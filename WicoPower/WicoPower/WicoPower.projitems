@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>38047fee-ee7c-478f-b355-7b45f4ccb3e8</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>WicoPower</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BatteryCheck.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Reactors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Solar.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WicoPower.cs" />
+  </ItemGroup>
+</Project>

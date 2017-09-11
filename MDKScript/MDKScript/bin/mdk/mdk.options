@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mdk version="0.9.18">
+  <gamebinpath enabled="no">c:\program files (x86)\steam\SteamApps\common\SpaceEngineers\Bin64</gamebinpath>
+  <installpath>C:\USERS\SAETT\APPDATA\LOCAL\MICROSOFT\VISUALSTUDIO\15.0_CE59EFB3\EXTENSIONS\Z2FX0EDD.GUH</installpath>
+  <outputpath>C:\Users\saett\AppData\Roaming\SpaceEngineers\IngameScripts\local</outputpath>
+  <minify>yes</minify>
+  <ignore>
+    <folder>mdk</folder>
+  </ignore>
+</mdk>

@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDK Combined Test", "MDK Combined Test\MDK Combined Test.csproj", "{E8D46FEB-1EBA-4549-A6F3-1F19BF851109}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IngameScript1", "..\IngameScript1\IngameScript1\IngameScript1.csproj", "{F203545E-4CCA-48EF-B5FE-31D68E510E16}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E8D46FEB-1EBA-4549-A6F3-1F19BF851109}.Debug|x64.ActiveCfg = Debug|x64
+		{E8D46FEB-1EBA-4549-A6F3-1F19BF851109}.Debug|x64.Build.0 = Debug|x64
+		{F203545E-4CCA-48EF-B5FE-31D68E510E16}.Debug|x64.ActiveCfg = Debug|x64
+		{F203545E-4CCA-48EF-B5FE-31D68E510E16}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,30 @@
+﻿/* Wico Craft ORIBTAL LAUNCH control sub-module
+ * 
+ * 
+* Handles MODES:
+* MODE_HOVER
+* MODE_LAUNCHPREP
+* MODE_LANDED
+* MODE_ORBITALLAUNCH
+* 
+* Commands:
+* 
+* setmaxspeed <value>: sets the maximum speed in m/s. Default speed is 100. Only need to set if mod increases speed
+* resetlaunch: reset any saved launch locations.
+* orbitallaunch: Start launch to orbit
+* 
+* 1.66 (initial version)
+*    
+*   2.2 SE V1.72 Changes
+*
+* 3.0 Serialize changes and current code
+* 3.0a Optimize for connectors init.
+* 3.0b merge grid fixes
+* 
+* 3.0c MDK Version https://github.com/malware-dev/MDK-SE/wiki
+* 
+* Need:
+*  circumnavigate planet to target spot
+*  'ask' for docking position after arriving at 'spot'
+*
+*/

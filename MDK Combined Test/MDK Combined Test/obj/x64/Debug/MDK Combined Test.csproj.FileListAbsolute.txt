@@ -1,0 +1,3 @@
+c:\users\saett\onedrive\documents\visual studio 2017\Projects\MDK Combined Test\MDK Combined Test\obj\x64\Debug\MDK Combined Test.csprojResolveAssemblyReference.cache
+c:\users\saett\onedrive\documents\visual studio 2017\Projects\MDK Combined Test\MDK Combined Test\obj\x64\Debug\MDK Combined Test.exe
+c:\users\saett\onedrive\documents\visual studio 2017\Projects\MDK Combined Test\MDK Combined Test\obj\x64\Debug\MDK Combined Test.pdb

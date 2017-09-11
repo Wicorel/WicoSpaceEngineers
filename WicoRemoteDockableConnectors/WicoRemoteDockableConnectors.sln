@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoRemoteDockableConnectors", "WicoRemoteDockableConnectors\WicoRemoteDockableConnectors.shproj", "{E84578E4-4F77-4F37-8962-FA0A1BA051DB}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoRemoteDockableConnectors\WicoRemoteDockableConnectors.projitems*{e84578e4-4f77-4f37-8962-fa0a1ba051db}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {18ED3078-2AF3-41F9-A8D1-6503D0A1D203}
+	EndGlobalSection
+EndGlobal

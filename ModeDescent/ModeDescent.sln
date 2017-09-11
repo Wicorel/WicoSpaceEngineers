@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeDescent", "ModeDescent\ModeDescent.shproj", "{DF7B8A6E-850A-4A20-A7DB-4DDE0D96FECF}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ModeDescent\ModeDescent.projitems*{df7b8a6e-850a-4a20-a7db-4dde0d96fecf}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {810BE264-40C1-4F3A-9EC8-CF57A995B2CD}
+	EndGlobalSection
+EndGlobal

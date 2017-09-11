@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeHover", "ModeHover\ModeHover.shproj", "{F6CD999F-D1A8-4F3D-B360-5D7A0141B9DE}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ModeHover\ModeHover.projitems*{f6cd999f-d1a8-4f3d-b360-5d7a0141b9de}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7184954F-F951-46F5-925E-0696D99BE2FA}
+	EndGlobalSection
+EndGlobal

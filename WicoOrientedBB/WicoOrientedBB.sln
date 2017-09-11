@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.8
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoOrientedBB", "WicoOrientedBB\WicoOrientedBB.shproj", "{DB7CD1DF-BA22-47A3-AF57-5EE4B084DD18}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoOrientedBB\WicoOrientedBB.projitems*{db7cd1df-ba22-47a3-af57-5ee4b084dd18}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ECAD4363-C24E-4643-B019-DFE914D18FDB}
+	EndGlobalSection
+EndGlobal
