@@ -20,8 +20,7 @@ namespace IngameScript
     {
         #region Antenna
 
-    //    List<IMyTerminalBlock> antennaList = new List<IMyTerminalBlock>();
-List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
+        List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
 
         string antennaInit()
         {
@@ -36,11 +35,8 @@ List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
         {
             for (int i = 0; i < antennaList.Count; i++)
             {
-
                 antennaList[i].Enabled = true;
             }
-
-//            blockApplyAction(antennaList, "OnOff_On");
         }
         #endregion
 

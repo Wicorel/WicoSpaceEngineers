@@ -36,49 +36,29 @@ namespace IngameScript
 
         string airventInit()
         {
-            airventList.Clear();// = new List<IMyTerminalBlock>();
+            airventList.Clear();
 
             GridTerminalSystem.GetBlocksOfType<IMyAirVent>(airventList, (x => x.CubeGrid == Me.CubeGrid));
 
             for (int i = 0; i < airventList.Count; i++)
             {
-
-                if (airventList[i].CustomName.ToLower().Contains("hangar"))
+                if (airventList[i].CustomName.ToLower().Contains("hangar") || airventList[i].CustomData.ToLower().Contains("hangar"))
                     hangarairventList.Add(airventList[i]);
-                if (airventList[i].CustomName.ToLower().Contains("outside"))
+                if (airventList[i].CustomName.ToLower().Contains("outside") || airventList[i].CustomData.ToLower().Contains("outside"))
                     outsideairventList.Add(airventList[i]);
-                if (airventList[i].CustomName.ToLower().Contains("bridge"))
+                if (airventList[i].CustomName.ToLower().Contains("bridge") || airventList[i].CustomData.ToLower().Contains("bridge"))
                     bridgeairventList.Add(airventList[i]);
-                if (airventList[i].CustomName.ToLower().Contains("crew"))
+                if (airventList[i].CustomName.ToLower().Contains("crew") || airventList[i].CustomData.ToLower().Contains("crew"))
                     bridgeairventList.Add(airventList[i]);
 
-                if (airventList[i].CustomName.ToLower().Contains("isolated"))
+                if (airventList[i].CustomName.ToLower().Contains("isolated") || airventList[i].CustomData.ToLower().Contains("isolated"))
                     isolatedairlockairventList.Add(airventList[i]);
-                else if (airventList[i].CustomName.ToLower().Contains("airlock"))
+                else if (airventList[i].CustomName.ToLower().Contains("airlock") || airventList[i].CustomData.ToLower().Contains("airlock"))
                     airlockairventList.Add(airventList[i]);
 
-                if (airventList[i].CustomName.ToLower().Contains("cockpit"))
+                if (airventList[i].CustomName.ToLower().Contains("cockpit") || airventList[i].CustomData.ToLower().Contains("cockpit"))
                     cockpitairventList.Add(airventList[i]);
 
-
-                /*
-                if (airventList[i].CustomData.ToLower().Contains("hangar"))
-                    hangarairventList.Add(airventList[i]);
-                if (airventList[i].CustomData.ToLower().Contains("outside"))
-                    outsideairventList.Add(airventList[i]);
-                if (airventList[i].CustomData.ToLower().Contains("bridge"))
-                    bridgeairventList.Add(airventList[i]);
-                if (airventList[i].CustomData.ToLower().Contains("crew"))
-                    bridgeairventList.Add(airventList[i]);
-
-                if (airventList[i].CustomData.ToLower().Contains("isolated"))
-                    isolatedairlockairventList.Add(airventList[i]);
-                else if (airventList[i].CustomData.ToLower().Contains("airlock"))
-                    airlockairventList.Add(airventList[i]);
-
-                if (airventList[i].CustomData.ToLower().Contains("cockpit"))
-                    cockpitairventList.Add(airventList[i]);
-                    */
             }
             isPressurizationOn();
             return "A" + airventList.Count.ToString("0");
@@ -94,7 +74,7 @@ namespace IngameScript
                 if (av != null)
                 {
                     if (av.IsDepressurizing && dGravity > .75)
-                        av.ApplyAction("OnOff_On");
+                        av.Enabled = true;// ApplyAction("OnOff_On");
                 }
             }
         }
@@ -107,7 +87,7 @@ namespace IngameScript
                 if (av != null)
                 {
                     if (av.IsDepressurizing)
-                        av.ApplyAction("OnOff_Off");
+                        av.Enabled = false;// ApplyAction("OnOff_Off");
                 }
             }
         }
@@ -129,7 +109,6 @@ namespace IngameScript
             string s = "";
             IMyAirVent av;
 
-
             int count = Math.Min(maxCount, airventList.Count);
             for (int i = 0; i < count; i++)
             {
@@ -149,14 +128,11 @@ namespace IngameScript
                     s += " " + (airLevel * 100).ToString("0.0") + "%";
                     //		StatusLog(s + "\n"+progressBar(airLevel*100),textPanelReport);
                     if (i > 0) s += "\n";
-
                 }
             }
             return s;
-
         }
 
         #endregion
-
     }
 }
