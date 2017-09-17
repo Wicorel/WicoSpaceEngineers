@@ -56,7 +56,8 @@
 * 
 * 05/13: fix GetBlocksContains<T>()
 * 
-* 3.0I MDK Version 08/20/2017   MDK: https://github.com/malware-dev/MDK-SE/wiki
+* 3.0I MDK Version 08/20/2017   MDK: https://github.com/malware-dev/MDK-SE/
+* Uncompressed source for this script here: https://github.com/Wicorel/SpaceEngineers/tree/master/MDK%20Craft%20Control
 * 
 * Handles:
 * Master timer for sub-modules

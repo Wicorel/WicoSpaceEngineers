@@ -23,7 +23,8 @@
  * 3.0A effective mass and effective thrust
  * 
  * 3.0c MDK Version https://github.com/malware-dev/MDK-SE/wiki
- * 
+ *  Uncompressed Source Here: https://github.com/Wicorel/SpaceEngineers/tree/master/MDK%20Orbital%20Descent
+ *  
  * NEED:  
  *  
  *  trigger timers on stages of descent (see rotor legs example)

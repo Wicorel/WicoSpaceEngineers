@@ -42,7 +42,7 @@ void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arriv
 		ResetMotion();
 		current_state = arrivalState;
 //		GyroControl.SetRefBlock(dockingConnector);
-		iPushCount = 0;
+//		iPushCount = 0;
 //		sleepAllSensors();
 		return;
 	}
@@ -168,10 +168,22 @@ void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arriv
 	}
 
 }
-#endregion
+        #endregion
 
-double calculateStoppingDistance(List<IMyTerminalBlock>thrustUpList,double currentV,double dGrav)
-{MyShipMass myMass;myMass=((IMyShipController)gpsCenter).CalculateShipMass();double hoverthrust=0;hoverthrust=myMass.TotalMass*dGrav*9.810;double maxThrust=calculateMaxThrust(thrustUpList);double maxDeltaV=(maxThrust-hoverthrust)/myMass.TotalMass;double secondstozero=currentV/maxDeltaV;Echo("secondstozero="+secondstozero.ToString("0.00"));double stoppingM=currentV/2*secondstozero;Echo("stoppingM="+stoppingM.ToString("0.00"));return stoppingM;}
+double calculateStoppingDistance(List<IMyTerminalBlock> thrustUpList, double currentV, double dGrav)
+        {
+            MyShipMass myMass;
+            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            double hoverthrust = 0;
+            hoverthrust = myMass.PhysicalMass * dGrav * 9.810;
+            double maxThrust = calculateMaxThrust(thrustUpList);
+            double maxDeltaV = (maxThrust - hoverthrust) / myMass.PhysicalMass;
+            double secondstozero = currentV / maxDeltaV;
+            Echo("secondstozero=" + secondstozero.ToString("0.00"));
+            double stoppingM = currentV / 2 * secondstozero;
+            Echo("stoppingM=" + stoppingM.ToString("0.00"));
+            return stoppingM;
+        }
 
     }
 }

@@ -136,7 +136,11 @@ string BlockInit()
 
 	return sInitResults;
 }
-
+string modeOnInit() 
+{ 
+ 
+	return ">"; 
+} 
 #endregion
 
 

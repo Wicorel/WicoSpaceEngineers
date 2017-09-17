@@ -22,6 +22,7 @@
 * 3.0b merge grid fixes
 * 
 * 3.0c MDK Version https://github.com/malware-dev/MDK-SE/wiki
+* Uncompressed Source here: https://github.com/Wicorel/SpaceEngineers/tree/master/MDK%20Orbital%20Launch
 * 
 * Need:
 *  circumnavigate planet to target spot

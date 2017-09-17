@@ -90,10 +90,10 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="MDKUtilities">
-      <HintPath>C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\xtb2ibgp.rb3\MDKUtilities.dll</HintPath>
+      <HintPath>C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\jcn4yfv5.chz\MDKUtilities.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Analyzer Include="C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\xtb2ibgp.rb3\Analyzers\MDKAnalyzer.dll" />
+    <Analyzer Include="C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\jcn4yfv5.chz\Analyzers\MDKAnalyzer.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DoModes.cs" />
@@ -106,9 +106,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Readme.cs" />
     <AdditionalFiles Include="thumb.png" />
-    <AdditionalFiles Include="C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\xtb2ibgp.rb3\Analyzers\whitelist.cache">
-      <Link>MDK\whitelist.cache</Link>
-    </AdditionalFiles>
+    <AdditionalFiles Include="MDK\whitelist.cache" />
   </ItemGroup>
   <Import Project="..\..\WicoGrid\WicoGrid\WicoGrid.projitems" Label="Shared" />
   <Import Project="..\..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.projitems" Label="Shared" />
@@ -124,6 +122,8 @@
   <Import Project="..\..\WicoGasGens\WicoGasGens\WicoGasGens.projitems" Label="Shared" />
   <Import Project="..\..\ShipDim\ShipDim\ShipDim.projitems" Label="Shared" />
   <Import Project="..\..\ShipRoll\ShipRoll\ShipRoll.projitems" Label="Shared" />
+  <Import Project="..\..\WicoTravelMovement\WicoTravelMovement\WicoTravelMovement.projitems" Label="Shared" />
+  <Import Project="..\..\WicoSensors\WicoSensors\WicoSensors.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="mdk\mdk.options" DestinationFolder="$(TargetDir)\mdk" />
