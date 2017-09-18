@@ -87,9 +87,11 @@ namespace IngameScript
                 Deserialize();
 
                 Echo(craftOperation());
-                vCurrentPos = gpsCenter.GetPosition();
-                velocityShip = ((IMyShipController)gpsCenter).GetShipSpeed();
-
+                if (gpsCenter !=null)
+                {
+                    vCurrentPos = gpsCenter.GetPosition();
+                    velocityShip = ((IMyShipController)gpsCenter).GetShipSpeed();
+                }
                 if (processArguments(sArgument))
                     return;
 

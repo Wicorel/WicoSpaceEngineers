@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeGoTarget", "ModeGoTarget\ModeGoTarget.shproj", "{93FEE782-A85C-43D7-A068-7B676B92E77B}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ModeGoTarget\ModeGoTarget.projitems*{93fee782-a85c-43d7-a068-7b676b92e77b}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F2E1F20E-97B1-4060-8EFD-2E34DD48D1AE}
+	EndGlobalSection
+EndGlobal

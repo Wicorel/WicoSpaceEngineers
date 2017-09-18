@@ -35,13 +35,26 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoGasGens", "..\WicoGasGe
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoAirVents", "..\WicoAirVents\WicoAirVents\WicoAirVents.shproj", "{774DE04D-ECF6-4033-9A00-7C04EC3A2934}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeLaunch", "..\ModeLaunch\ModeLaunch\ModeLaunch.shproj", "{6AA698BF-EA52-4E7A-9631-240B448D5685}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeHover", "..\ModeHover\ModeHover\ModeHover.shproj", "{F6CD999F-D1A8-4F3D-B360-5D7A0141B9DE}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeOrbitalLaunchPrep", "..\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep.shproj", "{012B8A6F-B626-488D-994A-F9CD3143AA5B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeOrbitalLaunch", "..\ModeOrbitalLaunch\ModeOrbitalLaunch\ModeOrbitalLaunch.shproj", "{435F0FFC-37C5-41DF-8C40-C960DDC53B15}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep.projitems*{012b8a6f-b626-488d-994a-f9cd3143aa5b}*SharedItemsImports = 13
 		..\WicoThrusters\WicoThrusters\WicoThrusters.projitems*{16d5d301-e8ca-45e6-b9d9-968f6d1aa766}*SharedItemsImports = 13
 		..\WicoGasTanks\WicoGasTanks\WicoGasTanks.projitems*{2118e240-d5fe-4b28-98fd-23dd8a1d7c7d}*SharedItemsImports = 13
 		..\SharedWicoGyro\SharedWicoGyro\SharedWicoGyro.projitems*{405cd3ab-b8e0-4c7d-b1f8-48199354b480}*SharedItemsImports = 13
+		..\ModeOrbitalLaunch\ModeOrbitalLaunch\ModeOrbitalLaunch.projitems*{435f0ffc-37c5-41df-8c40-c960ddc53b15}*SharedItemsImports = 13
 		..\WicoOldNavInterface\WicoOldNavInterface\WicoOldNavInterface.projitems*{48726aa5-2501-4f7d-b1fd-a2b5ee8504c0}*SharedItemsImports = 13
 		..\WicoDoors\WicoDoors\WicoDoors.projitems*{4cd3ff7d-0e20-4026-9823-79c99173309c}*SharedItemsImports = 13
+		..\ModeHover\ModeHover\ModeHover.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\ModeOrbitalLaunch\ModeOrbitalLaunch\ModeOrbitalLaunch.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\SharedWicoGyro\SharedWicoGyro\SharedWicoGyro.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoCameras\WicoCameras\WicoCameras.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoConnectors\WicoConnectors\WicoConnectors.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
@@ -57,6 +70,7 @@ Global
 		..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoThrusters\WicoThrusters\WicoThrusters.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.projitems*{5731b863-8478-4f96-99fe-914deffb6b79}*SharedItemsImports = 13
+		..\ModeLaunch\ModeLaunch\ModeLaunch.projitems*{6aa698bf-ea52-4e7a-9631-240b448d5685}*SharedItemsImports = 13
 		..\WicoAirVents\WicoAirVents\WicoAirVents.projitems*{774de04d-ecf6-4033-9a00-7c04ec3a2934}*SharedItemsImports = 13
 		..\WicoLandingGears\WicoLandingGears\WicoLandingGears.projitems*{784351ff-951d-468a-8548-89fbd6129569}*SharedItemsImports = 13
 		..\WicoGasGens\WicoGasGens\WicoGasGens.projitems*{85a26d0e-61e6-4e70-b394-7216bdf0b2a5}*SharedItemsImports = 13
@@ -65,6 +79,7 @@ Global
 		..\WicoGrid\WicoGrid\WicoGrid.projitems*{cd5d65c2-f2c3-4a71-9c46-ade848dff34b}*SharedItemsImports = 13
 		..\WicoConnectors\WicoConnectors\WicoConnectors.projitems*{ebdc9b7f-652a-45bc-90c3-d16b2e3a6914}*SharedItemsImports = 13
 		..\WicoDetectedEntities\WicoDetectedEntities\WicoDetectedEntities.projitems*{f4a99ae8-36f6-4801-a032-8a03e3d52220}*SharedItemsImports = 13
+		..\ModeHover\ModeHover\ModeHover.projitems*{f6cd999f-d1a8-4f3d-b360-5d7a0141b9de}*SharedItemsImports = 13
 		..\WicoModes\WicoModes\WicoModes.projitems*{ff33a42f-da7b-48f2-bd4a-2471d51f7898}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

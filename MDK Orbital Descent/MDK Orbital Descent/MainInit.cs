@@ -43,9 +43,9 @@ string doInit()
 		//StatusLog("clear",textLongStatus,true);
 		StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
 
-		if (!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
-		if (!modeCommands.ContainsKey("orbitallaunch")) modeCommands.Add("orbitallaunch", MODE_ORBITALLAUNCH);
-		// if(!modeCommands.ContainsKey("orbitaldescent")) modeCommands.Add("orbitaldescent", MODE_DESCENT);
+//		if (!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
+//		if (!modeCommands.ContainsKey("orbitallaunch")) modeCommands.Add("orbitallaunch", MODE_ORBITALLAUNCH);
+		 if(!modeCommands.ContainsKey("orbitaldescent")) modeCommands.Add("orbitaldescent", MODE_DESCENT);
 
 		sInitResults += initSerializeCommon();
 		Deserialize();
@@ -62,6 +62,7 @@ string doInit()
 		sInitResults += gearsInit();
 		sInitResults += tanksInit();
 		sInitResults += gyrosetup();
+		initShipDim();
 
 		Deserialize();
 		bWantFast = false;

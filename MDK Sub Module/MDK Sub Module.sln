@@ -75,6 +75,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeOrbitalLaunchPrep", "..
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BatteryCheck", "..\BatteryCheck\BatteryCheck\BatteryCheck.shproj", "{6322F24C-7106-4B4A-B569-AF880F4EFD5E}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeGoTarget", "..\ModeGoTarget\ModeGoTarget\ModeGoTarget.shproj", "{93FEE782-A85C-43D7-A068-7B676B92E77B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AvionicsGyroControl", "..\AvionicsGyroControl\AvionicsGyroControl\AvionicsGyroControl.shproj", "{3FC57F14-1686-4214-BDEF-9693ED82C2F2}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep.projitems*{012b8a6f-b626-488d-994a-f9cd3143aa5b}*SharedItemsImports = 13
@@ -83,6 +87,7 @@ Global
 		..\WicoGasTanks\WicoGasTanks\WicoGasTanks.projitems*{2118e240-d5fe-4b28-98fd-23dd8a1d7c7d}*SharedItemsImports = 13
 		..\ModeDocking\ModeDocking\ModeDocking.projitems*{30b8b36e-f37d-4ccc-b5d2-bf5c371baf98}*SharedItemsImports = 13
 		..\WicoPower\WicoPower\WicoPower.projitems*{38047fee-ee7c-478f-b355-7b45f4ccb3e8}*SharedItemsImports = 13
+		..\AvionicsGyroControl\AvionicsGyroControl\AvionicsGyroControl.projitems*{3fc57f14-1686-4214-bdef-9693ed82c2f2}*SharedItemsImports = 13
 		..\SharedWicoGyro\SharedWicoGyro\SharedWicoGyro.projitems*{405cd3ab-b8e0-4c7d-b1f8-48199354b480}*SharedItemsImports = 13
 		..\ModeOrbitalLaunch\ModeOrbitalLaunch\ModeOrbitalLaunch.projitems*{435f0ffc-37c5-41df-8c40-c960ddc53b15}*SharedItemsImports = 13
 		..\WicoCargoCheck\WicoCargoCheck\WicoCargoCheck.projitems*{454a1add-74af-42fb-8fe9-a272ba4d7dde}*SharedItemsImports = 13
@@ -103,6 +108,7 @@ Global
 		..\WicoGasGens\WicoGasGens\WicoGasGens.projitems*{85a26d0e-61e6-4e70-b394-7216bdf0b2a5}*SharedItemsImports = 13
 		..\WicoLights\WicoLights\WicoLights.projitems*{85dc7d02-b126-4c3c-9640-d2257f2dd37a}*SharedItemsImports = 13
 		..\WicoAntenna\WicoAntenna\WicoAntenna.projitems*{90e13f91-d516-48ea-b357-a7816d5fceef}*SharedItemsImports = 13
+		..\ModeGoTarget\ModeGoTarget\ModeGoTarget.projitems*{93fee782-a85c-43d7-a068-7b676b92e77b}*SharedItemsImports = 13
 		..\WicoSensors\WicoSensors\WicoSensors.projitems*{ae623794-2e25-4618-8b26-965cfdb814ce}*SharedItemsImports = 13
 		..\ShipDim\ShipDim\ShipDim.projitems*{aefc326f-3c23-4445-9ee3-0f4acd440c5f}*SharedItemsImports = 13
 		..\ModeRelaunch\ModeRelaunch\ModeRelaunch.projitems*{b1319409-5ca7-49af-970e-87e5a36448f1}*SharedItemsImports = 13

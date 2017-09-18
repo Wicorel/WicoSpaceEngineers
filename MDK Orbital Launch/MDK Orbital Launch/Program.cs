@@ -31,6 +31,8 @@ namespace IngameScript
         Vector3D currentPosition/*, lastPosition, currentVelocity, lastVelocity*/;
         const string velocityFormat = "0.00";
 
+        float fMaxMps = 100;
+
         IMyTerminalBlock anchorPosition;
         IMyTerminalBlock gpsCenter = null;
 

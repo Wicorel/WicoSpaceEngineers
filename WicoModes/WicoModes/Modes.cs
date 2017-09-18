@@ -59,6 +59,9 @@ const int MODE_INSPACE = 27; // now in space (no gravity)
 const int MODE_ORBITALLAUNCH = 28; // start orbital launch
 
 const int MODE_DESCENT = 29;
+const int MODE_ARRIVEDTARGET=30; // we have arrived at target
+
+const int MODE_UNDERCONSTRUCTION = 31;
 
 const int MODE_PET = 111; // pet that follows the player
 

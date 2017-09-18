@@ -54,7 +54,17 @@ namespace IngameScript
             thrustAllList.Clear();
 
             if (orientationBlock == null) return "No Orientation Block";
-            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustAllList, localGridFilter);
+//            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustAllList, localGridFilter);
+	        List<IMyTerminalBlock> thrustLocal = new List<IMyTerminalBlock>();
+
+            // Add 'cutter' exclusion from thrusters.
+	        GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
+	        for(int i=0;i<thrustLocal.Count;i++)
+	        {
+		        if (thrustLocal[i].CustomName.ToLower().Contains("cutter") || thrustLocal[i].CustomData.ToLower().Contains("cutter"))
+			        continue;
+		        thrustAllList.Add(thrustLocal[i]);
+	        }
 
             Matrix fromGridToReference;
             orientationBlock.Orientation.GetMatrix(out fromGridToReference);
