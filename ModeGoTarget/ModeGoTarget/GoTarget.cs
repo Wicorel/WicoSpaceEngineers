@@ -78,6 +78,7 @@ namespace IngameScript
                 if (bYawOnly)
                 {
                     yawangle = CalculateYaw(vTargetLocation, gpsCenter);
+            Echo("yawangle=" + yawangle.ToString());
                     bAimed = Math.Abs(yawangle) < .05;
                     DoRotate(yawangle, "Yaw");
                 }
@@ -87,7 +88,7 @@ namespace IngameScript
                     bAimed = GyroMain("forward", vVec, gpsCenter);
                 }
                 //return;
-
+                
                 if (bAimed)
                 //		if (GyroMain("forward", vVec, gpsCenter, bYawOnly))
                 {
