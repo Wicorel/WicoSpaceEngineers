@@ -256,46 +256,42 @@ namespace IngameScript
             double yawAngle = 0;
             bool facingTarget = false;
 
-            Vector3D vCenter;
-            Vector3D vBack;
-            Vector3D vUp;
-            Vector3D vRight;
-            Vector3D vLeft;
-
             MatrixD refOrientation = GetBlock2WorldTransform(Origin);
 
-            vCenter = Origin.GetPosition();
-            vBack = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Backward);
-            vUp = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Up);
-            vRight = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Right);
-            vLeft = vCenter - 1.0 * Vector3D.Normalize(refOrientation.Right);
+            Vector3D vCenter = Origin.GetPosition();
+            Vector3D vBack = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Backward);
+//            Vector3D vUp = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Up);
+            Vector3D vRight = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Right);
+            Vector3D vLeft = vCenter - 1.0 * Vector3D.Normalize(refOrientation.Right);
 
-            debugGPSOutput("vCenter", vCenter);
-            debugGPSOutput("vBack", vBack);
-            debugGPSOutput("vUp", vUp);
-            debugGPSOutput("vRight", vRight);
+ //           debugGPSOutput("vCenter", vCenter);
+  //          debugGPSOutput("vBack", vBack);
+ //           debugGPSOutput("vUp", vUp);
+ //           debugGPSOutput("vRight", vRight);
 
-            /*
-            double centerTargetDistance = calculateDistance(vCenter, destination);
-            double upTargetDistance = calculateDistance(vUp, destination);
-            double backTargetDistance = calculateDistance(vBack, destination);
-            double rightLocalDistance = calculateDistance(vRight, vCenter);
+            
+  //          double centerTargetDistance = calculateDistance(vCenter, destination);
+  //          double upTargetDistance = calculateDistance(vUp, destination);
+  //          double backTargetDistance = calculateDistance(vBack, destination);
+  //          double rightLocalDistance = calculateDistance(vRight, vCenter);
             double rightTargetDistance = calculateDistance(vRight, destination);
 
             double leftTargetDistance = calculateDistance(vLeft, destination);
 
             double yawLocalDistance = calculateDistance(vRight, vLeft);
-            */
+
+
             double centerTargetDistance = Vector3D.DistanceSquared(vCenter, destination);
-            double upTargetDistance = Vector3D.DistanceSquared(vUp, destination);
             double backTargetDistance = Vector3D.DistanceSquared(vBack, destination);
+            /*
+            double upTargetDistance = Vector3D.DistanceSquared(vUp, destination);
             double rightLocalDistance = Vector3D.DistanceSquared(vRight, vCenter);
             double rightTargetDistance = Vector3D.DistanceSquared(vRight, destination);
 
             double leftTargetDistance = Vector3D.DistanceSquared(vLeft, destination);
 
             double yawLocalDistance = Vector3D.DistanceSquared(vRight, vLeft);
-
+            */
             facingTarget = centerTargetDistance < backTargetDistance;
 
             yawAngle = (leftTargetDistance - rightTargetDistance) / yawLocalDistance;
@@ -309,6 +305,12 @@ namespace IngameScript
             //	Echo("yawangle=" + Math.Round(yawAngle,5)); 
             return yawAngle;
         }
+
+        double calculateDistance(Vector3D a, Vector3D b)
+        {
+            return Vector3D.Distance(a, b);
+        }
+
         #region Grid2World
         // from http://forums.keenswh.com/threads/library-grid-to-world-coordinates.7284828/
         MatrixD GetGrid2WorldTransform(IMyCubeGrid grid)
