@@ -108,20 +108,35 @@ namespace IngameScript
                     if (velocityShip > 5) dFar = stoppingDistance * 5;
                     if (velocityShip > 5) dApproach = stoppingDistance * 2;
                     Echo("distance=" + niceDoubleMeters(distance));
-                    Echo("DFar=" + dFar);
-                    Echo("dApproach=" + dApproach);
-                    Echo("dPrecision=" + dPrecision);
+ //                   Echo("DFar=" + dFar);
+ //                   Echo("dApproach=" + dApproach);
+ //                   Echo("dPrecision=" + dPrecision);
+                    Echo("speedMax=" + speedMax);
+                    Echo("velocityShip=" + velocityShip);
                     if (distance > dFar)
                     {
-                        Echo("DFAR");
+ //                       Echo("DFAR");
                         if (velocityShip < 1)
+                        {
+                            Echo("DFAR*1");
                             powerUpThrusters(thrustForwardList, 100);
-                        else if (velocityShip < speedMax / 2)
-                            powerUpThrusters(thrustForwardList, 25);
-                        else if (velocityShip < speedMax)
+                        }
+                        else if (velocityShip < (speedMax*0.85))
+//                        else if (velocityShip < speedMax / 2)
+                        {
+                            Echo("DFAR**2");
+                            powerUpThrusters(thrustForwardList, 55);
+                        }
+                        else if (velocityShip < (speedMax*1.05))
+                        {
+                            Echo("DFAR***3");
                             powerUpThrusters(thrustForwardList, 1);
+                        }
                         else
+                        {
+                            Echo("DFAR****4");
                             powerDownThrusters(thrustAllList);
+                        }
                     }
                     else if (distance > dApproach)
                     {

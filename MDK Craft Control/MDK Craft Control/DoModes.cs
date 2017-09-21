@@ -21,7 +21,6 @@ namespace IngameScript
         #region domodes
         void doModes()
         {
-            StatusLog("clear", gpsPanel);
             Echo("mode=" + iMode.ToString());
             /*
                 if ((craft_operation & CRAFT_MODE_PET) > 0 && iMode != MODE_PET)

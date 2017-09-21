@@ -59,6 +59,10 @@
 * 3.0I MDK Version 08/20/2017   MDK: https://github.com/malware-dev/MDK-SE/
 * Uncompressed source for this script here: https://github.com/Wicorel/SpaceEngineers/tree/master/MDK%20Craft%20Control
 * 
+* 3.0J Add moduleDoPreModes() to Main()
+* Move pre-mode to moduleDoPreModes()
+* add clearing of gpsPanel to moduleDoPreModes()
+* 
 * Handles:
 * Master timer for sub-modules
 * Calculates ship speed and vectors
