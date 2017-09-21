@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDK Craft Control", "MDK Craft Control\MDK Craft Control.csproj", "{52A1F87F-C99B-456D-A12E-3689B36EEAAC}"
 EndProject
@@ -49,6 +49,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoAntenna", "..\WicoAnten
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoWheels", "..\WicoWheels\WicoWheels\WicoWheels.shproj", "{4630A8EC-523A-4D35-B2C7-59041653653B}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoNavRotors", "..\WicoNavRotors\WicoNavRotors\WicoNavRotors.shproj", "{574E4BAA-03CB-4504-85BA-00907F28BAEC}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\WicoThrusters\WicoThrusters\WicoThrusters.projitems*{16d5d301-e8ca-45e6-b9d9-968f6d1aa766}*SharedItemsImports = 13
@@ -73,11 +75,13 @@ Global
 		..\WicoGrid\WicoGrid\WicoGrid.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoLandingGears\WicoLandingGears\WicoLandingGears.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoModes\WicoModes\WicoModes.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoNavRotors\WicoNavRotors\WicoNavRotors.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoPower\WicoPower\WicoPower.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSerialize\WicoSerialize\WicoSerialize.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoThrusters\WicoThrusters\WicoThrusters.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoWheels\WicoWheels\WicoWheels.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.projitems*{5731b863-8478-4f96-99fe-914deffb6b79}*SharedItemsImports = 13
+		..\WicoNavRotors\WicoNavRotors\WicoNavRotors.projitems*{574e4baa-03cb-4504-85ba-00907f28baec}*SharedItemsImports = 13
 		..\WicoLandingGears\WicoLandingGears\WicoLandingGears.projitems*{784351ff-951d-468a-8548-89fbd6129569}*SharedItemsImports = 13
 		..\WicoGasGens\WicoGasGens\WicoGasGens.projitems*{85a26d0e-61e6-4e70-b394-7216bdf0b2a5}*SharedItemsImports = 13
 		..\WicoAntenna\WicoAntenna\WicoAntenna.projitems*{90e13f91-d516-48ea-b357-a7816d5fceef}*SharedItemsImports = 13
@@ -100,5 +104,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AF94E8B4-AA9E-474B-9CDA-41B8E6B98C34}
 	EndGlobalSection
 EndGlobal

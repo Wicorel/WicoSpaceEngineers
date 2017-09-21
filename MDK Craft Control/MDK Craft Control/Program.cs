@@ -28,10 +28,6 @@ namespace IngameScript
 
         Vector3D currentPosition;
 
-        //DateTime dtStartTime;
-        //bool bCalcAssumed = true;
-        //bool bGotStart = false;
-
         const string velocityFormat = "0.00";
 
         IMyTerminalBlock anchorPosition;
@@ -121,9 +117,10 @@ namespace IngameScript
 
         void ResetMotion(bool bNoDrills = false)
         {
-            //	if (navEnable != null)	blockApplyAction(navEnable,"OnOff_Off"); //navEnable.ApplyAction("OnOff_Off"); 
             powerDownThrusters(thrustAllList);
             gyrosOff();
+            powerDownRotors(rotorNavLeftList);
+            powerDownRotors(rotorNavRightList);
             blockApplyAction(gpsCenter, "AutoPilot_Off");
         }
 
@@ -166,7 +163,7 @@ namespace IngameScript
                 else if (/*wheelList.Count>0 || */ Me.CustomName.ToLower().Contains("sled"))
                     craft_operation |= CRAFT_MODE_SLED;
 
-                if (ionThrustCount > 0)
+                 if (ionThrustCount > 0)
                 {
                     iThrustModes++;
                 }
@@ -178,6 +175,13 @@ namespace IngameScript
                 {
                     iThrustModes++;
                 }
+
+                // if it has NAV ROTORS, assume rotor propulsion
+                if(rotorNavLeftList.Count>0 && rotorNavRightList.Count>0) craft_operation |= CRAFT_MODE_ROTOR;
+
+                // if it has SLED wheels (and some thrusters), assume SLED propulsion
+                if(wheelSledList.Count>0 && iThrustModes>0) craft_operation |= CRAFT_MODE_SLED;
+
 
                 if (iThrustModes > 1 || Me.CustomName.ToLower().Contains("orbital"))
                     craft_operation |= CRAFT_MODE_ORBITAL;

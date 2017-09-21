@@ -23,6 +23,8 @@ namespace IngameScript
 //        double arrivalDistanceMax = 100;
         double speedMax = 100;
         bool bGoOption = true; // false means just orient.
+        bool bSled = false;
+        bool bRotor = false;
 
         void doModeGoTarget()
         {
@@ -34,7 +36,18 @@ namespace IngameScript
             if (current_state == 0)
             {
                 if ((craft_operation & CRAFT_MODE_SLED) > 0)
+                {
+                    bSled = true;
                     if (speedMax > 45) speedMax = 45;
+                }
+                else bSled = false;
+
+                if ((craft_operation & CRAFT_MODE_ROTOR) > 0)
+                {
+                    bRotor = true;
+//                    if (speedMax > 45) speedMax = 45;
+                }
+                else bRotor = false;
 
                 //	setAlertState(ALERT_DOCKING);
                 //	clearAlertState(ALERT_GOINGHOME | ALERT_LAUNCHING | ALERT_GOINGTARGET | ALERT_DOCKINGASSIST);
@@ -70,7 +83,8 @@ namespace IngameScript
                     return;
                 }
                 bool bYawOnly = false;
-                if ((craft_operation & CRAFT_MODE_SLED) > 0) bYawOnly = true;
+                if (bSled || bRotor) bYawOnly = true;
+
                 debugGPSOutput("TargetLocation", vTargetLocation);
 
                 bool bAimed = false;
@@ -80,23 +94,29 @@ namespace IngameScript
                     yawangle = CalculateYaw(vTargetLocation, gpsCenter);
             Echo("yawangle=" + yawangle.ToString());
                     bAimed = Math.Abs(yawangle) < .05;
-                    DoRotate(yawangle, "Yaw");
+                    if (bSled)
+                        DoRotate(yawangle, "Yaw");
+                    else if (bRotor)
+                        DoRotorRotate(yawangle);
+                    // else:  WE DON"T KNOW WHAT WE ARE
+
                 }
                 else
                 {
-                    //vVec = vTargetLocation - gpsCenter.GetPosition();
                     bAimed = GyroMain("forward", vVec, gpsCenter);
                 }
                 //return;
                 
                 if (bAimed)
-                //		if (GyroMain("forward", vVec, gpsCenter, bYawOnly))
                 {
                     // we are aimed at location
                     Echo("Aimed");
                     gyrosOff();
                     if (!bGoOption)
                     {
+                        powerDownRotors(rotorNavLeftList);
+                        powerDownRotors(rotorNavRightList);
+
                         powerDownThrusters(thrustAllList);
                         setMode(MODE_ARRIVEDTARGET);
                         return;
@@ -119,23 +139,23 @@ namespace IngameScript
                         if (velocityShip < 1)
                         {
                             Echo("DFAR*1");
-                            powerUpThrusters(thrustForwardList, 100);
+                            powerForward(100);
                         }
                         else if (velocityShip < (speedMax*0.85))
 //                        else if (velocityShip < speedMax / 2)
                         {
                             Echo("DFAR**2");
-                            powerUpThrusters(thrustForwardList, 55);
+                            powerForward(55);
                         }
                         else if (velocityShip < (speedMax*1.05))
                         {
                             Echo("DFAR***3");
-                            powerUpThrusters(thrustForwardList, 1);
+                            powerForward(1);
                         }
                         else
                         {
                             Echo("DFAR****4");
-                            powerDownThrusters(thrustAllList);
+                            powerDown();
                         }
                     }
                     else if (distance > dApproach)
@@ -143,38 +163,36 @@ namespace IngameScript
                         Echo("Approach");
 
                         if (velocityShip < 1)
-                            powerUpThrusters(thrustForwardList, 100);
+                            powerForward(100);
                         else if (velocityShip < speedMax / 2)
-                            powerUpThrusters(thrustForwardList, 25);
+                            powerForward(25);
                         else if (velocityShip < speedMax)
-                            powerUpThrusters(thrustForwardList, 1);
+                            powerForward(1);
                         else
-                            powerDownThrusters(thrustAllList);
+                            powerDown();
                     }
                     else if (distance > dPrecision)
                     {
                         Echo("Precision");
                         // almost  to target.  should take stoppingdistance into account.
                         if (velocityShip < 1)
-                            powerUpThrusters(thrustForwardList, 100);
+                            powerForward(100);
                         else if (velocityShip < speedMax / 2)
-                            powerUpThrusters(thrustForwardList, 25);
+                            powerForward(25);
                         else if (velocityShip < speedMax)
-                            powerUpThrusters(thrustForwardList, 1);
+                            powerForward(1);
                         else
-                            powerDownThrusters(thrustAllList);
+                            powerDown();
                     }
                     else
                     {
                         Echo("Close");
                         if (velocityShip < 1)
-                            powerUpThrusters(thrustForwardList, 25);
+                            powerForward(25);
                         else if (velocityShip < 5)
-                            powerUpThrusters(thrustForwardList, 5);
-                        //				else if (velocityShip <= 15)
-                        //					powerUpThrusters(thrustForwardList, 1);
+                            powerForward(5);
                         else
-                            powerDownThrusters(thrustAllList);
+                            powerDown();
                     }
 
                 }
@@ -183,6 +201,8 @@ namespace IngameScript
                     // we are aiming at location
                     Echo("Aiming");
                     //			DoRotate(yawangle, "Yaw");
+
+                    // DO NOT turn off rotors..
                     powerDownThrusters(thrustAllList);
 
                 }
@@ -190,6 +210,18 @@ namespace IngameScript
 
         }
 
+        void powerForward(float fPower)
+        {
+            if (bRotor)
+                powerUpRotors(fPower);
+            else
+                powerUpThrusters(thrustForwardList, fPower);
+        }
 
+        void powerDown()
+        {
+            powerDownThrusters(thrustAllList);
+            powerDownRotors();
+        }
     }
 }
