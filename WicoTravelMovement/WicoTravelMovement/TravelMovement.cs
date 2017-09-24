@@ -31,7 +31,9 @@ void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arriv
 {
 	Echo("dTM:" + arrivalState);
 	//		Vector3D vTargetLocation = vHome;// gpsCenter.GetPosition();
-	Vector3D vVec = vTargetLocation - gpsCenter.GetPosition();
+//    gpsCenter.CubeGrid.
+	Vector3D vVec = vTargetLocation - ((IMyShipController)gpsCenter).CenterOfMass;
+//	Vector3D vVec = vTargetLocation - gpsCenter.GetPosition();
 	//		debugGPSOutput("vTargetLocation", vTargetLocation);
 	double distance = vVec.Length();
 	Echo("distance=" + niceDoubleMeters(distance));

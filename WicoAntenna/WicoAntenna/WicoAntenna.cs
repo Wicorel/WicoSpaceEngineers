@@ -75,6 +75,7 @@ namespace IngameScript
         }
         void antSend(string message)
         {
+            Echo("Sending:\n" + message);
             bool bSent = false;
             if (antennaList.Count < 1) antennaInit();
             for (int i = 0; i < antennaList.Count; i++)

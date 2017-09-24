@@ -1,4 +1,4 @@
-﻿/* Wico Craft SLED NAV Control sub-module
+﻿/* Wico Craft NAV Control sub-module
 	* 
 	* Handles MODES:
 	* MODE_DOCKED
@@ -29,6 +29,8 @@
     3.0A Start NAV processing: W and O
     3.0B Add D, S, C
     3.0C Add arrivedtarget
+
+    Added Rotors
 
 	* TODO: 
 	*/

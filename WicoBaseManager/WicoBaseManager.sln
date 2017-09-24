@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoBaseManager", "WicoBaseManager\WicoBaseManager.shproj", "{440B447D-81B0-4AC8-B2AC-8541663C2A84}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoBaseManager\WicoBaseManager.projitems*{440b447d-81b0-4ac8-b2ac-8541663c2a84}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {52A62B45-2054-402D-8FED-0558A5020B50}
+	EndGlobalSection
+EndGlobal

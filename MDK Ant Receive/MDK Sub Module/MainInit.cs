@@ -21,7 +21,7 @@ namespace IngameScript
         #region maininit
 
         string sInitResults = "";
- //       string sArgResults = "";
+        //       string sArgResults = "";
 
         int currentInit = 0;
 
@@ -51,10 +51,18 @@ namespace IngameScript
                 sInitResults += antennaInit();
 
                 sInitResults += modeOnInit(); // handle mode initializting from load/recompile..
-                init = true;
 
             }
+            else if (currentInit == 1)
+            {
+                sInitResults += connectorsInit();
+                sInitResults += initDockingInfo();
+                sInitResults += BlockInit();
+                init = true;
+                if (localBaseConnectors.Count < 1)
+                    sInitResults = "\nNo [BASE] Connectors found\n" + sInitResults;
 
+            }
             currentInit++;
             if (init) currentInit = 0;
 
@@ -70,6 +78,45 @@ namespace IngameScript
         {
             string sInitResults = "";
 
+            List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
+            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch);
+            if (centerSearch.Count == 0)
+            {
+                centerSearch = GetBlocksContains<IMyRemoteControl>("[NAV]");
+                if (centerSearch.Count == 0)
+                {
+                    GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
+                    if (centerSearch.Count == 0)
+                    {
+                        GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
+                        if (centerSearch.Count == 0)
+                        {
+                            sInitResults += "!!NO Controller";
+                            return sInitResults;
+                        }
+                        else
+                        {
+                            sInitResults += "S";
+                        }
+                    }
+                    else
+                    {
+                        sInitResults += "R";
+                    }
+                }
+            }
+            else
+            {
+                sInitResults += "N";
+            }
+            gpsCenter = centerSearch[0];
+
+            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
+            blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
+            if (blocks.Count > 0)
+                gpsPanel = blocks[0] as IMyTextPanel;
+
+            if (gpsCenter == null) Echo("ERROR: No control block found!");
 
             return sInitResults;
         }

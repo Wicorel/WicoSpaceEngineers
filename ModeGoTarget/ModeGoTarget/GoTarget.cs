@@ -45,12 +45,10 @@ namespace IngameScript
                 if ((craft_operation & CRAFT_MODE_ROTOR) > 0)
                 {
                     bRotor = true;
-//                    if (speedMax > 45) speedMax = 45;
+                    if (speedMax > 15) speedMax = 15;
                 }
                 else bRotor = false;
 
-                //	setAlertState(ALERT_DOCKING);
-                //	clearAlertState(ALERT_GOINGHOME | ALERT_LAUNCHING | ALERT_GOINGTARGET | ALERT_DOCKINGASSIST);
                 GyroControl.SetRefBlock(gpsCenter);
                 if (bValidHome || bValidTarget)
                 {
@@ -213,7 +211,23 @@ namespace IngameScript
         void powerForward(float fPower)
         {
             if (bRotor)
+            {
+                /*
+                // need to ramp up/down rotor power or they will flip small vehicles and spin a lot
+                float maxVelocity = rotorNavLeftList[0].GetMaximum<float>("Velocity");
+                float currentVelocity = rotorNavLeftList[0].GetValueFloat("Velocity");
+                float cPower = (currentVelocity / maxVelocity * 100);
+                cPower = Math.Abs(cPower);
+                if (fPower > (cPower + 5f))
+                    fPower = cPower + 5;
+                if (fPower < (cPower - 5))
+                    fPower = cPower - 5;
+
+                if (fPower < 0f) fPower = 0f;
+                if (fPower > 100f) fPower = 100f;
+                */
                 powerUpRotors(fPower);
+            }
             else
                 powerUpThrusters(thrustForwardList, fPower);
         }

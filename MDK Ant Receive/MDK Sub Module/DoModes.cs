@@ -39,6 +39,10 @@ namespace IngameScript
         void doModeAlways()
         {
 	        processPendingReceives();
+ 	        processPendingSends();
+//	        processReceivedMessage();
+	        processDockingStates();
+	        doMomAnnounce();
         }
 
 

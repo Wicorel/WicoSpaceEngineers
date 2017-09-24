@@ -24,11 +24,18 @@ namespace IngameScript
         bool processArguments(string sArgument)
         {
 
-	        if (sArgument == "" || sArgument == "timer" || sArgument == "wccs" || sArgument == "wcct")
-	        {
-		        Echo("Arg=" + sArgument);
-	        }
-	        else antReceive(sArgument);
+            if (sArgument == "" || sArgument == "timer" || sArgument == "wccs" || sArgument == "wcct")
+            {
+                Echo("Arg=" + sArgument);
+            }
+            // try to process the message ourselves
+
+            else if(processDockMessage(sArgument))
+            {
+                Echo("Processed");
+            }
+            // we don't know this message.  Pass it on to other modules
+            else antReceive(sArgument);
 
 	        return false; // keep processing in main
         }

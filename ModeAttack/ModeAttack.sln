@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeAttack", "ModeAttack\ModeAttack.shproj", "{6E0816FC-B773-4B78-8CAB-63824D662ED9}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ModeAttack\ModeAttack.projitems*{6e0816fc-b773-4b78-8cab-63824d662ed9}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1FF61C89-FE35-44EF-9732-403DC6E9F12D}
+	EndGlobalSection
+EndGlobal

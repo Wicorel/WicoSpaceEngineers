@@ -46,13 +46,26 @@ namespace IngameScript
             return "NR:L" + rotorNavLeftList.Count.ToString("0") + "R" + rotorNavRightList.Count.ToString("0");
         }
 
-        bool powerUpRotors(float targetPower)
+        bool powerUpRotors(float targetPower) // move forward
         {
-            // TODO: need to ramp up/down rotor power
+            if (rotorNavLeftList.Count < 1) return false;
+                // need to ramp up/down rotor power or they will flip small vehicles and spin a lot
+            float maxVelocity = rotorNavLeftList[0].GetMaximum<float>("Velocity");
+            float currentVelocity = rotorNavLeftList[0].GetValueFloat("Velocity");
+            float cPower = (currentVelocity / maxVelocity * 100);
+            cPower = Math.Abs(cPower);
+            if (targetPower > (cPower + 5f))
+                targetPower = cPower + 5;
+            if (targetPower < (cPower - 5))
+                targetPower = cPower - 5;
+
+            if (targetPower < 0f) targetPower = 0f;
+            if (targetPower > 100f) targetPower = 100f;
+
             if (Math.Abs(targetPower) > 0)
             {
-                powerUpRotors(rotorNavLeftList, targetPower);
-                powerUpRotors(rotorNavRightList, -targetPower);
+                powerUpRotors(rotorNavLeftList, -targetPower);
+                powerUpRotors(rotorNavRightList, targetPower);
                 return true;
             }
             else return false;

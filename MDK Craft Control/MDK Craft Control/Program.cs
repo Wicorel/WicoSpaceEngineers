@@ -121,7 +121,9 @@ namespace IngameScript
             gyrosOff();
             powerDownRotors(rotorNavLeftList);
             powerDownRotors(rotorNavRightList);
-            blockApplyAction(gpsCenter, "AutoPilot_Off");
+	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
+
         }
 
         void MasterReset()

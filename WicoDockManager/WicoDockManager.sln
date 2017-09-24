@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoDockManager", "WicoDockManager\WicoDockManager.shproj", "{428D52AF-C12E-4B3D-B6A3-C944B0179800}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoDockManager\WicoDockManager.projitems*{428d52af-c12e-4b3d-b6a3-c944b0179800}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {559908B7-4173-4C19-A0B8-C1F20652A9CD}
+	EndGlobalSection
+EndGlobal

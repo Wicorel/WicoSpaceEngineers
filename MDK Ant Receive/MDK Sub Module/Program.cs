@@ -20,15 +20,15 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "AntReceive";
-        string sVersion = "3.0E";
+        string sVersion = "3.0F";
 
         const string sGPSCenter = "Craft Remote Control";
 
-        Vector3I iForward = new Vector3I(0, 0, 0);
-        Vector3I iUp = new Vector3I(0, 0, 0);
-        Vector3I iLeft = new Vector3I(0, 0, 0);
+//        Vector3I iForward = new Vector3I(0, 0, 0);
+//        Vector3I iUp = new Vector3I(0, 0, 0);
+//        Vector3I iLeft = new Vector3I(0, 0, 0);
 //        Vector3D currentPosition;
-        const string velocityFormat = "0.00";
+//        const string velocityFormat = "0.00";
 
 //        IMyTerminalBlock anchorPosition;
         IMyTerminalBlock gpsCenter = null;

@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoWeapons", "WicoWeapons\WicoWeapons.shproj", "{139C8DC8-89AA-4BC5-B1C8-93725C7C1BCB}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoWeapons\WicoWeapons.projitems*{139c8dc8-89aa-4bc5-b1c8-93725c7c1bcb}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {471328C8-1B80-4DDC-AAEF-4171A34E5AFC}
+	EndGlobalSection
+EndGlobal

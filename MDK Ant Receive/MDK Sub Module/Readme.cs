@@ -21,5 +21,7 @@
 * ignore projectors with !WCC in name or customdata
 * 
 * 3.0E MDK Version
+* 
+* 3.0F Combined DockMgr into code
 *
 */

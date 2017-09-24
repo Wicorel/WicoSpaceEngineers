@@ -27,6 +27,9 @@ namespace IngameScript
         // rotor base.
         // combined connector and merge block (ex, tradeship)
 
+        // opening hangar doors after connection
+        // close hangar doors before de-connect
+
 
         #region docking
 
@@ -153,12 +156,12 @@ namespace IngameScript
             }
             else if (current_state == 120)
             {//120	request available docking connector
-             //		if (getAvailableRemoteConnector(out targetConnector))
                 if (velocityShip < 5)
                 {
-                    antSend("WICO:DOCK?:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                    antSend("WICO:DOCK?:" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
                     {
-                        current_state = 130;
+                        dtStartShip = DateTime.Now;
+                        current_state = 131;
                     }
                 }
                 else ResetMotion();
@@ -255,7 +258,7 @@ namespace IngameScript
 
                     }
                     else
-                    { // needs time-out.
+                    { // uses timeout from above
                         Echo("Awaiting reply message");
                     }
                 }
@@ -410,7 +413,7 @@ namespace IngameScript
                     }
                     else
                     {
-                        Echo("<=5");
+                        Echo("<=15");
                         if (velocityShip < 2)
                         {
                             iPushCount++;
@@ -434,6 +437,7 @@ namespace IngameScript
             }
         }
         #endregion
+
         bool bScanLeft = true;
         bool bScanRight = true;
         bool bScanUp = true;

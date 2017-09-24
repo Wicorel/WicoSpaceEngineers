@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoQuadrantCameraScan", "WicoQuadrantCameraScan\WicoQuadrantCameraScan.shproj", "{63F8405F-C717-4AA9-80CE-117966D9F001}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoQuadrantCameraScan\WicoQuadrantCameraScan.projitems*{63f8405f-c717-4aa9-80ce-117966d9f001}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E07C1191-0BCB-47B1-A18F-A391776945F3}
+	EndGlobalSection
+EndGlobal
