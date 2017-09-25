@@ -66,7 +66,7 @@ namespace IngameScript
                 {
                     camera = tb as IMyCameraBlock;
                     if (camera == null) continue;
-                    if (camera.CanScan(SCAN_DISTANCE))
+                    if (camera.CanScan(SCAN_DISTANCE, NEXTPITCH, NEXTYAW))
                     {
                         info = camera.Raycast(SCAN_DISTANCE, NEXTPITCH, NEXTYAW);
                         quadrant++;

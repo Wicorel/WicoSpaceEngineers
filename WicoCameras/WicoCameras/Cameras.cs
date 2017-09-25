@@ -18,198 +18,226 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-#region camerasensors 
+        #region camerasensors 
 
-string sCameraViewOnly = "[VIEW]"; // do not use cameras with this in their name for scanning.
+        string sCameraViewOnly = "[VIEW]"; // do not use cameras with this in their name for scanning.
 
-readonly Matrix cameraidentityMatrix = new Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+        readonly Matrix cameraidentityMatrix = new Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
-List<IMyTerminalBlock> cameraForwardList = new List<IMyTerminalBlock>();
-List<IMyTerminalBlock> cameraBackwardList = new List<IMyTerminalBlock>();
-List<IMyTerminalBlock> cameraDownList = new List<IMyTerminalBlock>();
-List<IMyTerminalBlock> cameraUpList = new List<IMyTerminalBlock>();
-List<IMyTerminalBlock> cameraLeftList = new List<IMyTerminalBlock>();
-List<IMyTerminalBlock> cameraRightList = new List<IMyTerminalBlock>();
- 
-List<IMyTerminalBlock> cameraAllList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> cameraForwardList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> cameraBackwardList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> cameraDownList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> cameraUpList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> cameraLeftList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> cameraRightList = new List<IMyTerminalBlock>();
 
-IMyTerminalBlock lastCamera = null;
+        List<IMyTerminalBlock> cameraAllList = new List<IMyTerminalBlock>();
 
-private MyDetectedEntityInfo lastDetectedInfo;
+        IMyTerminalBlock lastCamera = null;
+
+        private MyDetectedEntityInfo lastDetectedInfo;
 
 
-bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance=100, float pitch=0, float yaw=0)
-{
-	double foundmax = 0;
-	lastCamera = null;
-	for (int i = 0; i < cameraList.Count; i++)
-	{
-		double thismax = ((IMyCameraBlock)cameraList[i]).AvailableScanRange;
-//		Echo(cameraList[i].CustomName + ":maxRange:" + thismax.ToString("N0"));
-		// find camera with highest scan range.
-		if (thismax > foundmax)
-		{
-			foundmax = thismax;
-			lastCamera = cameraList[i];
-		}
-	}
+        bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
+        {
+            double foundmax = 0;
+            lastCamera = null;
+            for (int i = 0; i < cameraList.Count; i++)
+            {
+                double thismax = ((IMyCameraBlock)cameraList[i]).AvailableScanRange;
+                //		Echo(cameraList[i].CustomName + ":maxRange:" + thismax.ToString("N0"));
+                // find camera with highest scan range.
+                if (thismax > foundmax)
+                {
+                    foundmax = thismax;
+                    lastCamera = cameraList[i];
+                }
+            }
 
-	IMyCameraBlock camera = lastCamera as IMyCameraBlock;
-	if (lastCamera == null)
-	{
-		return false;
-	}
+            IMyCameraBlock camera = lastCamera as IMyCameraBlock;
+            if (lastCamera == null)
+            {
+                return false;
+            }
 
-	if (camera.CanScan(scandistance))
-	{
-//		Echo("simple Scan with Camera:" + camera.CustomName);
+            if (camera.CanScan(scandistance))
+            {
+                //		Echo("simple Scan with Camera:" + camera.CustomName);
 
-		lastDetectedInfo = camera.Raycast(scandistance, pitch, yaw);
-		lastCamera = camera;
+                lastDetectedInfo = camera.Raycast(scandistance, pitch, yaw);
+                lastCamera = camera;
 
-		if(!lastDetectedInfo.IsEmpty())
-			addDetectedEntity(lastDetectedInfo);
+                if (!lastDetectedInfo.IsEmpty())
+                    addDetectedEntity(lastDetectedInfo);
 
-		return true;
-	}
-	else
-	{
-		Echo(camera.CustomName + ":" + camera.AvailableScanRange.ToString("N0"));
-	}
+                return true;
+            }
+            else
+            {
+                Echo(camera.CustomName + ":" + camera.AvailableScanRange.ToString("N0"));
+            }
 
-	return false;
+            return false;
 
-}
+        }
 
-bool doCameraScan(List<IMyTerminalBlock> cameraList, Vector3D targetPos)
-{
-	Echo("target Scan");
-	double foundmax = 0;
-	lastCamera = null;
-	for (int i = 0; i < cameraList.Count; i++)
-	{
-		double thismax = ((IMyCameraBlock)cameraList[i]).AvailableScanRange;
-//		Echo(cameraList[i].CustomName + ":maxRange:" + thismax.ToString("N0"));
-		// find camera with highest scan range.
-		if (thismax > foundmax)
-		{
-			foundmax = thismax;
-			lastCamera = cameraList[i];
-		}
-	}
+        bool doCameraScan(List<IMyTerminalBlock> cameraList, Vector3D targetPos)
+        {
+            Echo("target Scan");
+            double foundmax = 0;
+            lastCamera = null;
+            for (int i = 0; i < cameraList.Count; i++)
+            {
+                double thismax = ((IMyCameraBlock)cameraList[i]).AvailableScanRange;
+                //		Echo(cameraList[i].CustomName + ":maxRange:" + thismax.ToString("N0"));
+                // find camera with highest scan range.
+                if (thismax > foundmax)
+                {
+                    foundmax = thismax;
+                    lastCamera = cameraList[i];
+                }
+            }
 
-	IMyCameraBlock camera = lastCamera as IMyCameraBlock;
-	if (lastCamera == null)
-		return false;
+            IMyCameraBlock camera = lastCamera as IMyCameraBlock;
+            if (lastCamera == null)
+                return false;
 
-//	if (camera.CanScan(scandistance))
-	{
-		Echo("Scanning with Camera:" + camera.CustomName);
-		lastDetectedInfo = camera.Raycast(targetPos);
-		lastCamera = camera;
+            //	if (camera.CanScan(scandistance))
+            {
+                Echo("Scanning with Camera:" + camera.CustomName);
+                lastDetectedInfo = camera.Raycast(targetPos);
+                lastCamera = camera;
 
-		if(!lastDetectedInfo.IsEmpty())
-			addDetectedEntity(lastDetectedInfo);
+                if (!lastDetectedInfo.IsEmpty())
+                    addDetectedEntity(lastDetectedInfo);
 
-		return true;
-	}
-	/*
-	else
-	{
-		Echo(camera.CustomName + ":" + camera.AvailableScanRange.ToString("N0"));
-	}
-	return false;
-		*/
-}
+                return true;
+            }
+            /*
+            else
+            {
+                Echo(camera.CustomName + ":" + camera.AvailableScanRange.ToString("N0"));
+            }
+            return false;
+                */
+        }
 
-double findMaxCameraRange(List<IMyTerminalBlock> cameraList)
-{
-	double maxCameraRangeAvailable = 0;
-	for (int i = 0; i < cameraList.Count; i++)
-	{
-		IMyCameraBlock camera = cameraList[i] as IMyCameraBlock;
-		if (maxCameraRangeAvailable < camera.AvailableScanRange)
-			maxCameraRangeAvailable = camera.AvailableScanRange;
+        double findMaxCameraRange(List<IMyTerminalBlock> cameraList)
+        {
+            double maxCameraRangeAvailable = 0;
+            for (int i = 0; i < cameraList.Count; i++)
+            {
+                IMyCameraBlock camera = cameraList[i] as IMyCameraBlock;
+                if (maxCameraRangeAvailable < camera.AvailableScanRange)
+                    maxCameraRangeAvailable = camera.AvailableScanRange;
 
-	}
-	return maxCameraRangeAvailable;
-}
-string camerasensorsInit(IMyTerminalBlock orientationBlock)  
-{
-	cameraForwardList.Clear();
+            }
+            return maxCameraRangeAvailable;
+        }
+        string camerasensorsInit(IMyTerminalBlock orientationBlock)
+        {
+            cameraForwardList.Clear();
 
-	cameraBackwardList.Clear();
-	cameraDownList.Clear();
-	cameraUpList.Clear();
-	cameraLeftList.Clear();
-	cameraRightList.Clear();
-	cameraAllList.Clear();
+            cameraBackwardList.Clear();
+            cameraDownList.Clear();
+            cameraUpList.Clear();
+            cameraLeftList.Clear();
+            cameraRightList.Clear();
+            cameraAllList.Clear();
 
-	GridTerminalSystem.GetBlocksOfType<IMyCameraBlock>(cameraAllList, (x1 => x1.CubeGrid == Me.CubeGrid));
-	Matrix fromGridToReference;
-	orientationBlock.Orientation.GetMatrix(out fromGridToReference);
-	Matrix.Transpose(ref fromGridToReference, out fromGridToReference);
+            GridTerminalSystem.GetBlocksOfType<IMyCameraBlock>(cameraAllList, (x1 => x1.CubeGrid == Me.CubeGrid));
+            Matrix fromGridToReference;
+            orientationBlock.Orientation.GetMatrix(out fromGridToReference);
+            Matrix.Transpose(ref fromGridToReference, out fromGridToReference);
 
-	for (int i = 0; i < cameraAllList.Count; ++i)
-	{
-		if (cameraAllList[i].CustomName.Contains(sCameraViewOnly) )
-			continue; // don't add it to our list.
+            for (int i = 0; i < cameraAllList.Count; ++i)
+            {
+                if (cameraAllList[i].CustomName.Contains(sCameraViewOnly))
+                    continue; // don't add it to our list.
 
-		IMyCameraBlock camera = cameraAllList[i] as IMyCameraBlock;
+                IMyCameraBlock camera = cameraAllList[i] as IMyCameraBlock;
 
-		camera.EnableRaycast = true;
+                camera.EnableRaycast = true;
 
-		Matrix fromcameraToGrid;
-		camera.Orientation.GetMatrix(out fromcameraToGrid);
-		Vector3 accelerationDirection = Vector3.Transform(fromcameraToGrid.Forward, fromGridToReference);
-		if (accelerationDirection == cameraidentityMatrix.Left)
-		{
-			cameraLeftList.Add(cameraAllList[i]);
-		}
-		else if (accelerationDirection == cameraidentityMatrix.Right)
-		{
-			cameraRightList.Add(cameraAllList[i]);
-		}
-		else if (accelerationDirection == cameraidentityMatrix.Backward)
-		{
-			cameraBackwardList.Add(cameraAllList[i]);
-		}
-		else if (accelerationDirection == cameraidentityMatrix.Forward)
-		{
-			cameraForwardList.Add(cameraAllList[i]);
-		}
-		else if (accelerationDirection == cameraidentityMatrix.Up)
-		{
-			cameraUpList.Add(cameraAllList[i]);
-		}
-		else if (accelerationDirection == cameraidentityMatrix.Down)
-		{
-			cameraDownList.Add(cameraAllList[i]);
-		}
-	}
-	string s;
-	s = "CS:<";
-	s += "F" + cameraForwardList.Count.ToString("00");
-	s += "B" + cameraBackwardList.Count.ToString("00");
-	s += "D" + cameraDownList.Count.ToString("00");
-	s += "U" + cameraUpList.Count.ToString("00");
-	s += "L" + cameraLeftList.Count.ToString("00");
-	s += "R" + cameraRightList.Count.ToString("00");
-	s += ">";
-	return s;
+                Matrix fromcameraToGrid;
+                camera.Orientation.GetMatrix(out fromcameraToGrid);
+                Vector3 accelerationDirection = Vector3.Transform(fromcameraToGrid.Forward, fromGridToReference);
+                if (accelerationDirection == cameraidentityMatrix.Left)
+                {
+                    cameraLeftList.Add(cameraAllList[i]);
+                }
+                else if (accelerationDirection == cameraidentityMatrix.Right)
+                {
+                    cameraRightList.Add(cameraAllList[i]);
+                }
+                else if (accelerationDirection == cameraidentityMatrix.Backward)
+                {
+                    cameraBackwardList.Add(cameraAllList[i]);
+                }
+                else if (accelerationDirection == cameraidentityMatrix.Forward)
+                {
+                    cameraForwardList.Add(cameraAllList[i]);
+                }
+                else if (accelerationDirection == cameraidentityMatrix.Up)
+                {
+                    cameraUpList.Add(cameraAllList[i]);
+                }
+                else if (accelerationDirection == cameraidentityMatrix.Down)
+                {
+                    cameraDownList.Add(cameraAllList[i]);
+                }
+            }
+            string s;
+            s = "CS:<";
+            s += "F" + cameraForwardList.Count.ToString("00");
+            s += "B" + cameraBackwardList.Count.ToString("00");
+            s += "D" + cameraDownList.Count.ToString("00");
+            s += "U" + cameraUpList.Count.ToString("00");
+            s += "L" + cameraLeftList.Count.ToString("00");
+            s += "R" + cameraRightList.Count.ToString("00");
+            s += ">";
+            return s;
 
-} 
+        }
 
-void nameCameras(List<IMyTerminalBlock> cameraList, string sDirection)
-{
-	for(int i=0;i<cameraList.Count; i++)
-	{
-		cameraList[i].CustomName="Camera " + (i+1).ToString() + " " + sDirection;
-	}
-}
-  
-#endregion
+        void nameCameras(List<IMyTerminalBlock> cameraList, string sDirection)
+        {
+            for (int i = 0; i < cameraList.Count; i++)
+            {
+                cameraList[i].CustomName = "Camera " + (i + 1).ToString() + " " + sDirection;
+            }
+        }
 
+        #endregion
+
+        #region hovercameras
+        List<IMyTerminalBlock> cameraHoverForeDownList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> cameraHoverAftDownList = new List<IMyTerminalBlock>();
+
+        string hovercamerasInit(IMyTerminalBlock orientationBlock)
+        {
+            string s = "";
+            if (cameraAllList.Count < 1)
+                s += camerasensorsInit(orientationBlock);
+            cameraHoverForeDownList.Clear();
+            cameraHoverAftDownList.Clear();
+
+            foreach (var camera in cameraDownList)
+            {
+                if (camera.CustomName.ToLower().Contains("fore") || camera.CustomData.ToLower().Contains("fore"))
+                    cameraHoverForeDownList.Add(camera);
+                else if (camera.CustomName.ToLower().Contains("aft") || camera.CustomData.ToLower().Contains("aft"))
+                    cameraHoverAftDownList.Add(camera);
+            }
+            s += "HCS:<";
+            s += "F" + cameraHoverForeDownList.Count.ToString("00");
+            s += "A" + cameraHoverAftDownList.Count.ToString("00");
+            s += ">";
+            return s;
+
+        }
+
+        #endregion
 
 
     }
