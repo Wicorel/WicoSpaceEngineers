@@ -34,7 +34,7 @@ string tanksInit()
 { 
 	{ 
 		tankList = new List < IMyTerminalBlock > (); 
-		GridTerminalSystem.GetBlocksOfType < IMyOxygenTank > (tankList, (x => x.CubeGrid == Me.CubeGrid)); 
+		GridTerminalSystem.GetBlocksOfType < IMyGasTank > (tankList, (x => x.CubeGrid == Me.CubeGrid)); 
 	} 
 	iHydroTanks = 0; 
 	iOxygenTanks = 0; 
@@ -67,8 +67,8 @@ string tanksInit()
 //		int iTankType = tankType(tankList[i]); 
 //		if ((iTankType & iTypes) > 0)  
 		{ 
-			IMyOxygenTank tank = tankList[i] as IMyOxygenTank; 
-			float tankLevel = tank.GetOxygenLevel(); 
+			IMyGasTank tank = tankList[i] as IMyGasTank; 
+			float tankLevel = tank.FilledRatio; 
 			totalPercent += tankLevel; 
 			iTanksCount++; 
 		} 
