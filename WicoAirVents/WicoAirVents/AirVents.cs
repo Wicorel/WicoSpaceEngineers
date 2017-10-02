@@ -18,6 +18,16 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        /* 
+         * On a planet with o2, a air vent will show oxygen levels, even when OFF. 5.4%=earth 
+         * alien=0.06% 
+         *  
+         *  
+         * In space, can vent isolated tank by filling airlock, then opening doors and dumping o2 
+         *  
+         * Can create no o2 in (sealed) rooms on planets by depresurrizing 
+         */ 
+
         #region airvents 
 
         List<IMyTerminalBlock> airventList = new List<IMyTerminalBlock>();
@@ -32,7 +42,7 @@ namespace IngameScript
 
         List<IMyTerminalBlock> cockpitairventList = new List<IMyTerminalBlock>(); // outside air. directly supplying a cockpit. turn off if cockpit not occupied. 
 
-        bool bPressurization = false;
+        bool bPressurization = false; // pressurization enabled in world settings
 
         string airventInit()
         {

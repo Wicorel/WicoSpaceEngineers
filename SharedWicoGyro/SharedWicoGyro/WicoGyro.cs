@@ -37,6 +37,8 @@ namespace IngameScript
 double CTRL_COEFF = 0.9; 
 int LIMIT_GYROS = 3; // max number of gyros to use to align craft. Leaving some available allows for player control to continue during auto-align 
 int LEAVE_GYROS = -1;  // leave this many gyros free for user.
+
+
 IMyShipController rc; 
 List < IMyGyro > gyros;
 
@@ -48,9 +50,9 @@ bool GyroMain(string argument)
 		gyrosetup();
 //	Echo("GyroMain(" + argument + ")");
 
-	if (rc is IMyRemoteControl)
+	if (rc is IMyShipController)
 	{
-		Vector3D grav = (rc as IMyRemoteControl).GetNaturalGravity();
+		Vector3D grav = (rc as IMyShipController).GetNaturalGravity();
 		return GyroMain(argument, grav, gpsCenter);
 	}
 	else
