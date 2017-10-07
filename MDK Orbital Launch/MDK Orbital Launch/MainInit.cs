@@ -37,16 +37,20 @@ namespace IngameScript
             string sProgress = progressBar(progress);
             StatusLog(moduleName + sProgress, textPanelReport);
 
-            Echo("Init");
+            Echo("Init:" + currentInit.ToString());
             if (currentInit == 0)
             {
                 //StatusLog("clear",textLongStatus,true);
                 StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
-
-                if (!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
-                if (!modeCommands.ContainsKey("orbitallaunch")) modeCommands.Add("orbitallaunch", MODE_ORBITALLAUNCH);
-                // if(!modeCommands.ContainsKey("orbitaldescent")) modeCommands.Add("orbitaldescent", MODE_DESCENT);
-
+                if (modeCommands != null)
+                {
+                    if (!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
+                    if (!modeCommands.ContainsKey("orbitallaunch")) modeCommands.Add("orbitallaunch", MODE_ORBITALLAUNCH);
+                 // if(!modeCommands.ContainsKey("orbitaldescent")) modeCommands.Add("orbitaldescent", MODE_DESCENT);
+               }
+                else Echo("NULL modeCommands!");
+                gridsInit();
+                initLogging();
                 sInitResults += initSerializeCommon();
                 Deserialize();
             }
@@ -70,6 +74,7 @@ namespace IngameScript
                 sInitResults += NAVInit();
                 sInitResults += gyrosetup();
                 sInitResults += doorsInit();
+                sInitResults += landingsInit(gpsCenter);
 
                 Deserialize();
 
@@ -94,18 +99,21 @@ namespace IngameScript
         string BlockInit()
         {
             string sInitResults = "";
-
+            Echo("#localgrids="+localGrids.Count);
             List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
-            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch, (x => x.CubeGrid == Me.CubeGrid));
+            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch, (x1 => x1.CubeGrid == Me.CubeGrid));
             // GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch);
             if (centerSearch.Count == 0)
             {
                 centerSearch = GetBlocksContains<IMyRemoteControl>("[NAV]");
                 if (centerSearch.Count == 0)
                 {
-                    GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, (x => x.CubeGrid == Me.CubeGrid));
-                    if (centerSearch.Count == 0)
+
+                    GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
+
+                    if (centerSearch.Count ==  0)
                     {
+                        // didn't find an RC.  try 'cockpits'
                         GridTerminalSystem.GetBlocksOfType<IMyCockpit>(centerSearch, localGridFilter);
                         //                GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
                         int i = 0;
@@ -116,21 +124,23 @@ namespace IngameScript
                                 continue;
                             break;
                         }
-                        if (i > centerSearch.Count)
+                        if (i > centerSearch.Count || i==0)
                         {
                             sInitResults += "!!NO valid Controller";
                             Echo("No Controller found");
                         }
-                        else
+                        else 
                         {
                             sInitResults += "S";
                             Echo("Using good ship Controller: " + centerSearch[i].CustomName);
                         }
+                        
                     }
                     else
                     {
                         sInitResults += "R";
-                        Echo("Using First Remote control found: " + centerSearch[0].CustomName);
+                        Echo("Using first remote control: " +centerSearch[0].CustomName);
+//                        gpsCenter = centerSearch[0];
                     }
                 }
             }
@@ -139,7 +149,9 @@ namespace IngameScript
                 sInitResults += "N";
                 Echo("Using Named: " + centerSearch[0].CustomName);
             }
-            gpsCenter = centerSearch[0];
+//            if (centerSearch.Count > 0)
+                gpsCenter = centerSearch[0];
+  //          else gpsCenter = null;
 
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
