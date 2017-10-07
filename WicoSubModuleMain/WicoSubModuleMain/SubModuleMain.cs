@@ -25,6 +25,7 @@ namespace IngameScript
         {
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
             Echo(sBanner + "Creator");
+            gridsInit();
             initLogging();
             if (!Me.CustomName.Contains(moduleName))
                 Me.CustomName = "PB " + OurName + " " + moduleName;
@@ -54,10 +55,12 @@ namespace IngameScript
             {
                 if (list[i].IsWorking)
                 {
-                    Echo("Working local Projector found!");
+                    Echo("Projector:" + list[i].CustomName);
                     bWorkingProjector = true;
                 }
             }
+            if (bWorkingProjector)
+                Echo("Working local Projector found!");
 
             if (sArgument != "" && sArgument != "timer" && sArgument != "wccs") Echo("Arg=" + sArgument);
 
