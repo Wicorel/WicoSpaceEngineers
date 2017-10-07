@@ -29,7 +29,7 @@ namespace IngameScript
         void doModeHover()
         {
             StatusLog("clear", textPanelReport);
-            Echo("Hover Mode");
+            Echo("Hover Mode:" + gpsCenter.CustomName);
             StatusLog(OurName + ":" + moduleName + ":Hover", textPanelReport);
             StatusLog("Planet Gravity: " + dGravity.ToString(velocityFormat) + " g", textPanelReport);
             double elevation = 0;
@@ -60,6 +60,11 @@ namespace IngameScript
             bool bConnectorIsLocked = AnyConnectorIsLocked();
             bool bGearsReadyToLock = anyGearReadyToLock();
 
+            Echo("Gears:");
+            foreach(var gear in gearList)
+            {
+                Echo(gear.CustomName);
+            }
             if (bGearsLocked)
             {
                 if (current_state != 2)
@@ -75,7 +80,8 @@ namespace IngameScript
                     }
                     current_state = 2;
                 }
-            }
+                 landingDoMode(1);
+           }
             else
             {
                 if (current_state != 1)
@@ -90,7 +96,7 @@ namespace IngameScript
 
                     current_state = 1;
                 }
-
+                landingDoMode(0);
             }
             if (doCameraScan(cameraStage1LandingList, elevation * 2)) // scan down 2x current alt
             {
@@ -112,7 +118,6 @@ namespace IngameScript
                 StatusLog("Landing Gear(s) LOCKED!", textPanelReport);
                 // we can turn off thrusters.. but that's about it..
                 // stay in 'hover' iMode
-
             }
             else if (bGearsReadyToLock)
             {
@@ -142,6 +147,7 @@ namespace IngameScript
             if (bConnectorIsLocked || bGearsLocked)
             {
                 Echo("Stable");
+                landingDoMode(1); // landing mode
                 gyrosOff();
             }
             else

@@ -49,6 +49,7 @@ namespace IngameScript
             StatusLog("clear", textPanelReport);
             StatusLog(OurName + ":" + moduleName + ":Descent", textPanelReport);
             StatusLog("Gravity=" + dGravity.ToString(velocityFormat), textPanelReport);
+            Echo("Gravity=" + dGravity.ToString(velocityFormat));
             double alt = 0;
             double halt = 0;
 
@@ -214,6 +215,7 @@ namespace IngameScript
 
             if (current_state == 0)
             {
+                Echo("Init State");
                 //powerDownThrusters(thrustAllList,thrustAll,true);
                 if (dGravity > 0)
                 { // we are starting in gravity
@@ -241,8 +243,10 @@ namespace IngameScript
                         current_state = 10;
                 }
             }
+            Echo("After init check=" + current_state.ToString());
             if (current_state == 10)
             {
+                Echo("Dampeners to on. Aim toward target");
                 //		bOverTarget=false; 
                 powerDownThrusters(thrustStage1DownList, thrustAll, false);
                 if (bValidTarget)
@@ -259,6 +263,7 @@ namespace IngameScript
 
                 if (sStatus.Contains("Shutdown"))
                 { // somebody hit nav override 
+                    Echo("NAV OVERRIDE.  Stopping");
                     current_state = 0;
                 }
                 if (sStatus.Contains("Done"))
@@ -314,10 +319,10 @@ namespace IngameScript
             if (current_state == 40)
             {
                 StatusLog("Free Fall", textPanelReport);
+                Echo("Free Fall");
                 if (imsc != null && imsc.DampenersOverride)
                     blockApplyAction(gpsCenter, "DampenersOverride");
 
-                powerDownThrusters(thrustStage1UpList);
                 if (alt < startReverseAlt)
                 {
                     //			startNavCommand("!;V"); 
@@ -325,7 +330,8 @@ namespace IngameScript
                 }
                 else
                 {
-                    StatusLog("Waiting for reverse altitude: " + startReverseAlt.ToString("N0") + " meters", textPanelReport);
+                 powerDownThrusters(thrustStage1UpList);
+                   StatusLog("Waiting for reverse altitude: " + startReverseAlt.ToString("N0") + " meters", textPanelReport);
 
                     if (alt > 44000 && alt < 45000)
                         current_state = 10; // re-align 
@@ -352,7 +358,7 @@ namespace IngameScript
 
                 GyroMain(sOrientation);
                 bWantFast = true;
-
+/*
                 for (int i = 0; i < gyros.Count; ++i)
                 { //kick the ship over since it is 180 to alignment and gyromain will not start rotation when 180
                     IMyGyro g = gyros[i] as IMyGyro;
@@ -363,7 +369,7 @@ namespace IngameScript
                     g.SetValueFloat("Roll", 0);
                     g.SetValueBool("Override", true);
                 }
-
+*/
                 current_state = 61;
                 return;
             }
@@ -569,6 +575,7 @@ namespace IngameScript
                 float hoverionPercent = 0;
 
                 calculateHoverThrust(thrustStage1UpList, out hoveratmoPercent, out hoverhydroPercent, out hoverionPercent);
+                bool bLandingReady=landingDoMode(1);
 
                 if (doCameraScan(cameraStage1LandingList, alt * 2)) // scan down 2x current alt
                 {
@@ -689,7 +696,7 @@ namespace IngameScript
 
                         powerDownThrusters(thrustAllList);
 
-                        if (velocityShip > 20)
+                        if (velocityShip > 20  || !bLandingReady)
                             powerDownThrusters(thrustStage1DownList);
                         else
                         {
@@ -715,7 +722,7 @@ namespace IngameScript
                         else
                             GyroMain(sOrientation);
 
-                        if (velocityShip > 15)
+                        if (velocityShip > 15 || !bLandingReady)
                             powerDownThrusters(thrustStage1UpList);
                         if (velocityShip > 5)
                         {
@@ -748,7 +755,7 @@ namespace IngameScript
 
                         if (bValidLaunch1)
                         {
-                            if (velocityShip > 3)
+                            if (velocityShip > 3 || !bLandingReady)
                             {
                                 powerDownThrusters(thrustStage1UpList);
                             }
@@ -830,6 +837,7 @@ namespace IngameScript
             else if (current_state == 207)
             {
             }
+            Echo("End state=" + current_state);
 
         }
 
