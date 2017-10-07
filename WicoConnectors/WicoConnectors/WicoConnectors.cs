@@ -125,7 +125,7 @@ IMyTerminalBlock getConnectedConnector()
 void ConnectAnyConnectors(bool bConnect = true, string sAction = "")
 {
 	getLocalConnectors();
-	Echo("CCA:"+ localDockConnectors.Count);
+//	Echo("CCA:"+ localDockConnectors.Count);
 	for (int i = 0; i < localDockConnectors.Count; i++)
 	{
 		IMyShipConnector sc = localDockConnectors[i] as IMyShipConnector;
