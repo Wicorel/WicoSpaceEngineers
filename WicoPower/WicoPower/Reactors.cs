@@ -18,35 +18,35 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-#region reactors
-List<IMyTerminalBlock> reactorList = new List<IMyTerminalBlock>();
+        #region reactors
+        List<IMyTerminalBlock> reactorList = new List<IMyTerminalBlock>();
 
-void initReactors()
-{
-	reactorList.Clear();
-	maxReactorPower = -1;
-    GridTerminalSystem.GetBlocksOfType<IMyReactor>(reactorList, localGridFilter);
-	if (reactorList.Count > 0)
-		maxReactorPower = 0;
-	foreach(var tb in reactorList)
-	{
-		IMyReactor r = tb as IMyReactor;
-		maxReactorPower += r.MaxOutput;
-	}
-}
+        void initReactors()
+        {
+            reactorList.Clear();
+            maxReactorPower = -1;
+            GridTerminalSystem.GetBlocksOfType<IMyReactor>(reactorList, localGridFilter);
+            if (reactorList.Count > 0)
+                maxReactorPower = 0;
+            foreach (var tb in reactorList)
+            {
+                IMyReactor r = tb as IMyReactor;
+                maxReactorPower += r.MaxOutput;
+            }
+        }
 
-double getCurrentReactorOutput()
-{
-	double output = 0;
-	foreach(var tb in reactorList)
-	{
-		IMyReactor r = tb as IMyReactor;
-		output += r.CurrentOutput;
-	}
-	return output;
-}
+        double getCurrentReactorOutput()
+        {
+            double output = 0;
+            foreach (var tb in reactorList)
+            {
+                IMyReactor r = tb as IMyReactor;
+                output += r.CurrentOutput;
+            }
+            return output;
+        }
 
-#endregion
+        #endregion
 
     }
 }
