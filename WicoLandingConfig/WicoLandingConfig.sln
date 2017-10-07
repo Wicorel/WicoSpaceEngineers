@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoLandingConfig", "WicoLandingConfig\WicoLandingConfig.shproj", "{2764570C-AF74-40A8-908E-6BC99D34A918}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoLandingConfig\WicoLandingConfig.projitems*{2764570c-af74-40a8-908e-6bc99d34a918}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FE1D2B5E-5A08-4ABD-A36F-C074A64F534A}
+	EndGlobalSection
+EndGlobal
