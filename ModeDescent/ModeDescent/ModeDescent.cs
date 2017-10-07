@@ -696,8 +696,11 @@ namespace IngameScript
 
                         powerDownThrusters(thrustAllList);
 
-                        if (velocityShip > 20  || !bLandingReady)
+                        if (velocityShip > 20 || !bLandingReady)
+                        {
                             powerDownThrusters(thrustStage1DownList);
+                            powerDownThrusters(thrustStage1UpList);
+                        }
                         else
                         {
 
@@ -723,8 +726,11 @@ namespace IngameScript
                             GyroMain(sOrientation);
 
                         if (velocityShip > 15 || !bLandingReady)
+                        {
+                            // too fast or wait for landing mode
                             powerDownThrusters(thrustStage1UpList);
-                        if (velocityShip > 5)
+                        }
+                        else if (velocityShip > 5)
                         {
                             powerUpThrusters(thrustStage1UpList, (float)(hoveratmoPercent * 0.99), thrustatmo);
                             powerUpThrusters(thrustStage1UpList, (float)(hoverhydroPercent * 0.99), thrusthydro);
@@ -732,7 +738,6 @@ namespace IngameScript
 
                             //						powerDownThrusters(thrustStage1UpList);
                         }
-
                         else
                         {
                             //powerUpThrusters(thrustStage1UpList, (float)(hoverthrust * 0.99));
