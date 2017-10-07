@@ -39,20 +39,20 @@ namespace IngameScript
         int LEAVE_GYROS = -1;  // leave this many gyros free for user.
 
 
-        IMyShipController rc;
+        IMyShipController gyroControl;
         List<IMyGyro> gyros;
 
         float minAngleRad = 0.01f; // how tight to maintain aim Lower is tighter. 
 
         bool GyroMain(string argument)
         {
-            if (rc == null)
+            if (gyroControl == null)
                 gyrosetup();
-            //	Echo("GyroMain(" + argument + ")");
+            	Echo("GyroMain(" + argument + ")");
 
-            if (rc is IMyShipController)
+            if (gyroControl is IMyShipController)
             {
-                Vector3D grav = (rc as IMyShipController).GetNaturalGravity();
+                Vector3D grav = (gyroControl as IMyShipController).GetNaturalGravity();
                 return GyroMain(argument, grav, gpsCenter);
             }
             else
@@ -66,9 +66,9 @@ namespace IngameScript
         bool GyroMain(string argument, Vector3D vDirection, IMyTerminalBlock gyroControlPoint)
         {
             bool bAligned = true;
-            if (rc == null)
+            if (gyroControl == null)
                 gyrosetup();
-            Echo("GyroMain(" + argument + ",VECTOR3D) #Gyros=" + gyros.Count);
+//            Echo("GyroMain(" + argument + ",VECTOR3D) #Gyros=" + gyros.Count);
             Matrix or;
             gyroControlPoint.Orientation.GetMatrix(out or);
 
@@ -133,12 +133,13 @@ namespace IngameScript
         {
             string s = "";
             var l = new List<IMyTerminalBlock>();
-            rc = gpsCenter as IMyShipController;
+            gyroControl = gpsCenter as IMyShipController;
 
-            if (rc == null)
+            if (gyroControl == null)
             {
+                // purposefully dont search on our own for a controller
                 if (l.Count < 1) return "No RC!";
-                rc = (IMyRemoteControl)l[0];
+                gyroControl = (IMyRemoteControl)l[0];
             }
             gyrosOff(); // turn off any working gyros from previous runs
                         // NOTE: Uses grid of controller, not ME, nor localgridfilter
