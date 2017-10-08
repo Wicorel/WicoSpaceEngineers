@@ -24,15 +24,10 @@ namespace IngameScript
         void initReactors()
         {
             reactorList.Clear();
-            maxReactorPower = -1;
             GridTerminalSystem.GetBlocksOfType<IMyReactor>(reactorList, localGridFilter);
-            if (reactorList.Count > 0)
-                maxReactorPower = 0;
-            foreach (var tb in reactorList)
-            {
-                IMyReactor r = tb as IMyReactor;
-                maxReactorPower += r.MaxOutput;
-            }
+
+            float currentOutput;
+            reactorCheck(out currentOutput);
         }
 
         double getCurrentReactorOutput()
@@ -44,6 +39,27 @@ namespace IngameScript
                 output += r.CurrentOutput;
             }
             return output;
+        }
+
+        bool reactorCheck(out float currentOutput)
+        {
+            currentOutput = 0;
+            maxReactorPower = -1;
+            bool bNeedyReactor = false;
+            if (reactorList.Count > 0)
+                maxReactorPower = 0;
+
+            foreach(IMyReactor r in reactorList)
+            {
+                // check inventory.
+                // check power modes
+
+                // if reactor is working, add up it's values.
+                currentOutput += r.CurrentOutput;
+                maxReactorPower += r.MaxOutput;
+
+            }
+            return bNeedyReactor;
         }
 
         #endregion
