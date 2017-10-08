@@ -18,16 +18,21 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-// SE V1.172
-#region gasgens
-List<IMyTerminalBlock> gasgenList = new List<IMyTerminalBlock>();
-string gasgenInit()
-{
-	gasgenList.Clear();
-	GridTerminalSystem.GetBlocksOfType<IMyGasGenerator>(gasgenList, (x1 => x1.CubeGrid == Me.CubeGrid));
-	return "GG" + gasgenList.Count.ToString("00");
-}
-#endregion
+        // SE V1.172
+        #region gasgens
+        List<IMyTerminalBlock> gasgenList = new List<IMyTerminalBlock>();
+        string gasgenInit()
+        {
+            gasgenList.Clear();
+            GridTerminalSystem.GetBlocksOfType<IMyGasGenerator>(gasgenList, localGridFilter);
+            return "GG" + gasgenList.Count.ToString("00");
+        }
+
+        bool gasgenCheck()
+        {
+            return true;
+        }
+        #endregion
 
     }
 }
