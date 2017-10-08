@@ -126,7 +126,7 @@ namespace IngameScript
                     else
                     {
                         capacity = defaultCapacity(theContainer) * 10;
-                        cargoMult = 10;
+                        cargoMult = 9999;
                     }
                 }
             }
