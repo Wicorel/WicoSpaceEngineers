@@ -140,10 +140,13 @@ namespace IngameScript
                     else if (percentthisbattery > 99)
                         batteryList[ib].ApplyAction("Recharge");
                 }
-                if (!isRechargeSet(batteryList[ib]) && percentthisbattery < targetMax && !bFoundRecharging)
+                if (!b.OnlyRecharge && percentthisbattery < targetMax && !bFoundRecharging)
                 {
-                    Echo("Turning on Recharge for " + batteryList[ib].CustomName);
-                    batteryList[ib].ApplyAction("Recharge");
+                    Echo("Turning on Recharge for " + b.CustomName);
+                    b.OnlyDischarge = false;
+                    b.OnlyRecharge = true;
+                    b.SemiautoEnabled = false;
+//                    batteryList[ib].ApplyAction("Recharge");
                     bFoundRecharging = true;
                 }
             }
