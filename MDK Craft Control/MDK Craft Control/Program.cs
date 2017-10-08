@@ -54,8 +54,7 @@ namespace IngameScript
 
             doCargoCheck();
             Echo("Cargo=" + cargopcent.ToString() + "%");
-            Echo("Cargo Mult=" + cargoMult.ToString());
-
+//            Echo("Cargo Mult=" + cargoMult.ToString());
 
             batteryCheck(0, false);
             output += "Batteries: #=" + batteryList.Count.ToString();
@@ -63,6 +62,17 @@ namespace IngameScript
             {
                 output += " : " + (getCurrentBatteryOutput() / maxBatteryPower * 100).ToString("0.00") + "%";
                 output += "\n Storage=" + batteryPercentage.ToString() + "%";
+
+                // Debug Info:
+                foreach (var tb in batteryList)
+                {
+                    float foutput = 0;
+                    IMyBatteryBlock r = tb as IMyBatteryBlock;
+
+                    PowerProducer.GetMaxOutput(r, out foutput);
+                    //		output = r.MaxOutput;
+                    Echo(foutput.ToString() + "MW " + r.CustomName);
+                }
             }
 
             Echo(output);
@@ -70,13 +80,23 @@ namespace IngameScript
 
             Echo("Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW"));
 
-            output = "Reactors: #" + reactorList.Count.ToString();
+            float fCurrentReactorOutput = 0;
+            reactorCheck(out fCurrentReactorOutput);
             if (reactorList.Count > 0)
             {
+                output = "Reactors: #" + reactorList.Count.ToString();
                 output += " - " + maxReactorPower.ToString("0.00") + "MW\n";
-                float fPer = (float)(getCurrentReactorOutput() / totalMaxPowerOutput * 100);
-                output += " Curr Output=" + getCurrentReactorOutput().ToString("0.00") + "MW" + " : " + fPer.ToString("0.00") + "%";
+                float fPer = (float)(fCurrentReactorOutput / totalMaxPowerOutput * 100);
+                output += " Curr Output=" + fCurrentReactorOutput.ToString("0.00") + "MW" + " : " + fPer.ToString("0.00") + "%";
                 //			Echo("Reactor total usage=" + fPer.ToString("0.00") + "%");
+
+                // debug output
+                foreach (var tb in reactorList)
+                {
+                    IMyReactor r = tb as IMyReactor;
+                    Echo(r.MaxOutput.ToString() + " " + r.CustomName);
+                }
+
             }
             Echo(output);
             output = "";
@@ -97,6 +117,10 @@ namespace IngameScript
             }
             else Echo("No Hydrogen Tanks");
 
+            if(gasgenList.Count >0)
+            {
+                Echo(gasgenList.Count + " Gas Gens");
+            }
 
             if (dGravity >= 0)
             {
