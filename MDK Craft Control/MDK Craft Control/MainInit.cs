@@ -83,6 +83,7 @@ namespace IngameScript
                 sInitResults += ejectorsInit();
 
                 sInitResults += antennaInit();
+                sInitResults += gasgenInit();
 
                 //        Serialize();
 
