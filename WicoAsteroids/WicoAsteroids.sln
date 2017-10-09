@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoAsteroids", "WicoAsteroids\WicoAsteroids.shproj", "{7E915614-B8A3-4570-8D08-9252FB786139}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoAsteroids\WicoAsteroids.projitems*{7e915614-b8a3-4570-8d08-9252fb786139}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AC45E572-76F8-4EB5-AC62-080054F15068}
+	EndGlobalSection
+EndGlobal
