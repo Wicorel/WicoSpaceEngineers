@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeMiniMine", "ModeMiniMine\ModeMiniMine.shproj", "{21E2A96B-43FB-4E09-B308-DA4D649F1118}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ModeMiniMine\ModeMiniMine.projitems*{21e2a96b-43fb-4e09-b308-da4d649f1118}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {73F4B7C7-5119-40BF-9AA6-5B910356FF88}
+	EndGlobalSection
+EndGlobal
