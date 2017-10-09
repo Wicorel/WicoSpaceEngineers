@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeUnderconstruction", "ModeUnderconstruction\ModeUnderconstruction.shproj", "{E1D12AB3-50A1-4FA1-8AD8-A2C097C2B446}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ModeUnderconstruction\ModeUnderconstruction.projitems*{e1d12ab3-50a1-4fa1-8ad8-a2c097c2b446}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2003B68A-9D84-4BC6-9035-D1079E05BD96}
+	EndGlobalSection
+EndGlobal
