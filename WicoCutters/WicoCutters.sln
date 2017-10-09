@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoCutters", "WicoCutters\WicoCutters.shproj", "{7B5FE6EB-B1FA-4BE7-A276-CA240BE030A0}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoCutters\WicoCutters.projitems*{7b5fe6eb-b1fa-4be7-a276-ca240be030a0}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2B32D18D-08EC-447E-8217-8DB8199FC05C}
+	EndGlobalSection
+EndGlobal
