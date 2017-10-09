@@ -32,6 +32,8 @@ namespace IngameScript
 
             // when all initialization is done, set init to true.
 
+        	if(currentInit==0) initLogging();
+
             Log("Init:" + currentInit.ToString());
             double progress = currentInit * 100 / 3;
             string sProgress = progressBar(progress);
@@ -47,7 +49,6 @@ namespace IngameScript
                 if (!modeCommands.ContainsKey("orbitallaunch")) modeCommands.Add("orbitallaunch", MODE_ORBITALLAUNCH);
                 // if(!modeCommands.ContainsKey("orbitaldescent")) modeCommands.Add("orbitaldescent", MODE_DESCENT);
                 gridsInit();
-                initLogging();
                 sInitResults += initSerializeCommon();
                 Deserialize();
             }
