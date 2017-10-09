@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoProjectors", "WicoProjectors\WicoProjectors.shproj", "{578314C5-BACA-4365-A23B-DB565494EAA7}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoProjectors\WicoProjectors.projitems*{578314c5-baca-4365-a23b-db565494eaa7}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {06984919-F385-46F1-89EF-8701BF790749}
+	EndGlobalSection
+EndGlobal
