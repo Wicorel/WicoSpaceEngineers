@@ -22,6 +22,7 @@ namespace IngameScript
         void doModes()
         {
             Echo("mode=" + iMode.ToString());
+            doModeAlways();
 /*            if (AnyConnectorIsConnected() && !((craft_operation & CRAFT_MODE_ORBITAL) > 0))
             {
                 Echo("DM:docked");
@@ -49,6 +50,12 @@ namespace IngameScript
               StatusLog(moduleName + " Manual Control", textPanelReport);
         }
         #endregion
+
+        void doModeAlways()
+        {
+//	        processPendingSends();
+//	        processReceives();
+        }
 
     }
 }
