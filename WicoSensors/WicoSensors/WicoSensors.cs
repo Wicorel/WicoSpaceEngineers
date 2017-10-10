@@ -22,7 +22,7 @@ namespace IngameScript
 
         List<IMySensorBlock> sensorsList = new List<IMySensorBlock>();
 
-        string sensorInit()
+        string sensorInit(bool bSleep=true)
         {
             sensorsList.Clear();
             List<IMyTerminalBlock> ltb = new List<IMyTerminalBlock>();
@@ -32,7 +32,7 @@ namespace IngameScript
             {
                 sensorsList.Add(sb as IMySensorBlock);
             }
-            sleepAllSensors();
+            if(bSleep) sleepAllSensors();
             return "S" + sensorsList.Count.ToString("00");
         }
 
@@ -65,12 +65,13 @@ namespace IngameScript
 
         void setSensorShip(IMyTerminalBlock tb, float fLeft, float fRight, float fUp, float fDown, float fFront, float fBack)
         {
+            // need to use world matrix to get orientation correctly
             IMySensorBlock sb = tb as IMySensorBlock;
             if (sb == null) return;
             //		Echo(sb.CustomName);
             //	Echo(sb.Position.ToString());
             //x=width, y=height, z=back/forth. (fw=+z) (right=-y)
-            float fXOffset = sb.Position.X * 0.5f;
+            float fXOffset = sb.Position.X * 0.5f; // small grid only?
             float fYOffset = sb.Position.Y * 0.5f;
             float fZOffset = sb.Position.Z * 0.5f;
 
