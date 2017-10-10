@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorDisplay", "SensorDisplay\SensorDisplay.csproj", "{7CA63EDF-1829-4298-8769-66629386A23D}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoSensors", "..\WicoSensors\WicoSensors\WicoSensors.shproj", "{AE623794-2E25-4618-8B26-965CFDB814CE}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoGrid", "..\WicoGrid\WicoGrid\WicoGrid.shproj", "{CD5D65C2-F2C3-4A71-9C46-ADE848DFF34B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ShipDim", "..\ShipDim\ShipDim\ShipDim.shproj", "{AEFC326F-3C23-4445-9EE3-0F4ACD440C5F}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\ShipDim\ShipDim\ShipDim.projitems*{7ca63edf-1829-4298-8769-66629386a23d}*SharedItemsImports = 4
+		..\WicoGrid\WicoGrid\WicoGrid.projitems*{7ca63edf-1829-4298-8769-66629386a23d}*SharedItemsImports = 4
+		..\WicoSensors\WicoSensors\WicoSensors.projitems*{7ca63edf-1829-4298-8769-66629386a23d}*SharedItemsImports = 4
+		..\WicoSensors\WicoSensors\WicoSensors.projitems*{ae623794-2e25-4618-8b26-965cfdb814ce}*SharedItemsImports = 13
+		..\ShipDim\ShipDim\ShipDim.projitems*{aefc326f-3c23-4445-9ee3-0f4acd440c5f}*SharedItemsImports = 13
+		..\WicoGrid\WicoGrid\WicoGrid.projitems*{cd5d65c2-f2c3-4a71-9c46-ade848dff34b}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7CA63EDF-1829-4298-8769-66629386A23D}.Debug|x64.ActiveCfg = Debug|x64
+		{7CA63EDF-1829-4298-8769-66629386A23D}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {57BE3E5E-CCCE-4151-82D1-348C22FADD5A}
+	EndGlobalSection
+EndGlobal
