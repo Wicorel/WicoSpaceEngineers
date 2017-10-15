@@ -38,6 +38,7 @@ namespace IngameScript
         #endregion
 
         #region powerproducer
+/*
 
         public static class PowerProducer
         {
@@ -176,9 +177,9 @@ namespace IngameScript
                     result = m; return result != 0;
             }
         }
+*/
 
         #endregion
-
 
     }
 }
