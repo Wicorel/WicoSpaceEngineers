@@ -66,6 +66,7 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
     values.Append("DisassembleRatio =" + unit.DisassembleRatio.ToString() + "\n");
     values.Append("DisplayNameText =" + unit.DisplayNameText.ToString() + "\n");
     values.Append("\nActions:\n");
+
     for (int i = 0; i < resultList.Count; i++)
     {
         StringBuilder temp = new StringBuilder();
@@ -371,7 +372,8 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n ProjectionOffset=" + io.ProjectionOffset.ToString());
         values.Append("\n ProjectionRotation=" + io.ProjectionRotation.ToString());
         values.Append("\n RemainingBlocks=" + io.RemainingBlocks.ToString());
-    }
+         values.Append("\n");
+   }
     if (unit is IMyThrust)
     {
         values.Append("\nIMyThrust");
@@ -380,7 +382,8 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n ThrustOverride=" + io.ThrustOverride.ToString());
         float maxThrust = io.GetMaximum<float>("Override");
         values.Append("\n MaxThrustOverride=" + maxThrust.ToString());
-    }
+         values.Append("\n");
+   }
     if (unit is IMyGyro)
     {
         values.Append("\nIMyGyro");
@@ -391,6 +394,7 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n Pitch=" + io.Pitch.ToString());
         values.Append("\n Roll=" + io.Roll.ToString());
         values.Append("\n Yaw=" + io.Yaw.ToString());
+        values.Append("\n");
     }
     if (unit is IMyPistonBase)
     {
@@ -402,6 +406,68 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n MinLimit=" + io.MinLimit.ToString());
         values.Append("\n Status=" + io.Status.ToString());
         values.Append("\n Velocity=" + io.Velocity.ToString());
+         values.Append("\n");
+   }
+
+
+
+    Echo("Accepted resources:");
+    values.Append("\nAccepted resources:");
+    MyResourceSinkComponent sink;
+    unit.Components.TryGet<MyResourceSinkComponent>(out sink);
+    if (sink != null)
+    {
+        var list = sink.AcceptedResources;
+        for (int j = 0; j < list.Count; ++j)
+        {
+            values.Append("\n " + list[j].SubtypeId.ToString() +" ("+list[j].SubtypeName+")");
+            Echo(list[j].SubtypeId.ToString() +" ("+list[j].SubtypeName+")");
+
+            float currentInput = 0;
+            float maxRequiredInput = 0;
+            bool isPoweredBy = false;
+
+            currentInput=sink.CurrentInputByType(list[j]);
+            isPoweredBy=sink.IsPoweredByType(list[j]);
+            maxRequiredInput=sink.MaxRequiredInputByType(list[j]);
+
+            values.Append("\n Current=" + currentInput.ToString() + " Max=" + maxRequiredInput.ToString() + " Is=" + isPoweredBy.ToString());
+
+        }
     }
+    else
+    {
+        values.Append("\n No Resources");
+        Echo("No resources");
+    }
+    Echo("Provided resources:");
+    values.Append("\nProvided resources:");
+    MyResourceSourceComponent source;
+    unit.Components.TryGet<MyResourceSourceComponent>(out source);
+
+    if (source != null)
+    {
+        float currentOutput = 0;
+        float maxOutput = 0;
+        currentOutput = source.CurrentOutput;
+        maxOutput = source.MaxOutput;
+
+        values.Append("\n Current=" + currentOutput.ToString() + " Max=" + maxOutput.ToString() );
+
+        /*
+        var list = source.ResourceTypes;
+        for (int j = 0; j < list.Count; ++j)
+        {
+            values.Append("\n " + list[j].SubtypeId.ToString());
+            Echo(list[j].SubtypeId.ToString());
+        }
+        */
+    }
+    else
+    {
+        values.Append("\n No Resources");
+        Echo("No resources");
+    }
+
     values.Append("\n-------------\n");
 }
