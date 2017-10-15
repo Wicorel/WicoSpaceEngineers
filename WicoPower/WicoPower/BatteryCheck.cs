@@ -59,13 +59,24 @@ namespace IngameScript
                 maxBatteryPower = 0;
             foreach (var tb in batteryList)
             {
-                float output = 0;
+ //               float output = 0;
                 IMyBatteryBlock r = tb as IMyBatteryBlock;
 
-                PowerProducer.GetMaxOutput(r, out output);
-                //		output = r.MaxOutput;
+                MyResourceSourceComponent source;
+                r.Components.TryGet<MyResourceSourceComponent>(out source);
 
-                maxBatteryPower += output;
+                if (source != null)
+                {
+                    float currentOutput = 0;
+                    float maxOutput = 0;
+                    currentOutput = source.CurrentOutput;
+                    maxOutput = source.MaxOutput;
+                    maxBatteryPower += maxOutput;
+                }
+
+                //		output = r.MaxOutput;
+  //              PowerProducer.GetMaxOutput(r, out output);
+ //               maxBatteryPower += output;
             }
         }
 
