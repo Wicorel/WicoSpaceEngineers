@@ -69,9 +69,16 @@ namespace IngameScript
                     float foutput = 0;
                     IMyBatteryBlock r = tb as IMyBatteryBlock;
 
-                    PowerProducer.GetMaxOutput(r, out foutput);
-                    //		output = r.MaxOutput;
-                    Echo(foutput.ToString() + "MW " + r.CustomName);
+                    MyResourceSourceComponent source;
+                    r.Components.TryGet<MyResourceSourceComponent>(out source);
+
+                    if (source != null)
+                    {
+                        foutput = source.MaxOutput;
+                    }
+
+//                    PowerProducer.GetMaxOutput(r, out foutput);
+                    output+=foutput.ToString() + "MW " + r.CustomName;
                 }
             }
 
