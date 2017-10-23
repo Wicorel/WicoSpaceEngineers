@@ -18,128 +18,138 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-#region maininit
+        #region maininit
 
-string sInitResults = "";
-string sArgResults = "";
+        string sInitResults = "";
+        string sArgResults = "";
 
-int currentInit = 0;
+        int currentInit = 0;
 
-string doInit()
-{
+        string doInit()
+        {
 
-	if(currentInit==0) initLogging();
+            if (currentInit == 0) initLogging();
 
-	// set autogyro defaults.
-	LIMIT_GYROS = 1;
-	minAngleRad = 0.09f;
-	CTRL_COEFF = 0.75;
+            // set autogyro defaults.
+            LIMIT_GYROS = 1;
+            minAngleRad = 0.09f;
+            CTRL_COEFF = 0.75;
 
-	Log("Init:"+currentInit.ToString());
-	double progress=currentRun*100/3;
-	string sProgress=progressBar(progress);
-	StatusLog(sProgress,getTextBlock(sTextPanelReport));
+            Log("Init:" + currentInit.ToString());
+            double progress = currentRun * 100 / 3;
+            string sProgress = progressBar(progress);
+            StatusLog(sProgress, getTextBlock(sTextPanelReport));
 
-	Echo("Init:"+currentInit.ToString());
-	if(currentInit==0) 
-	{
-//StatusLog("clear",textLongStatus,true);
-StatusLog(DateTime.Now.ToString()+OurName+":"+moduleName+":INIT",textLongStatus,true);
+            Echo("Init:" + currentInit.ToString());
+            if (currentInit == 0)
+            {
+                //StatusLog("clear",textLongStatus,true);
+                StatusLog(DateTime.Now.ToString() + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
 
-	if(!modeCommands.ContainsKey("launch")) modeCommands.Add("launch", MODE_LAUNCH);
-	if(!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
+                if (!modeCommands.ContainsKey("launch")) modeCommands.Add("launch", MODE_LAUNCH);
+                if (!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
 
-		sInitResults+=	gridsInit();
+                sInitResults += gridsInit();
 
-		initTimers();
+                initTimers();
 
-		sInitResults+=initSerializeCommon();
+                sInitResults += initSerializeCommon();
 
-		Deserialize();
-		sInitResults+=	gridsInit();
-		sInitResults+=BlockInit();
+                Deserialize();
+                sInitResults += gridsInit();
+                sInitResults += BlockInit();
 
-		sInitResults+=thrustersInit(gpsCenter);
-		sInitResults += sensorInit();
-       sInitResults += camerasensorsInit(gpsCenter);
+                sInitResults += thrustersInit(gpsCenter);
+                sInitResults += sensorInit();
+                sInitResults += camerasensorsInit(gpsCenter);
 
-		sInitResults += connectorsInit();
-		sInitResults+=gyrosetup(); 
+                sInitResults += connectorsInit();
+                sInitResults += gyrosetup();
 
-		sInitResults += lightsInit();
-		initShipDim();
-		sInitResults+=modeOnInit(); 
-		init=true;
+                sInitResults += lightsInit();
+                initShipDim();
+                sInitResults += modeOnInit();
+                init = true;
 
-	}
+            }
 
-	currentInit++;
-	if(init) currentInit=0;
+            currentInit++;
+            if (init) currentInit = 0;
 
-	Log(sInitResults);
-    Echo(sInitResults);
+            Log(sInitResults);
+            Echo(sInitResults);
 
-	return sInitResults;
-}
+            return sInitResults;
+        }
 
-IMyTextPanel gpsPanel=null;
+        IMyTextPanel gpsPanel = null;
 
-string BlockInit()
-{
-	string sInitResults="";
+        string BlockInit()
+        {
+            string sInitResults = "";
+            gpsCenter = null;
 
-	List < IMyTerminalBlock > centerSearch = new List < IMyTerminalBlock > ();
-	GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch);
-	if (centerSearch.Count == 0) 
-	{
-		centerSearch=GetBlocksContains<IMyRemoteControl>("[NAV]");
-		if(centerSearch.Count==0)
-		{
-			GridTerminalSystem.GetBlocksOfType < IMyRemoteControl > (centerSearch,localGridFilter);
-			if(centerSearch.Count == 0) 
-			{
-				GridTerminalSystem.GetBlocksOfType < IMyShipController > (centerSearch,localGridFilter);
-				if(centerSearch.Count == 0) 
-				{
-					sInitResults+="!!NO Controller";
-					return sInitResults;
-				}
-				else
-				{
-					sInitResults+="S";
-				}
-			}
-			else 
-			{
-				sInitResults+="R";
-			}
-		}
-	}
-	else
-	{
-		sInitResults+="N";
-	}
-	gpsCenter = centerSearch[0];
+            List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
+            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch);
+            if (centerSearch.Count == 0)
+            {
+               GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
+                foreach(var b in centerSearch)
+                {
+                    if(b.CustomName.Contains("[NAV]") || b.CustomData.Contains("[NAV]"))
+                    {
+                        gpsCenter = b;
+                    }
+                    else if(b.CustomName.Contains("[!NAV]") || b.CustomData.Contains("[!NAV]"))
+                    {
+                        continue; // don't use this one.
+                    }
+                    sInitResults = "R";
+                    gpsCenter = b;
+                    break;
+                }
+                if(gpsCenter==null)
+                {
+                        GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
+                    if (centerSearch.Count == 0)
+                    {
+                        sInitResults += "!!NO Controller";
+                        return sInitResults;
 
-	List<IMyTerminalBlock> blocks =new List<IMyTerminalBlock>();
-	blocks=GetBlocksContains<IMyTextPanel>("[GPS]");
-	if(blocks.Count>0)
-		gpsPanel=blocks[0] as IMyTextPanel;
-    if (gpsCenter == null) Echo("ERROR: No control block found!");
-	return sInitResults;
-}
+                    }
+                    else
+                    {
+                        sInitResults += "S";
+                        gpsCenter = centerSearch[0];
+                    }
 
-#endregion
+                }
+            }
+            else
+            {
+                sInitResults += "N";
+                gpsCenter = centerSearch[0];
+            }
 
-string modeOnInit()
-{
-	if (iMode == MODE_DOCKING) 
-	{
-		ResetMotion();
-		current_state = 0;
-	}
-	return ">";
-}
+            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
+            blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
+            if (blocks.Count > 0)
+                gpsPanel = blocks[0] as IMyTextPanel;
+            if (gpsCenter == null) Echo("ERROR: No control block found!");
+            return sInitResults;
+        }
+
+        #endregion
+
+        string modeOnInit()
+        {
+            if (iMode == MODE_DOCKING)
+            {
+                ResetMotion();
+                current_state = 0;
+            }
+            return ">";
+        }
 
     }
 }
