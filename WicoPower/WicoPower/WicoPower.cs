@@ -23,9 +23,11 @@ namespace IngameScript
         void initPower()
         {
             totalMaxPowerOutput = 0;
-            Echo("Init power");
+            Echo("Init Reactors");
             initReactors();
+            Echo("Init Solar");
             initSolars();
+            Echo("Init Batteries");
             initBatteries();
             if (maxReactorPower > 0)
                 totalMaxPowerOutput += maxReactorPower;
