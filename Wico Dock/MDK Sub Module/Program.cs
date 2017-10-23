@@ -64,8 +64,8 @@ namespace IngameScript
         void ResetMotion(bool bNoDrills = false)  
         { 
         //	if (navEnable != null)	blockApplyAction(navEnable,"OnOff_Off"); //navEnable.ApplyAction("OnOff_Off"); 
-//	        powerDownThrusters(thrustAllList);
-//            gyrosOff();
+	        powerDownThrusters(thrustAllList);
+            gyrosOff();
 	        blockApplyAction(gpsCenter, "AutoPilot_Off"); 
         } 
 
