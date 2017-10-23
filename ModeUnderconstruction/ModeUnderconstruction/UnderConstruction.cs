@@ -72,10 +72,7 @@ namespace IngameScript
             }
             else if (current_state == 10)
             { // turn off projectors.
-                for (int i = 0; i < localProjectorList.Count; i++)
-                {
-                    localProjectorList[i].Enabled = false;
-                }
+                turnoffProjectors();
                 // check for 'enough' power to continue alone.
                 //TODO:
                 current_state = 20;
@@ -96,8 +93,5 @@ namespace IngameScript
                 // maybe need a time-out?
             }
         }
-
-
-
     }
 }
