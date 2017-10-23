@@ -36,7 +36,8 @@ namespace IngameScript
                     setMode(MODE_IDLE);
                     return;
                 }
-                vDock = gpsCenter.GetPosition();
+                vDock = ((IMyShipController)gpsCenter).CenterOfMass;
+//                vDock = gpsCenter.GetPosition();
                 powerDownThrusters(thrustAllList);
                 antennaMaxPower();
                 current_state = 100;
@@ -58,9 +59,15 @@ namespace IngameScript
                 current_state = 1;
             }
 
-            Vector3D vPos = gpsCenter.GetPosition();
-            double dist = (vPos - vDock).Length();
+//            Vector3D vPos = gpsCenter.GetPosition();
+            Vector3D vPos = ((IMyShipController)gpsCenter).CenterOfMass;
+
+            Echo("vDock=" + Vector3DToString(vDock));
+            Echo("vPos=" + Vector3DToString(vPos));
+
+            double dist = (vPos - vDock).LengthSquared();
             StatusLog(moduleName + ":Distance Launched=" + dist.ToString("0.00") + "m", textPanelReport);
+            Echo(moduleName + ":Distance Launched=" + dist.ToString("0.00") + "m");
 
             if (dist > 10)
             {
