@@ -3,7 +3,7 @@
 *
 * Control Script for Rovers and Drones and Oribtal craft
 * 
-* Version 3.0F
+* Version 3.0K
 * 
 * 2.0 Removed many built-in functions to make script room. These functions were duplicated in sub-modules anyway.
 * 2.0.1
@@ -62,6 +62,8 @@
 * 3.0J Add moduleDoPreModes() to Main()
 * Move pre-mode to moduleDoPreModes()
 * add clearing of gpsPanel to moduleDoPreModes()
+* 
+* 3.0K more init states if larger number of blocks in grid system.
 * 
 * Handles:
 * Master timer for sub-modules

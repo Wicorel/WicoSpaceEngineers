@@ -35,6 +35,8 @@ namespace IngameScript
             initLogging();
 
             Log("Init:" + currentInit.ToString());
+            Echo(gtsAllBlocks.Count.ToString() + " Blocks");
+
             double progress = currentInit * 100 / 3; // 3=Number of expected INIT phases.
             string sProgress = progressBar(progress);
             StatusLog(moduleName + sProgress, textPanelReport);
@@ -66,20 +68,22 @@ namespace IngameScript
                     currentPosition = anchorPosition.GetPosition();
                 }
                 initPower();
-
                 sInitResults += thrustersInit(gpsCenter);
                 sInitResults += gyrosetup();
-                /*
-                }
-                else if(currentRun==2)
-                {
-                */
+                if (gtsAllBlocks.Count < 300) currentInit = 2; // go ahead and do next step.
+            }
+            if (currentInit == 2)
+            {
                 sInitResults += wheelsInit(gpsCenter);
                 sInitResults += rotorsNavInit();
 
                 sInitResults += connectorsInit();
                 sInitResults += tanksInit();
                 sInitResults += drillInit();
+                if (gtsAllBlocks.Count < 100) currentInit = 3; // go ahead and do next step.
+            }
+            if (currentInit == 3)
+            {
                 sInitResults += ejectorsInit();
 
                 sInitResults += antennaInit();
@@ -110,7 +114,6 @@ namespace IngameScript
                     Echo("Missing Required Item; Please add");
                     return sInitResults;
                 }
-
             }
 
             currentInit++;
