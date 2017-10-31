@@ -1,7 +1,3 @@
-C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\obj\x64\Debug\Wico Dock.csprojResolveAssemblyReference.cache
-C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\obj\x64\Debug\Wico Dock.csproj.CoreCompileInputs.cache
-C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\obj\x64\Debug\MDK_Orbital_Descent.exe
-C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\obj\x64\Debug\MDK_Orbital_Descent.pdb
 C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\bin\MDK_Orbital_Descent.exe
 C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\bin\MDK_Orbital_Descent.pdb
 C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\bin\MDKUtilities.dll
@@ -26,3 +22,7 @@ C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub 
 C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\bin\System.Collections.Immutable.xml
 C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\bin\SharpDX.DirectInput.xml
 C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\bin\System.Reflection.Metadata.xml
+C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\obj\x64\Debug\Wico Dock.csproj.CoreCompileInputs.cache
+C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\obj\x64\Debug\MDK_Orbital_Descent.exe
+C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\obj\x64\Debug\MDK_Orbital_Descent.pdb
+C:\Users\saett\OneDrive\Documents\Visual Studio 2017\Projects\Wico Dock\MDK Sub Module\obj\x64\Debug\Wico Dock.csprojResolveAssemblyReference.cache
