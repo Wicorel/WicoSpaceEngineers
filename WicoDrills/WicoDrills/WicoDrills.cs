@@ -31,6 +31,24 @@ namespace IngameScript
                 drillList.Add(b as IMyTerminalBlock);
             return "D" + drillList.Count.ToString("00");
         }
+
+        void turnDrillsOn()
+        {
+            foreach(IMyFunctionalBlock b in drillList)
+            {
+                b.Enabled = true;
+            }
+
+        }
+
+        void turnDrillsOff()
+        {
+            foreach(IMyFunctionalBlock b in drillList)
+            {
+                b.Enabled = false;
+            }
+
+        }
         #endregion
         #region ejectors
 
@@ -43,6 +61,25 @@ namespace IngameScript
             foreach (var b in Output)
                 ejectorList.Add(b as IMyTerminalBlock);
             return "E" + ejectorList.Count.ToString("00");
+        }
+
+        void turnEjectorsOn()
+        {
+            foreach(IMyFunctionalBlock b in ejectorList)
+            {
+                b.Enabled = true;
+            }
+//                            blockApplyAction(ejectorList, "OnOff_On");
+
+        }
+
+        void turnEjectorsOff()
+        {
+            foreach(IMyFunctionalBlock b in ejectorList)
+            {
+                b.Enabled = false;
+            }
+
         }
         #endregion
 
