@@ -82,10 +82,6 @@ namespace IngameScript
         {
             if (iMode == newMode) return;
             // process delta mode
-            if (newMode == MODE_IDLE)
-            {
-
-            }
             iMode = newMode;
             current_state = 0;
         }
