@@ -103,7 +103,9 @@ namespace IngameScript
                 if (dot2 < 0) ang = Math.PI - ang; // compensate for >+/-90
                 if (ang < minAngleRad)
                 { // close enough 
+
                     g.SetValueBool("Override", false);
+                    //g.GyroOverride = false;
                     continue;
                 }
                 //		Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
@@ -115,14 +117,20 @@ namespace IngameScript
                 rot *= ctrl_vel;
                 float pitch = (float)rot.GetDim(0);
                 g.SetValueFloat("Pitch", pitch);
+                //g.Pitch = pitch;
 
                 float yaw = -(float)rot.GetDim(1);
                 g.SetValueFloat("Yaw", yaw);
+                //g.Yaw = yaw;
 
                 float roll = -(float)rot.GetDim(2);
-                g.SetValueFloat("Roll", roll);
+                //                g.SetValueFloat("Roll", roll);
+                g.Roll = roll;
+
                 //		g.SetValueFloat("Power", 1.0f); 
                 g.SetValueBool("Override", true);
+                //g.GyroOverride = true;
+
                 bAligned = false;
             }
             return bAligned;
@@ -180,7 +188,8 @@ namespace IngameScript
             {
                 for (int i = 0; i < gyros.Count; ++i)
                 {
-                    gyros[i].SetValueBool("Override", false);
+                    //gyros[i].SetValueBool("Override", false);
+                    gyros[i].GyroOverride = false;
                     gyros[i].Enabled = true;
                 }
             }
