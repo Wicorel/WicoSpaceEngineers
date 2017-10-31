@@ -27,6 +27,11 @@ namespace IngameScript
             public Vector3D position;
             public Vector3D vector;
             public long detectionType;
+            // detection types:
+            // pointed at by player with camera
+            // from ore detector (!)
+            // from 'tasting' with drills
+            // player given GPS
         }
 
         void initOreLocInfo()
@@ -117,6 +122,8 @@ namespace IngameScript
 
         void clearOreAmounts()
         {
+            if (oreInfos.Count < 1)
+                initOreInfo();
             for (int i = 0; i < oreInfos.Count; i++)
             {
                 oreInfos[i].localAmount = 0;
@@ -125,23 +132,44 @@ namespace IngameScript
 
         void addOreAmount(string sOre, double lAmount, bool bNoFind = false)
         {
-            //	Echo("addOreAmount:" + sOre + ":" + lAmount.ToString());
+ //       	Echo("addOreAmount:" + sOre + ":" + lAmount.ToString());
+            if (oreInfos.Count < 1)
+                initOreInfo();
+
             for (int i = 0; i < oreInfos.Count; i++)
             {
                 //		Echo(oreInfos[i].oreName);
                 if (oreInfos[i].oreName == sOre)
                 {
-                    //			Echo("Is in list!");
-                    //			Echo("Current amount=" + oreInfos[i].localAmount);
+ //                   Echo("Is in list!");
+ //                   Echo("Current amount=" + oreInfos[i].localAmount);
                     if (!bNoFind && lAmount > 0 && !oreInfos[i].bFound)
                     {
                         oreInfos[i].bFound = true;
                         foundOre(i);
                     }
-                    //			else Echo("already 'found'");
+//                    else Echo("already 'found'");
                     oreInfos[i].localAmount += lAmount;
                 }
             }
+        }
+
+        int iStoneOreId = -1;
+        double currentStoneAmount()
+        {
+            if(iStoneOreId<0)
+            {
+                for(int i=0;i<oreInfos.Count;i++)
+                {
+                    if(oreInfos[i].oreName=="Stone")
+                    {
+                        iStoneOreId = i;
+                        break;
+                    }
+                }
+            }
+            if (iStoneOreId < 0) return 0;
+            return oreInfos[iStoneOreId].localAmount;
         }
 
         void foundOre(int oreIndex)
@@ -169,5 +197,50 @@ namespace IngameScript
                     Echo(oreInfos[i].oreName + " " + oreInfos[i].localAmount);
             }
         }
+
+        // uses lContainers from WicoCargo
+        void doCargoOreCheck()
+        {
+            if (lContainers.Count < 1)
+                initCargoCheck();
+
+            if (lContainers.Count < 1)
+            {
+                // No cargo containers found.
+                return;
+            }
+            clearOreAmounts();
+//            Echo(lContainers.Count + " Containers");
+            for (int i = 0; i < lContainers.Count; i++)
+            {
+                IMyInventory inv = lContainers[i].GetInventory(0);
+                var items = inv.GetItems();
+                // go through all items
+                for (int i2 = 0; i2 < items.Count; i2++)
+                {
+                    var item = items[i2];
+
+                    string str;
+                    str = item.Content.TypeId.ToString();
+                    string[] aS = str.Split('_');
+                    string sType = aS[1];
+
+                    str = item.Content.SubtypeName + " " + sType + " " + item.Amount;
+                    //			StatusLog("  " + str,getTextBlock(CargoStatus));
+                    //			Echo(" " + str);
+                    //			if (item.Content.SubtypeName == "Stone" && item.Content.ToString().Contains("Ore"))
+//                    Echo(item.Content.ToString());
+                    if (item.Content.ToString().Contains("Ore"))
+                    {
+//                        Echo("Adding " + item.Content.SubtypeName);
+                        addOreAmount(item.Content.SubtypeName, (double)item.Amount);
+                        //				stoneamount+=(double)item.Amount;
+                    }
+                }
+
+            }
+
+        }
+
     }
 }
