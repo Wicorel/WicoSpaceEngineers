@@ -36,15 +36,15 @@ namespace IngameScript
             else lContainers.Clear();
 
             GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(grid, localGridFilter);
+                        lContainers.AddRange(grid);
 
+            grid.Clear();
+            GridTerminalSystem.GetBlocksOfType<IMyShipConnector>(grid, localGridFilter);
+            // should probably eliminate ejectors..
             lContainers.AddRange(grid);
 
             grid.Clear();
             GridTerminalSystem.GetBlocksOfType<IMyShipDrill>(grid, localGridFilter);
-            lContainers.AddRange(grid);
-
-            grid.Clear();
-            GridTerminalSystem.GetBlocksOfType<IMyShipConnector>(grid, localGridFilter);
             lContainers.AddRange(grid);
 
             grid.Clear();
@@ -183,6 +183,7 @@ namespace IngameScript
             return capacity;
 
         }
+
 
         #endregion
 
