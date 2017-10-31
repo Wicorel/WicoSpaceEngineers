@@ -158,7 +158,7 @@ void doModes()
             if (Antenna.Count > 0)
                 sShipName = Antenna[0].CustomName.Split('!')[0].Trim();
 
-            StatusLog("clear", gpsPanel);
+//            StatusLog("clear", gpsPanel);
 
             s = "Home";
 
