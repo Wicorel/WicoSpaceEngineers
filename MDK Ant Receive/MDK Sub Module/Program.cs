@@ -36,7 +36,7 @@ namespace IngameScript
         //IMyTerminalBlock gpsCenter = null;
         class OurException : Exception
         {
-            public OurException(string msg) : base("WicoExampleModule" + ": " + msg) { }
+            public OurException(string msg) : base("WicoAntReceiveModule" + ": " + msg) { }
         }
 
         string sLastMessage = "";
