@@ -127,7 +127,8 @@ bool validSavefile()
 string Vector3DToString(Vector3D v)
 {
     string s;
-    s = v.GetDim(0) + ":" + v.GetDim(1) + ":" + v.GetDim(2);
+    s = v.X.ToString("0.00") + ":" + v.Y.ToString("0.00") + ":" + v.Z.ToString("0.00");
+//    s = v.GetDim(0) + ":" + v.GetDim(1) + ":" + v.GetDim(2);
     return s;
 }
 bool ParseVector3d(string sVector, out double x, out double y, out double z)
