@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wico Dock", "MDK Sub Module\Wico Dock.csproj", "{52A1F87F-C99B-456D-A12E-3689B36EEAAC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDK Dock", "MDK Sub Module\MDK Dock.csproj", "{52A1F87F-C99B-456D-A12E-3689B36EEAAC}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoSubModuleMain", "..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.shproj", "{5731B863-8478-4F96-99FE-914DEFFB6B79}"
 EndProject
@@ -55,6 +55,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoRemoteDockableConnector
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoTravelMovement", "..\WicoTravelMovement\WicoTravelMovement\WicoTravelMovement.shproj", "{4A5A1957-600D-44C6-BE65-9EC80FCA41CD}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoBases", "..\WicoBases\WicoBases\WicoBases.shproj", "{8DED091E-DF6F-490C-8644-D4AFFA6FF7ED}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\ModeDocked\ModeDocked\ModeDocked.projitems*{06776b42-2575-4e49-8c91-9f4ed9961873}*SharedItemsImports = 13
@@ -72,6 +74,7 @@ Global
 		..\SharedWicoGyro\SharedWicoGyro\SharedWicoGyro.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\ShipDim\ShipDim\ShipDim.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoAntenna\WicoAntenna\WicoAntenna.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoBases\WicoBases\WicoBases.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoCameras\WicoCameras\WicoCameras.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoConnectors\WicoConnectors\WicoConnectors.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoDetectedEntities\WicoDetectedEntities\WicoDetectedEntities.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
@@ -89,6 +92,7 @@ Global
 		..\WicoLandingGears\WicoLandingGears\WicoLandingGears.projitems*{784351ff-951d-468a-8548-89fbd6129569}*SharedItemsImports = 13
 		..\WicoGasGens\WicoGasGens\WicoGasGens.projitems*{85a26d0e-61e6-4e70-b394-7216bdf0b2a5}*SharedItemsImports = 13
 		..\WicoLights\WicoLights\WicoLights.projitems*{85dc7d02-b126-4c3c-9640-d2257f2dd37a}*SharedItemsImports = 13
+		..\WicoBases\WicoBases\WicoBases.projitems*{8ded091e-df6f-490c-8644-d4affa6ff7ed}*SharedItemsImports = 13
 		..\WicoAntenna\WicoAntenna\WicoAntenna.projitems*{90e13f91-d516-48ea-b357-a7816d5fceef}*SharedItemsImports = 13
 		..\WicoSensors\WicoSensors\WicoSensors.projitems*{ae623794-2e25-4618-8b26-965cfdb814ce}*SharedItemsImports = 13
 		..\ShipDim\ShipDim\ShipDim.projitems*{aefc326f-3c23-4445-9ee3-0f4acd440c5f}*SharedItemsImports = 13
