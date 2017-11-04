@@ -39,7 +39,14 @@ namespace IngameScript
         100 init
 
         Use other connector position and vector for docking
-        110	Move to 'wait' location (or current location) ?request 'wait' location?
+        110	Move to 'wait' location (or current location) ?request 'wait' location? ->115 or ->120
+
+        111 calc colision avoid moving to 'mom'
+        112 do travel to avoid collision moving to mom
+
+        
+        115 do travel to 'mom' location (range 4500) ->120
+
         120	request available docking connector
 
         130	settime-out
@@ -49,12 +56,17 @@ namespace IngameScript
         'Back' Connector:
         160 move to launch1
         161 collision detected.
+        162 do travel for collision avoid ->160 Coll2->163
+        163 secondary collision if asteroid ->164 else ->161
+        164 init escape from inside asteroid/ship
+        165 check for escape route when found ->162
+
+
         170 align to docking alignment
         171 align to dock
         172 align to docking alignment
-        173
-        171 'reverse' to dock, aiming connector at target connector
-                support 'back' connector
+        173 'reverse' to dock, aiming connector at target connector
+                supports 'back' connector
                 TODO: support 'forward' connector
                 TODO: support 'down' connector (kneeling required for wheeled vehicles?)
 
@@ -343,6 +355,8 @@ namespace IngameScript
                 Echo("Aligning to dock");
                 bool bAimed = false;
                 minAngleRad = 0.03f;
+
+                // may need to change direction if non- 'back' connector
                 bAimed = GyroMain("up", vDockAlign, gpsCenter);
                 if (bAimed) current_state++; // 170->171 172->173
             }
