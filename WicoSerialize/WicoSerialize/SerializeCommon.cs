@@ -136,6 +136,11 @@ namespace IngameScript
             {
                 coordinates = sVector.Trim().Split(':');
             }
+            x = 0;
+            y = 0;
+            z = 0;
+            if (coordinates.Length < 3) return false;
+
             bool xOk = double.TryParse(coordinates[0].Trim(), out x);
             bool yOk = double.TryParse(coordinates[1].Trim(), out y);
             bool zOk = double.TryParse(coordinates[2].Trim(), out z);
