@@ -18,27 +18,27 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-#region domodes
-void doModes()
-{
-	Echo("mode=" + iMode.ToString());
-	if (AnyConnectorIsConnected() && (iMode!=MODE_LAUNCH ) && iMode!=MODE_DOCKED )
-	{
-		setMode(MODE_DOCKED);
-	}
+        #region domodes
+        void doModes()
+        {
+	        Echo("mode=" + iMode.ToString());
+	        if (AnyConnectorIsConnected() && (iMode!=MODE_LAUNCH ) && iMode!=MODE_DOCKED )
+	        {
+		        setMode(MODE_DOCKED);
+	        }
 
-	doModeAlways();
+	        doModeAlways();
 
-	if(iMode==MODE_IDLE && (craft_operation & CRAFT_MODE_SLED) > 0)
-		setMode(MODE_SLEDMMOVE);
+	        if(iMode==MODE_IDLE && (craft_operation & CRAFT_MODE_SLED) > 0)
+		        setMode(MODE_SLEDMMOVE);
 
-	if(iMode==MODE_LAUNCH){doModeLaunch();return;}
-	if(iMode==MODE_RELAUNCH){doModeRelaunch();return;}
-	if(iMode==MODE_DOCKING){doModeDocking();return;}
-	if(iMode==MODE_DOCKED){doModeDocked();return;}
+	        if(iMode==MODE_LAUNCH){doModeLaunch();return;}
+	        if(iMode==MODE_RELAUNCH){doModeRelaunch();return;}
+	        if(iMode==MODE_DOCKING){doModeDocking();return;}
+	        if(iMode==MODE_DOCKED){doModeDocked();return;}
    
-}
-#endregion
+        }
+        #endregion
 
 
         #region modeidle 
@@ -65,15 +65,18 @@ void doModes()
                 setMode(MODE_DOCKED);
             }
             logState();
+            checkBases();
+            Echo(baseInfoString());
         }
         #endregion
 
+        /*
         long lMomID = 0;
         Vector3D vMomPosition;
         string sMomName = "";
 
         bool bMomRequestSent = false;
-
+        */
         void processReceives()
         {
             double x, y, z;
@@ -94,6 +97,7 @@ void doModes()
                     {
                         if (aMessage[1] == "MOM")
                         {
+                        /* OBSOLETE
                             Echo("MOM says hello!");
                             // FORMAT:			antSend("WICO:MOM:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition()));
                             int iOffset = 2;
@@ -126,11 +130,38 @@ void doModes()
                                     vMomPosition = vPosition;
                                 }
                             }
+                        */
+                        }
+                        if (aMessage[1] == "BASE")
+                        {
+                            // base reponds with BASE information
+                            //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +":"+bJumpCapable)XXX
+
+                            // 2      3   4         5          6           7+
+                            // name, ID, position, velocity, Jump Capable, Source, Sink
+                            // source and sink need to have "priorities".  support vechicle can take ore from a miner drone.  and then it can deliver to a base.
+                            //
+                            Echo("BASE says hello!");
+                            int iOffset = 2;
+                            string sName = aMessage[iOffset++];
+
+                            long id = 0;
+                            long.TryParse(aMessage[iOffset++], out id);
+
+                            x = Convert.ToDouble(aMessage[iOffset++]);
+                            y = Convert.ToDouble(aMessage[iOffset++]);
+                            z = Convert.ToDouble(aMessage[iOffset++]);
+                            Vector3D vPosition = new Vector3D(x, y, z);
+
+                            bool bJumpCapable = stringToBool(aMessage[iOffset++]);
+
+                            addBase(id, sName, vPosition, bJumpCapable);
                         }
 
                     }
                 }
             }
+            /* OBSOLETE
             if (lMomID == 0)
             {
                 Echo("Orphan!!!");
@@ -142,6 +173,7 @@ void doModes()
             }
             else
                 Echo("Mom=" + sMomName);
+                */
         }
 
         #region logstate

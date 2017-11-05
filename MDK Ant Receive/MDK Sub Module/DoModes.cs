@@ -42,7 +42,7 @@ namespace IngameScript
  	        processPendingSends();
 //	        processReceivedMessage();
 	        processDockingStates();
-	        doMomAnnounce();
+	        doBaseAnnounce();
         }
 
 

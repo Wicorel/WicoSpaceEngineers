@@ -23,5 +23,7 @@
 * 3.0E MDK Version
 * 
 * 3.0F Combined DockMgr into code
+* 
+* 3.0G New BASE communications.  remove MOM
 *
 */

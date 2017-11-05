@@ -18,26 +18,29 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        #region MOM_ANNOUNCER
-        const long lBaseTransmitWait = 15;
+        const double dBaseTransmitWait = 15; //seconds between active transmits
 
-        long lBaseLastTransmit = lBaseTransmitWait + 5;
+        double dBaseLastTransmit = dBaseTransmitWait + 5;
 
-        void doMomAnnounce()
+        void doBaseAnnounce(bool bForceAnnounce=false)
         {
             if (dockingInfo.Count > 0)
             {
-                Echo("MOM: Last Transmit=" + lBaseLastTransmit.ToString());
-                if (lBaseLastTransmit > lBaseTransmitWait)
+                Echo("BASE: Last Transmit=" + dBaseLastTransmit.ToString());
+                if (dBaseLastTransmit > dBaseTransmitWait || bForceAnnounce)
                 {
-                    lBaseLastTransmit = 0;
-                    antSend("WICO:MOM:" + gpsName("", gpsCenter.CubeGrid.CustomName) + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(((IMyShipController)gpsCenter).CenterOfMass));
+                    dBaseLastTransmit = 0;
+                    bool bJumpCapable = false;
+
+                    antSend("WICO:BASE:" + gpsName("", gpsCenter.CubeGrid.CustomName) + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()) + ":" + bJumpCapable.ToString());
+                    //                   antSend("WICO:MOM:" + gpsName("", gpsCenter.CubeGrid.CustomName) + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(((IMyShipController)gpsCenter).CenterOfMass));
                 }
                 else
-                    lBaseLastTransmit++;
+                {
+                    dBaseLastTransmit+=Runtime.TimeSinceLastRun.TotalSeconds;
+                }
             }
         }
-        #endregion
 
         bool processAnnounceMessage(string sReceivedMessage)
         {
@@ -54,7 +57,7 @@ namespace IngameScript
                     if (aMessage[1] == "HELLO")
                     {
                         Echo("HELLO");
-                        lBaseLastTransmit = lBaseTransmitWait + 5; // force us to transmit next tick 
+                        dBaseLastTransmit = dBaseTransmitWait + 5; // force us to transmit next tick 
                         bWantFast = true;
                     }
                     return false; // we processed it, but still pass it on to other modules

@@ -18,6 +18,7 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+
         #region DOCKING
         List<DockingInfo> dockingInfo = new List<DockingInfo>();
 
@@ -31,6 +32,12 @@ namespace IngameScript
             public long assignedEntity;
             public List<IMyTerminalBlock> subBlocks;
             public long lAlign;
+
+            // TODO:
+            public string sType; // types of drones supported
+
+            // TODO: 
+            public string sDroneName; // name of drone assigned to this dock
         }
 
         List<IMyTerminalBlock> dockingAlllights = new List<IMyTerminalBlock>();
@@ -186,7 +193,7 @@ namespace IngameScript
             Echo(output);
         }
 
-        int getAvailableDock(long incomingID)
+        int getAvailableDock(long incomingID, string sType, string sName)
         {
             int iDock = -1;
             for (int i = 0; i < dockingInfo.Count; i++)
@@ -220,6 +227,8 @@ namespace IngameScript
                         // check if available.. 
                         // mark as 'pending' with timeout
                         // dumb selection for now..
+
+                        // TODO: Check if type is supported
                         IMyShipConnector connector = dockingInfo[i].tb as IMyShipConnector;
                         if (dockingInfo[i].State == 0)
                         {
@@ -242,7 +251,7 @@ namespace IngameScript
             return iDock;
         }
 
-        void sendDockInfo(int iDock, long incomingID)
+        void sendDockInfo(int iDock, long incomingID, string sName, bool bApproach=false)
         {
             if (iDock < 0 || iDock >= dockingInfo.Count) return;
 
@@ -257,6 +266,7 @@ namespace IngameScript
 
             dockingInfo[iDock].State = 2;
             dockingInfo[iDock].assignedEntity = incomingID;
+            dockingInfo[iDock].sDroneName = sName;
 
             Vector3D vAlign;
             MatrixD worldtb = gpsCenter.WorldMatrix;
@@ -287,19 +297,101 @@ namespace IngameScript
 
             vAlign.Normalize();
 
-            if (dockingInfo[iDock].lAlign < 0)
+            if (bApproach)
             {
-                antSend("WICO:DOCK:" + incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName) + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
+                Vector3D vApproach = vPosition + vVec * 30;
+                 antSend("WICO:CONA:" + incomingID + ":" + connector.EntityId + ":" + Vector3DToString(vApproach));
             }
             else
             {
-                antSend("WICO:ADOCK:" + incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName)
-                + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec) + ":" + Vector3DToString(vAlign));
+                if (dockingInfo[iDock].lAlign < 0)
+                {
+                    antSend("WICO:COND:" + incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName) + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
+                }
+                else
+                {
+                    antSend("WICO:ACOND:" + incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName)
+                    + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec) + ":" + Vector3DToString(vAlign));
+                }
             }
 
         }
 
         #endregion
+
+
+        //
+        //  OLD
+        //
+        // antSend("WICO:DOCK?:" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+
+        //antSend("WICO:DOCK:" + aMessage[3] + ":" + connector.EntityId + ":" + connector.CustomName + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
+        //antSend("WICO:ADOCK:" + incomingID + ":" + connector.EntityId + ":" + connector.CustomName 	+ ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec)+":" + Vector3DToString(vAlign));
+
+
+        //antSend("WICO:HELLO:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+
+        //antSend("WICO:MOM:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition()));
+
+            // TODO:
+            //
+            // NEW
+            //
+            // drone request base info
+        //antSend("WICO:BASE?:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+
+            // base reponds with BASE information
+        //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition())XXX
+
+        // name, ID, position, velocity, Jump Capable, Source, Sink
+        // source and sink need to have "priorities".  support vechicle can take ore from a miner drone.  and then it can deliver to a base.
+        //
+        // 
+
+            // Request docking connector
+            // 
+            // give: base ID for request, drone ship size/type?, source wanted, sink wanted
+
+        //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
+
+
+            // NACK response to request
+            // approach GPS?
+            // Reason:  
+            // no available connectors
+            // source temp not available
+            // no room for sink
+            // CONF=CONnector Fail
+        //antSend("WICO:CONF:" + droneId +":" + SaveFile.EntityId.ToString(), +":"+ ":"+Vector3DToString(vApproachPosition))
+
+
+            // ACK response to request
+            // approach gps for hold
+
+            // base replies to drone with CONnector Approach
+        //antSend("WICO:CONA:" + droneId +":" + SaveFile.EntityId.ToString(), +":"+ ":"+Vector3DToString(vApproachPosition))
+
+            // NOTE: Updates can be send to drone with updated approach position...
+
+            // Drone arrives at dock position
+            // then drone asks for docking
+        //antSend("WICO:COND?:" + baseId +":" + SaveFile.EntityId.ToString(), +":"+ ":"+Vector3DToString(gpsCenter.GetPosition())
+        //antSend("WICO:COND?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
+
+
+            // base delays for full stop, opening hangar, etc
+            // then sends: CONnector Dock : connector + vector [+ align]  
+        //antSend("WICO:COND:" + droneId + ":" + SaveFile.EntityId.ToString() + ":" + connector.EntityId + ":" + connector.CustomName + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
+        //antSend("WICO:ACOND:" + droneId + ":" + SaveFile.EntityId.ToString() + ":" + connector.EntityId + ":" + connector.CustomName 	+ ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec)+":" + Vector3DToString(vAlign));
+
+
+
+            // Recover All Command
+            // all drones should attempt to return to base with jump capability
+            
+            // Recover Specific Command
+            // base asks drone to return
+
 
         // return true if message processed, else false.
         bool processDockMessage(string sReceivedMessage)
@@ -316,6 +408,7 @@ namespace IngameScript
                 {
                     if (aMessage[1] == "DOCK?")
                     {
+                    /* OBSOLETE
                         Echo("Docking Request!");
 
                         sReceivedMessage = ""; // we processed it.
@@ -336,6 +429,88 @@ namespace IngameScript
                             // need to have 'target' for message based on request message.
                             antSend("WICO:DOCKF:" + aMessage[3] + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
                         }
+                        return true;
+                        */
+                    }
+                    if (aMessage[1] == "CON?")
+                    {
+                        Echo("Connector Approach Request!");
+        //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
+
+                        bool pOK = false;
+                        long baseID = 0;
+                        pOK = long.TryParse(aMessage[2], out baseID);
+                        if(baseID!=SaveFile.EntityId)
+                        {
+                            // not our message.  Not Jenny's boat
+                            return false;
+                        }
+                        string sType = aMessage[3];
+                        string sName = aMessage[4];
+
+                        sReceivedMessage = ""; // we processed it.
+                        int i = -1;
+                        long incomingID = 0;
+                        pOK = long.TryParse(aMessage[5], out incomingID);
+
+                        i = getAvailableDock(incomingID, sType, sName);
+                        if (i >= 0 && pOK)
+                        {
+                            sendDockInfo(i, incomingID, sName, true);
+                        }
+                        else
+                        {
+                            // docking request failed
+                            // need to have 'target' for message based on request message.
+                            antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                        }
+                        return true;
+                    }
+                    if (aMessage[1] == "COND?")
+                    {
+                        Echo("Connector Dock Request!");
+        //antSend("WICO:COND?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
+
+                        bool pOK = false;
+                        long baseID = 0;
+                        pOK = long.TryParse(aMessage[2], out baseID);
+                        if(baseID!=SaveFile.EntityId)
+                        {
+                            // not our message.  Not Jenny's boat
+                            return false;
+                        }
+
+                        sReceivedMessage = ""; // we processed it.
+
+                        string sType = aMessage[3];
+                        string sDroneName = aMessage[4];
+                        int i = -1;
+                        long incomingID = 0;
+                        pOK = long.TryParse(aMessage[5], out incomingID);
+                        i = getAvailableDock(incomingID,sType, sDroneName);
+                        if (i >= 0 && pOK)
+                        {
+                            sendDockInfo(i, incomingID, sDroneName);
+                        }
+                        else
+                        {
+                            // docking request failed
+                            antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                        }
+                        return true;
+                    }
+                    if (aMessage[1] == "BASE?")
+                    {
+        //antSend("WICO:BASE?:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                        Echo("Base Request!");
+                        sReceivedMessage = ""; // we processed it.
+
+
+                        long incomingID = 0;
+                        bool pOK = false;
+                        pOK = long.TryParse(aMessage[3], out incomingID);
+
+                        doBaseAnnounce(true);
                         return true;
                     }
                 }

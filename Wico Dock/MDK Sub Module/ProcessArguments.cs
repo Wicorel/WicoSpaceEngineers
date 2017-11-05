@@ -19,10 +19,6 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
 
-
-
-        #region arguments
-
         bool processArguments(string sArgument)
         {
             sArgResults = "";
@@ -63,7 +59,7 @@ namespace IngameScript
             }
             else if (args[0] == "forgetmom")
             {
-                lMomID = 0;
+//                lMomID = 0;
             }
             else
             {
@@ -81,7 +77,6 @@ namespace IngameScript
             }
             return false; // keep processing in main
         }
-        #endregion
 
 
     }

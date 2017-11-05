@@ -20,20 +20,12 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "AntReceive";
-        string sVersion = "3.0F";
+        string sVersion = "3.0G";
 
         const string sGPSCenter = "Craft Remote Control";
 
-//        Vector3I iForward = new Vector3I(0, 0, 0);
-//        Vector3I iUp = new Vector3I(0, 0, 0);
-//        Vector3I iLeft = new Vector3I(0, 0, 0);
-//        Vector3D currentPosition;
-//        const string velocityFormat = "0.00";
-
-//        IMyTerminalBlock anchorPosition;
         IMyTerminalBlock gpsCenter = null;
-//        Vector3D vCurrentPos;
-        //IMyTerminalBlock gpsCenter = null;
+
         class OurException : Exception
         {
             public OurException(string msg) : base("WicoAntReceiveModule" + ": " + msg) { }

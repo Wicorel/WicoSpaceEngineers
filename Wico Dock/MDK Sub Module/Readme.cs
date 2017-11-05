@@ -59,4 +59,6 @@ leave LIMIT_GYROS to default
 3.0S Don't clear GPS Panel
 add 'forgetmom' command to make drone forget about a previous 'motherhsip.
 
+3.0T remove MOM and use new 'BASE' system for docking
+
 */

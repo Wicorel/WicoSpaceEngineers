@@ -36,7 +36,12 @@ namespace IngameScript
         /*
         state
         0 master inint
-        100 init
+        100 init antenna power
+        101 wait for slow speed
+          choose base.  Send request.
+        102 wait for reply from base
+
+        //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
 
         Use other connector position and vector for docking
         110	Move to 'wait' location (or current location) ?request 'wait' location? ->115 or ->120
@@ -83,6 +88,8 @@ namespace IngameScript
         Vector3D vDockAlign;
         bool bDoDockAlign = false;
 
+        int iTargetBase = -1;
+
         void doModeDocking()
         {
             StatusLog("clear", textPanelReport);
@@ -116,6 +123,7 @@ namespace IngameScript
                     ResetMotion();
                     current_state = 100;
                 }
+                iTargetBase = -1;
             }
             Vector3D vPos = dockingConnector.GetPosition();
             if (!AnyConnectorIsConnected() && AnyConnectorIsLocked())
@@ -138,14 +146,109 @@ namespace IngameScript
             }
             else if (current_state == 101)
             { // wait for slow
-                if (velocityShip < 10) current_state = 110;
-            }
-            else if (current_state == 110)
-            { //110	Move to 'wait' location (or current location) ?request 'wait' location?
-                if (lMomID > 0)
+                if (velocityShip < 10)
                 {
-                    double distancesqmom = Vector3D.DistanceSquared(vMomPosition, gpsCenter.GetPosition());
-                    if (distancesqmom > 25000) // max SG antenna range
+                    if (iTargetBase < 0) iTargetBase = findBestBase();
+                    if (iTargetBase >= 0)
+                    {
+                        dtStartShip = DateTime.Now;
+                        antSend("WICO:CON?:" + baseIdOf(iTargetBase).ToString() + ":" + "mini" + ":" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                        current_state = 102;
+                    }
+                    else // No available base
+                        setMode(MODE_ATTENTION);
+                }
+                else
+                    ResetMotion();
+            }
+            else if (current_state == 102)
+            { // wait for reply from base
+                bWantFast = false;
+                DateTime dtMaxWait = dtStartShip.AddSeconds(5.0f);
+                DateTime dtNow = DateTime.Now;
+                if (DateTime.Compare(dtNow, dtMaxWait) > 0)
+                {
+                    current_state = 105;
+                    return;
+                }
+                if (sReceivedMessage != "")
+                {
+                    Echo("Received Message=\n" + sReceivedMessage);
+                    string[] aMessage = sReceivedMessage.Trim().Split(':');
+                    Echo(aMessage.Length + ": Length");
+                    for (int i = 0; i < aMessage.Length; i++)
+                        Echo(i + ":" + aMessage[i]);
+                    if (aMessage.Length > 1)
+                    {
+                        if (aMessage[0] != "WICO")
+                        {
+                            Echo("not wico system message");
+                            return;
+                        }
+                        if (aMessage.Length > 2)
+                        {
+                            if (aMessage[1] == "CONA")
+                            {
+                                Echo("Approach answer!");
+                                //antSend("WICO:CONA:" + droneId +":" + SaveFile.EntityId.ToString(), +":"+Vector3DToString(vApproachPosition))
+
+                                long id = 0;
+                                long.TryParse(aMessage[2], out id);
+                                if (id == SaveFile.EntityId)
+                                {
+                                    // it's a message for us.
+                                    sReceivedMessage = ""; // we processed it.
+                                    long.TryParse(aMessage[3], out id);
+                                    double x, y, z;
+                                    int iOff = 4;
+                                    x = Convert.ToDouble(aMessage[iOff++]);
+                                    y = Convert.ToDouble(aMessage[iOff++]);
+                                    z = Convert.ToDouble(aMessage[iOff++]);
+                                    Vector3D vPosition = new Vector3D(x, y, z);
+
+                                    vHome = vPosition;
+                                    bValidHome = true;
+                                    //                                        StatusLog("clear", gpsPanel);
+                                    //                                        debugGPSOutput("Home", vHome);
+
+                                    current_state = 110;
+                                }
+                            }
+                            // TODO: need to process CONF
+                        }
+                    }
+                }
+                else
+                { // uses timeout from above
+                    Echo("Awaiting reply message");
+                }
+            }
+            else if (current_state == 105)
+            { // timeout waiting for reply from base..
+                // move closer to the chosen base's last known position.
+                if (iTargetBase < 0)
+                {
+                    setMode(MODE_ATTENTION);
+                    return;
+                }
+                doTravelMovement(basePositionOf(iTargetBase), 4000, 101, 106);
+            }
+            else if (current_state == 106)
+            {
+                calcCollisionAvoid(basePositionOf(iTargetBase));
+                current_state = 107;
+            }
+            else if (current_state == 107)
+            {
+                doTravelMovement(vAvoid, 5.0f, 101, 106);
+            }
+
+            else if (current_state == 110)
+            { //110	Move to 'approach' location (or current location) ?request 'wait' location?
+                if (bValidHome)
+                {
+                    double distancesqHome = Vector3D.DistanceSquared(vHome, gpsCenter.GetPosition());
+                    if (distancesqHome > 25000) // max SG antenna range
                     {
                         current_state = 115;
                     }
@@ -155,7 +258,7 @@ namespace IngameScript
             }
             else if (current_state == 111)
             { // collision detected
-                calcCollisionAvoid(vMomPosition);
+                calcCollisionAvoid(vHome);
                 current_state = 112;
             }
             else if (current_state == 112)
@@ -163,14 +266,14 @@ namespace IngameScript
                 doTravelMovement(vAvoid, 5.0f, 110, 111);
             }
             else if (current_state == 115)
-            { // get closer to mom
-                doTravelMovement(vMomPosition, 4500, 120, 111);
+            { // get closer to approach location
+                doTravelMovement(vHome, 5.0f, 120, 111);
             }
             else if (current_state == 120)
             {//120	request available docking connector
                 if (velocityShip < 5)
                 {
-                    antSend("WICO:DOCK?:" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                    antSend("WICO:COND?:" +baseIdOf(iTargetBase) +":" + "mini"+gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
                     {
                         dtStartShip = DateTime.Now;
                         current_state = 131;
@@ -215,7 +318,8 @@ namespace IngameScript
                             }
                             if (aMessage.Length > 2)
                             {
-                                if (aMessage[1] == "DOCK" || aMessage[1] == "ADOCK")
+                                //                                if (aMessage[1] == "DOCK" || aMessage[1] == "ADOCK")
+                                if (aMessage[1] == "COND" || aMessage[1] == "ACOND")
                                 {
                                     Echo("Docking answer!");
                                     // FORMAT:	antSend("WICO:DOCK:" + aMessage[3] + ":" + connector.EntityId + ":" + connector.CustomName + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
@@ -241,7 +345,7 @@ namespace IngameScript
                                         z = Convert.ToDouble(aMessage[iOff++]);
                                         Vector3D vVec = new Vector3D(x, y, z);
 
-                                        if (aMessage[1] == "ADOCK")
+                                        if (aMessage[1] == "ACOND")
                                         {
                                             x = Convert.ToDouble(aMessage[iOff++]);
                                             y = Convert.ToDouble(aMessage[iOff++]);
@@ -264,7 +368,7 @@ namespace IngameScript
 
                                     }
                                 }
-
+                                // TODO handle CONF
                             }
                         }
 
@@ -667,11 +771,8 @@ namespace IngameScript
                 // we are already close to avoid.  try a different method.
                 var cross = Vector3D.Cross(vTargetLocation, vCenter);
                 debugGPSOutput("cross", cross);
-
             }
             debugGPSOutput("vAvoid", vAvoid);
-
         }
-
     }
 }
