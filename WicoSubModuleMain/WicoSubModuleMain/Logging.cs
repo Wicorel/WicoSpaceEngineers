@@ -18,6 +18,8 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        // NOTE: sub-module Version ONLY (but there's no difference)
+        // 110517 Follow search order for text panels
         // 2/25: Performance: only check blocks once, re-check on init.
         // use cached blocks 12/xx
         #region logging
@@ -44,13 +46,15 @@ namespace IngameScript
             blocks = GetBlocksNamed<IMyTerminalBlock>(stheName);
             if (blocks.Count < 1)
             {
-                blocks = GetBlocksContains<IMyTextPanel>(stheName);
-                if (blocks.Count > 0)
-                    textblock = blocks[0] as IMyTextPanel;
+                blocks = GetMeBlocksContains<IMyTextPanel>(stheName);
+                if (blocks.Count < 1)
+                    blocks = GetBlocksContains<IMyTextPanel>(stheName);
             }
-            else if (blocks.Count > 1)
+            if (blocks.Count > 1)
                 throw new OurException("Multiple status blocks found: \"" + stheName + "\"");
-            else textblock = blocks[0] as IMyTextPanel;
+            else
+                if (blocks.Count > 0)
+                textblock = blocks[0] as IMyTextPanel;
             return textblock;
         }
 
@@ -118,6 +122,7 @@ namespace IngameScript
             }
             s = ShipName.Substring(0, iName) + sQual;
             s.Replace(":", "_"); // filter out bad characters
+            s.Replace(";", "_"); // filter out bad characters
             return s;
 
         }

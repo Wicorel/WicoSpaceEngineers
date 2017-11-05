@@ -18,7 +18,7 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-
+        // 1105 allow save file to use contains()
         // V3.0 - redo all variables & cleanup
         #region serializecommon
         const string SAVE_FILE_NAME = "Wico Craft Save";
@@ -107,7 +107,18 @@ namespace IngameScript
             blocks = GetBlocksNamed<IMyTextPanel>(SAVE_FILE_NAME);
 
             if (blocks.Count > 1) Echo("Multiple blocks found: \"" + SAVE_FILE_NAME + "\"");
-            else if (blocks.Count == 0) Echo("Missing: " + SAVE_FILE_NAME);
+            else if (blocks.Count == 0)
+            { 
+                blocks = GetBlocksContains<IMyTextPanel>(SAVE_FILE_NAME);
+                if (blocks.Count == 1)
+                    SaveFile = blocks[0] as IMyTextPanel;
+                else
+                {
+                    blocks = GetMeBlocksContains<IMyTextPanel>(SAVE_FILE_NAME);
+                    if (blocks.Count == 1)
+                        SaveFile = blocks[0] as IMyTextPanel;
+                }
+            }
             else SaveFile = blocks[0] as IMyTextPanel;
 
             if (SaveFile == null)

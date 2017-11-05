@@ -61,4 +61,6 @@ add 'forgetmom' command to make drone forget about a previous 'motherhsip.
 
 3.0T remove MOM and use new 'BASE' system for docking
 
+3.0T2 search order for text panels
+
 */

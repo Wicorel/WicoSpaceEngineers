@@ -18,6 +18,7 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        // 110517 search order for the text panels
 // 2/25: Performance: only check blocks once, re-check on init.
 // use cached blocks 12/xx
 #region logging
@@ -37,24 +38,26 @@ void initLogging()
 	bLoggingInit = true;
 }
 
-IMyTextPanel getTextBlock(string stheName)
-{
-    IMyTextPanel textblock = null;
-	List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-	blocks = GetBlocksNamed<IMyTerminalBlock>(stheName);
-	if (blocks.Count < 1)
-    {
-        blocks = GetBlocksContains<IMyTextPanel>(stheName);
-		if (blocks.Count > 0)
-            textblock = blocks[0] as IMyTextPanel;
-    }
-    else if (blocks.Count > 1)
-        throw new OurException("Multiple status blocks found: \"" + stheName + "\"");
-    else textblock = blocks[0] as IMyTextPanel;
-	return textblock;
-}
+        IMyTextPanel getTextBlock(string stheName)
+        {
+            IMyTextPanel textblock = null;
+            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
+            blocks = GetBlocksNamed<IMyTerminalBlock>(stheName);
+            if (blocks.Count < 1)
+            {
+                blocks = GetMeBlocksContains<IMyTextPanel>(stheName);
+                if (blocks.Count < 1)
+                    blocks = GetBlocksContains<IMyTextPanel>(stheName);
+            }
+            if (blocks.Count > 1)
+                throw new OurException("Multiple status blocks found: \"" + stheName + "\"");
+            else
+                if (blocks.Count > 0)
+                textblock = blocks[0] as IMyTextPanel;
+            return textblock;
+        }
 
-IMyTextPanel getTextStatusBlock(bool force_update = false)
+        IMyTextPanel getTextStatusBlock(bool force_update = false)
 {
 	if ((statustextblock != null || bLoggingInit) && !force_update ) return statustextblock;
 	statustextblock = getTextBlock(OurName + " Status");

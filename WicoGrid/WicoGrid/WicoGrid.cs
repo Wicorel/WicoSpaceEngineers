@@ -301,6 +301,19 @@ namespace IngameScript
             }
             return Output;
         }
+        public List<IMyTerminalBlock> GetMeBlocksContains<T>(string Keyword = null) where T : class
+        {
+            if (gtsAllBlocks.Count < 1) gridsInit();
+            List<IMyTerminalBlock> Output = new List<IMyTerminalBlock>();
+            for (int e = 0; e < gtsAllBlocks.Count; e++)
+            {
+                if (Me.CubeGrid==gtsAllBlocks[e].CubeGrid && gtsAllBlocks[e] is T && Keyword != null && (gtsAllBlocks[e].CustomName.Contains(Keyword) || gtsAllBlocks[e].CustomData.Contains(Keyword)))
+                {
+                    Output.Add(gtsAllBlocks[e]);
+                }
+            }
+            return Output;
+        }
         public List<IMyTerminalBlock> GetBlocksNamed<T>(string Keyword = null) where T : class
         {
             if (gtsAllBlocks.Count < 1) gridsInit();

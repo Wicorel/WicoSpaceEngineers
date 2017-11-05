@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Master";
-        string sVersion = "3.0K MDK";
+        string sVersion = "3.0K2";
 
         const string sGPSCenter = "Craft Remote Control";
 

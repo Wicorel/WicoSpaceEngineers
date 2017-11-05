@@ -25,6 +25,8 @@
  * 3.0c MDK Version https://github.com/malware-dev/MDK-SE/wiki
  *  Uncompressed Source Here: https://github.com/Wicorel/SpaceEngineers/tree/master/MDK%20Orbital%20Descent
  *  
+ *  3.0D search order for text panels
+ *  
  * NEED:  
  *  
  *  trigger timers on stages of descent (see rotor legs example)

@@ -30,6 +30,8 @@
     3.0B Add D, S, C
     3.0C Add arrivedtarget
 
+    3.0D 110517  search order for text panels
+
     Added Rotors
 
 	* TODO: 

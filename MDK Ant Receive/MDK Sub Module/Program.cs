@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "AntReceive";
-        string sVersion = "3.0G";
+        string sVersion = "3.0G2";
 
         const string sGPSCenter = "Craft Remote Control";
 
