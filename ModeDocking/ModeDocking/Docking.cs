@@ -273,7 +273,7 @@ namespace IngameScript
             {//120	request available docking connector
                 if (velocityShip < 5)
                 {
-                    antSend("WICO:COND?:" +baseIdOf(iTargetBase) +":" + "mini"+gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                    antSend("WICO:COND?:" +baseIdOf(iTargetBase) +":" + "mini"+":"+gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
                     {
                         dtStartShip = DateTime.Now;
                         current_state = 131;
