@@ -18,48 +18,48 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-//03/27: Added caching for performance
-#region triggers
-//string[] aTriggerNames = {"Timer Block Wico Miner Status"};
-//string[] aITriggerNames = {"Timer Block LCD","Timer Block BARABAS", "Timer Block Miner Utility"};
-//string[] aFTriggerNames = {"Timer Block Wico Craft Control"};
+        // 11/06 return true if timer was found and triggered
+        //03/27: Added caching for performance
+        #region triggers
 
-Dictionary<string, List<IMyTerminalBlock>> dTimers = new Dictionary<string, List<IMyTerminalBlock>>();
+        Dictionary<string, List<IMyTerminalBlock>> dTimers = new Dictionary<string, List<IMyTerminalBlock>>();
 
-void initTimers()
-{
-	dTimers.Clear();
-}
-
-void doSubModuleTimerTriggers(string sKeyword = "[WCCS]")
-{
-	List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-
-	IMyTimerBlock theTriggerTimer = null;
-
-	if (dTimers.ContainsKey(sKeyword))
-	{
-		blocks = dTimers[sKeyword];
-	}
-	else
-	{
-		blocks = GetBlocksContains<IMyTerminalBlock>(sKeyword);
-		dTimers.Add(sKeyword, blocks);
-	}
-
-	for (int i = 0; i < blocks.Count; i++)
-    {
-        theTriggerTimer = blocks[i] as IMyTimerBlock;
-        if (theTriggerTimer != null)
+        void initTimers()
         {
-//            Echo("dSMT:" + blocks[i].CustomName);
-            theTriggerTimer.ApplyAction("TriggerNow");
+            dTimers.Clear();
         }
-    }
 
-}
+        bool doSubModuleTimerTriggers(string sKeyword = "[WCCS]")
+        {
+            bool bTriggered = false;
+            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
 
-#endregion
+            IMyTimerBlock theTriggerTimer = null;
+
+            if (dTimers.ContainsKey(sKeyword))
+            {
+                blocks = dTimers[sKeyword];
+            }
+            else
+            {
+                blocks = GetBlocksContains<IMyTerminalBlock>(sKeyword);
+                dTimers.Add(sKeyword, blocks);
+            }
+
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                theTriggerTimer = blocks[i] as IMyTimerBlock;
+                if (theTriggerTimer != null)
+                {
+                    //            Echo("dSMT:" + blocks[i].CustomName);
+                    theTriggerTimer.ApplyAction("TriggerNow");
+                    bTriggered = true;
+                }
+            }
+            return bTriggered;
+        }
+
+        #endregion
 
     }
 }
