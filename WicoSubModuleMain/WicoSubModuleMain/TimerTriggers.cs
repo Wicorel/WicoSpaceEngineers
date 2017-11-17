@@ -18,6 +18,11 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        const string sFastTimer="[WCCT]";
+        const string sSubModuleTimer = "[WCCS]";
+        const string sMainTimer = "[WCCM]";
+
+        // added doTriggerMain() for sub-module.
         // 11/06 return true if timer was found and triggered
         //03/27: Added caching for performance
         #region triggers
@@ -27,6 +32,12 @@ namespace IngameScript
         void initTimers()
         {
             dTimers.Clear();
+        }
+
+        void doTriggerMain()
+        {
+            if (!doSubModuleTimerTriggers(sFastTimer))
+                doSubModuleTimerTriggers(sMainTimer);
         }
 
         bool doSubModuleTimerTriggers(string sKeyword = "[WCCS]")
