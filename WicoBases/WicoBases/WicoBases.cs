@@ -75,18 +75,37 @@ namespace IngameScript
 
         string baseInfoString()
         {
-            string s = "Known Bases:\n";
+            string s = baseList.Count.ToString() +"\n";
+
             for(int i=0;i<baseList.Count; i++)
             {
-                s += baseList[i].baseName + " " + baseList[i].baseId + "\n";
+                s += baseList[i].baseId + ":" + baseList[i].baseName + ":" + Vector3DToString(baseList[i].position) +"\n";
             }
             return s;
         }
 
+        const double dBaseRequestTransmitWait = 25; //seconds between active transmits
+
+        double dBaseRequestLastTransmit = dBaseRequestTransmitWait + 5;
+
         void checkBases(bool bForceRequest=false)
         {
-            if(bForceRequest || baseList.Count<1)
+            if (dBaseRequestLastTransmit > dBaseRequestTransmitWait || bForceRequest)
+            {
+                dBaseRequestLastTransmit = 0;
                 antSend("WICO:BASE?:" + gpsCenter.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+            }
+            else
+            {
+                if (dBaseRequestLastTransmit < 0)
+                {
+                    // first-time init
+                    dBaseRequestLastTransmit = Me.EntityId % dBaseRequestTransmitWait; // randomize initial send
+
+                }
+                if (baseList.Count < 1)
+                    dBaseRequestLastTransmit += Runtime.TimeSinceLastRun.TotalSeconds;
+            }
         }
 
         int findBestBase()
@@ -134,6 +153,53 @@ namespace IngameScript
                 vPos = baseList[baseIndex].position;
             }
             return vPos;
+        }
+
+        bool processBaseMessages(string sMessage)
+        {
+            double x, y, z;
+
+            string[] aMessage = sMessage.Trim().Split(':');
+
+            if (aMessage.Length > 1)
+            {
+                if (aMessage[0] != "WICO")
+                {
+                    Echo("not wico system message");
+                    return false;
+                }
+                if (aMessage.Length > 2)
+                {
+                    if (aMessage[1] == "BASE")
+                    {
+                        // base reponds with BASE information
+                        //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +":"+bJumpCapable)XXX
+
+                        // 2      3   4         5          6           7+
+                        // name, ID, position, velocity, Jump Capable, Source, Sink
+                        // source and sink need to have "priorities".  support vechicle can take ore from a miner drone.  and then it can deliver to a base.
+                        //
+                        //                            Echo("BASE says hello!");
+                        int iOffset = 2;
+                        string sName = aMessage[iOffset++];
+
+                        long id = 0;
+                        long.TryParse(aMessage[iOffset++], out id);
+
+                        x = Convert.ToDouble(aMessage[iOffset++]);
+                        y = Convert.ToDouble(aMessage[iOffset++]);
+                        z = Convert.ToDouble(aMessage[iOffset++]);
+                        Vector3D vPosition = new Vector3D(x, y, z);
+
+                        bool bJumpCapable = stringToBool(aMessage[iOffset++]);
+
+                        addBase(id, sName, vPosition, bJumpCapable);
+                        return true; // we processed it
+                    }
+
+                }
+            }
+            return false;
         }
 
     }
