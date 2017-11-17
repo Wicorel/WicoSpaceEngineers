@@ -79,11 +79,14 @@ namespace IngameScript
         */
         void processReceives()
         {
-            double x, y, z;
+ //           double x, y, z;
 
             if (sReceivedMessage != "")
             {
                 Echo("Received Message=\n" + sReceivedMessage);
+                if (processBaseMessages(sReceivedMessage))
+                    return;
+
                 string[] aMessage = sReceivedMessage.Trim().Split(':');
 
                 if (aMessage.Length > 1)
@@ -131,31 +134,6 @@ namespace IngameScript
                                 }
                             }
                         */
-                        }
-                        if (aMessage[1] == "BASE")
-                        {
-                            // base reponds with BASE information
-                            //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +":"+bJumpCapable)XXX
-
-                            // 2      3   4         5          6           7+
-                            // name, ID, position, velocity, Jump Capable, Source, Sink
-                            // source and sink need to have "priorities".  support vechicle can take ore from a miner drone.  and then it can deliver to a base.
-                            //
-                            Echo("BASE says hello!");
-                            int iOffset = 2;
-                            string sName = aMessage[iOffset++];
-
-                            long id = 0;
-                            long.TryParse(aMessage[iOffset++], out id);
-
-                            x = Convert.ToDouble(aMessage[iOffset++]);
-                            y = Convert.ToDouble(aMessage[iOffset++]);
-                            z = Convert.ToDouble(aMessage[iOffset++]);
-                            Vector3D vPosition = new Vector3D(x, y, z);
-
-                            bool bJumpCapable = stringToBool(aMessage[iOffset++]);
-
-                            addBase(id, sName, vPosition, bJumpCapable);
                         }
 
                     }
