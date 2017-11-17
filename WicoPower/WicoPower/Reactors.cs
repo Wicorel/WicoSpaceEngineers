@@ -54,7 +54,7 @@ namespace IngameScript
                 // check inventory.
                 // check power modes
 
-                // if reactor is working, add up it's values.
+                // if reactor is working, add up its values.
                 currentOutput += r.CurrentOutput;
                 maxReactorPower += r.MaxOutput;
 
