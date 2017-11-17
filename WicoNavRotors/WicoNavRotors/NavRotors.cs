@@ -96,7 +96,8 @@ namespace IngameScript
                         if (targetVelocity < -maxVelocity) targetVelocity = -maxVelocity;
                  Echo("CurrentV:"+rv.ToString("0.00")+":ADJV=" + targetVelocity.ToString("0.00"));
                  */
-                rotor.TargetVelocity = targetVelocity;
+//                rotor.TargetVelocity = targetVelocity;
+                rotor.TargetVelocityRPM = targetVelocity;
             }
 
             return true;
@@ -112,7 +113,8 @@ namespace IngameScript
             for (int i = 0; i < rotorList.Count; i++)
             {
                 IMyMotorStator rotor = rotorList[i] as IMyMotorStator;
-                rotor.TargetVelocity = 0;
+                rotor.TargetVelocityRPM = 0;
+//                rotor.TargetVelocity = 0;
             }
             return true;
         }
