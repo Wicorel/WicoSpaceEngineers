@@ -153,11 +153,11 @@ namespace IngameScript
                 {
                     if (gr.p.Status == PistonStatus.Retracted)
                     {
-                        gr.p.SafetyLock = true;
+//                        gr.p.SafetyLock = true;
                     }
                     else
                     {
-                        gr.p.SafetyLock = false;
+//                        gr.p.SafetyLock = false;
                         gr.p.Retract();
                         bAllReady = false;
                     }
@@ -169,10 +169,12 @@ namespace IngameScript
                 foreach(var gr in landingPistonList)
                 {
                     if (gr.p.Status == PistonStatus.Extended)
-                        gr.p.SafetyLock = true;
+                    {
+                        //                        gr.p.SafetyLock = true;
+                    }
                     else
                     {
-                        gr.p.SafetyLock = false;
+                        //                        gr.p.SafetyLock = false;
                         gr.p.Extend();
                         bAllReady = false;
                     }
