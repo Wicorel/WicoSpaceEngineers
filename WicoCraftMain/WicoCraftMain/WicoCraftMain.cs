@@ -18,16 +18,21 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-
         Dictionary<string, int> modeCommands = new Dictionary<string, int>();
         string sBanner = "";
         public Program()
         {
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
             Echo(sBanner + "Creator");
+            doModuleConstructor();
+
             initLogging();
             StatusLog("clear", textLongStatus, true); // only MAIN module should clear long status on init.
-            doSubModuleTimerTriggers("[WCCM]"); // try to trigger MAIN timer in case it stopped.
+            if(!doSubModuleTimerTriggers(sMainTimer)) // try to trigger MAIN timer in case it stopped.
+            {
+                // if no main timer, then use UpdateFrequency
+                Runtime.UpdateFrequency = UpdateFrequency.Update100;
+            }
                                                 //	if (!Me.CustomName.Contains(moduleName))
                                                 //		Me.CustomName = "PB " + OurName+ " "+moduleName;
         }
@@ -43,9 +48,11 @@ namespace IngameScript
         double velocityShip;//, velocityForward, velocityUp, velocityLeft;
 
 
-        void Main(string sArgument)
+//        void Main(string sArgument)
+        void Main(string sArgument, UpdateType ut)
         {
             Echo(sBanner + tick());
+            Echo(ut.ToString());
             bWantFast = false;
             //ProfilerGraph();
 
@@ -193,7 +200,13 @@ namespace IngameScript
             else doSubModuleTimerTriggers();
 
             if (bWantFast)
-                doSubModuleTimerTriggers(sFastTimer);
+            {
+                 Runtime.UpdateFrequency |= UpdateFrequency.Once;
+                /*
+               if (!doSubModuleTimerTriggers(sFastTimer))
+                    doSubModuleTimerTriggers(sMainTimer);
+                    */
+            }
 
             bWasInit = false;
 
