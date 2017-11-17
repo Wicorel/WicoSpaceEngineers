@@ -21,7 +21,7 @@ namespace IngameScript
 
 
 
-        bool processArguments(string sArgument)
+        bool moduleProcessArguments(string sArgument)
         {
 
             if (sArgument == "" || sArgument == "timer" || sArgument == "wccs" || sArgument == "wcct")
@@ -35,11 +35,15 @@ namespace IngameScript
                 Echo("Processed");
             }
             // we don't know this message.  Pass it on to other modules
-            else antReceive(sArgument);
+    //        else antReceive(sArgument);
 
 	        return false; // keep processing in main
         }
-  
+        bool moduleProcessAntennaMessage(string sArgument)
+        {
+            // process an antenna message locally.  If processed, return true
+            return (processDockMessage(sArgument));
+        }
 
     }
 }

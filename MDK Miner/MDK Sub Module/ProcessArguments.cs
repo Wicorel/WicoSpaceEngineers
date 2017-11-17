@@ -23,7 +23,7 @@ namespace IngameScript
 
 #region arguments
 
-bool processArguments(string sArgument)
+bool moduleProcessArguments(string sArgument)
 {
 	sArgResults = "";
 	// string output="";
@@ -78,7 +78,11 @@ bool processArguments(string sArgument)
 	return false; // keep processing in main
 }
 #endregion
-  
+    bool moduleProcessAntennaMessage(string sArgument)
+        {
+            // we directly received an antenna message
+            return false;
+        }  
 
     }
 }

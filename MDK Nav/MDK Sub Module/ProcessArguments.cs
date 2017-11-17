@@ -23,7 +23,7 @@ namespace IngameScript
 
         // mult-arg
         #region arguments
-        bool processArguments(string sArgument)
+        bool moduleProcessArguments(string sArgument)
         {
             sArgResults = "";
             // string output="";
@@ -65,26 +65,9 @@ namespace IngameScript
                 {
 
                 }
-                /*
-                else if (args[0].ToLower() == "sled")
-                {
-                    if (args.Length > 1)
-                    {
-                        if (args[1].ToLower() == "stop")
-                        {
-                            sledStop();
-                        }
-                        else if (args[1].ToLower() == "start")
-                        {
-                            sledStart();
-                        }
-
-                    }
-
-                }
-                */
                 else if (args[0] == "W" || args[0] == "O")
                 { // [W|O] <x>:<y>:<z>  || W <x>,<y>,<z>
+                    // W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
                   // O means orient towards.  W means orient, then move to
                     Echo("Args:");
                     for (int icoord = 0; icoord < args.Length; icoord++)
@@ -94,10 +77,21 @@ namespace IngameScript
                         Echo("Invalid Command:(" + varArgs[iArg] + ")");
                         continue;
                     }
-                    string[] coordinates = args[1].Trim().Split(',');
+                    string sArg = args[1].Trim();
+
+                    if(args.Length>2)
+                    {
+                        sArg = args[1];
+                        for (int kk = 2; kk < args.Length; kk++)
+                            sArg += " " + args[kk];
+                        sArg = sArg.Trim();
+                    }
+
+                    Echo("sArg=\n'" + sArg+"'");
+                    string[] coordinates = sArg.Split(',');
                     if (coordinates.Length < 3)
                     {
-                        coordinates = args[1].Trim().Split(':');
+                        coordinates = sArg.Split(':');
                     }
                     Echo(coordinates.Length + " Coordinates");
                     for (int icoord = 0; icoord < coordinates.Length; icoord++)
@@ -111,10 +105,29 @@ namespace IngameScript
                         gyrosOff();// shutdown(gyroList);
                         return false;
                     }
+                    int iCoordinate = 0;
+                    string sWaypointName = "Waypoint";
+                    //  -  0   1           2        3          4       5
+                     // W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
+                    if (coordinates[0] == "GPS")
+                    {
+                        if (coordinates.Length > 4)
+                        {
+                            sWaypointName = coordinates[1];
+                            iCoordinate = 2;
+                        }
+                        else
+                        {
+                            Echo("Invalid Command");
+                            gyrosOff();
+                            return false;
+                        }
+                    }
+                        
                     double x, y, z;
-                    bool xOk = double.TryParse(coordinates[0].Trim(), out x);
-                    bool yOk = double.TryParse(coordinates[1].Trim(), out y);
-                    bool zOk = double.TryParse(coordinates[2].Trim(), out z);
+                    bool xOk = double.TryParse(coordinates[iCoordinate++].Trim(), out x);
+                    bool yOk = double.TryParse(coordinates[iCoordinate++].Trim(), out y);
+                    bool zOk = double.TryParse(coordinates[iCoordinate++].Trim(), out z);
                     if (!xOk || !yOk || !zOk)
                     {
                         //Echo("P:C");  
@@ -150,7 +163,6 @@ namespace IngameScript
                     {
                         //Echo("P:C");  
                         Echo("Invalid Command:(" + varArgs[iArg] + ")");
-                        //			shutdown(gyroList);
                         continue;
                     }
                 }
@@ -167,14 +179,11 @@ namespace IngameScript
                     {
                         arrivalDistanceMin = x;
                         Echo("Set arrival distance to:" + arrivalDistanceMin.ToString("0.00"));
-                        //            setMode(MODE_ARRIVEDTARGET);
                     }
 
                     else
                     {
-                        //Echo("P:C");  
                         Echo("Invalid Command:(" + varArgs[iArg] + ")");
-                        //			shutdown(gyroList);
                         continue;
                     }
                 }
@@ -188,7 +197,6 @@ namespace IngameScript
                     else
                     {
                         Echo(varArgs[iArg]);
-                        //             setMode(MODE_ARRIVEDTARGET);
                     }
                 }
                 else
@@ -209,7 +217,10 @@ namespace IngameScript
             return false; // keep processing in main
         }
         #endregion
-
+        bool moduleProcessAntennaMessage(string sArgument)
+        {
+            return false;
+        }
 
     }
 }

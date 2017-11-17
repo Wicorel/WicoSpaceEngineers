@@ -19,7 +19,7 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
 
-        bool processArguments(string sArgument)
+        bool moduleProcessArguments(string sArgument)
         {
             sArgResults = "";
             // string output="";
@@ -59,7 +59,7 @@ namespace IngameScript
             }
             else if (args[0] == "forgetmom")
             {
-//                lMomID = 0;
+                //                lMomID = 0;
             }
             else
             {
@@ -76,6 +76,12 @@ namespace IngameScript
                 }
             }
             return false; // keep processing in main
+        }
+
+        bool moduleProcessAntennaMessage(string sArgument)
+        {
+            // we directly received an antenna message
+            return false;
         }
 
 
