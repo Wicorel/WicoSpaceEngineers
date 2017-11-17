@@ -18,15 +18,14 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        const double dBaseTransmitWait = 15; //seconds between active transmits
+        const double dBaseTransmitWait = 55; //seconds between active transmits
 
-        double dBaseLastTransmit = dBaseTransmitWait + 5;
+        double dBaseLastTransmit = -1;
 
         void doBaseAnnounce(bool bForceAnnounce=false)
         {
             if (dockingInfo.Count > 0)
             {
-                Echo("BASE: Last Transmit=" + dBaseLastTransmit.ToString());
                 if (dBaseLastTransmit > dBaseTransmitWait || bForceAnnounce)
                 {
                     dBaseLastTransmit = 0;
@@ -37,7 +36,14 @@ namespace IngameScript
                 }
                 else
                 {
+                    if(dBaseLastTransmit<0)
+                    {
+                        // first-time init
+                        dBaseLastTransmit = Me.EntityId % dBaseTransmitWait; // randomize initial send
+
+                    }
                     dBaseLastTransmit+=Runtime.TimeSinceLastRun.TotalSeconds;
+                    Echo("BASE: Last Transmit=" + dBaseLastTransmit.ToString());
                 }
             }
         }
