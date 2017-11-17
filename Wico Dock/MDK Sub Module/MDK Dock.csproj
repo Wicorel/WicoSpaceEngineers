@@ -128,6 +128,7 @@
   <Import Project="..\..\WicoRemoteDockableConnectors\WicoRemoteDockableConnectors\WicoRemoteDockableConnectors.projitems" Label="Shared" />
   <Import Project="..\..\WicoTravelMovement\WicoTravelMovement\WicoTravelMovement.projitems" Label="Shared" />
   <Import Project="..\..\WicoBases\WicoBases\WicoBases.projitems" Label="Shared" />
+  <Import Project="..\..\WicoDrills\WicoDrills\WicoDrills.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="mdk\mdk.options" DestinationFolder="$(TargetDir)\mdk" />
