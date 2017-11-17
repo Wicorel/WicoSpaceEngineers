@@ -90,12 +90,14 @@ bool AnyConnectorIsConnected()
 
 IMyTerminalBlock getDockingConnector() // maybe pass in prefered orientation?
 { // dumb mode for now.
+            getLocalConnectors();
+
 	if(localDockConnectors.Count>0)
 	{
-	Echo("Found local Connector");
+//	Echo("Found local Connector");
 		return localDockConnectors[0];
 	}
-Echo("NO local connectors");
+//Echo("NO local connectors");
 	return null;
 }
 
@@ -107,19 +109,16 @@ IMyTerminalBlock getConnectedConnector()
 	{
 		IMyShipConnector sc = localDockConnectors[i] as IMyShipConnector;
 		if (sc.Status == MyShipConnectorStatus.Connected)
-//		if (sc.Status == MyShipConnectorStatus.Connected)
 		{
 			IMyShipConnector sco = sc.OtherConnector;
 			if (sco.CubeGrid == sc.CubeGrid)
 			{
-				//Echo("Locked-but connected to 'us'");
 				continue;
 			}
 			else return sc.OtherConnector;
 		}
 	}
 	return null;
-
 }
 
 void ConnectAnyConnectors(bool bConnect = true, string sAction = "")
