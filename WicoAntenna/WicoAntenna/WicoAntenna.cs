@@ -19,14 +19,28 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         #region Antenna
+        bool bGotAntennaName = false;
 
         List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
+        List<IMyLaserAntenna> antennaLList = new List<IMyLaserAntenna>();
 
         string antennaInit()
         {
             antennaList.Clear();
-            GetTargetBlocks<IMyRadioAntenna>(ref antennaList, "");
+            antennaLList.Clear();
 
+            GetTargetBlocks<IMyRadioAntenna>(ref antennaList, "");
+            GetTargetBlocks<IMyLaserAntenna>(ref antennaLList, "");
+            for (int i = 0; i < antennaList.Count; ++i)
+            {
+                if (antennaList[i].CustomName.Contains("unused") || antennaList[i].CustomData.Contains("unused"))
+                    continue;
+                if (!bGotAntennaName)
+                {
+                    OurName = "Wico " + antennaList[i].CustomName.Split('!')[0].Trim();
+                    bGotAntennaName = true;
+                }
+            }
             return "A" + antennaList.Count.ToString("0");
         }
 
@@ -46,7 +60,9 @@ namespace IngameScript
 
             foreach (var a in antennaList)
             {
-                a.SetValueFloat("Radius", 200);
+                a.Radius = 200;
+
+//                a.SetValueFloat("Radius", 200);
             }
         }
 
@@ -57,7 +73,8 @@ namespace IngameScript
             foreach (var a in antennaList)
             {
                 float maxPower = a.GetMaximum<float>("Radius");
-                a.SetValueFloat("Radius", maxPower);
+                a.Radius = maxPower;
+//                a.SetValueFloat("Radius", maxPower);
             }
         }
         #region AntennaSend
@@ -107,13 +124,22 @@ namespace IngameScript
                     lPendingIncomingMessages.RemoveAt(0);
                 }
             }
-            if (lPendingIncomingMessages.Count > 0) bWantFast = true; // if there are more, process quickly
+            if (lPendingIncomingMessages.Count > 0)
+            {
+                // if there are more, process quickly
+                doTriggerMain();
+                // NOTE: In MAIN module, this should be bWantFast=true;
+//                bWantFast = true; 
+            }
         }
         void antReceive(string message)
         {
             Echo("RECEIVE:\n" + message);
             lPendingIncomingMessages.Add(message);
-            bWantFast = true;
+            processPendingReceives();
+
+//            doTriggerMain();
+            //bWantFast = true;
         }
         #endregion
 
