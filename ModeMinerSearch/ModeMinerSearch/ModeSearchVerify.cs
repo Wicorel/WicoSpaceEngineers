@@ -18,7 +18,10 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        void doModeSearchVerify()
+        {
 
+        }
 
     }
 }

@@ -9,6 +9,7 @@
     <Import_RootNamespace>ModeMinerSearch</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ModeSearchOrient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModeSearchShift.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModeSearchVerify.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModeSearchCore.cs" />

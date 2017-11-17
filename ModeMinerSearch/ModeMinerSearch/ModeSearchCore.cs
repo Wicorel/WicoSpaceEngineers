@@ -31,5 +31,10 @@ namespace IngameScript
             } 
         }; 
         */
+
+        void doModeSearchCore()
+        {
+
+        }
     }
 }
