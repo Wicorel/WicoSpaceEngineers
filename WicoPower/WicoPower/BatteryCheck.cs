@@ -62,6 +62,9 @@ namespace IngameScript
  //               float output = 0;
                 IMyBatteryBlock r = tb as IMyBatteryBlock;
 
+                // 1.185
+                maxBatteryPower += r.MaxOutput;
+                /*
                 MyResourceSourceComponent source;
                 r.Components.TryGet<MyResourceSourceComponent>(out source);
 
@@ -73,7 +76,7 @@ namespace IngameScript
                     maxOutput = source.MaxOutput;
                     maxBatteryPower += maxOutput;
                 }
-
+                */
                 //		output = r.MaxOutput;
   //              PowerProducer.GetMaxOutput(r, out output);
  //               maxBatteryPower += output;
