@@ -75,6 +75,7 @@ namespace IngameScript
             float fYOffset = sb.Position.Y * 0.5f;
             float fZOffset = sb.Position.Z * 0.5f;
 
+            // need to use grid orientation to main orientation block
             float fSet;
             fSet = (float)(shipDim.WidthInMeters() / 2 - fXOffset + fLeft);
             sb.LeftExtend = Math.Max(fSet, 1.0f);
