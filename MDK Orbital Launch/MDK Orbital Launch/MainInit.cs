@@ -18,6 +18,12 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        void doModuleConstructor()
+        {
+            // called from main constructor.
+
+        }
+
         #region maininit
 
         string sInitResults = "";
@@ -46,8 +52,8 @@ namespace IngameScript
                 {
                     if (!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
                     if (!modeCommands.ContainsKey("orbitallaunch")) modeCommands.Add("orbitallaunch", MODE_ORBITALLAUNCH);
-                 // if(!modeCommands.ContainsKey("orbitaldescent")) modeCommands.Add("orbitaldescent", MODE_DESCENT);
-               }
+                    // if(!modeCommands.ContainsKey("orbitaldescent")) modeCommands.Add("orbitaldescent", MODE_DESCENT);
+                }
                 else Echo("NULL modeCommands!");
                 gridsInit();
                 initLogging();
@@ -99,7 +105,7 @@ namespace IngameScript
         string BlockInit()
         {
             string sInitResults = "";
-            Echo("#localgrids="+localGrids.Count);
+            Echo("#localgrids=" + localGrids.Count);
             List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
             GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch, (x1 => x1.CubeGrid == Me.CubeGrid));
             // GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch);
@@ -111,7 +117,7 @@ namespace IngameScript
 
                     GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
 
-                    if (centerSearch.Count ==  0)
+                    if (centerSearch.Count == 0)
                     {
                         // didn't find an RC.  try 'cockpits'
                         GridTerminalSystem.GetBlocksOfType<IMyCockpit>(centerSearch, localGridFilter);
@@ -124,23 +130,23 @@ namespace IngameScript
                                 continue;
                             break;
                         }
-                        if (i > centerSearch.Count || i==0)
+                        if (i > centerSearch.Count || i == 0)
                         {
                             sInitResults += "!!NO valid Controller";
                             Echo("No Controller found");
                         }
-                        else 
+                        else
                         {
                             sInitResults += "S";
                             Echo("Using good ship Controller: " + centerSearch[i].CustomName);
                         }
-                        
+
                     }
                     else
                     {
                         sInitResults += "R";
-                        Echo("Using first remote control: " +centerSearch[0].CustomName);
-//                        gpsCenter = centerSearch[0];
+                        Echo("Using first remote control: " + centerSearch[0].CustomName);
+                        //                        gpsCenter = centerSearch[0];
                     }
                 }
             }
@@ -149,9 +155,9 @@ namespace IngameScript
                 sInitResults += "N";
                 Echo("Using Named: " + centerSearch[0].CustomName);
             }
-//            if (centerSearch.Count > 0)
-                gpsCenter = centerSearch[0];
-  //          else gpsCenter = null;
+            //            if (centerSearch.Count > 0)
+            gpsCenter = centerSearch[0];
+            //          else gpsCenter = null;
 
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");

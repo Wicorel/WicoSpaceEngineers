@@ -18,6 +18,12 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        void doModuleConstructor()
+        {
+            // called from main constructor.
+
+        }
+
         #region maininit
 
         string sInitResults = "";
