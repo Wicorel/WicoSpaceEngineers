@@ -43,6 +43,8 @@ namespace IngameScript
 
         void turnDrillsOff()
         {
+            if (drillList.Count < 1) drillInit();
+
             foreach(IMyFunctionalBlock b in drillList)
             {
                 b.Enabled = false;
@@ -75,6 +77,8 @@ namespace IngameScript
 
         void turnEjectorsOff()
         {
+            if (ejectorList.Count < 1)    ejectorsInit();
+
             foreach(IMyFunctionalBlock b in ejectorList)
             {
                 b.Enabled = false;
