@@ -38,13 +38,12 @@ namespace IngameScript
 
         void doModeAlways()
         {
-	        processPendingReceives();
- 	        processPendingSends();
+//	        processPendingReceives();
+// 	        processPendingSends();
 //	        processReceivedMessage();
 	        processDockingStates();
 	        doBaseAnnounce();
         }
-
 
         #region modeidle 
         void ResetToIdle()
