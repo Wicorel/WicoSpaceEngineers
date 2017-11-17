@@ -21,8 +21,11 @@ namespace IngameScript
 
         Dictionary<string, int> modeCommands = new Dictionary<string, int>();
         string sBanner = "";
+        UpdateFrequency ufFast = UpdateFrequency.Update1; // default value for "Fast" for this module
+
         public Program()
         {
+            doModuleConstructor();
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
             Echo(sBanner + "Creator");
             gridsInit();
@@ -31,8 +34,7 @@ namespace IngameScript
                 Me.CustomName = "PB " + OurName + " " + moduleName;
         }
 
-
-
+        // added UpdateType and UpdateFrequency
         // sub-module common main
 #region MODULEMAIN
 
@@ -43,9 +45,11 @@ namespace IngameScript
 
         double velocityShip = -1;
 
-        void Main(string sArgument)
+ //       void Main(string sArgument)
+        void Main(string sArgument, UpdateType ut)
         {
             Echo(sBanner + tick());
+            Echo(ut.ToString());
             bWantFast = false;
 
             bWorkingProjector = false;
@@ -61,6 +65,7 @@ namespace IngameScript
             }
             if (bWorkingProjector)
                 Echo("Working local Projector found!");
+
 
             if (sArgument != "" && sArgument != "timer" && sArgument != "wccs") Echo("Arg=" + sArgument);
 
@@ -95,10 +100,55 @@ namespace IngameScript
                     vCurrentPos = gpsCenter.GetPosition();
                     velocityShip = ((IMyShipController)gpsCenter).GetShipSpeed();
                 }
-                if (processArguments(sArgument))
-                    return;
+                if((ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0)
+                {
+                    // pay attention to argument
+                    if (moduleProcessArguments(sArgument))
+                    {
+                        Serialize();
+                        return;
+                    }
 
-                if (bWantFast) Echo("FAST!");
+                }
+                else if ((ut & (UpdateType.Mod)) > 0)
+                {
+                    // script run by a mod
+                    if (moduleProcessArguments(sArgument))
+                    {
+                        Serialize();
+                        return;
+                    }
+
+                }
+                else if ((ut & (UpdateType.Script)) > 0)
+                {
+                    // script run by another PB
+                    if (moduleProcessArguments(sArgument))
+                    {
+                        Serialize();
+                        return;
+                    }
+
+                }
+                else if ((ut & (UpdateType.Antenna)) > 0)
+                {
+                    // antenna message
+                    if (!moduleProcessAntennaMessage(sArgument))
+                    {
+                        antReceive(sArgument);
+                    }
+                    Serialize();
+                    doTriggerMain();
+                    return;
+                }
+                else
+                {
+     //            if ((ut & (UpdateType.Once | UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100)) > 0)
+                   sArgument = ""; // else ignore argument
+                }
+
+	            processPendingReceives();
+ 	            processPendingSends();
 
                 moduleDoPreModes();
 
@@ -108,7 +158,14 @@ namespace IngameScript
             Serialize();
 
             if (bWantFast)
-                doSubModuleTimerTriggers("[WCCT]");
+            {
+                Echo("FAST!");
+                Runtime.UpdateFrequency |= ufFast;
+            }
+            else
+            {
+                Runtime.UpdateFrequency &= ~(UpdateFrequency.Update1 | UpdateFrequency.Update10 | UpdateFrequency.Update100); 
+           }
 
             modulePostProcessing();
 
