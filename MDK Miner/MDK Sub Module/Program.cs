@@ -14,13 +14,15 @@ using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Game;
 using VRageMath;
 
+//          <Editable>true</Editable>
+
 namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
         string OurName = "Wico Craft";
         string moduleName = "MINER";
-        string sVersion = "3.0A";
+        string sVersion = "3.1";
 
         const string sGPSCenter = "Craft Remote Control";
 
@@ -43,10 +45,13 @@ namespace IngameScript
 
         void ResetMotion(bool bNoDrills = false)  
         { 
-        //	if (navEnable != null)	blockApplyAction(navEnable,"OnOff_Off"); //navEnable.ApplyAction("OnOff_Off"); 
 	        powerDownThrusters(thrustAllList);
             gyrosOff();
 	        blockApplyAction(gpsCenter, "AutoPilot_Off"); 
+	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
+            if(!bNoDrills) turnDrillsOff();
+
         } 
 
     }

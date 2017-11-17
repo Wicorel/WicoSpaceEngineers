@@ -32,6 +32,10 @@
 
     3.0D 110517  search order for text panels
 
+    3.1 Version for PB Updates SE 1.185
+    o Added support for GPS-formatted nav locations
+        Ex:  W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
+
     Added Rotors
 
 	* TODO: 

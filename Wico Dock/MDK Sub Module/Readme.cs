@@ -63,4 +63,10 @@ add 'forgetmom' command to make drone forget about a previous 'motherhsip.
 
 3.0T2 search order for text panels
 
+3.0U 
+Add delays for requests for BASE?
+Turn drills and ejectors off when heading to dock. (drills at start and ejectors when arrive at approach).
+
+3.1 Version for SE 1.185 PB Changes
+
 */

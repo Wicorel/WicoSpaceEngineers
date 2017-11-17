@@ -21,7 +21,7 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "Orbital Launch";
-        string sVersion = "3.0C";
+        string sVersion = "3.1";
 
         const string sGPSCenter = "Craft Remote Control";
 

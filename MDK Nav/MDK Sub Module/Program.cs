@@ -19,8 +19,9 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         string OurName = "Wico Craft";
+
         string moduleName = "NAV";
-        string sVersion = "3.0D";
+        string sVersion = "3.1";
 
         const string sGPSCenter = "Craft Remote Control";
 

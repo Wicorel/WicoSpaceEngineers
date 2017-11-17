@@ -27,6 +27,8 @@
  *  
  *  3.0D search order for text panels
  *  
+ *  3.1 Updates for SE V1.185
+ *  
  * NEED:  
  *  
  *  trigger timers on stages of descent (see rotor legs example)

@@ -67,6 +67,8 @@
 * 
 * 3.0K2  search order for text panels
 * 
+* 3.1 Verison for SE 1.185 PB Major changes
+* 
 * Handles:
 * Master timer for sub-modules
 * Calculates ship speed and vectors

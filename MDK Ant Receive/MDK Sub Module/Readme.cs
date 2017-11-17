@@ -27,5 +27,10 @@
 * 3.0G New BASE communications.  remove MOM
 * 
 * 3.0G2  search order for text panels
+* 
+* 3.0H
+* Increase time before active BASE send.  Randomize time before starting to send to avoid burst transmission at world start.
+* 
+* 3.1 Version for SE 1.185
 *
 */

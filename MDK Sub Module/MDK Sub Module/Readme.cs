@@ -7,6 +7,8 @@
  * 
  * 3.0a MDK Version https://github.com/malware-dev/MDK-SE/wiki
  * 
+ * 3.1 Updates for SE V1.185
+ * 
  * NEED:  
  *  
  * WANTED: 

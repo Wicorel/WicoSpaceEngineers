@@ -24,6 +24,8 @@
 * 3.0c MDK Version https://github.com/malware-dev/MDK-SE/wiki
 * Uncompressed Source here: https://github.com/Wicorel/SpaceEngineers/tree/master/MDK%20Orbital%20Launch
 * 
+* 3.1 Updates for SE V1.185
+* 
 * Need:
 *  circumnavigate planet to target spot
 *  'ask' for docking position after arriving at 'spot'

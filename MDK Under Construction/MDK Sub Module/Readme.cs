@@ -9,6 +9,8 @@
  * 
  * 3.0B search order for text panels
  * 
+ * 3.1 First version for new PB changes in SE 1.185
+ * 
  * NEED:  
  *  
  * WANTED: 
