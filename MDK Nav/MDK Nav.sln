@@ -102,6 +102,7 @@ Global
 		..\ModeGoTarget\ModeGoTarget\ModeGoTarget.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\SharedWicoGyro\SharedWicoGyro\SharedWicoGyro.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\ShipDim\ShipDim\ShipDim.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoAntenna\WicoAntenna\WicoAntenna.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoCameras\WicoCameras\WicoCameras.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoConnectors\WicoConnectors\WicoConnectors.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoDetectedEntities\WicoDetectedEntities\WicoDetectedEntities.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
