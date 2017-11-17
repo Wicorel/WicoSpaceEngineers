@@ -121,6 +121,7 @@ namespace IngameScript
                 else
                 {
                     ResetMotion();
+                    turnDrillsOff();
                     current_state = 100;
                 }
                 iTargetBase = -1;
@@ -451,6 +452,7 @@ namespace IngameScript
             else if (current_state == 170 || current_state == 172)
             { //170 172 'reverse' to dock, aiming connector at dock location
               // align to docking alignment if needed
+                turnEjectorsOff();
                 if (!bDoDockAlign)
                 {
                     current_state = 173;
