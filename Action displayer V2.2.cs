@@ -263,10 +263,10 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n BrakingTorque=" + ipp.BrakingTorque.ToString());
         values.Append("\n Displacement=" + ipp.Displacement.ToString());
         values.Append("\n IsAttached=" + ipp.IsAttached.ToString());
-        values.Append("\n LowerLimit=" + ipp.LowerLimit.ToString());
+//        values.Append("\n LowerLimit=" + ipp.LowerLimit.ToString());
         values.Append("\n Torque=" + ipp.Torque.ToString());
-        values.Append("\n UpperLimit=" + ipp.UpperLimit.ToString());
-        values.Append("\n Velocity=" + ipp.TargetVelocity.ToString());
+ //       values.Append("\n UpperLimit=" + ipp.UpperLimit.ToString());
+//        values.Append("\n Velocity=" + ipp.TargetVelocity.ToString());
 
         float minVelocity = ipp.GetMinimum<float>("Velocity");
         values.Append("\n  minVelocity=" + minVelocity.ToString());
