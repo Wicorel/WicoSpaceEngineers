@@ -34,7 +34,7 @@ namespace IngameScript
             public long lAlign;
 
             // TODO:
-            public string sType; // types of drones supported
+ //           public string sType; // types of drones supported
 
             // TODO: 
             public string sDroneName; // name of drone assigned to this dock
