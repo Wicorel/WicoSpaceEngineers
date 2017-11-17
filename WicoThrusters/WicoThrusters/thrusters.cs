@@ -19,6 +19,7 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         #region thrusters
+        List<IMyTerminalBlock> thrustAllList = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> thrustForwardList = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> thrustBackwardList = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> thrustDownList = new List<IMyTerminalBlock>();
@@ -40,8 +41,10 @@ namespace IngameScript
         const int thrusthydro = 2;
         const int thrustion = 4;
         const int thrustAll = 0xff;
-        List<IMyTerminalBlock> thrustAllList = new List<IMyTerminalBlock>();
-        readonly Matrix identityMatrix = new Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+        readonly Matrix thrustIdentityMatrix = new Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+
+        string sIgnoreThruster = "IGNORE";
+        string sCutterThruster = "cutter";
 
         string thrustersInit(IMyTerminalBlock orientationBlock)
         {
@@ -61,7 +64,9 @@ namespace IngameScript
 	        GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
 	        for(int i=0;i<thrustLocal.Count;i++)
 	        {
-		        if (thrustLocal[i].CustomName.ToLower().Contains("cutter") || thrustLocal[i].CustomData.ToLower().Contains("cutter"))
+		        if (thrustLocal[i].CustomName.ToLower().Contains(sCutterThruster) || thrustLocal[i].CustomData.ToLower().Contains(sCutterThruster))
+			        continue;
+		        if (thrustLocal[i].CustomName.ToLower().Contains(sIgnoreThruster) || thrustLocal[i].CustomData.ToLower().Contains(sIgnoreThruster))
 			        continue;
 		        thrustAllList.Add(thrustLocal[i]);
 	        }
@@ -90,32 +95,32 @@ namespace IngameScript
                     hydroThrustCount++;
                 else if (iThrustType == thrustion)
                     ionThrustCount++;
-                if (accelerationDirection == identityMatrix.Left)
+                if (accelerationDirection == thrustIdentityMatrix.Left)
                 {
                     thrustLeft += maxThrust((IMyThrust)thrustAllList[i]);
                     thrustLeftList.Add(thrustAllList[i]);
                 }
-                else if (accelerationDirection == identityMatrix.Right)
+                else if (accelerationDirection == thrustIdentityMatrix.Right)
                 {
                     thrustRight += maxThrust((IMyThrust)thrustAllList[i]);
                     thrustRightList.Add(thrustAllList[i]);
                 }
-                else if (accelerationDirection == identityMatrix.Backward)
+                else if (accelerationDirection == thrustIdentityMatrix.Backward)
                 {
                     thrustBackward += maxThrust((IMyThrust)thrustAllList[i]);
                     thrustBackwardList.Add(thrustAllList[i]);
                 }
-                else if (accelerationDirection == identityMatrix.Forward)
+                else if (accelerationDirection == thrustIdentityMatrix.Forward)
                 {
                     thrustForward += maxThrust((IMyThrust)thrustAllList[i]);
                     thrustForwardList.Add(thrustAllList[i]);
                 }
-                else if (accelerationDirection == identityMatrix.Up)
+                else if (accelerationDirection == thrustIdentityMatrix.Up)
                 {
                     thrustUp += maxThrust((IMyThrust)thrustAllList[i]);
                     thrustUpList.Add(thrustAllList[i]);
                 }
-                else if (accelerationDirection == identityMatrix.Down)
+                else if (accelerationDirection == thrustIdentityMatrix.Down)
                 {
                     thrustDown += maxThrust((IMyThrust)thrustAllList[i]);
                     thrustDownList.Add(thrustAllList[i]);
@@ -143,6 +148,7 @@ namespace IngameScript
                     return thrusthydro;
                 else return thrustion;
             }
+            // else
             return 0;
         }
 
@@ -152,6 +158,8 @@ namespace IngameScript
             //	StatusLog(thruster.CustomName+":"+thruster.BlockDefinition.SubtypeId,textLongStatus,true);
             double max = 0;
 
+            max = thruster.MaxEffectiveThrust;
+            /*
             if (thruster.GetValueFloat("Override") > 1.0001)
             {
                 max = thruster.CurrentThrust * 100 / thruster.GetValueFloat("Override");
@@ -235,6 +243,7 @@ namespace IngameScript
                     }
                 }
             }
+            */
             return max;
         }
 
@@ -292,7 +301,7 @@ namespace IngameScript
             double hoverthrust = 0;
             hoverthrust = myMass.TotalMass * dGravity * 9.810;
 
-            Echo("hoverthrust=" + hoverthrust.ToString("N0"));
+//            Echo("hoverthrust=" + hoverthrust.ToString("N0"));
 
 
             if (atmoThrust > 0)
@@ -373,19 +382,21 @@ namespace IngameScript
         {
             int iCount = 0;
             if (fPower > 100) fPower = 100;
+            if (fPower < 0) fPower = 0;
             for (int thrusterIndex = 0; thrusterIndex < thrusters.Count; thrusterIndex++)
             {
                 int iThrusterType = thrusterType(thrusters[thrusterIndex]);
                 if ((iThrusterType & iTypes) > 0)
                 {
                     IMyThrust thruster = thrusters[thrusterIndex] as IMyThrust;
-                    float maxThrust = thruster.GetMaximum<float>("Override");
+//                    float maxThrust = thruster.GetMaximum<float>("Override");
                     if (!thruster.IsWorking)
                     {
                         thruster.Enabled = true;// ApplyAction("OnOff_On");
                     }
                     iCount += 1;
-                    thruster.SetValueFloat("Override", maxThrust * (fPower / 100.0f));
+                    thruster.ThrustOverridePercentage = fPower;
+//                    thruster.SetValueFloat("Override", maxThrust * (fPower / 100.0f));
                 }
             }
             return iCount;
@@ -421,7 +432,8 @@ namespace IngameScript
                 {
                     iCount++;
                     IMyThrust thruster = thrusters[thrusterIndex] as IMyThrust;
-                    thruster.SetValueFloat("Override", 0);
+                    thruster.ThrustOverride = 0;
+//                    thruster.SetValueFloat("Override", 0);
                     if (thruster.IsWorking && bForceOff)
                         thruster.Enabled = false;// ApplyAction("OnOff_Off");
                     else if (!thruster.IsWorking && !bForceOff)
@@ -437,21 +449,35 @@ namespace IngameScript
                 if (groups[groupIndex].Name == sFThrust)
                 {
                     List<IMyTerminalBlock> thrusters = null;
-                    groups[groupIndex].GetBlocks(thrusters, localGridFilter); return (powerDownThrusters(thrusters) > 0);
+                    groups[groupIndex].GetBlocks(thrusters, localGridFilter);
+                    return (powerDownThrusters(thrusters) > 0);
                 }
             }
             return false;
         }
         bool powerUpThrusters()
-        { return (powerUpThrusters(thrustForwardList) > 0); }
+        {
+            return (powerUpThrusters(thrustForwardList) > 0);
+        }
         bool powerDownThrusters()
-        { return (powerDownThrusters(thrustForwardList) > 0); }
+        {
+            return (powerDownThrusters(thrustForwardList) > 0);
+        }
         double currentOverrideThrusters(List<IMyTerminalBlock> theBlocks, int iTypes = thrustAll)
         {
             for (int i = 0; i < theBlocks.Count; i++)
             {
-                int iThrusterType = thrusterType(theBlocks[i]); if ((iThrusterType & iTypes) > 0 && theBlocks[i].IsWorking)
-                { IMyThrust thruster = theBlocks[i] as IMyThrust; float maxThrust = thruster.GetMaximum<float>("Override"); if (maxThrust > 0) return (double)thruster.ThrustOverride / maxThrust * 100; }
+                int iThrusterType = thrusterType(theBlocks[i]);
+                if ((iThrusterType & iTypes) > 0 && theBlocks[i].IsWorking)
+                {
+                    IMyThrust thruster = theBlocks[i] as IMyThrust;
+                    return thruster.ThrustOverride;
+                    /*
+                    float maxThrust = thruster.GetMaximum<float>("Override");
+                    if (maxThrust > 0)
+                        return (double)thruster.ThrustOverride / maxThrust * 100;
+                        */
+                }
             }
             return 0;
         }
@@ -459,8 +485,11 @@ namespace IngameScript
         {
             for (int i = 0; i < theBlocks.Count; i++)
             {
-                int iThrusterType = thrusterType(theBlocks[i]); if ((iThrusterType & iTypes) > 0 && theBlocks[i].IsWorking)
-                { return true; }
+                int iThrusterType = thrusterType(theBlocks[i]);
+                if ((iThrusterType & iTypes) > 0 && theBlocks[i].IsWorking)
+                {
+                    return true;
+                }
             }
             return false;
         }
