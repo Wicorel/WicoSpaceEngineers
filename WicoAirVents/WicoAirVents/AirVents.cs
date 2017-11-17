@@ -26,7 +26,7 @@ namespace IngameScript
          * In space, can vent isolated tank by filling airlock, then opening doors and dumping o2 
          *  
          * Can create no o2 in (sealed) rooms on planets by depresurrizing 
-         */ 
+         */
 
         #region airvents 
 
@@ -48,7 +48,7 @@ namespace IngameScript
         {
             airventList.Clear();
 
-            GridTerminalSystem.GetBlocksOfType<IMyAirVent>(airventList, (x => x.CubeGrid == Me.CubeGrid));
+            GridTerminalSystem.GetBlocksOfType<IMyAirVent>(airventList, localGridFilter);
 
             for (int i = 0; i < airventList.Count; i++)
             {
@@ -79,11 +79,14 @@ namespace IngameScript
             for (int i = 0; i < cockpitairventList.Count; i++)
             {
                 IMyAirVent av;
-               
+
+
                 av = airventList[i] as IMyAirVent;
                 if (av != null)
                 {
-                    if (av.IsDepressurizing && dGravity > .75)
+
+                    //                    if (av.IsDepressurizing && dGravity > .75)
+                    if (av.Status == VentStatus.Depressurizing && dGravity > .75)
                         av.Enabled = true;// ApplyAction("OnOff_On");
                 }
             }
@@ -96,7 +99,8 @@ namespace IngameScript
                 av = airventList[i] as IMyAirVent;
                 if (av != null)
                 {
-                    if (av.IsDepressurizing)
+                    //                   if (av.IsDepressurizing)
+                    if (av.Status == VentStatus.Depressurizing)
                         av.Enabled = false;// ApplyAction("OnOff_Off");
                 }
             }
@@ -104,14 +108,21 @@ namespace IngameScript
 
         bool isPressurizationOn()
         {
-            bPressurization = false;
             if (airventList.Count < 1)
                 airventInit();
             if (airventList.Count < 1) // no air vents to check
-                return bPressurization;
-            if (airventList[0].DetailedInfo.Contains("Oxygen disabled in world settings")) { return bPressurization; }
-            bPressurization = true;
-            return bPressurization;
+                return false;
+            IMyAirVent av = airventList[0] as IMyAirVent;
+            if (av == null) return false;
+            return av.PressurizationEnabled;
+            /*
+             * pre 1.185
+            if (airventList[0].DetailedInfo.Contains("Oxygen disabled in world settings"))
+            {
+                return false;
+            }
+            return true;
+            */
         }
 
         string ventStatus(List<IMyTerminalBlock> airventList, int maxCount = 99)
@@ -132,7 +143,7 @@ namespace IngameScript
                     //			else s+="-"; 
                     if (av.CanPressurize) s += "C";
                     else s += "l";
-                    if (av.IsDepressurizing) s += "D";
+                    if (av.Status == VentStatus.Depressurizing) s += "D";
                     else s += "P";
                     float airLevel = av.GetOxygenLevel();
                     s += " " + (airLevel * 100).ToString("0.0") + "%";
@@ -144,5 +155,54 @@ namespace IngameScript
         }
 
         #endregion
+
+        #region textpanels
+
+        List<IMyTerminalBlock> textpanelList = new List<IMyTerminalBlock>();
+
+        List<IMyTerminalBlock> textpanelAirlockPressurizingList = new List<IMyTerminalBlock>(); //airlock pressurizing warning
+        List<IMyTerminalBlock> textpanelAirlockWarningList = new List<IMyTerminalBlock>(); //LCD Panel airlock warning
+
+        // Sabrina 2.0
+        List<IMyTerminalBlock> textpanelAirlockOutter = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> textpanelAirlockInner = new List<IMyTerminalBlock>();
+
+        string textpaneltInit()
+        {
+            textpanelList.Clear();
+            textpanelAirlockPressurizingList.Clear();
+            textpanelAirlockWarningList.Clear();
+            GridTerminalSystem.GetBlocksOfType<IMyTextPanel>(textpanelList, localGridFilter);
+
+            for (int i = 0; i < textpanelList.Count; i++)
+            {
+
+                if (textpanelList[i].CustomName.ToLower().Contains("pressurizing"))
+                    textpanelAirlockPressurizingList.Add(textpanelList[i]);
+                if (textpanelList[i].CustomName.ToLower().Contains("airlock warning"))
+                    textpanelAirlockWarningList.Add(textpanelList[i]);
+                if (textpanelList[i].CustomName.ToLower().Contains("airlock 2")) //           AIRLOCK
+                    textpanelAirlockOutter.Add(textpanelList[i]);
+                if (textpanelList[i].CustomName.ToLower().Contains("airlock 1")) //           HANGAR
+                    textpanelAirlockInner.Add(textpanelList[i]);
+
+                /*
+            if (textpanelList[i].CustomData.ToLower().Contains("pressurizing"))
+                textpanelAirlockPressurizingList.Add(textpanelList[i]);
+            if (textpanelList[i].CustomData.ToLower().Contains("airlock warning"))
+                textpanelAirlockWarningList.Add(textpanelList[i]);
+            if (textpanelList[i].CustomData.ToLower().Contains("airlock outter")) //           AIRLOCK
+                textpanelAirlockOutter.Add(textpanelList[i]);
+            if (textpanelList[i].CustomData.ToLower().Contains("airlock inner")) //           HANGAR
+                textpanelAirlockInner.Add(textpanelList[i]);
+                */
+            }
+            return "T" + "P" + textpanelAirlockWarningList.Count.ToString("0") + "W" + textpanelAirlockWarningList.Count.ToString("0");
+        }
+
+        // RGB: 255:150:0
+
+        #endregion
+
     }
 }
