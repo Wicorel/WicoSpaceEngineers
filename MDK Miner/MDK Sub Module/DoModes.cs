@@ -36,6 +36,11 @@ namespace IngameScript
             if (iMode == MODE_MININGORE) doModeMiningOre();
             if (iMode == MODE_EXITINGASTEROID) doModeExitingAsteroid();
 
+            if (iMode == MODE_SEARCHORIENT) doModeSearchOrient();
+            if (iMode == MODE_SEARCHSHIFT) doModeSearchShift();
+            if (iMode == MODE_SEARCHVERIFY) doModeSearchVerify();
+            if (iMode == MODE_SEARCHCORE) doModeSearchCore();
+
 /*
             if (iMode == MODE_IDLE) doModeIdle();
             else if (iMode == MODE_DESCENT) doModeDescent();
