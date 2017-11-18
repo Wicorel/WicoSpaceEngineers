@@ -24,6 +24,8 @@ namespace IngameScript
         // use cached blocks 12/xx
         #region logging
 
+        bool bDisableLogging = false;
+
         string sLongStatus = "Wico Craft Log";
         string sTextPanelReport = "Craft Report";
         IMyTextPanel statustextblock = null;
@@ -66,7 +68,7 @@ namespace IngameScript
         }
         void StatusLog(string text, IMyTextPanel block, bool bReverse = false)
         {
-            if (block == null) return;
+            if (block == null || bDisableLogging) return;
             if (text.Equals("clear"))
             {
                 block.WritePublicText("");
