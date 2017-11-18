@@ -21,6 +21,7 @@ namespace IngameScript
          void doModuleConstructor()
         {
             // called from main constructor.
+            bDisableLogging = true;
 
         }
 
