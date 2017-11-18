@@ -21,7 +21,7 @@ namespace IngameScript
         void doModuleConstructor()
         {
             // called from main constructor.
-
+//            bGotAntennaName = false;
         }
 
 
