@@ -164,8 +164,8 @@ namespace IngameScript
             }
             else
             {
-                Runtime.UpdateFrequency &= ~(UpdateFrequency.Update1 | UpdateFrequency.Update10 | UpdateFrequency.Update100); 
-           }
+                Runtime.UpdateFrequency &= ~(ufFast);
+            }
 
             modulePostProcessing();
 
