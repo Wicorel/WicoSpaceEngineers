@@ -42,29 +42,35 @@ namespace IngameScript
         string doInit()
         {
 
-            // initialization of each module goes here:
+//             Echo("InitA:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+           // initialization of each module goes here:
 
             // when all initialization is done, set init to true.
-            initLogging();
 
             Log("Init:" + currentInit.ToString());
             Echo(gtsAllBlocks.Count.ToString() + " Blocks");
-
+            /*
             double progress = currentInit * 100 / 3; // 3=Number of expected INIT phases.
             string sProgress = progressBar(progress);
             StatusLog(moduleName + sProgress, textPanelReport);
-
-            Echo("Init:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+            */
+            if (gpsCenter != null)
+            {
+                anchorPosition = gpsCenter;
+                currentPosition = anchorPosition.GetPosition();
+            }
+//            Echo("InitB:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
             if (currentInit == 0)
             {
-            Echo("Init:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+//            Echo("Init0:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 //        StatusLog("clear", textLongStatus, true); // only MAIN module should clear long status on init.
                 StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
 
                 /*
                 if(!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
                 */
-                sInitResults += gridsInit();
+               sInitResults += gridsInit();
+                 initLogging();
                 initTimers();
                 sInitResults += initSerializeCommon();
 
@@ -72,16 +78,11 @@ namespace IngameScript
             }
             else if (currentInit == 1)
             {
-            Echo("Init:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+//            Echo("Init1:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 Deserialize();// get info from savefile to avoid blind-rewrite of (our) defaults
 
                 sInitResults += BlockInit();
                 initCargoCheck();
-                if (gpsCenter != null)
-                {
-                    anchorPosition = gpsCenter;
-                    currentPosition = anchorPosition.GetPosition();
-                }
                 initPower();
                 sInitResults += thrustersInit(gpsCenter);
                sInitResults += gyrosetup();
@@ -89,19 +90,24 @@ namespace IngameScript
             }
             if (currentInit == 2)
             {
-            Echo("Init:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+//            Echo("Init2:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 sInitResults += wheelsInit(gpsCenter);
                 sInitResults += rotorsNavInit();
 
-                sInitResults += connectorsInit();
-                sInitResults += tanksInit();
-                sInitResults += drillInit();
-                sInitResults += controllersInit();
-                if (gtsAllBlocks.Count < 100) currentInit = 3; // go ahead and do next step.
+                 if (gtsAllBlocks.Count < 100) currentInit = 3; // go ahead and do next step.
             }
             if (currentInit == 3)
             {
-            Echo("Init:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+//            Echo("Init3:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+               sInitResults += connectorsInit();
+                sInitResults += tanksInit();
+                sInitResults += drillInit();
+                sInitResults += controllersInit();
+                if (gtsAllBlocks.Count < 100) currentInit = 4; // go ahead and do next step.
+            }
+            if (currentInit == 4)
+            {
+//            Echo("Init4:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 sInitResults += ejectorsInit();
                 sInitResults += antennaInit();
                 sInitResults += gasgenInit();
@@ -115,6 +121,11 @@ namespace IngameScript
 
                 if (bGotAntennaName)
                    sBanner = "*" + OurName + ":" + moduleName + " V" + sVersion + " ";
+
+                if(sBanner.Length>34)
+                {
+                    sBanner = OurName + ":" + moduleName + "\nV" + sVersion + " ";
+                }
 
                 if (anchorPosition != null)
                 {
