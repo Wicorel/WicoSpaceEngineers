@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "TechnikerMain";
-        string sVersion = "T3.1";
+        string sVersion = "T3.1A";
 
         string sGPSCenter = "Remote Control Techniker";
 
@@ -37,11 +37,18 @@ namespace IngameScript
             public OurException(string msg) : base("WicoTechniker" + ": " + msg) { }
         }
 
+        double dCargoCheckWait = 2; //seconds between checks
+        double dCargoCheckLast = -1;
+
+        double dBatteryCheckWait = 5; //seconds between checks
+        double dBatteryCheckLast = -1;
+
+
         void moduleDoPreModes()
         {
-            StatusLog("clear",textPanelReport);
+            StatusLog("clear", textPanelReport);
 
-           string output = "";
+            string output = "";
             if (AnyConnectorIsConnected()) output += "Connected";
             else output += "Not Connected";
 
@@ -54,11 +61,42 @@ namespace IngameScript
 
             if (bWantFast) Echo("FAST!");
 
-            doCargoCheck();
-            Echo("Cargo=" + cargopcent.ToString() + "%");
-//            Echo("Cargo Mult=" + cargoMult.ToString());
+            if (dCargoCheckLast > dCargoCheckWait)
+            {
+                dCargoCheckLast = 0;
 
-            batteryCheck(0, false);
+
+                doCargoCheck();
+            }
+            else
+            {
+                if (dCargoCheckLast < 0)
+                {
+                    // first-time init
+                    //                    dProjectorCheckLast = Me.EntityId % dProjectorCheckWait; // randomize initial check
+                    dCargoCheckLast = dCargoCheckWait + 5; // force check
+                }
+                dCargoCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
+            }
+
+            Echo("Cargo=" + cargopcent.ToString() + "%");
+            //            Echo("Cargo Mult=" + cargoMult.ToString());
+
+            if (dBatteryCheckLast > dBatteryCheckWait)
+            {
+                dBatteryCheckLast = 0;
+                batteryCheck(0, false);
+            }
+            else
+            {
+                if (dBatteryCheckLast < 0)
+                {
+                    // first-time init
+                    dBatteryCheckLast = dBatteryCheckWait+5; // force check
+                }
+                dBatteryCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
+            }
+
             output += "Batteries: #=" + batteryList.Count.ToString();
             if (batteryList.Count > 0 && maxBatteryPower > 0)
             {

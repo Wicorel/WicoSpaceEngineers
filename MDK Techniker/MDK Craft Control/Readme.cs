@@ -3,7 +3,7 @@
 *
 * Control Script for Rovers and Drones and Oribtal craft
 * 
-* Version 3.0K2
+* Version T3.1A
 * 
 * 2.0 Removed many built-in functions to make script room. These functions were duplicated in sub-modules anyway.
 * 2.0.1
