@@ -18,8 +18,6 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        // SE V1.172
-        #region gasgens
         List<IMyTerminalBlock> gasgenList = new List<IMyTerminalBlock>();
         string gasgenInit()
         {
@@ -32,7 +30,19 @@ namespace IngameScript
         {
             return true;
         }
-        #endregion
+        void 	doCheckGasGensNeeded()
+        { // from Techniker
+	        // handle controlling gas gens
+	        if(tanksFill() > 99)
+	        {
+		        blockApplyAction(gasgenList, "OnOff_Off");
+	        }
+	        else
+	        {
+		        blockApplyAction(gasgenList, "OnOff_On");
+	        }
+
+        }
 
     }
 }
