@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoControllers", "WicoControllers\WicoControllers.shproj", "{05DE1441-FD05-4413-A8AE-3586F15D1B96}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoControllers\WicoControllers.projitems*{05de1441-fd05-4413-a8ae-3586f15d1b96}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8323042A-1FB3-4D42-A063-F31EB873879C}
+	EndGlobalSection
+EndGlobal
