@@ -496,6 +496,21 @@ namespace IngameScript
 
         #endregion
 
+        int countThrusters(List<IMyTerminalBlock> theBlocks, int iTypes = thrustAll)
+        {
+
+	        int iCount = 0;
+	        for (int i = 0; i < theBlocks.Count; i++)
+	        {
+		        int iThrusterType = thrusterType(theBlocks[i]);
+		        if ((iThrusterType & iTypes) > 0 && theBlocks[i].IsWorking)
+		        {
+			        iCount++;
+		        }
+	        }
+	        return iCount;
+
+        }
 
 
     }
