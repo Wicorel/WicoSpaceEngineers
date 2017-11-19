@@ -20,65 +20,66 @@ namespace IngameScript
     {
         #region tanks
         List<IMyTerminalBlock> tankList = new List<IMyTerminalBlock>();
-        List < IMyTerminalBlock > oxytankList = new List < IMyTerminalBlock > (); 
-        List < IMyTerminalBlock > hydrotankList = new List < IMyTerminalBlock > (); 
- 
-        List < IMyTerminalBlock > isolatedoxytankList = new List < IMyTerminalBlock > (); 
- 
+        List<IMyTerminalBlock> oxytankList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> hydrotankList = new List<IMyTerminalBlock>();
+
+        List<IMyTerminalBlock> isolatedoxytankList = new List<IMyTerminalBlock>();
+
 
         const int iTankOxygen = 1;
         const int iTankHydro = 2;
         int iHydroTanks = 0;
         int iOxygenTanks = 0;
-string tanksInit()  
-{ 
-	{ 
-		tankList = new List < IMyTerminalBlock > (); 
-		GridTerminalSystem.GetBlocksOfType < IMyGasTank > (tankList, (x => x.CubeGrid == Me.CubeGrid)); 
-	} 
-	iHydroTanks = 0; 
-	iOxygenTanks = 0; 
-	for (int i = 0; i < tankList.Count; ++i)  
-	{ 
-		if (tankType(tankList[i]) == iTankOxygen) 
-		{ 
-			if(tankList[i].CustomName.ToLower().Contains("isolated")) 
-				isolatedoxytankList.Add(tankList[i]); 
-			else 
-				oxytankList.Add(tankList[i]); 
- 
-			iOxygenTanks++; 
-		} 
-		else if (tankType(tankList[i]) == iTankHydro)  
-		{ 
-			hydrotankList.Add(tankList[i]); 
- 
-			iHydroTanks++; 
-		} 
-	} 
-	return "T" + tankList.Count.ToString("00"); 
-} 
- double tanksFill(List < IMyTerminalBlock > tankList)  
-{ 
-	double totalPercent = 0; 
-	int iTanksCount = 0; 
-	for (int i = 0; i < tankList.Count; ++i)  
-	{ 
-//		int iTankType = tankType(tankList[i]); 
-//		if ((iTankType & iTypes) > 0)  
-		{ 
-			IMyGasTank tank = tankList[i] as IMyGasTank; 
-			float tankLevel = tank.FilledRatio; 
-			totalPercent += tankLevel; 
-			iTanksCount++; 
-		} 
-	} 
-	if (iTanksCount > 0)  
-	{ 
-		return totalPercent * 100 / iTanksCount; 
-	} else return 0; 
-} 
-       double tanksFill(int iTypes = 0xff)
+        string tanksInit()
+        {
+            {
+                tankList = new List<IMyTerminalBlock>();
+                GridTerminalSystem.GetBlocksOfType<IMyGasTank>(tankList, (x => x.CubeGrid == Me.CubeGrid));
+            }
+            iHydroTanks = 0;
+            iOxygenTanks = 0;
+            for (int i = 0; i < tankList.Count; ++i)
+            {
+                if (tankType(tankList[i]) == iTankOxygen)
+                {
+                    if (tankList[i].CustomName.ToLower().Contains("isolated"))
+                        isolatedoxytankList.Add(tankList[i]);
+                    else
+                        oxytankList.Add(tankList[i]);
+
+                    iOxygenTanks++;
+                }
+                else if (tankType(tankList[i]) == iTankHydro)
+                {
+                    hydrotankList.Add(tankList[i]);
+
+                    iHydroTanks++;
+                }
+            }
+            return "T" + tankList.Count.ToString("00");
+        }
+        double tanksFill(List<IMyTerminalBlock> tankList)
+        {
+            double totalPercent = 0;
+            int iTanksCount = 0;
+            for (int i = 0; i < tankList.Count; ++i)
+            {
+                //		int iTankType = tankType(tankList[i]); 
+                //		if ((iTankType & iTypes) > 0)  
+                {
+                    IMyGasTank tank = tankList[i] as IMyGasTank;
+                    float tankLevel = tank.FilledRatio;
+                    totalPercent += tankLevel;
+                    iTanksCount++;
+                }
+            }
+            if (iTanksCount > 0)
+            {
+                return totalPercent * 100 / iTanksCount;
+            }
+            else return 0;
+        }
+        double tanksFill(int iTypes = 0xff)
         {
             if (tankList.Count < 1) tanksInit();
             if (tankList.Count < 1) return -1;
