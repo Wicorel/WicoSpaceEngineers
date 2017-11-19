@@ -18,8 +18,12 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+
+
         Dictionary<string, int> modeCommands = new Dictionary<string, int>();
         string sBanner = "";
+        UpdateFrequency ufFast = UpdateFrequency.Update1; // default value for "Fast" for this module
+
         public Program()
         {
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
@@ -47,63 +51,110 @@ namespace IngameScript
 
         double velocityShip;//, velocityForward, velocityUp, velocityLeft;
 
+        double dProjectorCheckWait = 5; //seconds between checks
+        double dProjectorCheckLast = -1;
+
+        double dGridCheckWait = 3; //seconds between checks
+        double dGridCheckLast = -1;
 
 //        void Main(string sArgument)
         void Main(string sArgument, UpdateType ut)
         {
-            Echo(sBanner + tick());
+           Echo(sBanner + tick());
             Echo(ut.ToString());
             bWantFast = false;
             //ProfilerGraph();
 
-            bWorkingProjector = false;
-            var list = new List<IMyTerminalBlock>();
-            GridTerminalSystem.GetBlocksOfType<IMyProjector>(list, localGridFilter);
-            for (int i = 0; i < list.Count; i++)
+            if (dProjectorCheckLast > dProjectorCheckWait)
             {
-                if (list[i].IsWorking)
+                dProjectorCheckLast = 0;
+
+                bWorkingProjector = false;
+                var list = new List<IMyTerminalBlock>();
+                GridTerminalSystem.GetBlocksOfType<IMyProjector>(list, localGridFilter);
+                for (int i = 0; i < list.Count; i++)
                 {
-                    if (list[i].CustomName.Contains("!WCC") || list[i].CustomData.Contains("!WCC")) continue; // ignore
-                    Echo("Working local Projector found!");
-                    //            init = false;
-                    //            sInitResults = "";
-                    bWorkingProjector = true;
+                    if (list[i].IsWorking)
+                    {
+                        if (list[i].CustomName.Contains("!WCC") || list[i].CustomData.Contains("!WCC")) continue; // ignore
+                        Echo("Working local Projector found!");
+                        //            init = false;
+                        //            sInitResults = "";
+                        bWorkingProjector = true;
+                    }
                 }
             }
+            else
+            {
+//                Echo("Delay Projector Check");
+                if (dProjectorCheckLast < 0)
+                {
+                    // first-time init
+//                    dProjectorCheckLast = Me.EntityId % dProjectorCheckWait; // randomize initial check
+                    dProjectorCheckLast = dProjectorCheckWait+5; // force check
+                }
+                dProjectorCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
+            }
+//            Echo("MainInst1:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
             sPassedArgument = "";
+/*
             if (sArgument != "" && sArgument != "timer" || sArgument != "wcct")
             {
                 Echo("Arg=" + sArgument);
             }
-
+*/
             double newgridBaseMass = 0;
-            IMyTextPanel masstextBlock = getTextBlock("MASS");
 
             if (anchorPosition != null)
             {
-                MyShipMass myMass;
-                myMass = ((IMyShipController)anchorPosition).CalculateShipMass();
-
-                StatusLog("clear", masstextBlock);
-                StatusLog("BaseMass=" + myMass.BaseMass.ToString(), masstextBlock);
-                StatusLog("TotalMass=" + myMass.TotalMass.ToString(), masstextBlock);
-                StatusLog("Physicalmass=" + myMass.PhysicalMass.ToString(), masstextBlock);
-                //		Echo("Physicalmass=" + myMass.PhysicalMass.ToString());
-                StatusLog("gridBaseMass=" + gridBaseMass.ToString(), masstextBlock);
-                newgridBaseMass = myMass.BaseMass;
-                if (myMass.BaseMass == 0)
-                    Echo("No Mass--Station?");
-                if (newgridBaseMass != gridBaseMass && gridBaseMass > 0)
+                if (dGridCheckLast > dGridCheckWait || !init)
                 {
-                    Echo("MASS CHANGE");
-                    StatusLog(OurName + ":" + moduleName + ":MASS CHANGE", textLongStatus, true);
+//                    Echo("DO Grid Check");
+                    dGridCheckLast = 0;
+
+//                    IMyTextPanel masstextBlock = getTextBlock("MASS");
+                    MyShipMass myMass;
+                    myMass = ((IMyShipController)anchorPosition).CalculateShipMass();
+
+//                    StatusLog("clear", masstextBlock);
+//                    StatusLog("BaseMass=" + myMass.BaseMass.ToString(), masstextBlock);
+//                    StatusLog("TotalMass=" + myMass.TotalMass.ToString(), masstextBlock);
+//                    StatusLog("Physicalmass=" + myMass.PhysicalMass.ToString(), masstextBlock);
+                    //		Echo("Physicalmass=" + myMass.PhysicalMass.ToString());
+//                    StatusLog("gridBaseMass=" + gridBaseMass.ToString(), masstextBlock);
+                    newgridBaseMass = myMass.BaseMass;
+                    if (myMass.BaseMass == 0)
+                        Echo("No Mass--Station?");
+                    if (newgridBaseMass != gridBaseMass && gridBaseMass > 0)
+                    {
+                        Echo("MASS CHANGE");
+                        StatusLog(OurName + ":" + moduleName + ":MASS CHANGE", textLongStatus, true);
+                    }
+                }
+                else
+                {
+//                    Echo("Delay Grid Check");
+                    if (dGridCheckLast < 0)
+                    {
+                        // first-time init
+    //                    dGridCheckLast = Me.EntityId % dGridCheckWait; // randomize initial check
+                        dGridCheckLast = dGridCheckWait+5; // force check
+                    }
+                    dGridCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
+                    newgridBaseMass = gridBaseMass; // assume it's the old mass for now
                 }
             }
-            else gridBaseMass = newgridBaseMass = 0;
+            else
+            {
+                Echo("No anchorPosition to check");
+                gridBaseMass = newgridBaseMass = 0;
+            }
+//            Echo("MainInst1A:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+
             if (sArgument == "init" || (Math.Abs(newgridBaseMass - gridBaseMass) > 1 && gridBaseMass > 0) || (currentInit == 0 && calcGridSystemChanged()))
             {
-                StatusLog("INIT or GRID/MASS CHANGE!", masstextBlock);
+                Log("INIT or GRID/MASS CHANGE!");
 
                 Echo("Arg init or grid/mass change!");
                 sInitResults = "";
@@ -114,6 +165,8 @@ namespace IngameScript
             }
             Log("clear");
 
+//            Echo("MainInst2:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+
             if (!init)
             {
                 if (bWorkingProjector)
@@ -122,7 +175,9 @@ namespace IngameScript
                     StatusLog("Construction in Progress\nTurn off projector to continue", textPanelReport);
                 }
                 else
+                {
                     bWantFast = true;
+                }
                 doInit();
                 bWasInit = true;
             }
@@ -185,14 +240,18 @@ namespace IngameScript
                     dGravity = -1.0;
                 }
 
-                if (processArguments(sArgument))
+//              Echo("MainInst3:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+               if (processArguments(sArgument))
                     return;
 
-                moduleDoPreModes();
+//               Echo("MainInst3A:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+               moduleDoPreModes();
 
+//              Echo("MainInst3B:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 doModes();
             }
             Serialize();
+//             Echo("MainInst4:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
             if (anchorPosition == null || SaveFile == null)
             {
@@ -202,11 +261,12 @@ namespace IngameScript
 
             if (bWantFast)
             {
-                 Runtime.UpdateFrequency |= UpdateFrequency.Once;
-                /*
-               if (!doSubModuleTimerTriggers(sFastTimer))
-                    doSubModuleTimerTriggers(sMainTimer);
-                    */
+                Echo("FAST!");
+                Runtime.UpdateFrequency |= ufFast;
+            }
+            else
+            {
+                Runtime.UpdateFrequency &= ~(ufFast);
             }
 
             bWasInit = false;
