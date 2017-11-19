@@ -154,12 +154,13 @@ namespace IngameScript
                 if (gpsCenter != null)
                 {
                     vCurrentPos = gpsCenter.GetPosition();
-                    velocityShip = ((IMyShipController)anchorPosition).GetShipSpeed();
                 }
 
                 if (gpsCenter is IMyShipController)
                 //		if (gpsCenter is IMyRemoteControl)
                 {
+                    velocityShip = ((IMyShipController)anchorPosition).GetShipSpeed();
+
                     Vector3D vNG = ((IMyShipController)gpsCenter).GetNaturalGravity();
                     //			Vector3D vNG = ((IMyRemoteControl)gpsCenter).GetNaturalGravity();
                     double dLength = vNG.Length();
