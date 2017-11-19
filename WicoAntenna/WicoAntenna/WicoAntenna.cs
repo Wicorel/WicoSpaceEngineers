@@ -18,7 +18,6 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        #region Antenna
         bool bGotAntennaName = false;
 
         List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
@@ -52,7 +51,6 @@ namespace IngameScript
                 antennaList[i].Enabled = true;
             }
         }
-        #endregion
 
         void antennaLowPower()
         {
