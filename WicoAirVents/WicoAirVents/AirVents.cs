@@ -43,12 +43,16 @@ namespace IngameScript
         List<IMyTerminalBlock> cockpitairventList = new List<IMyTerminalBlock>(); // outside air. directly supplying a cockpit. turn off if cockpit not occupied. 
 
         bool bPressurization = false; // pressurization enabled in world settings
+        bool bAVInit = false;
 
         string airventInit()
         {
             airventList.Clear();
+            bAVInit = false;
+            GetTargetBlocks<IMyAirVent>(ref airventList);
 
-            GridTerminalSystem.GetBlocksOfType<IMyAirVent>(airventList, localGridFilter);
+            //            GridTerminalSystem.GetBlocksOfType<IMyAirVent>(airventList, localGridFilter);
+ //           Echo("AV#=" + airventList.Count);
 
             for (int i = 0; i < airventList.Count; i++)
             {
@@ -70,6 +74,7 @@ namespace IngameScript
                     cockpitairventList.Add(airventList[i]);
 
             }
+            bAVInit = true;
             isPressurizationOn();
             return "A" + airventList.Count.ToString("0");
         }
@@ -108,7 +113,7 @@ namespace IngameScript
 
         bool isPressurizationOn()
         {
-            if (airventList.Count < 1)
+            if (!bAVInit)
                 airventInit();
             if (airventList.Count < 1) // no air vents to check
                 return false;
@@ -203,6 +208,23 @@ namespace IngameScript
         // RGB: 255:150:0
 
         #endregion
+        void doCheckAirVents()
+        {
+	        // handle turning off air vents if pressurization is off to save power.
+	        if (bPressurization)
+	        {
+		        blockApplyAction(airventList, "OnOff_On");
+	        }
+	        else // no pressurization or no vents.
+	        {
+		        if (airventList.Count > 0)
+		        {
+			        StatusLog("Pressurization turned OFF\n in World Settings\n", textPanelReport);
+			        blockApplyAction(airventList, "OnOff_Off");
+		        }
+	        }
+
+        }
 
     }
 }
