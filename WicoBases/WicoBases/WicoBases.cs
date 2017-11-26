@@ -84,9 +84,9 @@ namespace IngameScript
             return s;
         }
 
-        const double dBaseRequestTransmitWait = 25; //seconds between active transmits
+        double dBaseRequestTransmitWait = 25; //seconds between active transmits
 
-        double dBaseRequestLastTransmit = dBaseRequestTransmitWait + 5;
+        double dBaseRequestLastTransmit = -1;
 
         void checkBases(bool bForceRequest=false)
         {
@@ -112,11 +112,13 @@ namespace IngameScript
         {
             int iBest = -1;
             double distanceSQ = double.MaxValue;
+//sInitResults += baseList.Count + " Bases";
             for(int i=0;i<baseList.Count;i++)
             {
                 double curDistanceSQ = Vector3D.DistanceSquared(baseList[i].position, gpsCenter.GetPosition());
                 if( curDistanceSQ<distanceSQ)
                 {
+//                    sInitResults += " Choosing" + baseList[i].baseName;
                     iBest = i;
                     distanceSQ = curDistanceSQ;
                 }
