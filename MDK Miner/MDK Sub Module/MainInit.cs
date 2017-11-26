@@ -72,6 +72,7 @@ namespace IngameScript
 //		        sInitResults += gearsInit();
 		        sInitResults += tanksInit();
 		        sInitResults += gyrosetup();
+                GyroControl.UpdateGyroList(gyros);
 
 		        sInitResults += drillInit();
 		        sInitResults += ejectorsInit();
