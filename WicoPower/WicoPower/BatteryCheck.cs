@@ -94,6 +94,11 @@ namespace IngameScript
             return output;
         }
 
+        /*
+         * This routine goes through the batteries and turns the lowest to recharge and the others to discharge
+         * 
+         * This is to prevent overloading power on the mother ship
+         */
         bool batteryCheck(int targetMax, bool bEcho = true, IMyTextPanel textBlock = null, bool bProgress = false)
         {
             float totalCapacity = 0;
@@ -174,26 +179,32 @@ namespace IngameScript
                 batteryPercentage = -1;
             return bFoundRecharging;
         }
-        void batteryDischargeSet(bool bEcho = false)
+        // Set the state of the batteries and optionally display state of the batteries
+        void batteryDischargeSet(bool bEcho = false, bool bDischarge=true)
         {
             Echo(batteryList.Count + " Batteries");
+            string s;
             for (int i = 0; i < batteryList.Count; i++)
             {
-                string s = batteryList[i].CustomName + ": ";
-                if (isRechargeSet(batteryList[i]))
+                IMyBatteryBlock b;
+                b = batteryList[i] as IMyBatteryBlock;
+                b.OnlyRecharge = !bDischarge;
+                b.OnlyDischarge = bDischarge;
+                b.SemiautoEnabled = false;
+
+                s = b.CustomName + ": ";
+                if (b.OnlyRecharge)
                 {
                     s += "RECHARGE/";
-                    batteryList[i].ApplyAction("Recharge");
                 }
                 else s += "NOTRECHARGE/";
-                if (isDischargeSet(batteryList[i]))
+                if (b.OnlyDischarge)
                 {
                     s += "DISCHARGE";
                 }
                 else
                 {
                     s += "NOTDISCHARGE";
-                    batteryList[i].ApplyAction("Discharge");
                 }
                 if (bEcho) Echo(s);
             }
