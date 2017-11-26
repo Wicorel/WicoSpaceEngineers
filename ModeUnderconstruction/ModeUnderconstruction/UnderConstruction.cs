@@ -65,6 +65,22 @@ namespace IngameScript
                         // or maybe use TIM?
                     }
                 }
+                // TODO: 
+                // Try to pull stuff
+                //  Uranium to reactors
+                initReactors();
+
+                //  Ice to Gas Gens.
+                gasgenInit();
+
+                // Turn batteries to recharge
+                initBatteries();
+                batteryDischargeSet(true, false);
+
+                // put tanks to "Stockpile"
+                tanksInit();
+                TanksStockpile(true);
+
                 if(doProjectorCheck())
                 { // we are done projecting.
                     current_state = 10;
@@ -73,9 +89,21 @@ namespace IngameScript
             else if (current_state == 10)
             { // turn off projectors.
                 turnoffProjectors();
-                // check for 'enough' power to continue alone.
                 //TODO:
-                current_state = 20;
+                // check for 'enough' power to continue alone.
+                {
+
+                    // when 'enough':
+                    // turn tanks off stockpile
+                    TanksStockpile(false);
+
+                    // turn batteries off recharge
+                    batteryDischargeSet(true, true);
+                    // (request to) turn off welders
+
+                    // then change state:
+                    current_state = 20;
+                }
             }
             else if (current_state == 20)
             { // start the cut 
@@ -87,10 +115,19 @@ namespace IngameScript
                 doCut();
                 if(calcGridSystemChanged())
                 {
+                    doCut(false);
+                    current_state = 100;
                     if (AnyConnectorIsConnected())
-                        setMode(MODE_DOCKED);
+                       setMode(MODE_DOCKED);
                 }
                 // maybe need a time-out?
+            }
+            else if (current_state == 100)
+            { // cut-off done.
+                if (AnyConnectorIsConnected())
+                    setMode(MODE_DOCKED);
+                // TODo: autolaunch if not connected?
+
             }
         }
     }
