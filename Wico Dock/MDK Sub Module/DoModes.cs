@@ -58,6 +58,24 @@ namespace IngameScript
         #region modealways
         void doModeAlways()
         {
+/*
+            MyShipMass myMass;
+            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            double maxThrust = calculateMaxThrust(thrustBackwardList);
+            double maxDeltaV = maxThrust / myMass.PhysicalMass;
+            Echo("maxDeltaV=" + niceDoubleMeters(maxDeltaV));
+            // distance *.75
+            // distance /2
+            // /(maxdeltaV*2)
+
+            dtmFar = calculateStoppingDistance(thrustBackwardList, 54); // calculate maximum stopping distance at full speed
+            dtmApproach = calculateStoppingDistance(thrustBackwardList, 54*.75);
+            dtmPrecision =calculateStoppingDistance(thrustBackwardList, 5f);
+            Echo("dtmFar=" + niceDoubleMeters(dtmFar));
+            Echo("dtmApproach=" + niceDoubleMeters(dtmApproach));
+            Echo("dtmPrecision=" + niceDoubleMeters(dtmPrecision));
+            Echo("CurrentStop=" + niceDoubleMeters(calculateStoppingDistance(thrustBackwardList, velocityShip)));
+*/            
             processPendingSends();
             processReceives();
             if (AnyConnectorIsConnected() && (iMode != MODE_LAUNCH) && iMode != MODE_DOCKED)
@@ -84,6 +102,8 @@ namespace IngameScript
             if (sReceivedMessage != "")
             {
                 Echo("Received Message=\n" + sReceivedMessage);
+//                sInitResults += "Received Message=\n" + sReceivedMessage;
+
                 if (processBaseMessages(sReceivedMessage))
                     return;
 
