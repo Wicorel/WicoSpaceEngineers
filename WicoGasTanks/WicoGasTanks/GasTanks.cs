@@ -68,6 +68,7 @@ namespace IngameScript
                 //		if ((iTankType & iTypes) > 0)  
                 {
                     IMyGasTank tank = tankList[i] as IMyGasTank;
+                    if (tank == null) continue; // not a tank
                     float tankLevel = tank.FilledRatio;
                     totalPercent += tankLevel;
                     iTanksCount++;
@@ -92,6 +93,7 @@ namespace IngameScript
                 if ((iTankType & iTypes) > 0)
                 {
                     IMyGasTank tank = tankList[i] as IMyGasTank;
+                    if (tank == null) continue; // not a tank
                     float tankLevel = tank.FilledRatio;
                     totalLevel += tankLevel;
                     iTanksCount++;
@@ -103,15 +105,37 @@ namespace IngameScript
             }
             else return -1;
         }
+
+        // returns the 'type' of the tank
         int tankType(IMyTerminalBlock theBlock)
         {
             if (theBlock is IMyGasTank)
             {
+                // could also check the provider type...
+
                 if (theBlock.BlockDefinition.SubtypeId.Contains("Hydro"))
                     return iTankHydro;
                 else return iTankOxygen;
             }
             return 0;
+        }
+
+        void TanksStockpile(bool bStockPile = true,int iTypes = 0xff)
+        {
+            if (tankList.Count < 1) tanksInit();
+            if (tankList.Count < 1) return;
+
+            for (int i = 0; i < tankList.Count; ++i)
+            {
+                int iTankType = tankType(tankList[i]);
+                if ((iTankType & iTypes) > 0)
+                {
+                    IMyGasTank tank = tankList[i] as IMyGasTank;
+                    if (tank == null) continue; // not a tank
+                    tank.Stockpile=bStockPile;
+                }
+            }
+
         }
 
         #endregion
