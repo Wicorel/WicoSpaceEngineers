@@ -31,53 +31,7 @@ namespace IngameScript
                     setMode(MODE_DOCKED);
                 }
                 */
-            if (iMode == MODE_IDLE)
-                doModeIdle();
-            /*
-            else if (iMode == MODE_DUMBNAV)
-            {
-                doModeNav();
-            }
-            */
-            /*
-            else if (iMode == MODE_SLEDMMOVE)
-            {
-            doModeSledmMove();
-            }
-            else if (iMode == MODE_SLEDMRAMPD)
-            {
-            doModeSledmRampD();
-            }
-            else if (iMode == MODE_SLEDMLEVEL)
-            {
-            doModeSledmLevel();
-            }
-            else if (iMode == MODE_SLEDMDRILL)
-            {
-            doModeSledmDrill();
-            }
-            else if (iMode == MODE_SLEDMBDRILL)
-            {
-            doModeSledmBDrill();
-            }
-            else if (iMode == MODE_DOCKING)
-            {
-                // doModeDocking();
-            }
-            else if (iMode == MODE_DOCKED)
-            {
-                doModeDocked();
-            }
-            else if (iMode == MODE_LAUNCH)
-            {
-                // doModeLaunch();
-            }
-            else if (iMode == MODE_PET)
-            {
-                doModePet();
-            }
-                */
-
+            if (iMode == MODE_IDLE) doModeIdle();
             else if (iMode == MODE_ATTENTION)
             {
                 StatusLog("clear", textPanelReport);
