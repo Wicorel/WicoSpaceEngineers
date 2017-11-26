@@ -11,6 +11,11 @@
  * 
  * 3.1 First version for new PB changes in SE 1.185
  * 
+ * 3.1B Handle non-connector drones
+ * Start of stockpile and battery recharge checks
+ * Still needs reactor checks.
+ * 
+ * 
  * NEED:  
  *  
  * WANTED: 
