@@ -68,5 +68,14 @@ Add delays for requests for BASE?
 Turn drills and ejectors off when heading to dock. (drills at start and ejectors when arrive at approach).
 
 3.1 Version for SE 1.185 PB Changes
+Turn off logging because of text panel writes causing hang.
+
+3.2 Handle docking with connectors in any orientation
+
+delay for motion after going 'home' (added state 169)
+
+improve long-range travel for docking (chooses optimal speed, uses dampeners, etc). (major changes to TravelMovement code)
+Handle case where requested to dock, but have not heard from a base yet; request and wait a bit for a response. (added state 109)
+
 
 */
