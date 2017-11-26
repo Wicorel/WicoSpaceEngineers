@@ -21,7 +21,7 @@ namespace IngameScript
 
         #region travelmovement
         /*
-         * NEED: 
+         * TODO:
          * Handle non-rocket modes
          * calculate fastest travel direction and use that.
          * use designated direction and block for movement.
@@ -29,22 +29,92 @@ namespace IngameScript
          * add maxspeed parameter
          * 
          */
+
+        IMyShipController tmShipController = null;
+        double tmMaxSpeed = 85;
+
+        List<IMyTerminalBlock> thrustTmBackwardList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustTmForwardList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustTmLeftList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustTmRightList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustTmUpList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustTmDownList = new List<IMyTerminalBlock>();
+
+        IMySensorBlock tmSB=null;
+
+        bool btmApproach = false;
+        bool btmPrecision = false;
+        bool btmClose = false;
+        double dtmFar = 100;
+        double dtmApproach = 50;
+        double dtmPrecision = 15;
+        double dtmFarSpeed = 85;
+        double dtmApproachSpeed = 85 * .75;
+        double dtmPrecisionSpeed = 5;
+        
+        void InitDoTravelMovement(Vector3D vTargetLocation, double maxSpeed, IMyTerminalBlock myShipController, int iThrustType=thrustAll)
+        {
+
+            tmMaxSpeed = maxSpeed;
+            tmShipController =  myShipController as IMyShipController;
+            Vector3D vVec = vTargetLocation - tmShipController.CenterOfMass;
+            double distance = vVec.Length();
+
+            thrustersInit(tmShipController, ref thrustTmForwardList, ref  thrustTmBackwardList,
+            ref thrustTmDownList, ref thrustTmUpList,
+            ref thrustTmLeftList, ref thrustTmRightList,iThrustType);
+            sleepAllSensors();
+            if (sensorsList.Count > 0)
+            {
+                tmSB = sensorsList[0];
+                tmSB.DetectAsteroids = true;
+                tmSB.DetectEnemy = true;
+                tmSB.DetectLargeShips = true;
+                tmSB.DetectSmallShips = true;
+                tmSB.DetectStations = true;
+            }
+            btmApproach = false; // we have reached approach range
+            btmPrecision = false; // we have reached precision range
+            btmClose = false; // we have reached close range
+
+            double optimalV = CalculateOptimalSpeed( thrustTmBackwardList, distance);
+            if (optimalV < tmMaxSpeed)
+                tmMaxSpeed = optimalV;
+            sInitResults += "\nDistance="+niceDoubleMeters(distance)+" OptimalV=" + optimalV;
+
+            dtmFarSpeed = tmMaxSpeed;
+            dtmApproachSpeed = tmMaxSpeed * 0.75;
+            dtmPrecisionSpeed = 5;
+
+            dtmFar = calculateStoppingDistance(thrustTmBackwardList, dtmFarSpeed, 0); // calculate maximum stopping distance at full speed
+            dtmApproach = calculateStoppingDistance(thrustTmBackwardList, dtmApproachSpeed, 0);
+            dtmPrecision =calculateStoppingDistance(thrustTmBackwardList, dtmPrecisionSpeed, 0);
+       }
+
         void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState)
         {
             Echo("dTM:" + arrivalState);
             //		Vector3D vTargetLocation = vHome;// gpsCenter.GetPosition();
             //    gpsCenter.CubeGrid.
-            Vector3D vVec = vTargetLocation - ((IMyShipController)gpsCenter).CenterOfMass;
+            if (tmShipController == null)
+            {
+                InitDoTravelMovement(vTargetLocation,100, gpsCenter);
+            }
+
+            Vector3D vVec = vTargetLocation - tmShipController.CenterOfMass;
             //	Vector3D vVec = vTargetLocation - gpsCenter.GetPosition();
             //		debugGPSOutput("vTargetLocation", vTargetLocation);
             double distance = vVec.Length();
-            Echo("distance=" + niceDoubleMeters(distance));
-            Echo("velocity=" + velocityShip.ToString("0.00"));
+
+            Echo("dTM:distance=" + niceDoubleMeters(distance));
+            Echo("dTM:velocity=" + velocityShip.ToString("0.00"));
+            Echo("dTM:tmMaxSpeed=" + tmMaxSpeed.ToString("0.00"));
 
             if (distance < arrivalDistance)
             {
                 ResetMotion();
                 current_state = arrivalState;
+                tmShipController = null;
                 //		GyroControl.SetRefBlock(dockingConnector);
                 //		iPushCount = 0;
                 //		sleepAllSensors();
@@ -53,12 +123,21 @@ namespace IngameScript
             debugGPSOutput("TargetLocation", vTargetLocation);
 
             List<IMySensorBlock> aSensors = null;
-            IMySensorBlock sb;
+//            IMySensorBlock sb;
 
-            double stoppingDistance = calculateStoppingDistance(thrustBackwardList, velocityShip, 0);
+            double stoppingDistance = calculateStoppingDistance(thrustTmBackwardList, velocityShip, 0);
+//            Echo("StoppingD=" + niceDoubleMeters(stoppingDistance));
 
             bool bAimed = false;
             bAimed = GyroMain("forward", vVec, gpsCenter);
+
+            tmShipController.DampenersOverride = true;
+
+            if((distance - stoppingDistance) < arrivalDistance)
+            { // we are within stopping distance, so start slowing
+                ResetMotion();
+                return;
+            }
 
             if (bAimed)
             {
@@ -68,10 +147,11 @@ namespace IngameScript
 
                 if (sensorsList.Count > 0)
                 {
-                    sb = sensorsList[0];
+                    sleepAllSensors();
+//                    sb = sensorsList[0];
                     float fScanDist = Math.Min(50f, (float)stoppingDistance * 1.5f);
                     //			float fScanDist = Math.Min(50f, (float)distance);
-                    setSensorShip(sb, 0, 0, 0, 0, fScanDist, 0);
+                    setSensorShip(tmSB, 0, 0, 0, 0, fScanDist, 0);
                     /*
                      * need to do this ONCE.. so need travel init?
                      * should also sleep other sensors..
@@ -107,51 +187,63 @@ namespace IngameScript
                         return;
                     }
                 }
-                double dFar = 100;
-                double dApproach = 50;
-                double dPrecision = 15;
-                //		if (velocityShip > 10)
-                dFar = stoppingDistance * 5;
-                //		if (velocityShip > 10)
-                dApproach = stoppingDistance * 2;
-                //		if (velocityShip > 10)
-                dPrecision = stoppingDistance * 1.1;
-                Echo("DFar=" + dFar);
-                Echo("dApproach=" + dApproach);
-                Echo("dPrecision=" + dPrecision);
+                // else "Close"
+                /*
+                if (velocityShip > 10)
+                    dtmFar = stoppingDistance * 5;
+                if (velocityShip > 10)
+                    dtmApproach = stoppingDistance * 2;
+                if (velocityShip > 10)
+                    dtmPrecision = stoppingDistance * 1.1;
+                    */
 
-                if (distance > dFar)
+                Echo("dtmFar=" + niceDoubleMeters(dtmFar));
+                Echo("dtmApproach=" + niceDoubleMeters(dtmApproach));
+                Echo("dtmPrecision=" + niceDoubleMeters(dtmPrecision));
+
+                if (distance > dtmFar &&!btmApproach)
                 {
-                    Echo("DFAR");
+                    Echo("dtmFar");
                     if (velocityShip < 1)
-                        powerUpThrusters(thrustForwardList, 100);
-                    else if (velocityShip < 55)
-                        powerUpThrusters(thrustForwardList, 25);
-                    else if (velocityShip <= 85)
-                        powerUpThrusters(thrustForwardList, 1);
-                    else
+                        powerUpThrusters(thrustTmForwardList, 100);
+                    else if (velocityShip < dtmFarSpeed * .75)
+                        powerUpThrusters(thrustTmForwardList, 25f);
+                    else if (velocityShip <= dtmFarSpeed * .95)
+                    {
+                        powerUpThrusters(thrustTmForwardList, 1f);
+                    }
+                    else if (velocityShip >= dtmFarSpeed * 1.01)
+                    {
                         powerDownThrusters(thrustAllList);
+                    }
+                    else // sweet spot
+                    {
+                        powerDownThrusters(thrustAllList);
+                        tmShipController.DampenersOverride = false;
+                    }
                 }
-                else if (distance > dApproach)
+                else if (distance > dtmApproach && !btmPrecision)
                 {
                     Echo("Approach");
+                    btmApproach = true;
 
                     if (velocityShip < 1)
-                        powerUpThrusters(thrustForwardList, 85);
+                        powerUpThrusters(thrustTmForwardList, 85f);
                     else if (velocityShip < 15)
-                        powerUpThrusters(thrustForwardList, 25);
-                    else if (velocityShip <= 55)
-                        powerUpThrusters(thrustForwardList, 1);
+                        powerUpThrusters(thrustTmForwardList, 25f);
+                    else if (velocityShip <= dtmApproachSpeed)
+                        powerUpThrusters(thrustTmForwardList, 1f);
                     else
                         powerDownThrusters(thrustAllList);
                 }
-                else if (distance > dPrecision)
+                else if (distance > dtmPrecision && !btmClose)
                 {
                     Echo("Precision");
+ //                   btmPrecision = true;
                     if (velocityShip < 1)
-                        powerUpThrusters(thrustForwardList, 55);
-                    else if (velocityShip < 5)
-                        powerUpThrusters(thrustForwardList, 1);
+                        powerUpThrusters(thrustTmForwardList, 55f);
+                    else if (velocityShip < dtmPrecisionSpeed)
+                        powerUpThrusters(thrustTmForwardList, 1f);
                     //				else if (velocityShip <= 25)
                     //					powerUpThrusters(thrustForwardList, 1);
                     else
@@ -160,10 +252,11 @@ namespace IngameScript
                 else
                 {
                     Echo("Close");
+                    btmClose = true;
                     if (velocityShip < 1)
-                        powerUpThrusters(thrustForwardList, 25);
+                        powerUpThrusters(thrustTmForwardList, 25f);
                     else if (velocityShip < 5)
-                        powerUpThrusters(thrustForwardList, 5);
+                        powerUpThrusters(thrustTmForwardList, 5f);
                     //				else if (velocityShip <= 15)
                     //					powerUpThrusters(thrustForwardList, 1);
                     else
@@ -173,14 +266,34 @@ namespace IngameScript
             else
             {
                 Echo("Aiming");
-                powerDownThrusters(thrustAllList);
+                //                tmShipController.DampenersOverride = false;
+                tmShipController.DampenersOverride = true;
+                if (velocityShip < 5)
+                {
+                    powerDownThrusters(thrustAllList);
+                }
+                else
+                {
+                    powerDownThrusters(thrustTmBackwardList, thrustAll, true);
+                }
                 //		sleepAllSensors();
             }
 
         }
         #endregion
 
-        double calculateStoppingDistance(List<IMyTerminalBlock> thrustUpList, double currentV, double dGrav)
+        double CalculateOptimalSpeed(List<IMyTerminalBlock> thrustUpList, double distance)
+        {
+            MyShipMass myMass;
+            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            double maxThrust = calculateMaxThrust(thrustUpList);
+            double maxDeltaV = maxThrust / myMass.PhysicalMass;
+            // Magic..
+            double optimalV = ((distance * .75) / 2) / (maxDeltaV);
+
+            return optimalV;
+        }
+        double calculateStoppingDistance(List<IMyTerminalBlock> thrustUpList, double currentV, double dGrav=0)
         {
             MyShipMass myMass;
             myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
@@ -189,9 +302,10 @@ namespace IngameScript
             double maxThrust = calculateMaxThrust(thrustUpList);
             double maxDeltaV = (maxThrust - hoverthrust) / myMass.PhysicalMass;
             double secondstozero = currentV / maxDeltaV;
-            Echo("secondstozero=" + secondstozero.ToString("0.00"));
-            double stoppingM = currentV / 2 * secondstozero;
-            Echo("stoppingM=" + stoppingM.ToString("0.00"));
+//            Echo("secondstozero=" + secondstozero.ToString("0.00"));
+            // velocity will drop as we brake. at half way we should be at half speed
+            double stoppingM = currentV / 2 * secondstozero; 
+//            Echo("stoppingM=" + stoppingM.ToString("0.00"));
             return stoppingM;
         }
 
