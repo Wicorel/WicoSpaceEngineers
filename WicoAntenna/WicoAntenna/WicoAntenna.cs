@@ -52,27 +52,96 @@ namespace IngameScript
             }
         }
 
-        void antennaLowPower()
+        string sLastReceivedMessage = "";
+        
+        void AntennaCheckOldMessages()
+        {
+	        if (sReceivedMessage != "")
+	        {
+//		        Echo("Checking Message:\n" + sReceivedMessage);
+
+		        if (sLastReceivedMessage == sReceivedMessage)
+		        {
+//			        Echo("Clearing last message: Not processed");
+			        sReceivedMessage = ""; // clear it.
+		        }
+		        sLastReceivedMessage = sReceivedMessage;
+	        }
+	        else sLastReceivedMessage = "";
+        }
+
+        void DebugAntenna()
+        {
+/*
+            Echo("Debug Antenna");
+            Echo("Me=" + Me.EntityId.ToString());
+            for(int i=0;i<antennaList.Count;i++)
+            {
+                Echo(antennaList[i].CustomName);
+                Echo(antennaList[i].AttachedProgrammableBlock.ToString());
+            }
+*/
+        }
+
+        void SetAntennaMe()
+        {
+            float maxRadius = 0;
+            int iMax = -1;
+            for(int i=0;i<antennaList.Count;i++)
+            {
+                if(antennaList[i].Radius>maxRadius)
+                {
+                    iMax = i;
+                    maxRadius = antennaList[i].Radius;
+                }
+                if(iMax>=0)
+                {
+                    if (antennaList[iMax].AttachedProgrammableBlock != Me.EntityId)
+                        sInitResults += "\nSetting Antenna PB";
+                    antennaList[iMax].AttachedProgrammableBlock = Me.EntityId;
+                }
+            }
+        }
+
+        void antennaLowPower(bool bAll = false)
         {
             if (antennaList.Count < 1) antennaInit();
 
             foreach (var a in antennaList)
             {
                 a.Radius = 200;
+                if (a.AttachedProgrammableBlock > 0 || bAll)
+                {
+                    a.Enabled = true;
+                }
+           }
+        }
 
-//                a.SetValueFloat("Radius", 200);
+        void antennaSetRadius(float fRadius=200, bool bAll=false)
+        {
+            if (antennaList.Count < 1) antennaInit();
+            foreach (var a in antennaList)
+            {
+                if (a.AttachedProgrammableBlock > 0 || bAll)
+                {
+                    a.Radius = fRadius;
+                    a.Enabled = true;
+                }
             }
         }
 
-        void antennaMaxPower()
+        void antennaMaxPower(bool bAll=false)
         {
             if (antennaList.Count < 1) antennaInit();
 
             foreach (var a in antennaList)
             {
-                float maxPower = a.GetMaximum<float>("Radius");
-                a.Radius = maxPower;
-//                a.SetValueFloat("Radius", maxPower);
+                if (a.AttachedProgrammableBlock > 0 || bAll)
+                {
+                    float maxPower = a.GetMaximum<float>("Radius");
+                    a.Radius = maxPower;
+                    a.Enabled = true;
+                }
             }
         }
         #region AntennaSend
@@ -90,7 +159,7 @@ namespace IngameScript
         }
         void antSend(string message)
         {
-            Echo("Sending:\n" + message);
+//            Echo("Sending:\n" + message);
             bool bSent = false;
             if (antennaList.Count < 1) antennaInit();
             for (int i = 0; i < antennaList.Count; i++)
@@ -109,10 +178,11 @@ namespace IngameScript
         #endregion
 
         #region AntennaReceive
+        // This is for the module(s) that are set to be targets of messages from antennas
 
         List<string> lPendingIncomingMessages = new List<string>();
 
-        void processPendingReceives()
+        void processPendingReceives(bool bMain=false)
         {
             if (lPendingIncomingMessages.Count > 0)
             {
@@ -120,19 +190,27 @@ namespace IngameScript
                 { // receiver signals processed by removing message
                     sReceivedMessage = lPendingIncomingMessages[0];
                     lPendingIncomingMessages.RemoveAt(0);
+                    if (bMain)
+                    {
+                        bWantFast = true;
+                    }
+                    else
+                    {
+                       doTriggerMain();
+                    }
                 }
             }
             if (lPendingIncomingMessages.Count > 0)
             {
                 // if there are more, process quickly
-                doTriggerMain();
+//                doTriggerMain();
                 // NOTE: In MAIN module, this should be bWantFast=true;
 //                bWantFast = true; 
             }
         }
         void antReceive(string message)
         {
-            Echo("RECEIVE:\n" + message);
+//            Echo("RECEIVE:\n" + message);
             lPendingIncomingMessages.Add(message);
             processPendingReceives();
 
