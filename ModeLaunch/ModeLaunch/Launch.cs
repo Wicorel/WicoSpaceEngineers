@@ -19,6 +19,12 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         #region launch
+        List<IMyTerminalBlock> thrustLaunchBackwardList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustLaunchForwardList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustLaunchLeftList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustLaunchRightList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustLaunchUpList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustLaunchDownList = new List<IMyTerminalBlock>();
 
         void doModeLaunch()
         {
@@ -28,7 +34,13 @@ namespace IngameScript
             {
                 StatusLog(DateTime.Now.ToString() + " ACTION: StartLaunch", textLongStatus, true);
                 StatusLog(moduleName + ":Start Launch", textPanelReport);
-
+/*
+                Echo("#LocalDock=" + localDockConnectors.Count);
+                for (int i = 0; i < localDockConnectors.Count; i++)
+                {
+                    Echo(i + ":" + localDockConnectors[i].CustomName);
+                }
+                */
                 if (!AnyConnectorIsConnected())
                 {
                     StatusLog("Can't perform action unless docked", textLongStatus, true);
@@ -36,9 +48,18 @@ namespace IngameScript
                     setMode(MODE_IDLE);
                     return;
                 }
+                else
+                {
+                    IMyTerminalBlock dockingConnector = getConnectedConnector(true);
+//                    Echo("Using Connector=" + dockingConnector.CustomName);
+
+                    thrustersInit(dockingConnector, ref thrustLaunchForwardList, ref  thrustLaunchBackwardList,
+                        ref thrustLaunchDownList, ref thrustLaunchUpList,
+                        ref thrustLaunchLeftList, ref thrustLaunchRightList);
+                }
                 vDock = ((IMyShipController)gpsCenter).CenterOfMass;
 //                vDock = gpsCenter.GetPosition();
-                powerDownThrusters(thrustAllList);
+                powerDownThrusters(thrustAllList); // turns ON all thrusters.
                 antennaMaxPower();
                 current_state = 100;
                 return;
@@ -47,14 +68,12 @@ namespace IngameScript
             {
                 StatusLog(moduleName + ":Awaiting Disconnect", textPanelReport);
                 Echo("Awaiting Disconnect");
-
                 ConnectAnyConnectors(false, "OnOff_Off");
-
                 return;
             }
             if (current_state == 100)
             {
-                powerUpThrusters(thrustForwardList);
+                powerUpThrusters(thrustLaunchBackwardList);
 
                 current_state = 1;
             }
@@ -73,11 +92,11 @@ namespace IngameScript
             {
                 ConnectAnyConnectors(true, "OnOff_On");
             }
+
             {
 
-                if (velocityShip > 2) powerUpThrusters(thrustForwardList, 25);
-                else powerUpThrusters(thrustForwardList);
-
+                if (velocityShip > 2) powerUpThrusters(thrustLaunchBackwardList, 25);
+                else powerUpThrusters(thrustLaunchBackwardList);
             }
             if (dist > 45)
             {
