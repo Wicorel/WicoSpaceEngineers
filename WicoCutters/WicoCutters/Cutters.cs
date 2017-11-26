@@ -43,23 +43,23 @@ namespace IngameScript
         bool doCut(bool bCut = true)
         {
             bool bDoingCut = false;
-            Echo("CUTTING!");
+//            Echo("CUTTING!");
 		    for (int i = 0; i < cutterList.Count; i++)
 		    {
                 if (cutterList[i] is IMyThrust)
                 {
                     Echo("Thruster!");
                     var t = cutterList[i] as IMyThrust;
-                    t.Enabled = true;
                     if (bCut)
                     {
+                        t.Enabled = true;
                         t.SetValueFloat("Override", 100.0f);
                         bDoingCut = true;
                     }
                     else
                     {
+                        t.Enabled = false;
                         t.SetValueFloat("Override", 0f);
-
                     }
                 }
                 else if (cutterList[i] is IMySmallGatlingGun)
