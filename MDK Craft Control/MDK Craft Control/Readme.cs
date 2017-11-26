@@ -3,7 +3,7 @@
 *
 * Control Script for Rovers and Drones and Oribtal craft
 * 
-* Version 3.0K2
+* Version 3.1A
 * 
 * 2.0 Removed many built-in functions to make script room. These functions were duplicated in sub-modules anyway.
 * 2.0.1
@@ -68,6 +68,9 @@
 * 3.0K2  search order for text panels
 * 
 * 3.1 Verison for SE 1.185 PB Major changes
+* 
+* 3.1A init cycle optimizations
+* 
 * 
 * Handles:
 * Master timer for sub-modules
