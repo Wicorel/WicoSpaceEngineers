@@ -110,7 +110,7 @@ namespace IngameScript
             {
                 if (dGridCheckLast > dGridCheckWait || !init)
                 {
-//                    Echo("DO Grid Check");
+                   Echo("DO Grid Check");
                     dGridCheckLast = 0;
 
 //                    IMyTextPanel masstextBlock = getTextBlock("MASS");
@@ -124,6 +124,8 @@ namespace IngameScript
                     //		Echo("Physicalmass=" + myMass.PhysicalMass.ToString());
 //                    StatusLog("gridBaseMass=" + gridBaseMass.ToString(), masstextBlock);
                     newgridBaseMass = myMass.BaseMass;
+                    Echo("New=" + newgridBaseMass + " CurrentM=" + gridBaseMass);
+             Echo("MASS:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                     if (myMass.BaseMass == 0)
                         Echo("No Mass--Station?");
                     if (newgridBaseMass != gridBaseMass && gridBaseMass > 0)
@@ -152,7 +154,7 @@ namespace IngameScript
             }
 //            Echo("MainInst1A:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
-            if (sArgument == "init" || (Math.Abs(newgridBaseMass - gridBaseMass) > 1 && gridBaseMass > 0) || (currentInit == 0 && calcGridSystemChanged()))
+            if (sArgument == "init" || (Math.Abs(newgridBaseMass - gridBaseMass) > 1 && gridBaseMass > 0 && currentInit==0) || (currentInit == 0 && calcGridSystemChanged()))
             {
                 Log("INIT or GRID/MASS CHANGE!");
 
