@@ -100,27 +100,7 @@ bool processArguments(string sArgument)
 			else Echo("No Ship Controller found");
 
 		}
-/*
-		else if (args[0] == "setsimspeed")
-		{
-			if (args.Length < 2)
-			{
-				Echo("setsimspeed:nvalid arg");
-				continue;
-			}
-			float fValue = 0;
-			bool fOK = float.TryParse(args[1].Trim(), out fValue);
-			if (!fOK)
-			{
-				Echo("invalid float value:" + args[1]);
-				continue;
-			}
-			fAssumeSimSpeed = fValue;
-			bCalcAssumed = true;
-
-		}
-*/
-		else if (args[0] == "wcct")
+		else if (args[0] == "wcct" || args[0]=="")
 		{
 			// do nothing special
 		}
