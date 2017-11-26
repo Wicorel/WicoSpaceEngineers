@@ -48,13 +48,17 @@ namespace IngameScript
 
                     bBuilding = true;
                     // toggle: ShowOnlyBuildable
-                    bool bBuildable = localProjectorList[i].GetValueBool("ShowOnlyBuildable");
-                    localProjectorList[i].SetValueBool("ShowOnlyBuildable", !bBuildable);
-                    
+                    bool bBuildable = false;
+
+//                    bBuildable=localProjectorList[i].GetValueBool("ShowOnlyBuildable");
+                    bBuildable = localProjectorList[i].ShowOnlyBuildable;
+//                    localProjectorList[i].SetValueBool("ShowOnlyBuildable", !bBuildable);
+                    localProjectorList[i].ShowOnlyBuildable=!bBuildable;
+
                     if(bEcho) Echo(localProjectorList[i].CustomName);
                     if(bEcho) Echo("Buildable:" + localProjectorList[i].BuildableBlocksCount);
                     if(bEcho) Echo("Remaining:" + localProjectorList[i].RemainingBlocks);
-                    if (!bBuildable || localProjectorList[i].RemainingBlocks < 1)
+                    if (bBuildable || localProjectorList[i].RemainingBlocks < 1)
                     {
                         bBuilding = true;
                     }
@@ -68,9 +72,8 @@ namespace IngameScript
 		    for (int i = 0; i < localProjectorList.Count; i++)
 		    {
 			    localProjectorList[i].Enabled = false;
-                localProjectorList[i].SetValueBool("ShowOnlyBuildable", false);
+                localProjectorList[i].ShowOnlyBuildable = false;
 		    }
-
         }
     }
 }
