@@ -284,6 +284,7 @@ namespace IngameScript
 //                                    turnDrillsOff();
                                     turnEjectorsOff();
                                     setMode(MODE_EXITINGASTEROID);
+                                    doTriggerMain();
                                 }
                                 // TODO: Needs time-out
                                 Echo("Cargo above low water: Waiting");
@@ -686,16 +687,34 @@ namespace IngameScript
                     {
                         bWantFast = true;
                         turnDrillsOn();
+
+                        // we want to turn on our horizontal axis as that should be the 'wide' one.
+
+
+                        bool bAimed = false;
+                        double yawangle = -999;
+                        Echo("vTarget=" + Vector3DToString(vLastContact));
+                        yawangle = CalculateYaw(vLastContact, gpsCenter);
+            Echo("yawangle=" + yawangle.ToString());
+                        double aYawAngle = Math.Abs(yawangle);
+                        bAimed = aYawAngle < .05;
+                        float maxYPR = GyroControl.MaxYPR;
+                        if (aYawAngle > 1.0) maxYPR = maxYPR / 2;
+                        DoRotate(yawangle, "Yaw", maxYPR);
+
+                        /*
                         //minAngleRad = 0.1f;
-                        bool bAimed = GyroMain("backward", vExpectedExit, gpsCenter);
+                        bAimed=GyroMain("backward", vExpectedExit, gpsCenter);
 
                        // minAngleRad = 0.01f;
                         // GyroMain("backward", vExpectedExit, gpsCenter);
+                        */
                         if (bAimed)
                         {
                             mineMoveForward(fTargetMiningmps,fAbortmps);
 
                         }
+                        
                         bool bLocalAsteroid = false;
                         aSensors = activeSensors();
                         for (int i = 0; i < aSensors.Count; i++)
