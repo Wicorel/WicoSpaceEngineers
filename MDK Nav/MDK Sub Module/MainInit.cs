@@ -37,18 +37,18 @@ namespace IngameScript
             // initialization of each module goes here:
 
             // when all initialization is done, set init to true.
-            initLogging();
 
             // set autogyro defaults.
             LIMIT_GYROS = 1;
             minAngleRad = 0.09f;
             CTRL_COEFF = 0.75;
 
+/*
             Log("Init:" + currentInit.ToString());
             double progress = currentInit * 100 / 3;
             string sProgress = progressBar(progress);
             StatusLog(sProgress, getTextBlock(sTextPanelReport));
-
+*/
             Echo("Init");
             if (currentInit == 0)
             {
@@ -63,6 +63,7 @@ namespace IngameScript
                 Deserialize();
                 sInitResults += gridsInit();
                 sInitResults += BlockInit();
+                initLogging();
 
                 sInitResults += thrustersInit(gpsCenter);
                 sInitResults += rotorsNavInit();
@@ -73,23 +74,28 @@ namespace IngameScript
                 sInitResults += connectorsInit();
 
                 sInitResults += gyrosetup(); 
+                GyroControl.UpdateGyroList(gyros);
+                GyroControl.SetRefBlock(gpsCenter);
+
                 sInitResults += lightsInit();
 
                 initShipDim();
 
                 sInitResults += modeOnInit(); // handle mode initializting from load/recompile..
-                GyroControl.UpdateGyroList(gyros);
                 init = true;
 
             }
 
             currentInit++;
-            if (init) currentInit = 0;
+            if (init)
+            {
+                currentInit = 0;
+                bWantFast = false;
+            }
 
             Log(sInitResults);
 
             return sInitResults;
-
         }
 
         IMyTextPanel gpsPanel = null;
