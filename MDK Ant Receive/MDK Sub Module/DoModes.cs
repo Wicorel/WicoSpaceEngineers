@@ -43,6 +43,7 @@ namespace IngameScript
 //	        processReceivedMessage();
 	        processDockingStates();
 	        doBaseAnnounce();
+            DebugAntenna();
         }
 
         #region modeidle 

@@ -1,10 +1,15 @@
 ﻿/*
 * Wico craft Antenna Receive sub-module
+* 
+* Full Source available here: https://github.com/Wicorel/SpaceEngineers/tree/master/MDK%20Ant%20Receive
+* Workshop here: http://steamcommunity.com/sharedfiles/filedetails/?id=883864500
 *
 * Handles:
 * Receiving messages from antennas
 * Passing messages on to other sub-modules
 * queueing of received mesages
+* 
+* Dock Manager.  Handles managing connectors and requests for docking
 *  
 * Modes:
 * none
@@ -32,5 +37,11 @@
 * Increase time before active BASE send.  Randomize time before starting to send to avoid burst transmission at world start.
 * 
 * 3.1 Version for SE 1.185
+* 
+* 3.1A 
+* Now using MDK Minify (size was >80k without)
+* Moved a number of utility routines into WicoAntenna
+* Check antenna for this PB set as attached.  Attach this PB to the antenna with maximum range
+* 
 *
 */

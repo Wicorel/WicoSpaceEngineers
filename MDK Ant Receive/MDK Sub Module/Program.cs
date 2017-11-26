@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "AntReceive";
-        string sVersion = "3.1";
+        string sVersion = "3.1A";
 
         const string sGPSCenter = "Craft Remote Control";
 
@@ -31,24 +31,12 @@ namespace IngameScript
             public OurException(string msg) : base("WicoAntReceiveModule" + ": " + msg) { }
         }
 
-        string sLastMessage = "";
-
+        
         void moduleDoPreModes()
         {
-	        if (sReceivedMessage != "")
-	        {
-		        Echo("Processing Message:\n" + sReceivedMessage);
-
-		        if (sLastMessage == sReceivedMessage)
-		        {
-			        Echo("Clearing last message: Not processed");
-			        sReceivedMessage = ""; // clear it.
-		        }
-
-		        sLastMessage = sReceivedMessage;
-	        }
-	        else sLastMessage = "";
+            AntennaCheckOldMessages();
         }
+
 
         void modulePostProcessing()
         {

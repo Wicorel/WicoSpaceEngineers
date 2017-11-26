@@ -56,6 +56,7 @@ namespace IngameScript
 
                 Deserialize();
                 sInitResults += antennaInit();
+                SetAntennaMe();
 
                 sInitResults += modeOnInit(); // handle mode initializting from load/recompile..
 
