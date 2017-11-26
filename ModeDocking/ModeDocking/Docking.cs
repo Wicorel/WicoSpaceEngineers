@@ -40,6 +40,11 @@ namespace IngameScript
         101 wait for slow speed
           choose base.  Send request.
         102 wait for reply from base
+        105  timeout while wiating for a reply from a base; try to move closer to base ->101
+        106 collision calc from 105
+        107 collision avoid from 106 ->101
+
+        109 No known bases.  wait for reply
 
         //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
 
@@ -67,6 +72,7 @@ namespace IngameScript
         165 check for escape route when found ->162
 
 
+        169 Delay for motion before 170
         170 align to docking alignment
         171 align to dock
         172 align to docking alignment
@@ -90,11 +96,19 @@ namespace IngameScript
 
         int iTargetBase = -1;
 
+        List<IMyTerminalBlock> thrustDockBackwardList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustDockForwardList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustDockLeftList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustDockRightList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustDockUpList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> thrustDockDownList = new List<IMyTerminalBlock>();
+
         void doModeDocking()
         {
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":DOCKING!", textPanelReport);
             StatusLog(moduleName + ":Docking: current_state=" + current_state, textPanelReport);
+            StatusLog(moduleName + ":Docking: current_state=" + current_state, textLongStatus, true);
             bWantFast = true;
             Echo("DOCKING: state=" + current_state);
 
@@ -102,8 +116,11 @@ namespace IngameScript
 
             if (dockingConnector == null) current_state = 0;
 
+//            sInitResults += "DOCKING: state=" + current_state+"\n";
+
             if (current_state == 0)
             {
+//                sInitResults = "DOCKING: state=" + current_state+"\n";
                 if (AnyConnectorIsConnected())
                 {
                     setMode(MODE_DOCKED);
@@ -116,12 +133,17 @@ namespace IngameScript
                     StatusLog(moduleName + ":No local Docking Connector Availalbe!", textLongStatus, true);
                     // we could check for merge blocks.. or landing gears..
                     setMode(MODE_ATTENTION);
+                    bWantFast = false;
                     return;
                 }
                 else
                 {
                     ResetMotion();
                     turnDrillsOff();
+
+                    thrustersInit(dockingConnector, ref thrustDockForwardList, ref  thrustDockBackwardList,
+                        ref thrustDockDownList, ref thrustDockUpList,
+                        ref thrustDockLeftList, ref thrustDockRightList);
                     current_state = 100;
                 }
                 iTargetBase = -1;
@@ -150,14 +172,20 @@ namespace IngameScript
                 if (velocityShip < 10)
                 {
                     if (iTargetBase < 0) iTargetBase = findBestBase();
-                    if (iTargetBase >= 0)
+                    //                    sInitResults += "101: Base=" + iTargetBase;
+                   dtStartShip = DateTime.Now;
+                   if (iTargetBase >= 0)
                     {
-                        dtStartShip = DateTime.Now;
                         antSend("WICO:CON?:" + baseIdOf(iTargetBase).ToString() + ":" + "mini" + ":" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
                         current_state = 102;
                     }
                     else // No available base
-                        setMode(MODE_ATTENTION);
+                    {
+                        // try to get a base to respond
+                        checkBases(true);
+                        current_state = 109;
+//                        setMode(MODE_ATTENTION);
+                    }
                 }
                 else
                     ResetMotion();
@@ -243,6 +271,20 @@ namespace IngameScript
             {
                 doTravelMovement(vAvoid, 5.0f, 101, 106);
             }
+            else if (current_state == 109)
+            {
+                // no known bases. requested response. wait for a while to see if we get one
+                bWantFast = false;
+                DateTime dtMaxWait = dtStartShip.AddSeconds(2.0f);
+                DateTime dtNow = DateTime.Now;
+                if (DateTime.Compare(dtNow, dtMaxWait) > 0)
+                {
+                    setMode(MODE_ATTENTION);
+                    return;
+                }
+                if (findBestBase() >= 0)
+                    current_state = 101;
+            }
 
             else if (current_state == 110)
             { //110	Move to 'approach' location (or current location) ?request 'wait' location?
@@ -274,7 +316,7 @@ namespace IngameScript
             {//120	request available docking connector
                 if (velocityShip < 5)
                 {
-                    antSend("WICO:COND?:" +baseIdOf(iTargetBase) +":" + "mini"+":"+gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                    antSend("WICO:COND?:" + baseIdOf(iTargetBase) + ":" + "mini" + ":" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
                     {
                         dtStartShip = DateTime.Now;
                         current_state = 131;
@@ -405,7 +447,7 @@ namespace IngameScript
                 Echo("Moving to Home");
                 //		if(iPushCount<60) iPushCount++;
                 //		else
-                doTravelMovement(vHome, 3.0f, 170, 161);
+                doTravelMovement(vHome, 3.0f, 169, 161);
             }
             else if (current_state == 161)
             { //161 Collision detected
@@ -447,6 +489,20 @@ namespace IngameScript
                 if (scanEscape())
                 {
                     current_state = 162;
+                }
+            }
+            else if (current_state == 169)
+            {
+                ResetMotion();
+                Echo("Waiting for ship to stop");
+                iPushCount = 0;
+                if (velocityShip < 0.1f)
+                {
+                    current_state = 170;
+                }
+                else
+                {
+                    bWantFast = false;
                 }
             }
             else if (current_state == 170 || current_state == 172)
@@ -524,24 +580,27 @@ namespace IngameScript
                     if (distance > 15)
                     {
                         Echo(">15");
-                        if (velocityShip < 2)
-                            powerUpThrusters(thrustBackwardList, 55);
-                        else if (velocityShip < 15)
-                            powerUpThrusters(thrustBackwardList, 25);
+                        if (velocityShip < .5)
+                        {
+                            iPushCount++;
+                            powerUpThrusters(thrustDockForwardList, 25+ iPushCount);
+                        }
+                        else if (velocityShip < 5)
+                            powerUpThrusters(thrustDockForwardList, 1);
                         else
                             powerDownThrusters(thrustAllList);
                     }
                     else
                     {
                         Echo("<=15");
-                        if (velocityShip < 2)
+                        if (velocityShip < .5)
                         {
                             iPushCount++;
-                            powerUpThrusters(thrustBackwardList, 25 + iPushCount);
+                            powerUpThrusters(thrustDockForwardList, 25 + iPushCount);
                         }
-                        else if (velocityShip < 5)
+                        else if (velocityShip < 1.4)
                         {
-                            powerUpThrusters(thrustBackwardList, 1);
+                            powerUpThrusters(thrustDockForwardList, 1);
                             if (iPushCount > 0) iPushCount--;
                         }
                         else
