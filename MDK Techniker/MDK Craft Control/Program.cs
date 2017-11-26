@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "TechnikerMain";
-        string sVersion = "T3.1A";
+        string sVersion = "T3.1B";
 
         string sGPSCenter = "Remote Control Techniker";
 

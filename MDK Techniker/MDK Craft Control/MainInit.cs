@@ -42,7 +42,7 @@ namespace IngameScript
         string doInit()
         {
 
-//             Echo("InitA:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+             Echo("InitA:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
            // initialization of each module goes here:
 
             // when all initialization is done, set init to true.

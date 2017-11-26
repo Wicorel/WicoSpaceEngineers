@@ -71,6 +71,10 @@
 * 
 * T3.1  Techniker version.
 * 
+* T3.1A Fixes for complexity
+* 
+* T3.1B fixes for (incorrectly) detecting mass change on dock
+* 
 * Handles:
 * Master timer for sub-modules
 * Calculates ship speed and vectors
