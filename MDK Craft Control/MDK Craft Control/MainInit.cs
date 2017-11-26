@@ -40,15 +40,15 @@ namespace IngameScript
             // initialization of each module goes here:
 
             // when all initialization is done, set init to true.
-            initLogging();
 
             Log("Init:" + currentInit.ToString());
             Echo(gtsAllBlocks.Count.ToString() + " Blocks");
 
+            /*
             double progress = currentInit * 100 / 3; // 3=Number of expected INIT phases.
             string sProgress = progressBar(progress);
             StatusLog(moduleName + sProgress, textPanelReport);
-
+            */
             Echo("Init:" + currentInit);
             if (currentInit == 0)
             {
@@ -59,6 +59,7 @@ namespace IngameScript
                 if(!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
                 */
                 sInitResults += gridsInit();
+                initLogging();
                 initTimers();
                 sInitResults += initSerializeCommon();
 
@@ -102,6 +103,13 @@ namespace IngameScript
                 autoConfig();
                 bWantFast = false;
 
+                if (bGotAntennaName)
+                   sBanner = "*" + OurName + ":" + moduleName + " V" + sVersion + " ";
+
+                if(sBanner.Length>34)
+                {
+                    sBanner = OurName + ":" + moduleName + "\nV" + sVersion + " ";
+                }
                 if (anchorPosition != null)
                 {
                     MyShipMass myMass;
