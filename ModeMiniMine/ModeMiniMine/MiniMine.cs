@@ -528,7 +528,7 @@ namespace IngameScript
                         ResetMotion();
                         sleepAllSensors();
 
-                        if (maxDeltaV < (fTargetMiningmps/2) && cargopcent > cargopctlowwater)
+                        if (maxDeltaV < (fTargetMiningmps/2) || cargopcent > cargopctlowwater)
                         {
                             setMode(MODE_DOCKING);
                         }
