@@ -64,22 +64,6 @@ namespace IngameScript
 
                 // 1.185
                 maxBatteryPower += r.MaxOutput;
-                /*
-                MyResourceSourceComponent source;
-                r.Components.TryGet<MyResourceSourceComponent>(out source);
-
-                if (source != null)
-                {
-                    float currentOutput = 0;
-                    float maxOutput = 0;
-                    currentOutput = source.CurrentOutput;
-                    maxOutput = source.MaxOutput;
-                    maxBatteryPower += maxOutput;
-                }
-                */
-                //		output = r.MaxOutput;
-  //              PowerProducer.GetMaxOutput(r, out output);
- //               maxBatteryPower += output;
             }
         }
 
