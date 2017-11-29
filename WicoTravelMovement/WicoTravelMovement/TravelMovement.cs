@@ -30,6 +30,8 @@ namespace IngameScript
          * 
          */
 
+        bool dTMDebug = true;
+
         IMyShipController tmShipController = null;
         double tmMaxSpeed = 85;
 
@@ -91,9 +93,10 @@ namespace IngameScript
             dtmPrecision =calculateStoppingDistance(thrustTmBackwardList, dtmPrecisionSpeed, 0);
        }
 
+
         void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState)
         {
-            Echo("dTM:" + arrivalState);
+            if(dTMDebug) Echo("dTM:" + arrivalState);
             //		Vector3D vTargetLocation = vHome;// gpsCenter.GetPosition();
             //    gpsCenter.CubeGrid.
             if (tmShipController == null)
@@ -106,9 +109,9 @@ namespace IngameScript
             //		debugGPSOutput("vTargetLocation", vTargetLocation);
             double distance = vVec.Length();
 
-            Echo("dTM:distance=" + niceDoubleMeters(distance));
-            Echo("dTM:velocity=" + velocityShip.ToString("0.00"));
-            Echo("dTM:tmMaxSpeed=" + tmMaxSpeed.ToString("0.00"));
+            if(dTMDebug) Echo("dTM:distance=" + niceDoubleMeters(distance));
+            if(dTMDebug) Echo("dTM:velocity=" + velocityShip.ToString("0.00"));
+            if(dTMDebug) Echo("dTM:tmMaxSpeed=" + tmMaxSpeed.ToString("0.00"));
 
             if (distance < arrivalDistance)
             {
@@ -142,7 +145,7 @@ namespace IngameScript
             if (bAimed)
             {
                 // we are aimed at location
-                Echo("Aimed");
+               if(dTMDebug)  Echo("Aimed");
                 gyrosOff();
 
                 if (sensorsList.Count > 0)
@@ -162,10 +165,10 @@ namespace IngameScript
                 aSensors = activeSensors();
                 if (aSensors.Count > 0)
                 {
-                    Echo("Sensor TRIGGER!");
-                    Echo("Name: " + aSensors[0].LastDetectedEntity.Name);
-                    Echo("Type: " + aSensors[0].LastDetectedEntity.Type);
-                    Echo("Relationship: " + aSensors[0].LastDetectedEntity.Relationship);
+                   if(dTMDebug)  Echo("Sensor TRIGGER!");
+                    if(dTMDebug) Echo("Name: " + aSensors[0].LastDetectedEntity.Name);
+                    if(dTMDebug) Echo("Type: " + aSensors[0].LastDetectedEntity.Type);
+                    if(dTMDebug) Echo("Relationship: " + aSensors[0].LastDetectedEntity.Relationship);
                     lastDetectedInfo = aSensors[0].LastDetectedEntity;
                     // something in way.
                     current_state = colDetectState;
@@ -197,13 +200,13 @@ namespace IngameScript
                     dtmPrecision = stoppingDistance * 1.1;
                     */
 
-                Echo("dtmFar=" + niceDoubleMeters(dtmFar));
-                Echo("dtmApproach=" + niceDoubleMeters(dtmApproach));
-                Echo("dtmPrecision=" + niceDoubleMeters(dtmPrecision));
+                if(dTMDebug) Echo("dtmFar=" + niceDoubleMeters(dtmFar));
+                if(dTMDebug) Echo("dtmApproach=" + niceDoubleMeters(dtmApproach));
+                if(dTMDebug) Echo("dtmPrecision=" + niceDoubleMeters(dtmPrecision));
 
                 if (distance > dtmFar &&!btmApproach)
                 {
-                    Echo("dtmFar");
+                    if(dTMDebug) Echo("dtmFar");
                     if (velocityShip < 1)
                         powerUpThrusters(thrustTmForwardList, 100);
                     else if (velocityShip < dtmFarSpeed * .75)
@@ -219,12 +222,13 @@ namespace IngameScript
                     else // sweet spot
                     {
                         powerDownThrusters(thrustAllList);
-                        tmShipController.DampenersOverride = false;
+                        powerDownThrusters(thrustTmBackwardList, thrustAll, true);
+//                        tmShipController.DampenersOverride = false;
                     }
                 }
                 else if (distance > dtmApproach && !btmPrecision)
                 {
-                    Echo("Approach");
+                    if(dTMDebug) Echo("Approach");
                     btmApproach = true;
 
                     if (velocityShip < 1)
@@ -238,7 +242,7 @@ namespace IngameScript
                 }
                 else if (distance > dtmPrecision && !btmClose)
                 {
-                    Echo("Precision");
+                    if(dTMDebug) Echo("Precision");
  //                   btmPrecision = true;
                     if (velocityShip < 1)
                         powerUpThrusters(thrustTmForwardList, 55f);
@@ -251,7 +255,7 @@ namespace IngameScript
                 }
                 else
                 {
-                    Echo("Close");
+                    if(dTMDebug) Echo("Close");
                     btmClose = true;
                     if (velocityShip < 1)
                         powerUpThrusters(thrustTmForwardList, 25f);
@@ -265,7 +269,7 @@ namespace IngameScript
             }
             else
             {
-                Echo("Aiming");
+                if(dTMDebug) Echo("Aiming");
                 //                tmShipController.DampenersOverride = false;
                 tmShipController.DampenersOverride = true;
                 if (velocityShip < 5)
