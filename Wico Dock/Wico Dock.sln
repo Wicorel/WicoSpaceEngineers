@@ -59,12 +59,15 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoBases", "..\WicoBases\W
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoDrills", "..\WicoDrills\WicoDrills\WicoDrills.shproj", "{4DA7BC66-5B0E-436C-BD2A-CD063083F8D1}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoPower", "..\WicoPower\WicoPower\WicoPower.shproj", "{38047FEE-EE7C-478F-B355-7B45F4CCB3E8}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\ModeDocked\ModeDocked\ModeDocked.projitems*{06776b42-2575-4e49-8c91-9f4ed9961873}*SharedItemsImports = 13
 		..\WicoThrusters\WicoThrusters\WicoThrusters.projitems*{16d5d301-e8ca-45e6-b9d9-968f6d1aa766}*SharedItemsImports = 13
 		..\WicoGasTanks\WicoGasTanks\WicoGasTanks.projitems*{2118e240-d5fe-4b28-98fd-23dd8a1d7c7d}*SharedItemsImports = 13
 		..\ModeDocking\ModeDocking\ModeDocking.projitems*{30b8b36e-f37d-4ccc-b5d2-bf5c371baf98}*SharedItemsImports = 13
+		..\WicoPower\WicoPower\WicoPower.projitems*{38047fee-ee7c-478f-b355-7b45f4ccb3e8}*SharedItemsImports = 13
 		..\SharedWicoGyro\SharedWicoGyro\SharedWicoGyro.projitems*{405cd3ab-b8e0-4c7d-b1f8-48199354b480}*SharedItemsImports = 13
 		..\WicoOldNavInterface\WicoOldNavInterface\WicoOldNavInterface.projitems*{48726aa5-2501-4f7d-b1fd-a2b5ee8504c0}*SharedItemsImports = 13
 		..\WicoTravelMovement\WicoTravelMovement\WicoTravelMovement.projitems*{4a5a1957-600d-44c6-be65-9ec80fca41cd}*SharedItemsImports = 13
