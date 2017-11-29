@@ -167,6 +167,7 @@ namespace IngameScript
 
             sReceivedMessage = getLine();
         }
+
         bool stringToBool(string txt)
         {
             txt = txt.Trim().ToLower();
