@@ -19,72 +19,83 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
 
-// check for gears with "[DOCK]"
-#region gears 
+        // check for gears with "[DOCK]"
+        #region gears 
 
-List<IMyTerminalBlock> gearList = new List<IMyTerminalBlock>();
+        List<IMyTerminalBlock> gearList = new List<IMyTerminalBlock>();
 
-void getLocalGears()
-{
-	if (gearList.Count < 1) gearList = GetBlocksContains<IMyLandingGear>("[DOCK]"); 
-	if (gearList.Count < 1) gearList = GetTargetBlocks<IMyLandingGear>(); 
+        void getLocalGears()
+        {
+            if (gearList.Count < 1) gearList = GetBlocksContains<IMyLandingGear>("[DOCK]");
+            if (gearList.Count < 1) gearList = GetTargetBlocks<IMyLandingGear>();
 
-	return;
-}
+            return;
+        }
 
 
-string gearsInit()
-{
-	{
-		gearList.Clear();
-		getLocalGears();
-	}
-	return "LG" + gearList.Count.ToString("00");
-}
-bool anyGearIsLocked()
-{
-	for (int i = 0; i < gearList.Count; i++)
-	{
-		IMyLandingGear lGear;
-		lGear = gearList[i] as IMyLandingGear;
-		if (lGear != null && lGear.IsLocked)
-			return true;
-	}
-	return false;
-}
+        string gearsInit()
+        {
+            {
+                gearList.Clear();
+                getLocalGears();
+            }
+            return "LG" + gearList.Count.ToString("00");
+        }
+        bool anyGearIsLocked()
+        {
+            for (int i = 0; i < gearList.Count; i++)
+            {
+                IMyLandingGear lGear;
+                lGear = gearList[i] as IMyLandingGear;
+                if (lGear != null && lGear.IsLocked)
+                    return true;
+            }
+            return false;
+        }
 
-bool gearReadyToLock(IMyTerminalBlock block)
-{
-	StringBuilder temp = new StringBuilder();
-	ITerminalAction theAction;
+        bool gearReadyToLock(IMyTerminalBlock block)
+        {
+            IMyLandingGear g = block as IMyLandingGear;
+            if (g == null) return false;
+            return ((int)g.LockMode == 1);// LandingGearMode.ReadyToLock);
+            /*
+            StringBuilder temp = new StringBuilder();
+            ITerminalAction theAction;
 
-	temp.Clear();
-	theAction = block.GetActionWithName("Lock");
-	block.GetActionWithName(theAction.Id.ToString()).WriteValue(block, temp);
-	if (temp.ToString().Contains("Ready"))
-		return true;
-	return false;
-}
-bool anyGearReadyToLock()
-{
-	StringBuilder temp = new StringBuilder();
-	for (int i = 0; i < gearList.Count; i++)
-	{
-		if (gearReadyToLock(gearList[i]))
-			return true;
-	}
-	return false;
-}
+            temp.Clear();
+            theAction = block.GetActionWithName("Lock");
+            block.GetActionWithName(theAction.Id.ToString()).WriteValue(block, temp);
+            if (temp.ToString().Contains("Ready"))
+                return true;
+            return false;
+            */
+        }
+        bool anyGearReadyToLock()
+        {
+            StringBuilder temp = new StringBuilder();
+            for (int i = 0; i < gearList.Count; i++)
+            {
+                if (gearReadyToLock(gearList[i]))
+                    return true;
+            }
+            return false;
+        }
 
-void gearsLock()
-{
-	for (int i = 0; i < gearList.Count; i++)
-	{
-//		if (gearReadyToLock(gearList[i]))
-			blockApplyAction(gearList[i],"Lock");
-	}
-}
-#endregion
+        void gearsLock(bool bLock = true)
+        {
+            for (int i = 0; i < gearList.Count; i++)
+            {
+                IMyLandingGear g = gearList[i] as IMyLandingGear;
+                if (g == null) continue;
+                if (bLock)
+                    g.Lock();
+                else
+                    g.Unlock();
+
+//                blockApplyAction(gearList[i], "Lock");
+            }
+        }
+        #endregion
 
 
     }
