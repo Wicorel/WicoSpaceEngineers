@@ -25,19 +25,15 @@ namespace IngameScript
 
         bool moduleProcessArguments(string sArgument)
         {
-            sArgResults = "";
-            // string output="";
-            if (sArgument == "" || sArgument == "timer" || sArgument == "wccs" || sArgument == "wcct")
+            if (sArgument == "" || sArgument == "timer" || sArgument == "wccs")
             {
                 Echo("Arg=" + sArgument);
-                Echo("PassedArg=" + sPassedArgument);
                 if (sPassedArgument != "" && sPassedArgument != "timer")
                 {
                     Echo("Using Passed Arg=" + sPassedArgument);
                     sArgument = sPassedArgument;
                 }
             }
-
             if (sArgument == "init")
             {
                 sInitResults = "";
@@ -47,32 +43,36 @@ namespace IngameScript
                 return false;
             }
 
-            string[] args = sArgument.Trim().Split(' ');
+            string[] varArgs = sArgument.Trim().Split(';');
 
-            if (args[0] == "timer")
+            for (int iArg = 0; iArg < varArgs.Length; iArg++)
             {
-                // do nothing for sub-module
-            }
-            else if (args[0] == "wccs")
-            {
-
-            }
-            else if (args[0] == "wcct")
-            {
-
-            }
-            else
-            {
-                int iDMode;
-                if (modeCommands.TryGetValue(args[0].ToLower(), out iDMode))
+                string[] args = varArgs[iArg].Trim().Split(' ');
+                if (args[0] == "timer")
                 {
-                    sArgResults = "mode set to " + iDMode;
-                    setMode(iDMode);
-                    // return true;
+                    // do nothing for sub-module (should not receive this argument)
+                }
+                else if (args[0] == "wccs")
+                {
+
+                }
+                else if (args[0] == "wcct")
+                {
+
                 }
                 else
                 {
-                    sArgResults = "Unknown argument:" + args[0];
+                    int iDMode;
+                    if (modeCommands.TryGetValue(args[0].ToLower(), out iDMode))
+                    {
+                        sArgResults = "mode set to " + iDMode;
+                        setMode(iDMode);
+                        // return true;
+                    }
+                    else
+                    {
+                        sArgResults = "Unknown argument:" + args[0];
+                    }
                 }
             }
             return false; // keep processing in main
