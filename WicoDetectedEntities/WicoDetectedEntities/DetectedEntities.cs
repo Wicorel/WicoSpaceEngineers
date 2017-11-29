@@ -41,6 +41,24 @@ void addDetectedEntity(MyDetectedEntityInfo thisDetectedInfo)
 }
 
 #endregion
+        string deiInfo(MyDetectedEntityInfo dei)
+        {
+            string s = "";
+
+            s += "ETBV";
+
+            s += ":" + dei.EntityId.ToString();
+            s += ":" + dei.TimeStamp;
+
+            Vector3D min = dei.BoundingBox.Min;
+            s += ":" + Vector3DToString(min);
+            Vector3D max = dei.BoundingBox.Max;
+            s += ":" + Vector3DToString(max);
+
+            Vector3D vMaxd = (Vector3)dei.Velocity;
+            s += ":" + Vector3DToString(vMaxd);
+            return s;
+        }
 
     }
 }
