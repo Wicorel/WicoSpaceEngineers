@@ -131,8 +131,10 @@ namespace IngameScript
             }
             return null;
         }
-        void ConnectAnyConnectors(bool bConnect = true, string sAction = "")
+        //        void ConnectAnyConnectors(bool bConnect = true, string sAction = "")
+        void ConnectAnyConnectors(bool bConnect = true, bool bOn = true)
             {
+//            string sAction = "";
                 getLocalConnectors();
                 //	Echo("CCA:"+ localDockConnectors.Count);
                 for (int i = 0; i < localDockConnectors.Count; i++)
@@ -155,14 +157,15 @@ namespace IngameScript
                     {
                         if (sc.Status == MyShipConnectorStatus.Connected) sc.ApplyAction("SwitchLock");
                     }
-
+                sc.Enabled = bOn;
+                /*
                     if (sAction != "")
                     {
                         ITerminalAction ita;
                         ita = sc.GetActionWithName(sAction);
                         if (ita != null) ita.Apply(sc);
                     }
-
+                    */
                 }
                 return;
             }

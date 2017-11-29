@@ -26,6 +26,11 @@ namespace IngameScript
             return "GG" + gasgenList.Count.ToString("00");
         }
 
+        void GasGensEnable (bool bOn=true)
+        {
+            blocksOnOff(gasgenList, bOn);
+        }
+
         bool gasgenCheck()
         {
             return true;
@@ -35,11 +40,13 @@ namespace IngameScript
 	        // handle controlling gas gens
 	        if(tanksFill() > 99)
 	        {
-		        blockApplyAction(gasgenList, "OnOff_Off");
+                blocksOnOff(gasgenList, false);
+//		        blockApplyAction(gasgenList, "OnOff_Off");
 	        }
 	        else
 	        {
-		        blockApplyAction(gasgenList, "OnOff_On");
+                blocksOnOff(gasgenList, true);
+//		        blockApplyAction(gasgenList, "OnOff_On");
 	        }
 
         }

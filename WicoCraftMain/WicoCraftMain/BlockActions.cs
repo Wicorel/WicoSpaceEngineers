@@ -19,6 +19,9 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         #region blockactions
+        /*
+         * Don't use actions any more..
+         * 
         void groupApplyAction(string sGroup, string sAction)
         {
             List<IMyBlockGroup> groups = new List<IMyBlockGroup>(); GridTerminalSystem.GetBlockGroups(groups); for (int groupIndex = 0; groupIndex < groups.Count; groupIndex++)
@@ -72,6 +75,28 @@ namespace IngameScript
                         Echo("Unsupported action:" + sAction);
                 }
             }
+        }
+        */
+
+        void blocksOnOff(List<IMyTerminalBlock> blocks, bool bOn=true)
+        {
+            foreach(var b in blocks)
+            {
+                IMyFunctionalBlock f = b as IMyFunctionalBlock;
+                if (f == null) continue;
+                f.Enabled = bOn;
+            }
+        }
+
+        void blocksToggleOnOff(List<IMyTerminalBlock> blocks)
+        {
+            foreach(var b in blocks)
+            {
+                IMyFunctionalBlock f = b as IMyFunctionalBlock;
+                if (f == null) continue;
+                f.Enabled = !f.Enabled;
+            }
+
         }
         #endregion
 
