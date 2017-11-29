@@ -24,6 +24,9 @@ namespace IngameScript
         string sBanner = "";
         UpdateFrequency ufFast = UpdateFrequency.Update1; // default value for "Fast" for this module
 
+        bool bSubModules = true;
+        bool bCraftOperation = true;
+
         public Program()
         {
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
@@ -149,7 +152,7 @@ namespace IngameScript
             }
             else
             {
-                Echo("No anchorPosition to check");
+//                Echo("No anchorPosition to check");
                 gridBaseMass = newgridBaseMass = 0;
             }
 //            Echo("MainInst1A:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
@@ -185,7 +188,8 @@ namespace IngameScript
             }
             else
             {
-                Deserialize();
+//            Echo("MainInst2a:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+                if(bSubModules) Deserialize();
                 sPassedArgument = sArgument;
 
                 if (bWasInit)
@@ -194,7 +198,8 @@ namespace IngameScript
                 }
                 //        Echo(sInitResults);
 
-                Log(craftOperation());
+//            Echo("MainInst2b:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+//                Log(craftOperation());
                 IMyTerminalBlock anchorOrientation = gpsCenter;
                 /*
                 if (anchorOrientation != null)
@@ -213,15 +218,20 @@ namespace IngameScript
                     vCurrentPos = gpsCenter.GetPosition();
                 }
 
+//            Echo("MainInst2c:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 if (gpsCenter is IMyShipController)
                 //		if (gpsCenter is IMyRemoteControl)
                 {
-                    velocityShip = ((IMyShipController)anchorPosition).GetShipSpeed();
+//            Echo("MainInst2c1:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+                    velocityShip = ((IMyShipController)gpsCenter).GetShipSpeed();
+//            Echo("MainInst2c2:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
                     Vector3D vNG = ((IMyShipController)gpsCenter).GetNaturalGravity();
                     //			Vector3D vNG = ((IMyRemoteControl)gpsCenter).GetNaturalGravity();
+//            Echo("MainInst2c3:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                     double dLength = vNG.Length();
                     dGravity = dLength / 9.81;
+//            Echo("MainInst2c4:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
                     if (dGravity > 0)
                     {
@@ -235,6 +245,7 @@ namespace IngameScript
                         Echo("Sea Level=" + altitude.ToString("0.00"));
 
                     }
+//            Echo("MainInst2cX:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
                 }
                 else
@@ -252,12 +263,12 @@ namespace IngameScript
 //              Echo("MainInst3B:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 doModes();
             }
-            Serialize();
+            if(bSubModules) Serialize();
 //             Echo("MainInst4:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
-            if (anchorPosition == null || SaveFile == null)
+            if ((anchorPosition == null || SaveFile == null ))
             {
-                Echo("Cannot use sub-modules; missing controller and/or SaveFile");
+                if(bSubModules) Echo("Cannot use sub-modules; missing controller and/or SaveFile");
             }
             else doSubModuleTimerTriggers();
 
@@ -273,11 +284,11 @@ namespace IngameScript
 
             bWasInit = false;
 
-            verifyAntenna();
+//verifyAntenna();
 
-            Echo("Passing:'" + sPassedArgument + "'");
+//            Echo("Passing:'" + sPassedArgument + "'");
 
-            Echo(craftOperation());
+            if(bCraftOperation) Echo(craftOperation());
 
             modulePostProcessing();
         }
