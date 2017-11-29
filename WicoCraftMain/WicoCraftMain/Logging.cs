@@ -34,6 +34,8 @@ namespace IngameScript
         IMyTextPanel textPanelReport = null;
         bool bLoggingInit = false;
 
+        bool bLogMeansEcho = false;
+
         void initLogging()
         {
             statustextblock = getTextStatusBlock(true);
@@ -100,6 +102,7 @@ namespace IngameScript
         void Log(string text)
         {
             StatusLog(text, getTextStatusBlock());
+            if (bLogMeansEcho && text!="clear") Echo(text);
         }
         string progressBar(double percent)
         {
