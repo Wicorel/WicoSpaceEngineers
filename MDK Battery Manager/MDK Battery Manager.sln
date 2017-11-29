@@ -1,0 +1,99 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDK Battery Manager", "MDK Craft Control\MDK Battery Manager.csproj", "{52A1F87F-C99B-456D-A12E-3689B36EEAAC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoSubModuleMain", "..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.shproj", "{5731B863-8478-4F96-99FE-914DEFFB6B79}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoGrid", "..\WicoGrid\WicoGrid\WicoGrid.shproj", "{CD5D65C2-F2C3-4A71-9C46-ADE848DFF34B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoSerialize", "..\WicoSerialize\WicoSerialize\WicoSerialize.shproj", "{BF4282F6-A87F-4B4E-9C3B-8D6543623371}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoModes", "..\WicoModes\WicoModes\WicoModes.shproj", "{FF33A42F-DA7B-48F2-BD4A-2471D51F7898}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoConnectors", "..\WicoConnectors\WicoConnectors\WicoConnectors.shproj", "{EBDC9B7F-652A-45BC-90C3-D16B2E3A6914}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedWicoGyro", "..\SharedWicoGyro\SharedWicoGyro\SharedWicoGyro.shproj", "{405CD3AB-B8E0-4C7D-B1F8-48199354B480}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoThrusters", "..\WicoThrusters\WicoThrusters\WicoThrusters.shproj", "{16D5D301-E8CA-45E6-B9D9-968F6D1AA766}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoCameras", "..\WicoCameras\WicoCameras\WicoCameras.shproj", "{B867062B-EBC6-479B-847C-7B7B95836A9B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoDetectedEntities", "..\WicoDetectedEntities\WicoDetectedEntities\WicoDetectedEntities.shproj", "{F4A99AE8-36F6-4801-A032-8A03E3D52220}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoLandingGears", "..\WicoLandingGears\WicoLandingGears\WicoLandingGears.shproj", "{784351FF-951D-468A-8548-89FBD6129569}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoDoors", "..\WicoDoors\WicoDoors\WicoDoors.shproj", "{4CD3FF7D-0E20-4026-9823-79C99173309C}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoGasTanks", "..\WicoGasTanks\WicoGasTanks\WicoGasTanks.shproj", "{2118E240-D5FE-4B28-98FD-23DD8A1D7C7D}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoOldNavInterface", "..\WicoOldNavInterface\WicoOldNavInterface\WicoOldNavInterface.shproj", "{48726AA5-2501-4F7D-B1FD-A2B5EE8504C0}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoGasGens", "..\WicoGasGens\WicoGasGens\WicoGasGens.shproj", "{85A26D0E-61E6-4E70-B394-7216BDF0B2A5}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ShipRoll", "..\ShipRoll\ShipRoll\ShipRoll.shproj", "{DAFAD80C-E6BA-4F09-B4C8-EC000242F3E6}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ShipDim", "..\ShipDim\ShipDim\ShipDim.shproj", "{AEFC326F-3C23-4445-9EE3-0F4ACD440C5F}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoCraftMain", "..\WicoCraftMain\WicoCraftMain\WicoCraftMain.shproj", "{FA8F37CD-BE12-4622-86BB-64CDD4E1B8F9}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoPower", "..\WicoPower\WicoPower\WicoPower.shproj", "{38047FEE-EE7C-478F-B355-7B45F4CCB3E8}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoCargoCheck", "..\WicoCargoCheck\WicoCargoCheck\WicoCargoCheck.shproj", "{454A1ADD-74AF-42FB-8FE9-A272BA4D7DDE}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoDrills", "..\WicoDrills\WicoDrills\WicoDrills.shproj", "{4DA7BC66-5B0E-436C-BD2A-CD063083F8D1}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoAntenna", "..\WicoAntenna\WicoAntenna\WicoAntenna.shproj", "{90E13F91-D516-48EA-B357-A7816D5FCEEF}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoWheels", "..\WicoWheels\WicoWheels\WicoWheels.shproj", "{4630A8EC-523A-4D35-B2C7-59041653653B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoNavRotors", "..\WicoNavRotors\WicoNavRotors\WicoNavRotors.shproj", "{574E4BAA-03CB-4504-85BA-00907F28BAEC}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\WicoThrusters\WicoThrusters\WicoThrusters.projitems*{16d5d301-e8ca-45e6-b9d9-968f6d1aa766}*SharedItemsImports = 13
+		..\WicoGasTanks\WicoGasTanks\WicoGasTanks.projitems*{2118e240-d5fe-4b28-98fd-23dd8a1d7c7d}*SharedItemsImports = 13
+		..\WicoPower\WicoPower\WicoPower.projitems*{38047fee-ee7c-478f-b355-7b45f4ccb3e8}*SharedItemsImports = 13
+		..\SharedWicoGyro\SharedWicoGyro\SharedWicoGyro.projitems*{405cd3ab-b8e0-4c7d-b1f8-48199354b480}*SharedItemsImports = 13
+		..\WicoCargoCheck\WicoCargoCheck\WicoCargoCheck.projitems*{454a1add-74af-42fb-8fe9-a272ba4d7dde}*SharedItemsImports = 13
+		..\WicoWheels\WicoWheels\WicoWheels.projitems*{4630a8ec-523a-4d35-b2c7-59041653653b}*SharedItemsImports = 13
+		..\WicoOldNavInterface\WicoOldNavInterface\WicoOldNavInterface.projitems*{48726aa5-2501-4f7d-b1fd-a2b5ee8504c0}*SharedItemsImports = 13
+		..\WicoDoors\WicoDoors\WicoDoors.projitems*{4cd3ff7d-0e20-4026-9823-79c99173309c}*SharedItemsImports = 13
+		..\WicoDrills\WicoDrills\WicoDrills.projitems*{4da7bc66-5b0e-436c-bd2a-cd063083f8d1}*SharedItemsImports = 13
+		..\WicoAntenna\WicoAntenna\WicoAntenna.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoConnectors\WicoConnectors\WicoConnectors.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoCraftMain\WicoCraftMain\WicoCraftMain.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoGrid\WicoGrid\WicoGrid.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoPower\WicoPower\WicoPower.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoSerialize\WicoSerialize\WicoSerialize.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.projitems*{5731b863-8478-4f96-99fe-914deffb6b79}*SharedItemsImports = 13
+		..\WicoNavRotors\WicoNavRotors\WicoNavRotors.projitems*{574e4baa-03cb-4504-85ba-00907f28baec}*SharedItemsImports = 13
+		..\WicoLandingGears\WicoLandingGears\WicoLandingGears.projitems*{784351ff-951d-468a-8548-89fbd6129569}*SharedItemsImports = 13
+		..\WicoGasGens\WicoGasGens\WicoGasGens.projitems*{85a26d0e-61e6-4e70-b394-7216bdf0b2a5}*SharedItemsImports = 13
+		..\WicoAntenna\WicoAntenna\WicoAntenna.projitems*{90e13f91-d516-48ea-b357-a7816d5fceef}*SharedItemsImports = 13
+		..\ShipDim\ShipDim\ShipDim.projitems*{aefc326f-3c23-4445-9ee3-0f4acd440c5f}*SharedItemsImports = 13
+		..\WicoCameras\WicoCameras\WicoCameras.projitems*{b867062b-ebc6-479b-847c-7b7b95836a9b}*SharedItemsImports = 13
+		..\WicoSerialize\WicoSerialize\WicoSerialize.projitems*{bf4282f6-a87f-4b4e-9c3b-8d6543623371}*SharedItemsImports = 13
+		..\WicoGrid\WicoGrid\WicoGrid.projitems*{cd5d65c2-f2c3-4a71-9c46-ade848dff34b}*SharedItemsImports = 13
+		..\ShipRoll\ShipRoll\ShipRoll.projitems*{dafad80c-e6ba-4f09-b4c8-ec000242f3e6}*SharedItemsImports = 13
+		..\WicoConnectors\WicoConnectors\WicoConnectors.projitems*{ebdc9b7f-652a-45bc-90c3-d16b2e3a6914}*SharedItemsImports = 13
+		..\WicoDetectedEntities\WicoDetectedEntities\WicoDetectedEntities.projitems*{f4a99ae8-36f6-4801-a032-8a03e3d52220}*SharedItemsImports = 13
+		..\WicoCraftMain\WicoCraftMain\WicoCraftMain.projitems*{fa8f37cd-be12-4622-86bb-64cdd4e1b8f9}*SharedItemsImports = 13
+		..\WicoModes\WicoModes\WicoModes.projitems*{ff33a42f-da7b-48f2-bd4a-2471d51f7898}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{52A1F87F-C99B-456D-A12E-3689B36EEAAC}.Debug|x64.ActiveCfg = Debug|x64
+		{52A1F87F-C99B-456D-A12E-3689B36EEAAC}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AF94E8B4-AA9E-474B-9CDA-41B8E6B98C34}
+	EndGlobalSection
+EndGlobal
