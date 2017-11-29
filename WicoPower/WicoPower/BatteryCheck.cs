@@ -141,7 +141,8 @@ namespace IngameScript
                     if (percentthisbattery < targetMax)
                         bFoundRecharging = true;
                     else if (percentthisbattery > 99)
-                        batteryList[ib].ApplyAction("Recharge");
+                        b.OnlyRecharge = false;
+//                    batteryList[ib].ApplyAction("Recharge");
                 }
                 if (!b.OnlyRecharge && percentthisbattery < targetMax && !bFoundRecharging)
                 {
