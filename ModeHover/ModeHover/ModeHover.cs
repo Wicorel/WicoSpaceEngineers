@@ -73,12 +73,15 @@ namespace IngameScript
                 {
                     // gears just became locked
                     Echo("Force thrusters Off!");
-                    blockApplyAction(thrustAllList, "OnOff_Off");
+                    powerDownThrusters(thrustAllList, thrustAll, true);
+//                    blockApplyAction(thrustAllList, "OnOff_Off");
 
                     if ((craft_operation & CRAFT_MODE_NOTANK) == 0)
                     {
-                        blockApplyAction(tankList, "Stockpile_On");
-                        blockApplyAction(gasgenList, "OnOff_On");
+                        TanksStockpile(true);
+                        GasGensEnable();
+//                        blockApplyAction(tankList, "Stockpile_On");
+//                        blockApplyAction(gasgenList, "OnOff_On");
                     }
                     current_state = 2;
                 }
@@ -89,10 +92,12 @@ namespace IngameScript
                 if (current_state != 1)
                 {
                     Echo("Force thrusters ON!");
-                    blockApplyAction(thrustAllList, "OnOff_On");
+                    powerDownThrusters(thrustAllList, thrustAll, true);
+//                    blockApplyAction(thrustAllList, "OnOff_On");
                     if ((craft_operation & CRAFT_MODE_NOTANK) == 0)
                     {
-                        blockApplyAction(tankList, "Stockpile_Off");
+                        TanksStockpile(false);
+//                        blockApplyAction(tankList, "Stockpile_Off");
                         //				blockApplyAction(gasgenList,"OnOff_On");
                     }
 
@@ -138,7 +143,7 @@ namespace IngameScript
                     //			blockApplyAction(thrustAllList, "OnOff_On");
                     //			if ((craft_operation & CRAFT_MODE_NOTANK) == 0) blockApplyAction(tankList,"Stockpile_On");
                 }
-                ConnectAnyConnectors(false, "OnOff_On");
+                ConnectAnyConnectors(false, true);// "OnOff_On");
             }
 
             if (bConnectorIsLocked)

@@ -94,7 +94,7 @@ namespace IngameScript
                     bValidLaunch1 = true;
                     bValidHome = false; // forget any 'home' waypoint.
 
-                    ConnectAnyConnectors(false, "OnOff_Off");
+                    ConnectAnyConnectors(false, false);// "OnOff_Off");
                     //			blockApplyAction(gearList, "OnOff_Off"); // in case autolock is set.
                     gearsLock(false);// blockApplyAction(gearList, "Unlock");
                     current_state = 50;
@@ -294,8 +294,9 @@ namespace IngameScript
                 if (velocityShip < (fMaxMps / 2))
                     next_state = 20;
 
-                ConnectAnyConnectors(false, "OnOff_On");
-                blockApplyAction(gearList, "OnOff_On");
+                ConnectAnyConnectors(false, true);// "OnOff_On");
+                blocksOnOff(gearList, true);
+//                blockApplyAction(gearList, "OnOff_On");
             }
             dLastVelocityShip = velocityShip;
 
@@ -336,7 +337,7 @@ namespace IngameScript
             {
                 powerDownThrusters(thrustAllList);
                 gyrosOff();
-                startNavCommand("!;V");
+//                startNavCommand("!;V");
                 setMode(MODE_INSPACE);
                 StatusLog("clear", textPanelReport);
                 Log("clear");

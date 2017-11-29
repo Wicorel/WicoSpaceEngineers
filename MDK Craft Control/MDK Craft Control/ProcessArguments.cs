@@ -46,7 +46,8 @@ namespace IngameScript
                     //	Echo("Coast: backward =" + thrustBackwardList.Count.ToString());
                     if (thrustBackwardList.Count > 1)
                     {
-                        blockApplyAction(thrustBackwardList, "OnOff");
+                        blocksToggleOnOff(thrustBackwardList);
+//                        blockApplyAction(thrustBackwardList, "OnOff");
                         //				blockApplyAction(thrustBackwardList, "OnOff_Off");
                     }
                 }

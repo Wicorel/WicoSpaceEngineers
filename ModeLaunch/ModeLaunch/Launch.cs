@@ -68,7 +68,7 @@ namespace IngameScript
             {
                 StatusLog(moduleName + ":Awaiting Disconnect", textPanelReport);
                 Echo("Awaiting Disconnect");
-                ConnectAnyConnectors(false, "OnOff_Off");
+                ConnectAnyConnectors(false, false); // "OnOff_Off");
                 return;
             }
             if (current_state == 100)
@@ -90,7 +90,7 @@ namespace IngameScript
 
             if (dist > 10)
             {
-                ConnectAnyConnectors(true, "OnOff_On");
+                ConnectAnyConnectors(true, true);// "OnOff_On");
             }
 
             {

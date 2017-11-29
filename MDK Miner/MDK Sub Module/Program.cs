@@ -47,7 +47,6 @@ namespace IngameScript
         { 
 	        powerDownThrusters(thrustAllList);
             gyrosOff();
-	        blockApplyAction(gpsCenter, "AutoPilot_Off"); 
 	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
 	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
             if(!bNoDrills) turnDrillsOff();

@@ -55,10 +55,10 @@ namespace IngameScript
             {
                 if (!anyGearIsLocked())
                 {
-                    if ((craft_operation & CRAFT_MODE_NOTANK) == 0) blockApplyAction(tankList, "Stockpile_Off");
+                    if ((craft_operation & CRAFT_MODE_NOTANK) == 0) TanksStockpile(false); // blockApplyAction(tankList, "Stockpile_Off");
                     setMode(MODE_HOVER);
                 }
-                ConnectAnyConnectors(false, "OnOff_On");
+                ConnectAnyConnectors(false, true);// "OnOff_On");
             }
 
             if (AnyConnectorIsLocked())
