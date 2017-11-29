@@ -21,7 +21,7 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "Orbital Launch";
-        string sVersion = "3.1";
+        string sVersion = "3.1a";
 
         const string sGPSCenter = "Craft Remote Control";
 
@@ -44,7 +44,7 @@ namespace IngameScript
 
         void moduleDoPreModes()
         {
-	        Echo("localDockConnectors.Count=" + localDockConnectors.Count);
+//	        Echo("localDockConnectors.Count=" + localDockConnectors.Count);
 	        string output = "";
 	        if (AnyConnectorIsConnected()) output += "Connected";
 

@@ -26,6 +26,8 @@
 * 
 * 3.1 Updates for SE V1.185
 * 
+* 3.1a build with current source
+* 
 * Need:
 *  circumnavigate planet to target spot
 *  'ask' for docking position after arriving at 'spot'
