@@ -44,15 +44,33 @@ namespace IngameScript
             return;
         }
         void blockApplyAction(string sBlock, string sAction)
-        { List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>(); blocks = GetBlocksNamed<IMyTerminalBlock>(sBlock); blockApplyAction(blocks, sAction); }
+        {
+            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
+            blocks = GetBlocksNamed<IMyTerminalBlock>(sBlock);
+            blockApplyAction(blocks, sAction);
+        }
         void blockApplyAction(IMyTerminalBlock sBlock, string sAction)
-        { ITerminalAction ita; ita = sBlock.GetActionWithName(sAction); if (ita != null) ita.Apply(sBlock); else Echo("Unsupported action:" + sAction); }
+        {
+            ITerminalAction ita; ita = sBlock.GetActionWithName(sAction);
+            if (ita != null)
+                ita.Apply(sBlock);
+            else
+                Echo("Unsupported action:" + sAction);
+        }
+
         void blockApplyAction(List<IMyTerminalBlock> lBlock, string sAction)
         {
             if (lBlock.Count > 0)
             {
                 for (int i = 0; i < lBlock.Count; i++)
-                { ITerminalAction ita; ita = lBlock[i].GetActionWithName(sAction); if (ita != null) ita.Apply(lBlock[i]); else Echo("Unsupported action:" + sAction); }
+                {
+                    ITerminalAction ita;
+                    ita = lBlock[i].GetActionWithName(sAction);
+                    if (ita != null)
+                        ita.Apply(lBlock[i]);
+                    else
+                        Echo("Unsupported action:" + sAction);
+                }
             }
         }
         #endregion
