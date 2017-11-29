@@ -18,6 +18,8 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        bool bVerboseSerialize=false;
+
         // 1105 allow save file to use contains()
         // V3.0 - redo all variables & cleanup
         #region serializecommon
