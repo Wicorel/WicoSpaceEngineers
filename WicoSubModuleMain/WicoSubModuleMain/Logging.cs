@@ -25,6 +25,7 @@ namespace IngameScript
         #region logging
 
         bool bDisableLogging = false;
+        bool bLogMeansEcho = false;
 
         string sLongStatus = "Wico Craft Log";
         string sTextPanelReport = "Craft Report";
@@ -90,6 +91,7 @@ namespace IngameScript
         void Log(string text)
         {
             StatusLog(text, getTextStatusBlock());
+            if (bLogMeansEcho && text!="clear") Echo(text);
         }
         string progressBar(double percent)
         {
