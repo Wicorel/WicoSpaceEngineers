@@ -81,8 +81,8 @@ namespace IngameScript
             {
                 if (current_state == 0)
                 {
-                    blockApplyAction(thrustAllList, "OnOff_Off");
-                    if ((craft_operation & CRAFT_MODE_NOTANK) == 0) blockApplyAction(tankList, "Stockpile_On");
+                    powerDownThrusters(thrustAllList, thrustAll, true);// blockApplyAction(thrustAllList, "OnOff_Off");
+                    if ((craft_operation & CRAFT_MODE_NOTANK) == 0) TanksStockpile(true);// blockApplyAction(tankList, "Stockpile_On");
 
                     current_state = 1;
                 }
@@ -122,9 +122,14 @@ namespace IngameScript
                 if (hydroPercent >= 0)
                 {
                     StatusLog("Hyd:" + progressBar(hydroPercent * 100), textPanelReport);
+                    if(hydroPercent<0.20f)
+                      StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
+
                     Echo("H:" + hydroPercent.ToString("000.0%"));
                 }
                 else Echo("No Hydrogen Tanks");
+                if (batteryPercentage < batterypctlow)
+                    StatusLog(" WARNING: Low Battery Power", textPanelReport);
 
                 //		if (iOxygenTanks > 0) StatusLog("O2:" + progressBar(tanksFill(iTankOxygen)), textPanelReport);
                 //		if (iHydroTanks > 0) StatusLog("Hyd:" + progressBar(tanksFill(iTankHydro)), textPanelReport);

@@ -44,6 +44,8 @@ namespace IngameScript
         float fHydroPower = 0;
         float fIonPower = 0;
 
+        bool bOrbitalLaunchDebug = false;
+
         void doModeOrbitalLaunch()
         {
             int next_state = current_state;
@@ -51,8 +53,11 @@ namespace IngameScript
             IMyTextPanel textBlock = textPanelReport;
 
             StatusLog("clear", textBlock);
+            Log("clear");
 
             StatusLog(OurName + ":" + moduleName + ":Oribital Launch", textBlock);
+            Log(OurName + ":" + moduleName + ":Oribital Launch");
+
             StatusLog("Planet Gravity: " + dGravity.ToString(velocityFormat) + " g", textPanelReport);
             StatusLog(velocityShip.ToString(velocityFormat) + " m/s", textBlock);
             Echo("Orbital Launch. State=" + current_state.ToString());
@@ -67,7 +72,7 @@ namespace IngameScript
                 }
                 else
                 {
-                    //Echo("Setting thrustStage1UpList");
+                    Echo("Setting thrustStage1UpList");
                     thrustStage1UpList = thrustUpList;
                     thrustStage1DownList = thrustDownList;
                     cameraStage1LandingList = cameraDownList;
@@ -77,8 +82,10 @@ namespace IngameScript
             if (current_state == 0)
             {
                 //		dtStartShip = DateTime.Now;
+                bWantFast = true;
                 dLastVelocityShip = 0;
-                if ((craft_operation & CRAFT_MODE_NOTANK) == 0) blockApplyAction(tankList, "Stockpile_Off");
+                if ((craft_operation & CRAFT_MODE_NOTANK) == 0) TanksStockpile(false);
+//                if ((craft_operation & CRAFT_MODE_NOTANK) == 0) blockApplyAction(tankList, "Stockpile_Off");
 
                 if (AnyConnectorIsConnected() || AnyConnectorIsLocked() || anyGearIsLocked())
                 {
@@ -89,7 +96,7 @@ namespace IngameScript
 
                     ConnectAnyConnectors(false, "OnOff_Off");
                     //			blockApplyAction(gearList, "OnOff_Off"); // in case autolock is set.
-                    blockApplyAction(gearList, "Unlock");
+                    gearsLock(false);// blockApplyAction(gearList, "Unlock");
                     current_state = 50;
                     return;
                 }
@@ -132,6 +139,7 @@ namespace IngameScript
                 if (AnyConnectorIsConnected() || AnyConnectorIsLocked() || anyGearIsLocked())
                 {
                     StatusLog("Awaiting release", textBlock);
+                    Log("Awaiting release");
                 }
                 else
                 {
@@ -175,7 +183,7 @@ namespace IngameScript
             }
             if (current_state == 10)
             {
-
+                bWantFast = true;
                 calculateHoverThrust(thrustStage1UpList, out fAtmoPower, out fHydroPower, out fIonPower);
                 powerDownThrusters(thrustStage1DownList, thrustAll, true);
                 current_state = 20;
@@ -188,7 +196,7 @@ namespace IngameScript
             if (current_state == 20)
             { // trying to move
                 StatusLog("Attempting Lift-off", textBlock);
-
+                Log("Attempting Lift-off");
                 // NOTE: need to NOT turn off atmo if we get all the way into using ions for this state.. and others?
                 if (velocityShip < 3f)
                 // if(velocityShip<1f)
@@ -224,15 +232,16 @@ namespace IngameScript
             if (current_state == 30)
             { // Retract landing config
                 StatusLog("Movement started. Retracting Landing config ", textBlock);
-
+                Log("Movement started. Retracting Landing config ");
                 next_state = 31;
             }
             if (current_state == 31)
             { // accelerate to max speed
-                StatusLog("Accelerating to max speed )" + fMaxMps.ToString("0") + ")", textBlock);
+                StatusLog("Accelerating to max speed (" + fMaxMps.ToString("0") + ")", textBlock);
+                Log("Accelerating to max speed");
                 if (dLastVelocityShip < velocityShip)
-                { // we are accelerationg
-
+                { // we are Accelerating
+                    if (bOrbitalLaunchDebug) Echo("Accelerating");
                     if (expectedV < (fMaxMps / 2))
                     // if(velocityShip<(fMaxMps/2))
                     {
@@ -255,21 +264,25 @@ namespace IngameScript
             if (current_state == 40)
             { // maintain max speed
                 StatusLog("Maintain max speed", textBlock);
-                StatusLog("Expectedv=" + expectedV.ToString("0.00") + " max=" + fMaxMps.ToString("0.00"), textBlock);
-                Echo("Expectedv=" + expectedV.ToString("0.00") + " max=" + fMaxMps.ToString("0.00"));
+                Log("Maintain max speed");
+                 if(bOrbitalLaunchDebug) StatusLog("Expectedv=" + expectedV.ToString("0.00") + " max=" + fMaxMps.ToString("0.00"), textBlock);
+                if(bOrbitalLaunchDebug) Echo("Expectedv=" + expectedV.ToString("0.00") + " max=" + fMaxMps.ToString("0.00"));
                 double dMin = (fMaxMps - fMaxMps * .05);
                 if (expectedV > dMin)
                 // if(velocityShip>(fMaxMps-5))
                 {
                     calculateHoverThrust(thrustStage1UpList, out fAtmoPower, out fHydroPower, out fIonPower);
-                    Echo("hover thrust:" + fAtmoPower.ToString() + ":" + fHydroPower.ToString() + ":" + fIonPower.ToString());
-
+                    if(bOrbitalLaunchDebug) Echo("hover thrust:" + fAtmoPower.ToString("0.00") + ":" + fHydroPower.ToString("0.00") + ":" + fIonPower.ToString("0.00"));
+                    if(bOrbitalLaunchDebug) StatusLog("hover thrust:" + fAtmoPower.ToString("0.00") + ":" + fHydroPower.ToString("0.00") + ":" + fIonPower.ToString("0.00"), textBlock);
+                    /*
+                     * Not needed as of 1.185
                     if (fAtmoPower < 1.001)
                         fAtmoPower = 0;
                     if (fHydroPower < 1.001)
                         fHydroPower = 0;
                     if (fIonPower < 1.001)
                         fIonPower = 0;
+                        */
 
                 }
                 else if (expectedV < (fMaxMps - 10))
@@ -294,8 +307,29 @@ namespace IngameScript
             //	batteryCheck(0, false);//,textPanelReport);
             //	if (bValidExtraInfo)
             StatusLog("Bat:" + progressBar(batteryPercentage), textPanelReport);
-            if (iOxygenTanks > 0) StatusLog("O2:" + progressBar(tanksFill(iTankOxygen)), textPanelReport);
-            if (iHydroTanks > 0) StatusLog("Hyd:" + progressBar(tanksFill(iTankHydro)), textPanelReport);
+            if (oxyPercent >= 0)
+            {
+                StatusLog("O2:" + progressBar(oxyPercent * 100), textPanelReport);
+                //Echo("O:" + oxyPercent.ToString("000.0%"));
+            }
+            else Echo("No Oxygen Tanks");
+
+            if (hydroPercent >= 0)
+            {
+                StatusLog("Hyd:" + progressBar(hydroPercent * 100), textPanelReport);
+                Echo("H:" + hydroPercent.ToString("0.0") + "%");
+                if (hydroPercent < 0.20f)
+                {
+                    StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
+                    Log(" WARNING: Low Hydrogen Supplies");
+                }
+            }
+            else Echo("No Hydrogen Tanks");
+            if (batteryPercentage < batterypctlow)
+            {
+                StatusLog(" WARNING: Low Battery Power", textPanelReport);
+                Log(" WARNING: Low Battery Power");
+            }
 
             StatusLog("", textBlock);
             if (dGravity < 0.01)
@@ -305,7 +339,7 @@ namespace IngameScript
                 startNavCommand("!;V");
                 setMode(MODE_INSPACE);
                 StatusLog("clear", textPanelReport);
-
+                Log("clear");
                 return;
             }
 
@@ -315,7 +349,7 @@ namespace IngameScript
             {
                 powerDownThrusters(thrustAllList, thrustatmo, true);
                 powerDownThrusters(thrustAllList, thrustion);
-                iPowered = powerUpThrusters(thrustStage1UpList, fIonPower, thrustion);
+                iPowered = powerUpThrusters(thrustStage1UpList, fIonPower/100, thrustion);
                 //Echo("Powered "+ iPowered.ToString()+ " Ion Thrusters");
             }
             else
@@ -326,7 +360,7 @@ namespace IngameScript
 
             if (fHydroPower > 0)
             {
-                powerUpThrusters(thrustStage1UpList, fHydroPower, thrusthydro);
+                powerUpThrusters(thrustStage1UpList, fHydroPower/100, thrusthydro);
             }
             else
             { // important not to let them provide dampener power..
@@ -335,17 +369,15 @@ namespace IngameScript
             }
             if (fAtmoPower > 0)
             {
-                powerUpThrusters(thrustStage1UpList, fAtmoPower, thrustatmo);
+                powerUpThrusters(thrustStage1UpList, fAtmoPower/100, thrustatmo);
             }
             else
             {
-
                 closeDoors(outterairlockDoorList);
 
                 // iPowered=powerDownThrusters(thrustStage1UpList,thrustatmo,true);
                 iPowered = powerDownThrusters(thrustAllList, thrustatmo, true);
                 //Echo("Powered DOWN "+ iPowered.ToString()+ " Atmo Thrusters");
-
             }
 
             {
@@ -355,7 +387,8 @@ namespace IngameScript
             if (ionThrustCount > 0) StatusLog("ION:" + progressBar(fIonPower), textBlock);
             if (hydroThrustCount > 0) StatusLog("HYD:" + progressBar(fHydroPower), textBlock);
             if (atmoThrustCount > 0) StatusLog("ATM:" + progressBar(fAtmoPower), textBlock);
-
+            if(bOrbitalLaunchDebug)
+                StatusLog("I:" + fIonPower.ToString("0.00") + "H:" + fHydroPower.ToString("0.00") + " A:" + fAtmoPower.ToString("0.00"), textBlock);
             current_state = next_state;
 
         }
