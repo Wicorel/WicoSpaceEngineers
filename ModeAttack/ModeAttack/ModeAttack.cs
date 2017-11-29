@@ -46,7 +46,7 @@ namespace IngameScript
          * Attack Plan: Long fast strafe
          * 400 found target
          * 
-         * Attack Plane: Track Target
+         * Attack Plan: Track Target
          * 1000 Found Target
          */
 
@@ -74,6 +74,7 @@ namespace IngameScript
         MyDetectedEntityInfo targetDetectedInfo = new MyDetectedEntityInfo();
         MyDetectedEntityInfo initialTargetDetectedInfo = new MyDetectedEntityInfo();
 
+        StringBuilder strbAttack = new StringBuilder();
 
         void doModeAttack()
         {
@@ -86,7 +87,9 @@ namespace IngameScript
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":Attack!", textPanelReport);
             Echo("current_state=" + current_state.ToString());
-            double effectiveMass = calculateEffectiveMass();
+            MyShipMass myMass;
+            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            double effectiveMass =  myMass.PhysicalMass;;
             double maxThrust = calculateMaxThrust(thrustForwardList);
 
             //	Echo("effectiveMass=" + effectiveMass.ToString("N0"));
@@ -142,7 +145,7 @@ namespace IngameScript
                 case 11: // process found target
                     {
                         // should dynamically select attack plan based on target
-                        if (iAttackPlan == 0) iAttackPlan = 100;
+                        if (iAttackPlan == 0) iAttackPlan = 20;
                         //				if (iAttackPlan == 0) iAttackPlan = 20;
 
                         double distancesq;
@@ -340,14 +343,14 @@ namespace IngameScript
                         vVec = vExpectedTargetPos - currentpos;
                         double distance = vVec.Length();
                         Echo("Distance=" + distance);
-                        strb.Clear();
-                        strb.Append("Name: " + targetDetectedInfo.Name);
-                        strb.AppendLine(); strb.Append("Type: " + targetDetectedInfo.Type);
-                        strb.AppendLine(); strb.Append("RelationShip: " + targetDetectedInfo.Relationship);
-                        strb.AppendLine(); strb.Append("Size: " + targetDetectedInfo.BoundingBox.Size);
-                        strb.AppendLine(); strb.Append("Velocity: " + targetDetectedInfo.Velocity);
-                        strb.AppendLine(); strb.Append("Orientation: " + targetDetectedInfo.Orientation);
-                        if (bScanTargetVerbose) Echo(strb.ToString());
+                        strbAttack.Clear();
+                        strbAttack.Append("Name: " + targetDetectedInfo.Name);
+                        strbAttack.AppendLine(); strbAttack.Append("Type: " + targetDetectedInfo.Type);
+                        strbAttack.AppendLine(); strbAttack.Append("RelationShip: " + targetDetectedInfo.Relationship);
+                        strbAttack.AppendLine(); strbAttack.Append("Size: " + targetDetectedInfo.BoundingBox.Size);
+                        strbAttack.AppendLine(); strbAttack.Append("Velocity: " + targetDetectedInfo.Velocity);
+                        strbAttack.AppendLine(); strbAttack.Append("Orientation: " + targetDetectedInfo.Orientation);
+                        if (bScanTargetVerbose) Echo(strbAttack.ToString());
 
                         bool bAimed = false;
                         //	holdStandoff(distance, sqStandoffDistance);
@@ -451,18 +454,18 @@ namespace IngameScript
                         }
                         if (doCameraScan(cameraForwardList, distance + 100))
                         {
-                            strb.Clear();
+                            strbAttack.Clear();
                             if (lastDetectedInfo.IsEmpty() || !IsValidAttackTarget(lastDetectedInfo))
                             { // hit nothing???
                                 dAimOffset += dAimDelta; // move faster..
                             }
                             else
                             { // we found something.
-                                strb.Append("Name: " + lastDetectedInfo.Name);
-                                strb.AppendLine(); strb.Append("Type: " + lastDetectedInfo.Type);
-                                strb.AppendLine(); strb.Append("Relationship: " + lastDetectedInfo.Relationship);
-                                //		strb.AppendLine();		strb.Append("Orientation: " + lastDetectedInfo.Orientation);
-                                if (bScanTargetVerbose) Echo(strb.ToString());
+                                strbAttack.Append("Name: " + lastDetectedInfo.Name);
+                                strbAttack.AppendLine(); strbAttack.Append("Type: " + lastDetectedInfo.Type);
+                                strbAttack.AppendLine(); strbAttack.Append("Relationship: " + lastDetectedInfo.Relationship);
+                                //		strbAttack.AppendLine();		strbAttack.Append("Orientation: " + lastDetectedInfo.Orientation);
+                                if (bScanTargetVerbose) Echo(strbAttack.ToString());
                                 double minsize = 3;
                                 if (lastDetectedInfo.Type == MyDetectedEntityType.SmallGrid) minsize = 0.75;
 
@@ -489,14 +492,14 @@ namespace IngameScript
                         vVec = targetPos - currentpos;
                         double distance = vVec.Length();
                         Echo("Distance=" + distance);
-                        strb.Clear();
-                        strb.Append("Name: " + targetDetectedInfo.Name);
-                        strb.AppendLine(); strb.Append("Type: " + targetDetectedInfo.Type);
-                        strb.AppendLine(); strb.Append("RelationShip: " + targetDetectedInfo.Relationship);
-                        //		strb.AppendLine();		strb.Append("Size: " + targetDetectedInfo.BoundingBox.Size);
+                        strbAttack.Clear();
+                        strbAttack.Append("Name: " + targetDetectedInfo.Name);
+                        strbAttack.AppendLine(); strbAttack.Append("Type: " + targetDetectedInfo.Type);
+                        strbAttack.AppendLine(); strbAttack.Append("RelationShip: " + targetDetectedInfo.Relationship);
+                        //		strbAttack.AppendLine();		strbAttack.Append("Size: " + targetDetectedInfo.BoundingBox.Size);
                         if (bScanTargetVerbose)
-                            Echo(strb.ToString());
-                        bool bAimed = false;
+                            Echo(strbAttack.ToString());
+ //                       bool bAimed = false;
                         double stoppingM = calculateStoppingDistance(thrustBackwardList, velocityShip, 0);
                     }
                     break;
@@ -519,14 +522,14 @@ namespace IngameScript
                         vVec = vExpectedTargetPos - currentpos;
                         double distance = vVec.Length();
                         Echo("Distance=" + distance);
-                        strb.Clear();
-                        strb.Append("Name: " + targetDetectedInfo.Name);
-                        strb.AppendLine(); strb.Append("Type: " + targetDetectedInfo.Type);
-                        strb.AppendLine(); strb.Append("RelationShip: " + targetDetectedInfo.Relationship);
-                        strb.AppendLine(); strb.Append("Size: " + targetDetectedInfo.BoundingBox.Size);
-                        strb.AppendLine(); strb.Append("Velocity: " + targetDetectedInfo.Velocity);
-                        strb.AppendLine(); strb.Append("Orientation: " + targetDetectedInfo.Orientation);
-                        if (bScanTargetVerbose) Echo(strb.ToString());
+                        strbAttack.Clear();
+                        strbAttack.Append("Name: " + targetDetectedInfo.Name);
+                        strbAttack.AppendLine(); strbAttack.Append("Type: " + targetDetectedInfo.Type);
+                        strbAttack.AppendLine(); strbAttack.Append("RelationShip: " + targetDetectedInfo.Relationship);
+                        strbAttack.AppendLine(); strbAttack.Append("Size: " + targetDetectedInfo.BoundingBox.Size);
+                        strbAttack.AppendLine(); strbAttack.Append("Velocity: " + targetDetectedInfo.Velocity);
+                        strbAttack.AppendLine(); strbAttack.Append("Orientation: " + targetDetectedInfo.Orientation);
+                        if (bScanTargetVerbose) Echo(strbAttack.ToString());
 
                         //				minAngleRad =0.005f;
                         bool bAimed = false;
@@ -582,14 +585,14 @@ namespace IngameScript
                             }
                             else
                             { // we found something.
-                                strb.Clear();
-                                strb.Append("Name: " + lastDetectedInfo.Name);
-                                strb.AppendLine(); strb.Append("Type: " + lastDetectedInfo.Type);
-                                strb.AppendLine(); strb.Append("Relationship: " + lastDetectedInfo.Relationship);
-                                strb.AppendLine(); strb.Append("Size: " + lastDetectedInfo.BoundingBox.Size);
-                                strb.AppendLine(); strb.Append("Velocity: " + lastDetectedInfo.Velocity);
-                                strb.AppendLine(); strb.Append("Orientation: " + lastDetectedInfo.Orientation);
-                                if (bScanTargetVerbose) Echo(strb.ToString());
+                                strbAttack.Clear();
+                                strbAttack.Append("Name: " + lastDetectedInfo.Name);
+                                strbAttack.AppendLine(); strbAttack.Append("Type: " + lastDetectedInfo.Type);
+                                strbAttack.AppendLine(); strbAttack.Append("Relationship: " + lastDetectedInfo.Relationship);
+                                strbAttack.AppendLine(); strbAttack.Append("Size: " + lastDetectedInfo.BoundingBox.Size);
+                                strbAttack.AppendLine(); strbAttack.Append("Velocity: " + lastDetectedInfo.Velocity);
+                                strbAttack.AppendLine(); strbAttack.Append("Orientation: " + lastDetectedInfo.Orientation);
+                                if (bScanTargetVerbose) Echo(strbAttack.ToString());
                                 double minsize = 3;
                                 if (lastDetectedInfo.Type == MyDetectedEntityType.SmallGrid) minsize = 0.75;
 
@@ -707,24 +710,6 @@ namespace IngameScript
             }
         }
 
-        string deiInfo(MyDetectedEntityInfo dei)
-        {
-            string s = "";
-
-            s += "ETBV";
-
-            s += ":" + dei.EntityId.ToString();
-            s += ":" + dei.TimeStamp;
-
-            Vector3D min = dei.BoundingBox.Min;
-            s += ":" + Vector3DToString(min);
-            Vector3D max = dei.BoundingBox.Max;
-            s += ":" + Vector3DToString(max);
-
-            Vector3D vMaxd = (Vector3)dei.Velocity;
-            s += ":" + Vector3DToString(vMaxd);
-            return s;
-        }
 
 
     }
