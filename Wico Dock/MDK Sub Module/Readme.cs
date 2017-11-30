@@ -77,5 +77,7 @@ delay for motion after going 'home' (added state 169)
 improve long-range travel for docking (chooses optimal speed, uses dampeners, etc). (major changes to TravelMovement code)
 Handle case where requested to dock, but have not heard from a base yet; request and wait a bit for a response. (added state 109)
 
+3.2a Remove blockApplyActions and connector actions
+
 
 */
