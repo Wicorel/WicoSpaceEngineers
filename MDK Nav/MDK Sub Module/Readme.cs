@@ -36,6 +36,10 @@
     o Added support for GPS-formatted nav locations
         Ex:  W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
 
+    3.1a
+    remove blockApplyActions() and make routines for each block type that needs it
+
+
     Added Rotors
 
 	* TODO: 
