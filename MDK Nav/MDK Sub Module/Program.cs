@@ -21,7 +21,7 @@ namespace IngameScript
         string OurName = "Wico Craft";
 
         string moduleName = "NAV";
-        string sVersion = "3.1";
+        string sVersion = "3.1a";
 
         const string sGPSCenter = "Craft Remote Control";
 
@@ -58,7 +58,8 @@ namespace IngameScript
             powerDownRotors(rotorNavLeftList);
             powerDownRotors(rotorNavRightList);
 
-            blockApplyAction(gpsCenter, "AutoPilot_Off"); 
+	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
         } 
 
     }
