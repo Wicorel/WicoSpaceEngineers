@@ -52,9 +52,9 @@ namespace IngameScript
         {
             StatusLog(DateTime.Now.ToString() + " ACTION: Reset To Idle", textLongStatus, true);
             ResetMotion();
-            if (navCommand != null)
-                if (!(navCommand is IMyTextPanel)) navCommand.CustomName = "NAV: C Wico Craft";
-            if (navStatus != null) navStatus.CustomName = sNavStatus + " Control Reset";
+//            if (navCommand != null)
+ //               if (!(navCommand is IMyTextPanel)) navCommand.CustomName = "NAV: C Wico Craft";
+//            if (navStatus != null) navStatus.CustomName = sNavStatus + " Control Reset";
             // bValidPlayerPosition=false;
             setMode(MODE_IDLE);
             if (AnyConnectorIsConnected()) setMode(MODE_DOCKED);
@@ -93,9 +93,11 @@ namespace IngameScript
         void ResetMotion(bool bNoDrills = false)
         {
             Echo("RESETMOTION!");
-            if (navEnable != null) blockApplyAction(navEnable, "OnOff_Off"); //navEnable.ApplyAction("OnOff_Off");
-            powerDownThrusters(thrustAllList);
-            blockApplyAction(sRemoteControl, "AutoPilot_Off");
+	        powerDownThrusters(thrustAllList);
+            gyrosOff();
+	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
+
         }
 
     }
