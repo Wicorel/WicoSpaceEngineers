@@ -32,6 +32,8 @@
  * 
  * 3.1 SE 1.185 PB changes.
  * 
+ * 3.1A changes for SE 1.185.200 (add RotorLock)
+ * 
  */
 
 string sVersion = "3.1";
@@ -1200,6 +1202,10 @@ void processGimbal(GimbalRotor gr, Vector3 vInputs,bool bDampeners)
 		gr.r.TargetVelocityRPM = 0;
 //		gr.r.TargetVelocity = 0;
 //		gr.r.SafetyLock = false;
+        gr.r.SetValueBool("RotorLock", true);
+        gr.r.UpperLimitRad=gr.r.Angle;
+        gr.r.LowerLimitRad=gr.r.Angle;
+
 	}
 
 
@@ -1262,8 +1268,11 @@ void stopGimbals()
 {
 	for (int i = 0; i < gimbalList.Count; i++)
 	{
-//		gimbalList[i].r.SafetyLock = false;
+        //		gimbalList[i].r.SafetyLock = false;
+        gimbalList[i].r.SetValueBool("RotorLock", true);
 		gimbalList[i].r.TargetVelocityRPM = 0;
+        gimbalList[i].r.UpperLimitRad=gimbalList[i].r.Angle;
+        gimbalList[i].r.LowerLimitRad=gimbalList[i].r.Angle;
 //		gimbalList[i].r.TargetVelocity = 0;
 //		listSetValueFloat(gimbalList[i].thrusters, "Override", 0);
 		if (gimbalList[i].subRotor != null)
@@ -1300,11 +1309,17 @@ float processRotorTargetAngle(GimbalRotor gr, float targetAngleD)
 	if (Math.Abs(angleDelta) <0.5)
 	{
 //		r.SafetyLock = true;
+        gr.r.SetValueBool("RotorLock", true);
         newVelocity = 0; // .25f * Math.Sign(angleDelta);
+        gr.r.UpperLimitRad=angleR;
+        gr.r.LowerLimitRad=angleR;
 	}
 	else
 	{
 //		r.SafetyLock = false;
+        gr.r.UpperLimitDeg=361;
+        gr.r.LowerLimitDeg=-361;
+        gr.r.SetValueBool("RotorLock", false);
 		if (Math.Abs(angleDelta) > 0.5)
 		{
 			newVelocity = .25f * Math.Sign(angleDelta);
