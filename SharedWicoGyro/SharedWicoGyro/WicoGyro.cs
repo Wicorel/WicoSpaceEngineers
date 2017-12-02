@@ -104,8 +104,8 @@ namespace IngameScript
                 if (ang < minAngleRad)
                 { // close enough 
 
-                    g.SetValueBool("Override", false);
-                    //g.GyroOverride = false;
+                    //g.SetValueBool("Override", false);
+                    g.GyroOverride = false;
                     continue;
                 }
                 //		Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 

@@ -89,8 +89,6 @@ namespace IngameScript
 
         int iPushCount = 0;
 
-        Vector3D vAvoid;
-
         Vector3D vDockAlign;
         bool bDoDockAlign = false;
 
@@ -264,6 +262,7 @@ namespace IngameScript
             }
             else if (current_state == 106)
             {
+                ResetTravelMovement();
                 calcCollisionAvoid(basePositionOf(iTargetBase));
                 current_state = 107;
             }
@@ -301,6 +300,7 @@ namespace IngameScript
             }
             else if (current_state == 111)
             { // collision detected
+                ResetTravelMovement();
                 calcCollisionAvoid(vHome);
                 current_state = 112;
             }
@@ -451,6 +451,7 @@ namespace IngameScript
             }
             else if (current_state == 161)
             { //161 Collision detected
+                ResetTravelMovement();
                 calcCollisionAvoid(vHome);
                 current_state = 162;
                 iPushCount = 0;
@@ -617,223 +618,6 @@ namespace IngameScript
         }
         #endregion
 
-        bool bScanLeft = true;
-        bool bScanRight = true;
-        bool bScanUp = true;
-        bool bScanDown = true;
-        bool bScanBackward = true;
-        bool bScanForward = true;
 
-        MyDetectedEntityInfo leftDetectedInfo = new MyDetectedEntityInfo();
-        MyDetectedEntityInfo rightDetectedInfo = new MyDetectedEntityInfo();
-        MyDetectedEntityInfo upDetectedInfo = new MyDetectedEntityInfo();
-        MyDetectedEntityInfo downDetectedInfo = new MyDetectedEntityInfo();
-        MyDetectedEntityInfo backwardDetectedInfo = new MyDetectedEntityInfo();
-        MyDetectedEntityInfo forwardDetectedInfo = new MyDetectedEntityInfo();
-
-        void initEscapeScan()
-        {
-            bScanLeft = true;
-            bScanRight = true;
-            bScanUp = true;
-            bScanDown = true;
-            bScanBackward = false;// don't rescan where we just came from..
-                                  //	bScanBackward = true;
-            bScanForward = true;
-            leftDetectedInfo = new MyDetectedEntityInfo();
-            rightDetectedInfo = new MyDetectedEntityInfo();
-            upDetectedInfo = new MyDetectedEntityInfo();
-            downDetectedInfo = new MyDetectedEntityInfo();
-            backwardDetectedInfo = new MyDetectedEntityInfo();
-            forwardDetectedInfo = new MyDetectedEntityInfo();
-
-            // don't assume all drones have all cameras..
-            if (cameraLeftList.Count < 1) bScanLeft = false;
-            if (cameraRightList.Count < 1) bScanRight = false;
-            if (cameraUpList.Count < 1) bScanUp = false;
-            if (cameraDownList.Count < 1) bScanDown = false;
-            if (cameraForwardList.Count < 1) bScanForward = false;
-            if (cameraBackwardList.Count < 1) bScanBackward = false;
-
-        }
-
-        bool scanEscape()
-        {
-            MatrixD worldtb = gpsCenter.WorldMatrix;
-            Vector3D vVec = worldtb.Forward;
-
-            if (bScanLeft)
-            {
-                if (doCameraScan(cameraLeftList, 200))
-                {
-                    bScanLeft = false;
-                    leftDetectedInfo = lastDetectedInfo;
-                    if (lastDetectedInfo.IsEmpty())
-                    {
-                        vVec = worldtb.Left;
-                        vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
-                        return true;
-                    }
-                }
-            }
-            if (bScanRight)
-            {
-                if (doCameraScan(cameraRightList, 200))
-                {
-                    bScanRight = false;
-                    rightDetectedInfo = lastDetectedInfo;
-                    if (lastDetectedInfo.IsEmpty())
-                    {
-                        vVec = worldtb.Right;
-                        vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
-                        return true;
-                    }
-                }
-            }
-            if (bScanUp)
-            {
-                if (doCameraScan(cameraUpList, 200))
-                {
-                    upDetectedInfo = lastDetectedInfo;
-                    bScanUp = false;
-                    if (lastDetectedInfo.IsEmpty())
-                    {
-                        vVec = worldtb.Up;
-                        vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
-                        return true;
-                    }
-                }
-            }
-            if (bScanDown)
-            {
-                if (doCameraScan(cameraDownList, 200))
-                {
-                    downDetectedInfo = lastDetectedInfo;
-                    bScanDown = false;
-                    if (lastDetectedInfo.IsEmpty())
-                    {
-                        vVec = worldtb.Down;
-                        vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
-                        return true;
-                    }
-                }
-            }
-            if (bScanBackward)
-            {
-                if (doCameraScan(cameraBackwardList, 200))
-                {
-                    backwardDetectedInfo = lastDetectedInfo;
-                    bScanBackward = false;
-                    if (lastDetectedInfo.IsEmpty())
-                    {
-                        vVec = worldtb.Backward;
-                        vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
-                        return true;
-                    }
-                }
-            }
-            if (bScanForward)
-            {
-                if (doCameraScan(cameraForwardList, 200))
-                {
-                    bScanForward = false;
-                    if (lastDetectedInfo.IsEmpty())
-                    {
-                        vVec = worldtb.Forward;
-                        vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
-                        return true;
-                    }
-                }
-            }
-            if (bScanForward || bScanBackward || bScanUp || bScanDown || bScanLeft || bScanRight)
-                return false; // still more scans to go
-
-            // nothing was 'clear'.  find longest vector.
-            MyDetectedEntityInfo furthest = backwardDetectedInfo;
-            Vector3D currentpos = gpsCenter.GetPosition();
-            vVec = worldtb.Backward;
-            if (furthest.HitPosition == null || leftDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)leftDetectedInfo.HitPosition))
-            {
-                vVec = worldtb.Left;
-                furthest = leftDetectedInfo;
-            }
-            if (furthest.HitPosition == null || rightDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)rightDetectedInfo.HitPosition))
-            {
-                vVec = worldtb.Right;
-                furthest = rightDetectedInfo;
-            }
-            if (furthest.HitPosition == null || upDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)upDetectedInfo.HitPosition))
-            {
-                vVec = worldtb.Up;
-                furthest = upDetectedInfo;
-            }
-            if (furthest.HitPosition == null || downDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)downDetectedInfo.HitPosition))
-            {
-                vVec = worldtb.Down;
-                furthest = downDetectedInfo;
-            }
-            if (furthest.HitPosition == null || forwardDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)forwardDetectedInfo.HitPosition))
-            {
-                vVec = worldtb.Forward;
-                furthest = forwardDetectedInfo;
-            }
-            if (furthest.HitPosition == null) return false;
-
-            double distance = Vector3D.Distance(currentpos, (Vector3D)furthest.HitPosition);
-            if (distance > 15)
-            {
-                vVec.Normalize();
-                vAvoid = gpsCenter.GetPosition() + vVec * distance / 2;
-                return true;
-            }
-
-            return false;
-        }
-
-        void calcCollisionAvoid(Vector3D vTargetLocation)
-        {
-            Echo("Collsion Detected");
-            Vector3D vHit;
-            if (lastDetectedInfo.HitPosition.HasValue)
-                vHit = (Vector3D)lastDetectedInfo.HitPosition;
-            else
-                vHit = gpsCenter.GetPosition();
-
-            Vector3D vCenter = lastDetectedInfo.Position;
-            //	Vector3D vTargetLocation = vHome;
-            //vTargetLocation;
-            debugGPSOutput("TargetLocation", vTargetLocation);
-            debugGPSOutput("HitPosition", vHit);
-            debugGPSOutput("CCenter", vCenter);
-
-            Vector3D vVec = (vCenter - vHit);
-            vVec.Normalize();
-
-            Vector3D vMinBound = lastDetectedInfo.BoundingBox.Min;
-            debugGPSOutput("vMinBound", vMinBound);
-            Vector3D vMaxBound = lastDetectedInfo.BoundingBox.Max;
-            debugGPSOutput("vMaxBound", vMaxBound);
-
-            double radius = (vCenter - vMinBound).Length();
-            Echo("Radius=" + radius.ToString("0.00"));
-
-            vAvoid = vCenter - vVec * (radius + shipDim.WidthInMeters() * 5);
-            //	 Vector3D gpsCenter.GetPosition() - vAvoid;
-
-            double distancesq = Vector3D.DistanceSquared(vAvoid, gpsCenter.GetPosition());
-            if (distancesq < 30)
-            {
-                // we are already close to avoid.  try a different method.
-                var cross = Vector3D.Cross(vTargetLocation, vCenter);
-                debugGPSOutput("cross", cross);
-            }
-            debugGPSOutput("vAvoid", vAvoid);
-        }
     }
 }

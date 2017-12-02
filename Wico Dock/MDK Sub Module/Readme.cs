@@ -79,5 +79,8 @@ Handle case where requested to dock, but have not heard from a base yet; request
 
 3.2a Remove blockApplyActions and connector actions
 
+3.2b Common DoTravelMemovement and collisio code.
+
+
 
 */

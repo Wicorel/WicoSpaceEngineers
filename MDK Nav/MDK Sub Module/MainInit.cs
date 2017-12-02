@@ -78,6 +78,7 @@ namespace IngameScript
                 GyroControl.SetRefBlock(gpsCenter);
 
                 sInitResults += lightsInit();
+                sInitResults += camerasensorsInit(gpsCenter);
 
                 initShipDim();
 

@@ -39,6 +39,7 @@
     3.1a
     remove blockApplyActions() and make routines for each block type that needs it
 
+    3.2 Collision Avoidance from Docking module for thruster travel
 
     Added Rotors
 
