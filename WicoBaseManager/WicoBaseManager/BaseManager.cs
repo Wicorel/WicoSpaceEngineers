@@ -30,8 +30,16 @@ namespace IngameScript
                 {
                     dBaseLastTransmit = 0;
                     bool bJumpCapable = false;
+                    string sname = Me.CubeGrid.CustomName;
+                    Vector3D vPosition = antennaPosition();
 
-                    antSend("WICO:BASE:" + gpsName("", gpsCenter.CubeGrid.CustomName) + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()) + ":" + bJumpCapable.ToString());
+                    if (gpsCenter != null)
+                    {
+                        sname = gpsCenter.CubeGrid.CustomName;
+//                        vPosition = gpsCenter.GetPosition();
+                    }
+                    antSend("WICO:BASE:" + gpsName("",sname) + ":" + SaveFile.EntityId.ToString() + 
+                        ":" + Vector3DToString(vPosition) + ":" + bJumpCapable.ToString());
                     //                   antSend("WICO:MOM:" + gpsName("", gpsCenter.CubeGrid.CustomName) + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(((IMyShipController)gpsCenter).CenterOfMass));
                 }
                 else
