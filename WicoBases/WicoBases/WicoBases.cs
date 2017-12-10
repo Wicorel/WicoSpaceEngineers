@@ -75,11 +75,19 @@ namespace IngameScript
 
         string baseInfoString()
         {
-            string s = baseList.Count.ToString() +"\n";
+            string s;
+            if (baseList.Count == 0)
+                return "No Known Bases";
+            if(baseList.Count>1)
+                s=  baseList.Count.ToString() +" Known Bases\n";
+            else s=  baseList.Count.ToString() +" Known Base\n";
 
             for(int i=0;i<baseList.Count; i++)
             {
-                s += baseList[i].baseId + ":" + baseList[i].baseName + ":" + Vector3DToString(baseList[i].position) +"\n";
+//                s += baseList[i].baseId + ":";
+                s += baseList[i].baseName + ":";
+                s+= Vector3DToString(baseList[i].position) +":";
+                s += "\n";
             }
             return s;
         }
@@ -108,7 +116,17 @@ namespace IngameScript
             }
         }
 
-        int findBestBase()
+        float RangeToNearestBase()
+        {
+            double bestRange = double.MaxValue;
+            int iBest = findNearestBase();
+            if (iBest >= 0)
+            {
+                bestRange = (gpsCenter.GetPosition() - baseList[iBest].position).Length();
+            }
+            return (float) bestRange;
+        }
+        int findNearestBase()
         {
             int iBest = -1;
             double distanceSQ = double.MaxValue;
@@ -124,6 +142,11 @@ namespace IngameScript
                 }
             }
             return iBest;
+
+        }
+        int findBestBase()
+        {
+            return findNearestBase();
         }
 
         long baseIdOf(int baseIndex)
