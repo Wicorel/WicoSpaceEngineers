@@ -71,6 +71,8 @@
 * 
 * 3.1A init cycle optimizations
 * 
+* 3.1B Handle no controller (stations, etc)
+* 
 * 
 * Handles:
 * Master timer for sub-modules
