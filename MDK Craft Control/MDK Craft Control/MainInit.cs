@@ -41,7 +41,7 @@ namespace IngameScript
 
             // when all initialization is done, set init to true.
 
-            Log("Init:" + currentInit.ToString());
+//            Log("Init:" + currentInit.ToString());
             Echo(gtsAllBlocks.Count.ToString() + " Blocks");
 
             /*
@@ -116,11 +116,12 @@ namespace IngameScript
                     myMass = ((IMyShipController)anchorPosition).CalculateShipMass();
 
                     gridBaseMass = myMass.BaseMass;
+                }////
 
                     sInitResults += modeOnInit(); // handle mode initializing from load/recompile..
 
                     init = true; // we are done
-
+                /*
                 }
                 else
                 {
@@ -130,6 +131,7 @@ namespace IngameScript
                     Echo("Missing Required Item; Please add");
                     return sInitResults;
                 }
+                */
             }
 
             currentInit++;
@@ -166,7 +168,7 @@ namespace IngameScript
                                 continue;
                             break;
                         }
-                        if (i > centerSearch.Count)
+                        if (i >= centerSearch.Count)
                         {
                             sInitResults += "!!NO valid Controller";
                             Echo("No Controller found");
@@ -191,7 +193,6 @@ namespace IngameScript
             }
             if (centerSearch.Count > 0)
                 gpsCenter = centerSearch[0];
-
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
             if (blocks.Count > 0)

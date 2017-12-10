@@ -87,7 +87,7 @@ namespace IngameScript
             string sInitResults = "";
 
             List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
-            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch);
+            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch, localGridFilter);
             if (centerSearch.Count == 0)
             {
                 centerSearch = GetBlocksContains<IMyRemoteControl>("[NAV]");
@@ -96,35 +96,45 @@ namespace IngameScript
                     GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
                     if (centerSearch.Count == 0)
                     {
-                        GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
-                        if (centerSearch.Count == 0)
+                        GridTerminalSystem.GetBlocksOfType<IMyCockpit>(centerSearch, localGridFilter);
+                        //                GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
+                        int i = 0;
+                        for (; i < centerSearch.Count; i++)
                         {
-                            sInitResults += "!!NO Controller";
-                            return sInitResults;
+                            Echo("Checking Controller:" + centerSearch[i].CustomName);
+                            if (centerSearch[i] is IMyCryoChamber)
+                                continue;
+                            break;
+                        }
+                        if (i >= centerSearch.Count)
+                        {
+                            sInitResults += "!!NO valid Controller";
+                            Echo("No Controller found");
                         }
                         else
                         {
                             sInitResults += "S";
+                            Echo("Using good ship Controller: " + centerSearch[i].CustomName);
                         }
                     }
                     else
                     {
                         sInitResults += "R";
+                        Echo("Using First Remote control found: " + centerSearch[0].CustomName);
                     }
                 }
             }
             else
             {
                 sInitResults += "N";
+                Echo("Using Named: " + centerSearch[0].CustomName);
             }
-            gpsCenter = centerSearch[0];
-
+            if (centerSearch.Count > 0)
+                gpsCenter = centerSearch[0];
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
             if (blocks.Count > 0)
                 gpsPanel = blocks[0] as IMyTextPanel;
-
-            if (gpsCenter == null) Echo("ERROR: No control block found!");
 
             return sInitResults;
         }

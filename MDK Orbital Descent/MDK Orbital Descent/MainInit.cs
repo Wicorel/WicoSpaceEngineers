@@ -95,7 +95,7 @@ namespace IngameScript
             string sInitResults = "";
 
             List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
-            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch, (x1 => x1.CubeGrid == Me.CubeGrid));
+            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch, localGridFilter);
             if (centerSearch.Count == 0)
             {
                 centerSearch = GetBlocksContains<IMyRemoteControl>("[NAV]");
@@ -114,7 +114,7 @@ namespace IngameScript
                                 continue;
                             break;
                         }
-                        if (i > centerSearch.Count)
+                        if (i >= centerSearch.Count)
                         {
                             sInitResults += "!!NO valid Controller";
                             Echo("No Controller found");
@@ -137,8 +137,8 @@ namespace IngameScript
                 sInitResults += "N";
                 Echo("Using Named: " + centerSearch[0].CustomName);
             }
-            gpsCenter = centerSearch[0];
-
+            if (centerSearch.Count > 0)
+                gpsCenter = centerSearch[0];
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
             if (blocks.Count > 0)
