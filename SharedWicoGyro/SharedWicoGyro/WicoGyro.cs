@@ -18,7 +18,7 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-
+        // 12/09 Add Summaries to members and functions
         // 09/11 Turn on gyros we are going to use
         // 04/30 only .ToLower ONCE
         // 04/12: add "Up"
@@ -32,23 +32,43 @@ namespace IngameScript
         #region Autogyro 
         // Originally from: http://forums.keenswh.com/threads/aligning-ship-to-planet-gravity.7373513/#post-1286885461 
 
-        // uses: gpsCenter from other code as the designated remote or ship controller
+        // NOTE: uses: gpsCenter from other code as the designated remote or ship controller
 
+        /// <summary>
+        /// GYRO:How much power to use 0 to 1.0
+        /// </summary>
         double CTRL_COEFF = 0.9;
-        int LIMIT_GYROS = 3; // max number of gyros to use to align craft. Leaving some available allows for player control to continue during auto-align 
-        int LEAVE_GYROS = -1;  // leave this many gyros free for user.
 
+        /// <summary>
+        /// GYRO:max number of gyros to use to align craft. Leaving some available allows for player control to continue during auto-align 
+        /// </summary>
+        int LIMIT_GYROS = 3;
 
+        /// <summary>
+        /// GYRO:leave this many gyros free for user. less than 0 means none. (not fully tested)
+        /// </summary>
+        int LEAVE_GYROS = -1;
+
+        /// <summary>
+        /// GYRO:The ship controller used by Gyro control
+        /// </summary>
         IMyShipController gyroControl;
+
+        /// <summary>
+        /// GYRO:The list of approved gyros to use for aiming
+        /// </summary>
         List<IMyGyro> gyros;
 
-        float minAngleRad = 0.01f; // how tight to maintain aim Lower is tighter. 
+        /// <summary>
+        /// GYRO:how tight to maintain aim. Lower is tighter. Default is 0.01f
+        /// </summary>
+        float minAngleRad = 0.01f;
 
         bool GyroMain(string argument)
         {
             if (gyroControl == null)
                 gyrosetup();
-            	Echo("GyroMain(" + argument + ")");
+//            Echo("GyroMain(" + argument + ")");
 
             if (gyroControl is IMyShipController)
             {
@@ -57,12 +77,19 @@ namespace IngameScript
             }
             else
             {
-                Echo("No Remote Control for gravity");
+                Echo("No Controller for gravity");
             }
 
             return true;
         }
 
+        /// <summary>
+        /// Try to align the ship/grid with the given vector. Returns true if the ship is within minAngleRad of being aligned
+        /// </summary>
+        /// <param name="argument">The direction to point. "rocket" (backward),  "backward", "up","forward"</param>
+        /// <param name="vDirection">the vector for the aim.</param>
+        /// <param name="gyroControlPoint">the terminal block to use for orientation</param>
+        /// <returns></returns>
         bool GyroMain(string argument, Vector3D vDirection, IMyTerminalBlock gyroControlPoint)
         {
             bool bAligned = true;
@@ -91,8 +118,11 @@ namespace IngameScript
             {
                 var g = gyros[i];
                 g.Orientation.GetMatrix(out or);
+
+                // not really 'down'.. just the direciton we are currently pointing
                 var localDown = Vector3D.Transform(down, MatrixD.Transpose(or));
-                var localGrav = Vector3D.Transform(vDirection, MatrixD.Transpose(g.WorldMatrix.GetOrientation()));
+                // not really gravity. just the direction we want to point
+                var localGrav = Vector3D.Transform(vDirection, MatrixD.Transpose(g.WorldMatrix.GetOrientation())); 
 
                 //Since the gyro ui lies, we are not trying to control yaw,pitch,roll but rather we 
                 //need a rotation vector (axis around which to rotate) 
@@ -110,26 +140,30 @@ namespace IngameScript
                 }
                 //		Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
 
-                double ctrl_vel = g.GetMaximum<float>("Yaw") * (ang / Math.PI) * CTRL_COEFF;
-                ctrl_vel = Math.Min(g.GetMaximum<float>("Yaw"), ctrl_vel);
+                float yawMax = g.GetMaximum<float>("Yaw"); // we assume all three are the same max
+                double ctrl_vel = yawMax * (ang / Math.PI) * CTRL_COEFF;
+                ctrl_vel = Math.Min(yawMax, ctrl_vel);
                 ctrl_vel = Math.Max(0.01, ctrl_vel);
                 rot.Normalize();
                 rot *= ctrl_vel;
-                float pitch = (float)rot.GetDim(0);
-                g.SetValueFloat("Pitch", pitch);
-                //g.Pitch = pitch;
+//                float pitch = -(float)rot.GetDim(0);
+                float pitch = -(float)rot.X;
+               //g.SetValueFloat("Pitch", -pitch);
+                g.Pitch = pitch;
 
-                float yaw = -(float)rot.GetDim(1);
-                g.SetValueFloat("Yaw", yaw);
-                //g.Yaw = yaw;
+//                float yaw = -(float)rot.GetDim(1);
+                float yaw = -(float)rot.Y;
+                //g.SetValueFloat("Yaw", yaw);
+                g.Yaw = yaw;
 
-                float roll = -(float)rot.GetDim(2);
+//                float roll = -(float)rot.GetDim(2);
+                float roll = -(float)rot.Z;
                 //                g.SetValueFloat("Roll", roll);
                 g.Roll = roll;
 
                 //		g.SetValueFloat("Power", 1.0f); 
-                g.SetValueBool("Override", true);
-                //g.GyroOverride = true;
+                //g.SetValueBool("Override", true);
+                g.GyroOverride = true;
 
                 bAligned = false;
             }
@@ -137,6 +171,10 @@ namespace IngameScript
         }
 
 
+        /// <summary>
+        /// Initialize the gyro controls.
+        /// </summary>
+        /// <returns>String representing what was initialized</returns>
         string gyrosetup()
         {
             string s = "";
@@ -147,7 +185,7 @@ namespace IngameScript
             {
                 // purposefully dont search on our own for a controller
                 if (l.Count < 1) return "No RC!";
-                gyroControl = (IMyRemoteControl)l[0];
+//                gyroControl = (IMyRemoteControl)l[0];
             }
             gyrosOff(); // turn off any working gyros from previous runs
                         // NOTE: Uses grid of controller, not ME, nor localgridfilter
@@ -182,6 +220,9 @@ namespace IngameScript
             s += "GYRO#" + gyros.Count.ToString("00") + "#";
             return s;
         }
+        /// <summary>
+        /// Turns off all overrides on controlled Gyros
+        /// </summary>
         void gyrosOff()
         {
             if (gyros != null)
