@@ -95,31 +95,58 @@ namespace IngameScript
          }; 
          */
 
+            /* New
+             * 0 = master init
+             * 10 delay for sensors, then check for asteroid found
+             * if found ->20
+             * else ->100
+             */
+
         double shiftElapsedMs = 0;
 
         void doModeSearchShift()
         {
+            List<IMySensorBlock> aSensors = null;
+
+            StatusLog("clear", textPanelReport);
+            StatusLog(moduleName + ":SearchShift", textPanelReport);
+            Echo("Search Shift: current_state=" + current_state.ToString());
+            double maxThrust = calculateMaxThrust(thrustForwardList);
+            Echo("maxThrust=" + maxThrust.ToString("N0"));
+
+            MyShipMass myMass;
+            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            double effectiveMass = myMass.PhysicalMass;
+            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
+
+            double maxDeltaV = (maxThrust) / effectiveMass;
+            Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+
+            Echo("Cargo=" + cargopcent.ToString() + "%");
+
+            Echo("velocity=" + velocityShip.ToString("0.00"));
+            Echo("shiftElapsedMs=" + shiftElapsedMs.ToString("0.00"));
+
             bool bLocalFoundAsteroid = false;
 
-            if (sensorsList.Count < 2)
+            IMySensorBlock sb;
+ //           IMySensorBlock sb2;
+            if (sensorsList.Count < 1)
             {
                 StatusLog(OurName + ":" + moduleName + " Search Shift: Not Enough Sensors!", textLongStatus, true);
                 setMode(MODE_ATTENTION);
                 return;
             }
-            List<IMySensorBlock> aSensors = null;
-            IMySensorBlock sb;
-            IMySensorBlock sb2;
 
             sb = sensorsList[0];
-            sb2 = sensorsList[1];
+//            sb2 = sensorsList[1];
             switch (current_state)
             {
                 case 0:
                     ResetMotion();
                     sleepAllSensors();
-                    sensorsList[0].DetectAsteroids = true;
-                    sensorsList[1].DetectAsteroids = true;
+                    sb.DetectAsteroids = true;
+ //                   sensorsList[1].DetectAsteroids = true;
                     setSensorShip(sb, 0, 0, 0, 0, 45, 0);
                     current_state = 10;
                     shiftElapsedMs = 0;
@@ -127,7 +154,7 @@ namespace IngameScript
                 case 10: // delay for sensors
                     shiftElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
                     if (shiftElapsedMs < 1) return;
-                    if (velocityShip < 0.2f) return;
+                    if (velocityShip > 0.2f) return;
 
                     aSensors = activeSensors();
                     bLocalFoundAsteroid = false;
@@ -158,6 +185,11 @@ namespace IngameScript
                     }
                     if (bLocalFoundAsteroid) current_state = 20;
                     else current_state = 100;
+                    break;
+                case 20:
+                    setMode(MODE_FINDORE);
+                    break;
+                case 100:
                     break;
             }
         }
