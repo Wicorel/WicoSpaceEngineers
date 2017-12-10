@@ -266,7 +266,8 @@ namespace IngameScript
             if(bSubModules) Serialize();
 //             Echo("MainInst4:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
-            if ((anchorPosition == null || SaveFile == null ))
+//            if ((anchorPosition == null || SaveFile == null ))
+            if ((SaveFile == null ))
             {
                 if(bSubModules) Echo("Cannot use sub-modules; missing controller and/or SaveFile");
             }
