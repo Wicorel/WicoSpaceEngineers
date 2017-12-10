@@ -43,5 +43,8 @@
 
     Added Rotors
 
+    3.2A travelmovement calculating target speeds and distances with more precision
+
+
 	* TODO: 
 	*/

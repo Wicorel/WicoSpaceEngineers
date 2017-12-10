@@ -155,8 +155,8 @@ namespace IngameScript
                     bool xOk = double.TryParse(args[1].Trim(), out x);
                     if (xOk)
                     {
-                        speedMax = x;
-                        Echo("Set speed to:" + speedMax.ToString("0.00"));
+                        shipSpeedMax = x;
+                        Echo("Set speed to:" + shipSpeedMax.ToString("0.00"));
                         //             setMode(MODE_ARRIVEDTARGET);
                     }
                     else
