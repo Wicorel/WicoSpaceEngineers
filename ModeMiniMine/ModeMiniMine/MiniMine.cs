@@ -224,6 +224,8 @@ namespace IngameScript
                     {
                         aSensors = activeSensors();
                         //                        bValidAsteroid = false;
+                        // TODO: check just the front sensor and we are 'exiting' if no asteroid active.
+                        //
                         bool bLocalAsteroid = false;
                         for (int i = 0; i < aSensors.Count; i++)
                         {
