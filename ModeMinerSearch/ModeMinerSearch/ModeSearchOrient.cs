@@ -18,15 +18,49 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        private StringBuilder strbSearchOrient = new StringBuilder();
+
+        double SOElapsedMs = 0;
+        /*
+         * States
+         * 0 Master init
+         * 10 Wait for motion, then ->20 
+         * 20 do the aiming at last contact (entrance)
+         * when aimed, -> SEARCH_SHIFT
+         */
 
         void doModeSearchOrient()
         {
-            if(current_state==0)
+            List<IMySensorBlock> aSensors = null;
+            IMySensorBlock sb;
+            IMySensorBlock sb2;
+
+            StatusLog("clear", textPanelReport);
+            StatusLog(moduleName + ":SearchOrient", textPanelReport);
+            Echo("Search Orient:current_state=" + current_state.ToString());
+            double maxThrust = calculateMaxThrust(thrustForwardList);
+            Echo("maxThrust=" + maxThrust.ToString("N0"));
+
+            MyShipMass myMass;
+            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            double effectiveMass = myMass.PhysicalMass;
+            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
+
+            double maxDeltaV = (maxThrust) / effectiveMass;
+            Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+
+            Echo("Cargo=" + cargopcent.ToString() + "%");
+
+            Echo("velocity=" + velocityShip.ToString("0.00"));
+            Echo("SOElapsedMs=" + SOElapsedMs.ToString("0.00"));
+
+            if (current_state == 0)
             {
                 StatusLog(DateTime.Now.ToString() + " StartSearchOrient", textLongStatus, true);
                 dtStartSearch = dtStartNav = DateTime.Now;
                 ResetMotion();
-                if (cargopcent > 99)
+                if (maxDeltaV < (fTargetMiningmps/2) || cargopcent > cargopctlowwater)
+//                if (cargopcent > 99)
                 {
                     setMode(MODE_DOCKING);
                     return;
@@ -52,26 +86,14 @@ namespace IngameScript
             }
             else if(current_state==20)
             {
+                // NEED: Time out.
                 bWantFast = true;
                 if(GyroMain("forward",vLastContact-gpsCenter.GetPosition(),gpsCenter))
-                {
+                { // we are aimed
                     ResetMotion();
+                    vLastExit = gpsCenter.GetPosition();
                     setMode(MODE_SEARCHSHIFT);
                 }
-/*
-                if (navStatus == null)
-                {
-                    ResetToIdle();
-                    setAlertState(ALERT_ATTENTION);
-                    throw new OurException("No nav Status block found");
-                }
-                string sStatus = navStatus.CustomName;
-                if (sStatus.Contains("Done"))
-                {
-                    vLastExit = gpsCenter.GetPosition();
-                    StartSearchShift();
-                }
-                */
             }
 
         }
