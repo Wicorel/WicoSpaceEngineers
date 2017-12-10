@@ -45,7 +45,8 @@ namespace IngameScript
                 // we magically got disconnected..
                 setMode(MODE_IDLE);
                 powerDownThrusters(thrustAllList);
-                antennaMaxPower();
+                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
+                antennaMaxPower(false,range);
                 // Need battery management.
             }
             else
