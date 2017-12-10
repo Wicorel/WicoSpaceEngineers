@@ -19,34 +19,88 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         // NAV
+        /// <summary>
+        /// the minimum distance to be from the target to be considered 'arrived'
+        /// </summary>
         double arrivalDistanceMin = 50;
         //        double arrivalDistanceMax = 100;
-        double speedMax = 100;
+
+        /// <summary>
+        /// false means just orient (no motion)
+        /// </summary>
         bool bGoOption = true; // false means just orient.
+
+        /// <summary>
+        /// We are a sled. Default false
+        /// </summary>
         bool bSled = false;
+
+        /// <summary>
+        /// We are rotor-control propulsion. Default false
+        /// </summary>
         bool bRotor = false;
 
+        /*
+        States:
+        0 -- Master Init
+
+
+        160 Main Travel to target
+
+
+
+        *** below here are thruster-only routines (for now)
+
+        170 Collision Detected From 160
+            Calculate collision avoidance 
+            then ->172
+
+        171 dummy state for debugging.
+        172 do travel movemenet for collision avoidance. 
+        if arrive target, ->160
+        if secondary collision ->173
+
+        173 secondary collision
+        if a type we can move around, try to move ->174
+        else go back to collision detection ->170
+
+        174 initilize escape plan
+        ->175
+
+        175 scan for an 'escape' route (pathfind)
+        timeout of (default) 5 seconds ->MODE_ATTENTION
+        after scans, ->180
+
+        180 travel to avoidance waypoint
+        on arrival ->160 (main travel)
+        on collision ->173
+
+        200 Arrived at target
+        ->MODE_ARRIVEDTARGET
+
+        */
         void doModeGoTarget()
         {
             StatusLog("clear", textPanelReport);
 
             StatusLog(moduleName + ":Going Target!", textPanelReport);
             StatusLog(moduleName + ":GT: current_state=" + current_state.ToString(), textPanelReport);
-            bWantFast = true;
+//            bWantFast = true;
             Echo("Going Target: state=" + current_state.ToString());
             if (current_state == 0)
             {
+                ResetTravelMovement();
                 if ((craft_operation & CRAFT_MODE_SLED) > 0)
                 {
                     bSled = true;
-                    if (speedMax > 45) speedMax = 45;
+                    if (shipSpeedMax > 45) shipSpeedMax = 45;
                 }
                 else bSled = false;
 
                 if ((craft_operation & CRAFT_MODE_ROTOR) > 0)
                 {
                     bRotor = true;
-                    if (speedMax > 15) speedMax = 15;
+                    if (shipSpeedMax > 15) shipSpeedMax = 15;
                 }
                 else bRotor = false;
 
@@ -56,6 +110,7 @@ namespace IngameScript
                     current_state = 160;
                 }
                 else setMode(MODE_ATTENTION);
+                bWantFast = true;
             }
             else if (current_state == 160)
             { //	160 move to Target
@@ -65,12 +120,16 @@ namespace IngameScript
                     vTargetLocation = vTargetMine;
 
 
+
                 Vector3D vVec = vTargetLocation - gpsCenter.GetPosition();
                 double distance = vVec.Length();
                 Echo("distance=" + niceDoubleMeters(distance));
                 Echo("velocity=" + velocityShip.ToString("0.00"));
                 //      Echo("TL:" + vTargetLocation.X.ToString("0.00") + ":" + vTargetLocation.Y.ToString("0.00") + ":" + vTargetLocation.Z.ToString("0.00"));
                 //		if(distance<17)
+//                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
+//                range = Math.Max(range, distance);
+//                antennaMaxPower(false,range);
                 if (bGoOption && (distance < arrivalDistanceMin))
                 {
                     Echo("we have arrived");
@@ -93,6 +152,9 @@ namespace IngameScript
                     yawangle = CalculateYaw(vTargetLocation, gpsCenter);
                     Echo("yawangle=" + yawangle.ToString());
                     bAimed = Math.Abs(yawangle) < .05;
+                    if (!bAimed) bWantFast = true;
+                    else bWantMedium = true;
+
                     if (bSled)
                         DoRotate(yawangle, "Yaw");
                     else if (bRotor)
@@ -103,6 +165,8 @@ namespace IngameScript
                 else if (bRotor)
                 {
                     bAimed = GyroMain("forward", vVec, gpsCenter);
+                    if (!bAimed) bWantFast = true;
+                    else bWantMedium = true;
                     if (bAimed)
                     {
                         // we are aimed at location
@@ -128,7 +192,7 @@ namespace IngameScript
                         //                   Echo("DFar=" + dFar);
                         //                   Echo("dApproach=" + dApproach);
                         //                   Echo("dPrecision=" + dPrecision);
-                        Echo("speedMax=" + speedMax);
+                        Echo("shipSpeedMax=" + shipSpeedMax);
                         Echo("velocityShip=" + velocityShip);
                         if (distance > dFar)
                         {
@@ -138,13 +202,13 @@ namespace IngameScript
                                 Echo("DFAR*1");
                                 powerForward(100);
                             }
-                            else if (velocityShip < (speedMax * 0.85))
-                            //                        else if (velocityShip < speedMax / 2)
+                            else if (velocityShip < (shipSpeedMax * 0.85))
+                            //                        else if (velocityShip < shipSpeedMax / 2)
                             {
                                 Echo("DFAR**2");
                                 powerForward(55);
                             }
-                            else if (velocityShip < (speedMax * 1.05))
+                            else if (velocityShip < (shipSpeedMax * 1.05))
                             {
                                 Echo("DFAR***3");
                                 powerForward(1);
@@ -161,9 +225,9 @@ namespace IngameScript
 
                             if (velocityShip < 1)
                                 powerForward(100);
-                            else if (velocityShip < speedMax / 2)
+                            else if (velocityShip < shipSpeedMax / 2)
                                 powerForward(25);
-                            else if (velocityShip < speedMax)
+                            else if (velocityShip < shipSpeedMax)
                                 powerForward(1);
                             else
                                 powerDown();
@@ -174,9 +238,9 @@ namespace IngameScript
                             // almost  to target.  should take stoppingdistance into account.
                             if (velocityShip < 1)
                                 powerForward(100);
-                            else if (velocityShip < speedMax / 2)
+                            else if (velocityShip < shipSpeedMax / 2)
                                 powerForward(25);
-                            else if (velocityShip < speedMax)
+                            else if (velocityShip < shipSpeedMax)
                                 powerForward(1);
                             else
                                 powerDown();
@@ -212,10 +276,11 @@ namespace IngameScript
 
             else if(current_state==170)
             { // collision detection
-//                IMyTextPanel tx = gpsPanel;
-//                gpsPanel = textLongStatus;
- //           StatusLog("clear", gpsPanel);
+              //                IMyTextPanel tx = gpsPanel;
+              //                gpsPanel = textLongStatus;
+              //           StatusLog("clear", gpsPanel);
 
+                bWantFast = true;
                 Vector3D vTargetLocation = vHome;
                 if (bValidTarget)
                     vTargetLocation = vTargetMine;
@@ -234,21 +299,30 @@ namespace IngameScript
 
             else if (current_state == 172)
             {
+//                 Vector3D vVec = vAvoid - gpsCenter.GetPosition();
+//                double distanceSQ = vVec.LengthSquared();
+               
                 doTravelMovement(vAvoid, 5.0f, 160, 173);
             }
             else if (current_state == 173)
             {       // secondary collision
-                if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid)
+                if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid 
+                    || lastDetectedInfo.Type == MyDetectedEntityType.LargeGrid 
+                    || lastDetectedInfo.Type == MyDetectedEntityType.SmallGrid 
+                    )
                 {
-                    current_state = 174;// setMode(MODE_ATTENTION);
+                    current_state = 174;
                 }
-                else current_state = 170;
+                else current_state = 170;// setMode(MODE_ATTENTION);
+                bWantFast = true;
             }
             else if (current_state == 174)
             {
                 initEscapeScan();
+                ResetTravelMovement();
                 dtStartShip = DateTime.Now;
                 current_state = 175;
+                bWantFast = true;
             }
             else if (current_state == 175)
             {
@@ -257,18 +331,31 @@ namespace IngameScript
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                 {
                     setMode(MODE_ATTENTION);
+                    doTriggerMain();
                     return;
                 }
                 if (scanEscape())
                 {
-                    current_state = 172;
+                    Echo("ESCAPE!");
+                    current_state = 180;
                 }
+                bWantMedium = true;
+//                bWantFast = true;
+           }
+            else if(current_state==180)
+            {
+                doTravelMovement(vAvoid,1f, 160, 173);
             }
             else if(current_state==200)
             { // we have arrived at target
                 ResetMotion();
                 bValidHome = false; // we used this one up.
+//                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
+                antennaMaxPower(false);
+                sleepAllSensors();
                 setMode(MODE_ARRIVEDTARGET);
+                bWantFast = true;
+                doTriggerMain();
             }
         }
 
