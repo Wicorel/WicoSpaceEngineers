@@ -18,7 +18,6 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        #region MINshipdim
 
         ShipDimensions shipDim;
 
@@ -77,6 +76,5 @@ namespace IngameScript
                 return _block2metric;
             }
         }
-        #endregion
     }
 }
