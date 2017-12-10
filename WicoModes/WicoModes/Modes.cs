@@ -84,6 +84,7 @@ namespace IngameScript
             // process delta mode
             iMode = newMode;
             current_state = 0;
+            doTriggerMain();
         }
 
         #endregion
