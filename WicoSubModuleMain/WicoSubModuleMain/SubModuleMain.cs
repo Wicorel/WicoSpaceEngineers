@@ -41,16 +41,19 @@ namespace IngameScript
         bool init = false;
         bool bWasInit = false;
         bool bWantFast = false;
+        bool bWantMedium = false;
+
         bool bWorkingProjector = false;
 
         double velocityShip = -1;
 
- //       void Main(string sArgument)
+        //       void Main(string sArgument)
         void Main(string sArgument, UpdateType ut)
         {
             Echo(sBanner + tick());
             Echo(ut.ToString());
             bWantFast = false;
+            bWantMedium = false;
 
             bWorkingProjector = false;
             var list = new List<IMyTerminalBlock>();
@@ -95,12 +98,12 @@ namespace IngameScript
                 Deserialize();
 
                 Echo(craftOperation());
-                if (gpsCenter !=null)
+                if (gpsCenter != null)
                 {
                     vCurrentPos = gpsCenter.GetPosition();
                     velocityShip = ((IMyShipController)gpsCenter).GetShipSpeed();
                 }
-                if((ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0)
+                if ((ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0)
                 {
                     // pay attention to argument
                     if (moduleProcessArguments(sArgument))
@@ -143,12 +146,12 @@ namespace IngameScript
                 }
                 else
                 {
-     //            if ((ut & (UpdateType.Once | UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100)) > 0)
-                   sArgument = ""; // else ignore argument
+                    //            if ((ut & (UpdateType.Once | UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100)) > 0)
+                    sArgument = ""; // else ignore argument
                 }
 
-	            processPendingReceives();
- 	            processPendingSends();
+                processPendingReceives();
+                processPendingSends();
 
                 moduleDoPreModes();
 
@@ -165,6 +168,14 @@ namespace IngameScript
             else
             {
                 Runtime.UpdateFrequency &= ~(ufFast);
+            }
+            if (bWantMedium)
+            {
+                Runtime.UpdateFrequency |= UpdateFrequency.Update10;
+            }
+            else
+            {
+                Runtime.UpdateFrequency &= ~(UpdateFrequency.Update10);
             }
 
             modulePostProcessing();
