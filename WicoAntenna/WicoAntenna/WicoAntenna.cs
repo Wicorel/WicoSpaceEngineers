@@ -130,15 +130,38 @@ namespace IngameScript
             }
         }
 
-        void antennaMaxPower(bool bAll=false)
+        Vector3D antennaPosition()
+        {
+           
+            if (antennaList.Count < 1) antennaInit();
+            foreach (var a in antennaList)
+            {
+                if (a.AttachedProgrammableBlock > 0 )
+                {
+                    // return the position of one we are listening to
+                    return a.GetPosition();
+                }
+            }
+            foreach (var a in antennaList)
+            {
+                // else any one will do
+                return a.GetPosition();
+            }
+            Vector3D vNone = new Vector3D();
+            return vNone;
+        }
+
+        void antennaMaxPower(bool bAll=false, float desiredRange=float.MaxValue)
         {
             if (antennaList.Count < 1) antennaInit();
+            if (desiredRange < 200) desiredRange = 200;
 
             foreach (var a in antennaList)
             {
                 if (a.AttachedProgrammableBlock > 0 || bAll)
                 {
                     float maxPower = a.GetMaximum<float>("Radius");
+                    if (desiredRange < maxPower) maxPower = desiredRange;
                     a.Radius = maxPower;
                     a.Enabled = true;
                 }
