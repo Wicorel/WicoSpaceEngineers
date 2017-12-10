@@ -33,14 +33,15 @@ namespace IngameScript
             wheelSledList.Clear();
             wheelRearSledList.Clear();
             wheelFrontSledList.Clear();
-
+            /*
+            if (orientationBlock == null) return "Wheels:NO CONTROLLER";
 
             GridTerminalSystem.GetBlocksOfType<IMyMotorSuspension>(wheelList, localGridFilter);
 
             Matrix fromGridToReference;
             orientationBlock.Orientation.GetMatrix(out fromGridToReference);
             Matrix.Transpose(ref fromGridToReference, out fromGridToReference);
-
+            */
             for (int i = 0; i < wheelList.Count; i++)
             {
                 if (wheelList[i].CustomName.Contains("[SLED]") || wheelList[i].CustomData.Contains("[SLED]"))
