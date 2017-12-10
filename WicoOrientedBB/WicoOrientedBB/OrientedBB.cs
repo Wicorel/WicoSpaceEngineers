@@ -22,9 +22,10 @@ namespace IngameScript
 
         OrientedBoundingBoxFaces _obbf;// = OrientedBoundingBoxFaces(Me);
 
-        void calculateGridBBPosition()
+        void calculateGridBBPosition(IMyTerminalBlock sourceBlock = null)
         {
-            _obbf = new OrientedBoundingBoxFaces(gpsCenter);
+            if (sourceBlock == null) sourceBlock = gpsCenter;
+            _obbf = new OrientedBoundingBoxFaces(sourceBlock);
         }
 
         #region orientedBB
@@ -116,6 +117,12 @@ namespace IngameScript
                     Corners[i] = tmp;
                 }
             }
+            // face 0=right output order is  BL, TL, BR, TR
+            // face 1=left output order is BL, TL, BR, TR
+            // face 2=top output order is FTL, FR, BL, BR
+            // face 3=bottom output order is FL, FR, BL, BR
+            // face 4=back output order is BL, BR, TL, TR
+            // face 5=front output order is BL, BR, TL, TR
 
             // Gets the points defining a face of the bounding box in world space.
             // 0 = right, 1 = left, 2 = top, 3 = bottom, 4 = back, 5 = front
