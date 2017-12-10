@@ -79,7 +79,7 @@ namespace IngameScript
 
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":Mine!", textPanelReport);
-            Echo("current_state=" + current_state.ToString());
+            Echo("FindOre:current_state=" + current_state.ToString());
         	MyShipMass myMass;
             myMass=((IMyShipController)gpsCenter).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
