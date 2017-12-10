@@ -18,9 +18,11 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+
+
         string OurName = "Wico Craft";
         string moduleName = "Dock";
-        string sVersion = "3.2b";
+        string sVersion = "3.2D";
 
         const string sGPSCenter = "Craft Remote Control";
 
@@ -29,6 +31,8 @@ namespace IngameScript
         Vector3I iLeft = new Vector3I(0, 0, 0);
  //       Vector3D currentPosition;
         const string velocityFormat = "0.00";
+
+//        double shipWidth = 0, shipHeight = 0, shipLength = 0;
 
  //       IMyTerminalBlock anchorPosition;
         IMyTerminalBlock gpsCenter = null;

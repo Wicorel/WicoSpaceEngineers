@@ -58,24 +58,58 @@ namespace IngameScript
         #region modealways
         void doModeAlways()
         {
-/*
-            MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
-            double maxThrust = calculateMaxThrust(thrustBackwardList);
-            double maxDeltaV = maxThrust / myMass.PhysicalMass;
-            Echo("maxDeltaV=" + niceDoubleMeters(maxDeltaV));
-            // distance *.75
-            // distance /2
-            // /(maxdeltaV*2)
+            /*
+                        MyShipMass myMass;
+                        myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+                        double maxThrust = calculateMaxThrust(thrustBackwardList);
+                        double maxDeltaV = maxThrust / myMass.PhysicalMass;
+                        Echo("maxDeltaV=" + niceDoubleMeters(maxDeltaV));
+                        // distance *.75
+                        // distance /2
+                        // /(maxdeltaV*2)
 
-            dtmFar = calculateStoppingDistance(thrustBackwardList, 54); // calculate maximum stopping distance at full speed
-            dtmApproach = calculateStoppingDistance(thrustBackwardList, 54*.75);
-            dtmPrecision =calculateStoppingDistance(thrustBackwardList, 5f);
-            Echo("dtmFar=" + niceDoubleMeters(dtmFar));
-            Echo("dtmApproach=" + niceDoubleMeters(dtmApproach));
-            Echo("dtmPrecision=" + niceDoubleMeters(dtmPrecision));
-            Echo("CurrentStop=" + niceDoubleMeters(calculateStoppingDistance(thrustBackwardList, velocityShip)));
-*/            
+                        dtmFar = calculateStoppingDistance(thrustBackwardList, 54); // calculate maximum stopping distance at full speed
+                        dtmApproach = calculateStoppingDistance(thrustBackwardList, 54*.75);
+                        dtmPrecision =calculateStoppingDistance(thrustBackwardList, 5f);
+                        Echo("dtmFar=" + niceDoubleMeters(dtmFar));
+                        Echo("dtmApproach=" + niceDoubleMeters(dtmApproach));
+                        Echo("dtmPrecision=" + niceDoubleMeters(dtmPrecision));
+                        Echo("CurrentStop=" + niceDoubleMeters(calculateStoppingDistance(thrustBackwardList, velocityShip)));
+            */
+
+            /*
+            Echo("W=" + shipDim.WidthInMeters() + " H=" + shipDim.HeightInMeters() + "  L=" + shipDim.LengthInMeters());
+
+            calculateGridBBPosition();
+            Vector3D[] points = new Vector3D[4];
+            _obbf.GetFaceCorners(4, points);
+            // back output order is BL, BR, TL, TR
+
+            // TODO: Use correct 'side' based on connector position.
+            /// DUH: or just just use connector as orientation. calculateGridBBPosition() 
+
+            for(int i=0;i<4;i++)
+            {
+                Echo(i + ":" + Vector3DToString(points[i]));
+            }
+            Echo("W2=" + (points[0] - points[1]).Length().ToString("0.0") + " H2=" + (points[0] - points[2]).Length().ToString("0.0"));
+
+            _obbf.GetFaceCorners(0,points);
+// face 0=right output order is  BL, TL, BR, TR ???
+            double length=(points[0] - points[2]).Length();
+            debugGPSOutput("R0", points[0]);
+            debugGPSOutput("R1", points[1]);
+            debugGPSOutput("R2", points[2]);
+            debugGPSOutput("r3", points[3]);
+            Echo("Length=" + length.ToString("0.0"));
+
+            */
+
+            if (iMode != MODE_ATTENTION)
+            {
+                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
+                antennaMaxPower(false, range);
+            }
             processPendingSends();
             processReceives();
             if (AnyConnectorIsConnected() && (iMode != MODE_LAUNCH) && iMode != MODE_DOCKED)

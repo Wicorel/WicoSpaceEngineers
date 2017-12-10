@@ -79,8 +79,10 @@ Handle case where requested to dock, but have not heard from a base yet; request
 
 3.2a Remove blockApplyActions and connector actions
 
-3.2b Common DoTravelMemovement and collisio code.
+3.2b Common DoTravelMemovement and collision code.
 
+3.2c Docking messages now include size of ship in meters so base can choose best available connector
 
+3.2d new travelmovement
 
 */
