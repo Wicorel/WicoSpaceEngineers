@@ -81,8 +81,6 @@ namespace IngameScript
                 dumpFoundOre();
                 //dumpOreLocs();
 
-
-
                 double maxThrust = calculateMaxThrust(thrustForwardList);
                 Echo("maxThrust=" + maxThrust.ToString("N0"));
 
