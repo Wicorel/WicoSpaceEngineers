@@ -109,6 +109,11 @@ namespace IngameScript
         // returns the 'type' of the tank
         int tankType(IMyTerminalBlock theBlock)
         {
+
+/*
+var sink = block.Components.Get<MyResourceSinkComponent>();
+bool oxygen = sink.AcceptedResources.Any(r => r.SubtypeName == "Oxygen");
+*/
             if (theBlock is IMyGasTank)
             {
                 // could also check the provider type...
