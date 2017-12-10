@@ -60,7 +60,8 @@ namespace IngameScript
                 vDock = ((IMyShipController)gpsCenter).CenterOfMass;
 //                vDock = gpsCenter.GetPosition();
                 powerDownThrusters(thrustAllList); // turns ON all thrusters.
-                antennaMaxPower();
+                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
+                antennaMaxPower(false,range);
                 current_state = 100;
                 return;
             }
