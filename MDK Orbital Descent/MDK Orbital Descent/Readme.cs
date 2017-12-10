@@ -29,6 +29,10 @@
  *  
  *  3.1 Updates for SE V1.185
  *  
+ *  3.1a Buld with current Source 11/26/2017
+ *  
+ *  3.1b Remove (almost) all ApplyActons 12032017
+ *  
  * NEED:  
  *  
  *  trigger timers on stages of descent (see rotor legs example)
