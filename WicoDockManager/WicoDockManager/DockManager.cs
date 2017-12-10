@@ -193,7 +193,7 @@ namespace IngameScript
             Echo(output);
         }
 
-        int getAvailableDock(long incomingID, string sType, string sName)
+        int getAvailableDock(long incomingID, string sType, double height, double width, double length)
         {
             int iDock = -1;
             for (int i = 0; i < dockingInfo.Count; i++)
@@ -269,7 +269,9 @@ namespace IngameScript
             dockingInfo[iDock].sDroneName = sName;
 
             Vector3D vAlign;
-            MatrixD worldtb = gpsCenter.WorldMatrix;
+            MatrixD worldtb;
+            if (gpsCenter != null) worldtb = gpsCenter.WorldMatrix;
+            else worldtb = Me.WorldMatrix;
 
             vAlign = worldtb.Forward;
             switch (dockingInfo[iDock].lAlign)
@@ -353,8 +355,16 @@ namespace IngameScript
             // give: base ID for request, drone ship size/type?, source wanted, sink wanted
 
         //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
-
-
+        // ship width, height, length
+        /*
+                        string sMessage = "WICO:CON?:";
+                        sMessage += baseIdOf(iTargetBase).ToString() + ":";
+                        sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
+                        //                    sMessage += shipDim.HeightInMeters() + "," + shipDim.WidthInMeters() + "," + shipDim.LengthInMeters() + ":";
+                        sMessage += gpsCenter.CubeGrid.CustomName + ":";
+                        sMessage += SaveFile.EntityId.ToString() + ":";
+                        sMessage += Vector3DToString(gpsCenter.GetPosition());
+                        */
             // NACK response to request
             // approach GPS?
             // Reason:  
@@ -384,8 +394,6 @@ namespace IngameScript
         //antSend("WICO:COND:" + droneId + ":" + SaveFile.EntityId.ToString() + ":" + connector.EntityId + ":" + connector.CustomName + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
         //antSend("WICO:ACOND:" + droneId + ":" + SaveFile.EntityId.ToString() + ":" + connector.EntityId + ":" + connector.CustomName 	+ ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec)+":" + Vector3DToString(vAlign));
 
-
-
             // Recover All Command
             // all drones should attempt to return to base with jump capability
             
@@ -408,8 +416,8 @@ namespace IngameScript
                 {
                     if (aMessage[1] == "DOCK?")
                     {
+                        Echo("[OBSOLETE] Docking Request!");
                     /* OBSOLETE
-                        Echo("Docking Request!");
 
                         sReceivedMessage = ""; // we processed it.
 
@@ -446,17 +454,29 @@ namespace IngameScript
                             return false;
                         }
                         string sType = aMessage[3];
-                        string sName = aMessage[4];
+                        double height = -1;
+                        double width = -1;
+                        double length = -1;
+                        string[]  aSize = sType.Trim().Split(',');
+                        if(aSize.Length>2)
+                        {
+                            pOK = double.TryParse(aSize[0], out height);
+                            pOK = double.TryParse(aSize[1], out width);
+                            pOK = double.TryParse(aSize[2], out length);
+                            
+                        }
+
+                        string sDroneName = aMessage[4];
 
                         sReceivedMessage = ""; // we processed it.
                         int i = -1;
                         long incomingID = 0;
                         pOK = long.TryParse(aMessage[5], out incomingID);
 
-                        i = getAvailableDock(incomingID, sType, sName);
+                        i = getAvailableDock(incomingID, sType, height, width, length);
                         if (i >= 0 && pOK)
                         {
-                            sendDockInfo(i, incomingID, sName, true);
+                            sendDockInfo(i, incomingID, sDroneName, true);
                         }
                         else
                         {
@@ -483,11 +503,23 @@ namespace IngameScript
                         sReceivedMessage = ""; // we processed it.
 
                         string sType = aMessage[3];
+                        double height = -1;
+                        double width = -1;
+                        double length = -1;
+                        string[]  aSize = sType.Trim().Split(',');
+                        if(aSize.Length>2)
+                        {
+                            pOK = double.TryParse(aSize[0], out height);
+                            pOK = double.TryParse(aSize[1], out width);
+                            pOK = double.TryParse(aSize[2], out length);
+                            
+                        }
+
                         string sDroneName = aMessage[4];
                         int i = -1;
                         long incomingID = 0;
                         pOK = long.TryParse(aMessage[5], out incomingID);
-                        i = getAvailableDock(incomingID,sType, sDroneName);
+                        i = getAvailableDock(incomingID,sType, height, width, length);
                         if (i >= 0 && pOK)
                         {
                             sendDockInfo(i, incomingID, sDroneName);
@@ -495,7 +527,7 @@ namespace IngameScript
                         else
                         {
                             // docking request failed
-                            antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                            antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(antennaPosition()));
                         }
                         return true;
                     }
@@ -504,7 +536,6 @@ namespace IngameScript
         //antSend("WICO:BASE?:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
                         Echo("Base Request!");
                         sReceivedMessage = ""; // we processed it.
-
 
                         long incomingID = 0;
                         bool pOK = false;
