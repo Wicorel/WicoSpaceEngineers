@@ -212,7 +212,8 @@ namespace IngameScript
             }
             else
             {
-                if (alt > 100)
+                bWantMedium = true;
+                if (alt > 5)
                 {
                     if ((craft_operation & CRAFT_MODE_NOAUTOGYRO) > 0)
                         StatusLog("Wico Gravity Alignment OFF", textBlock);
@@ -224,7 +225,8 @@ namespace IngameScript
                         if ((craft_operation & CRAFT_MODE_ROCKET) > 0)
                             sOrientation = "rocket";
 
-                        GyroMain(sOrientation);
+                        if(!GyroMain(sOrientation))
+                            bWantFast = true;
                     }
                 }
             }
