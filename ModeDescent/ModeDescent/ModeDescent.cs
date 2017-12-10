@@ -174,7 +174,8 @@ namespace IngameScript
             if (AnyConnectorIsLocked())
             {
                 ConnectAnyConnectors(true);
-                blockApplyAction(gearList, "Lock");
+                gearsLock(true);
+//                blockApplyAction(gearList, "Lock");
             }
 
             if (thrustStage1UpList.Count < 1)
@@ -231,8 +232,10 @@ namespace IngameScript
                 else
                 {
                     if (imsc != null && imsc.DampenersOverride)
-                        blockApplyAction(gpsCenter, "DampenersOverride"); //DampenersOverride 
-                    ConnectAnyConnectors(false, "OnOff_On");
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = false;
+//                        blockApplyAction(gpsCenter, "DampenersOverride"); //DampenersOverride 
+//                    ConnectAnyConnectors(false, "OnOff_On");
+                    ConnectAnyConnectors(false, true);
                     if (!bValidTarget)
                     {
                         StatusLog("No target landing waypoint set.", textPanelReport);
@@ -249,17 +252,23 @@ namespace IngameScript
                 Echo("Dampeners to on. Aim toward target");
                 //		bOverTarget=false; 
                 powerDownThrusters(thrustStage1DownList, thrustAll, false);
+                bWantFast = true;
                 if (bValidTarget)
                 {
-                    //			startNavWaypoint(vTarget, true);
+                    GyroMain(sOrientation, vTarget, gpsCenter);
+                        //			startNavWaypoint(vTarget, true);
                     current_state = 11;
                 }
                 else current_state = 20;
             }
             if (current_state == 11)
             {
+                bWantFast = true;
+                if (GyroMain(sOrientation, vTarget, gpsCenter))
+                    current_state = 20;
+                /*
                 string sStatus = "Shutdown";// navStatus.CustomName; 
-                StatusLog("Waiting for alignment with launch location" + dGravity.ToString(velocityFormat), textPanelReport);
+                StatusLog("Waiting for alignment with launch location " + dGravity.ToString(velocityFormat), textPanelReport);
 
                 if (sStatus.Contains("Shutdown"))
                 { // somebody hit nav override 
@@ -270,6 +279,7 @@ namespace IngameScript
                 {
                     current_state = 20;
                 }
+                */
             }
             if (current_state == 20)
             {
@@ -280,7 +290,8 @@ namespace IngameScript
                     StatusLog("Move towards surface for landing", textPanelReport);
 
                 if (imsc != null && !imsc.DampenersOverride)
-                    blockApplyAction(gpsCenter, "DampenersOverride");
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
+//                    blockApplyAction(gpsCenter, "DampenersOverride");
                 //		current_state=30; 
                 if (dGravity <= 0 || velocityShip < (fMaxMps * .8))
                     powerUpThrusters(thrustForwardList, 5);
@@ -313,7 +324,8 @@ namespace IngameScript
                 powerDownThrusters(thrustBackwardList, thrustAll, true);
 
                 if (imsc != null && imsc.DampenersOverride)
-                    blockApplyAction(gpsCenter, "DampenersOverride");
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = false;
+//                    blockApplyAction(gpsCenter, "DampenersOverride");
                 current_state = 40;
             }
             if (current_state == 40)
@@ -321,7 +333,8 @@ namespace IngameScript
                 StatusLog("Free Fall", textPanelReport);
                 Echo("Free Fall");
                 if (imsc != null && imsc.DampenersOverride)
-                    blockApplyAction(gpsCenter, "DampenersOverride");
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = false;
+//                    blockApplyAction(gpsCenter, "DampenersOverride");
 
                 if (alt < startReverseAlt)
                 {
@@ -354,7 +367,8 @@ namespace IngameScript
                 StatusLog("Waiting for alignment with gravity", textPanelReport);
 
                 if (imsc != null && imsc.DampenersOverride)
-                    blockApplyAction(gpsCenter, "DampenersOverride");
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = false;
+//                    blockApplyAction(gpsCenter, "DampenersOverride");
 
                 GyroMain(sOrientation);
                 bWantFast = true;
@@ -422,7 +436,8 @@ namespace IngameScript
                 if ((alt) < retroStartAlt)
                 {
                     if (imsc != null && !imsc.DampenersOverride)
-                        blockApplyAction(gpsCenter, "DampenersOverride");
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
+//                        blockApplyAction(gpsCenter, "DampenersOverride");
                     current_state = 90;
                 }
             }
