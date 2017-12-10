@@ -43,5 +43,9 @@
 * Moved a number of utility routines into WicoAntenna
 * Check antenna for this PB set as attached.  Attach this PB to the antenna with maximum range
 * 
-*
+*3.2 Drone height, width and length in docking requests
+* 
+* TODO: Process size info to select connectors
+* TODO: drones may take up more than one connector depending on height, width.
+* 
 */
