@@ -128,7 +128,7 @@ namespace IngameScript
                 if (dockingConnector == null)// || getAvailableRemoteConnector(out targetConnector))
                 {
                     Echo("No local connector for docking");
-                    StatusLog(moduleName + ":No local Docking Connector Availalbe!", textLongStatus, true);
+                    StatusLog(moduleName + ":No local Docking Connector Available!", textLongStatus, true);
                     // we could check for merge blocks.. or landing gears..
                     setMode(MODE_ATTENTION);
                     bWantFast = false;
@@ -157,7 +157,8 @@ namespace IngameScript
             }
             if (current_state == 100)
             {
-                antennaMaxPower();
+                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
+                antennaMaxPower(false,range);
                 if (sensorsList.Count > 0)
                 {
                     sb = sensorsList[0];
@@ -174,7 +175,25 @@ namespace IngameScript
                    dtStartShip = DateTime.Now;
                    if (iTargetBase >= 0)
                     {
-                        antSend("WICO:CON?:" + baseIdOf(iTargetBase).ToString() + ":" + "mini" + ":" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                        calculateGridBBPosition(dockingConnector);
+                        Vector3D[] points = new Vector3D[4];
+                        _obbf.GetFaceCorners(5, points); // 5 = front
+                                                         // front output order is BL, BR, TL, TR
+                        double width = (points[0] - points[1]).Length();
+                        double height = (points[0] - points[2]).Length();
+                        _obbf.GetFaceCorners(0, points);
+                        // face 0=right output order is  BL, TL, BR, TR ???
+                        double length = (points[0] - points[2]).Length();
+
+                        string sMessage = "WICO:CON?:";
+                        sMessage += baseIdOf(iTargetBase).ToString() + ":";
+                        sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
+                        //                    sMessage += shipDim.HeightInMeters() + "," + shipDim.WidthInMeters() + "," + shipDim.LengthInMeters() + ":";
+                        sMessage += gpsCenter.CubeGrid.CustomName + ":";
+                        sMessage += SaveFile.EntityId.ToString() + ":";
+                        sMessage += Vector3DToString(gpsCenter.GetPosition());
+                        antSend(sMessage);
+//                        antSend("WICO:CON?:" + baseIdOf(iTargetBase).ToString() + ":" + "mini" + ":" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
                         current_state = 102;
                     }
                     else // No available base
@@ -314,9 +333,29 @@ namespace IngameScript
             }
             else if (current_state == 120)
             {//120	request available docking connector
-                if (velocityShip < 5)
+                if (velocityShip < 1)
                 {
-                    antSend("WICO:COND?:" + baseIdOf(iTargetBase) + ":" + "mini" + ":" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+
+                    calculateGridBBPosition(dockingConnector);
+                    Vector3D[] points = new Vector3D[4];
+                    _obbf.GetFaceCorners(5, points); // 5 = front
+                                                     // front output order is BL, BR, TL, TR
+                    double width = (points[0] - points[1]).Length();
+                    double height = (points[0] - points[2]).Length();
+                    _obbf.GetFaceCorners(0,points);
+ // face 0=right output order is  BL, TL, BR, TR ???
+                    double length=(points[0] - points[2]).Length();
+
+                    string sMessage = "WICO:COND?:";
+                    sMessage += baseIdOf(iTargetBase).ToString() + ":";
+                    sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
+//                    sMessage += shipDim.HeightInMeters() + "," + shipDim.WidthInMeters() + "," + shipDim.LengthInMeters() + ":";
+                    sMessage += gpsCenter.CubeGrid.CustomName + ":";
+                    sMessage += SaveFile.EntityId.ToString() + ":";
+                    sMessage += Vector3DToString(gpsCenter.GetPosition());
+                    antSend(sMessage);
+
+                    //                    antSend("WICO:COND?:" + baseIdOf(iTargetBase) + ":" + "mini" + ":" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
                     {
                         dtStartShip = DateTime.Now;
                         current_state = 131;
@@ -336,7 +375,7 @@ namespace IngameScript
                 DateTime dtNow = DateTime.Now;
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                 {
-                    current_state = 0;
+                    current_state = 100;
                     return;
                 }
                 if (getAvailableRemoteConnector(out targetConnector))
@@ -436,11 +475,13 @@ namespace IngameScript
                 debugGPSOutput("dock", vDock);
                 debugGPSOutput("launch1", vLaunch1);
                 debugGPSOutput("Home", vHome);
+                bWantFast = true;
             }
             else if (current_state == 150)
             { //150  Start:	Move through locations
                 current_state = 160;
                 iPushCount = 0;
+                bWantFast = true;
             }
             else if (current_state == 160)
             { //	160 move to home
@@ -455,6 +496,7 @@ namespace IngameScript
                 calcCollisionAvoid(vHome);
                 current_state = 162;
                 iPushCount = 0;
+                bWantFast = true;
             }
             else if (current_state == 162)
             {
@@ -466,17 +508,23 @@ namespace IngameScript
             else if (current_state == 163)
             {       // secondary collision
 
-                if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid)
+//                if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid)
+                if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid 
+                    || lastDetectedInfo.Type == MyDetectedEntityType.LargeGrid 
+                    || lastDetectedInfo.Type == MyDetectedEntityType.SmallGrid 
+                    )
                 {
-                    current_state = 164;// setMode(MODE_ATTENTION);
+                    current_state = 164;
                 }
-                else current_state = 161;
+                else current_state = 161;// setMode(MODE_ATTENTION);
+                bWantFast = true;
             }
             else if (current_state == 164)
             {
                 initEscapeScan();
                 dtStartShip = DateTime.Now;
                 current_state = 165;
+                bWantFast = true;
             }
             else if (current_state == 165)
             {
@@ -491,25 +539,30 @@ namespace IngameScript
                 {
                     current_state = 162;
                 }
+                bWantFast = true;
             }
             else if (current_state == 169)
             {
                 ResetMotion();
                 Echo("Waiting for ship to stop");
+                turnEjectorsOff();
                 iPushCount = 0;
                 if (velocityShip < 0.1f)
                 {
+                    bWantFast = true;
                     current_state = 170;
                 }
                 else
                 {
+                    bWantMedium = true;
                     bWantFast = false;
                 }
             }
             else if (current_state == 170 || current_state == 172)
             { //170 172 'reverse' to dock, aiming connector at dock location
               // align to docking alignment if needed
-                turnEjectorsOff();
+                bWantFast = true;
+//                turnEjectorsOff();
                 if (!bDoDockAlign)
                 {
                     current_state = 173;
@@ -525,6 +578,7 @@ namespace IngameScript
             }
             else if (current_state == 171)
             { //171 align to dock
+                bWantFast = true;
                 Vector3D vTargetLocation = vDock;
                 Vector3D vVec = vTargetLocation - dockingConnector.GetPosition();
 
@@ -543,6 +597,7 @@ namespace IngameScript
             else if (current_state == 173)
             { //173 'reverse' to dock, aiming connector at dock location
                 // needs a time-out for when misaligned or base connector moves.
+                bWantFast = true;
                 Echo("bDoDockAlign=" + bDoDockAlign);
                 StatusLog(moduleName + ":Docking: Reversing to dock! Velocity=" + velocityShip.ToString("0.00"), textPanelReport);
                 Echo("Reversing to Dock");
