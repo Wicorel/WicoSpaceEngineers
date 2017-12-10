@@ -34,9 +34,14 @@
  * 
  * 3.1A changes for SE 1.185.200 (add RotorLock)
  * 
+ * 3.1B Set "unlimited" upper & Lower limit using SetValueFloat since setter doesn't allow max/min
+ * 
+ * 3.1C Set upper/lower to constrain movement during rotor movement
+ * 
+ * 
  */
 
-string sVersion = "3.1";
+string sVersion = "3.1C";
 string OurName = "Wico Gimbal";
 string moduleName = "Gimbal Control";
 
@@ -883,12 +888,12 @@ List < GimbalRotor > gimbalList = new List < GimbalRotor > ();
 public class GimbalRotor
 {
 	public IMyMotorStator r;
-	public float zminus;
-	public float zplus;
-	public float yminus;
-	public float yplus;
-	public float xminus;
-	public float xplus;
+	public float zminus; // forward
+	public float zplus; // backward
+	public float yminus; // down
+	public float yplus; // up
+	public float xminus; // right
+	public float xplus; // left
 
 	public bool bAutoDampen;
 	public bool bGravity;
@@ -1155,12 +1160,15 @@ Echo("Loading Gimbal:" + r.CustomName);
 void processGimbal(GimbalRotor gr, Vector3 vInputs,bool bDampeners)
 {
 	if (gr == null) return;
+    string s="";
+    s =  gr.r.CustomName;
 
 	float x = vInputs.X;
 	float y = vInputs.Y;
 	float z = vInputs.Z;
 	if(bDampeners && !gr.bAutoDampen)
 	{
+        s += ": No AutoDampen:";
 		x = y = z = 0;
 	}
 	float targetAngle = -1;
@@ -1187,10 +1195,13 @@ void processGimbal(GimbalRotor gr, Vector3 vInputs,bool bDampeners)
 		if (x > 0 && gr.xplus>=0) targetAngle = gr.xplus;
 	}
 
-	Log(gr.r.CustomName);
+    //	Log(gr.r.CustomName);
+    s += " A=" + (gr.r.Angle * 57.295779513f).ToString("0.00");
+    if (gr.r.Angle < 0) s += "NEG!";
+    s+= ":" + targetAngle;
 
-    Log(gr.r.Angle+ ":"+targetAngle);
-
+    //    Log(gr.r.Angle+ ":"+targetAngle);
+    Log(s);
 	if (targetAngle >= 0)
 	{
 		if(Math.Abs(processRotorTargetAngle(gr, targetAngle))<5)
@@ -1273,6 +1284,7 @@ void stopGimbals()
 		gimbalList[i].r.TargetVelocityRPM = 0;
         gimbalList[i].r.UpperLimitRad=gimbalList[i].r.Angle;
         gimbalList[i].r.LowerLimitRad=gimbalList[i].r.Angle;
+
 //		gimbalList[i].r.TargetVelocity = 0;
 //		listSetValueFloat(gimbalList[i].thrusters, "Override", 0);
 		if (gimbalList[i].subRotor != null)
@@ -1316,9 +1328,23 @@ float processRotorTargetAngle(GimbalRotor gr, float targetAngleD)
 	}
 	else
 	{
-//		r.SafetyLock = false;
-        gr.r.UpperLimitDeg=361;
-        gr.r.LowerLimitDeg=-361;
+        //		r.SafetyLock = false;
+        //        gr.r.UpperLimitDeg=361; // doesn't work correctly on 1.185.200
+        //        gr.r.LowerLimitDeg=-361;
+         gr.r.SetValueFloat("UpperLimit", float.MaxValue);
+        gr.r.SetValueFloat("LowerLimit", float.MinValue);
+        /*
+       if (angleDelta < 0)
+        {
+            gr.r.UpperLimitRad = gr.r.Angle;
+//            gr.r.LowerLimitDeg=targetAngleD;
+        }
+        else
+        {
+//            gr.r.UpperLimitDeg =targetAngleD;
+            gr.r.LowerLimitRad= gr.r.Angle;
+        }
+        */
         gr.r.SetValueBool("RotorLock", false);
 		if (Math.Abs(angleDelta) > 0.5)
 		{
