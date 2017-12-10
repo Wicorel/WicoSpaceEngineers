@@ -277,7 +277,7 @@ namespace IngameScript
             MyShipMass myMass;
             myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
             double hoverthrust = 0;
-            hoverthrust = myMass.TotalMass * dGravity * 9.810;
+            hoverthrust = myMass.PhysicalMass * dGravity * 9.810;
 
 //            Echo("hoverthrust=" + hoverthrust.ToString("N0"));
 
