@@ -65,6 +65,12 @@ namespace IngameScript
 
         float tmMaxSensorM = 50f;
 
+        // propulsion mode
+        bool btmRotor = false;
+        bool btmSled = false;
+        // else it's gyros and thrusters
+
+
         /// <summary>
         /// reset so the next call to doTravelMovement will re-initialize.
         /// </summary>
@@ -86,6 +92,21 @@ namespace IngameScript
         void InitDoTravelMovement(Vector3D vTargetLocation, double maxSpeed, IMyTerminalBlock myShipController, int iThrustType=thrustAll)
         {
             tmMaxSpeed = maxSpeed;
+
+            if ((craft_operation & CRAFT_MODE_SLED) > 0)
+            {
+                btmSled = true;
+//                if (shipSpeedMax > 45) shipSpeedMax = 45;
+            }
+            else btmSled = false;
+
+            if ((craft_operation & CRAFT_MODE_ROTOR) > 0)
+            {
+                btmRotor = true;
+//                if (shipSpeedMax > 15) shipSpeedMax = 15;
+            }
+            else btmRotor = false;
+
             tmShipController =  myShipController as IMyShipController;
             Vector3D vVec = vTargetLocation - tmShipController.CenterOfMass;
             double distance = vVec.Length();
@@ -97,7 +118,9 @@ namespace IngameScript
             if (sensorsList.Count > 0)
             {
                 tmSB = sensorsList[0];
-                tmSB.DetectAsteroids = true;
+                if (btmRotor || btmSled) tmSB.DetectAsteroids = false;
+                else
+                    tmSB.DetectAsteroids = true;
                 tmSB.DetectEnemy = true;
                 tmSB.DetectLargeShips = true;
                 tmSB.DetectSmallShips = true;
@@ -113,6 +136,9 @@ namespace IngameScript
             btmApproach = false; // we have reached approach range
             btmPrecision = false; // we have reached precision range
             btmClose = false; // we have reached close range
+
+
+
 
             double optimalV = CalculateOptimalSpeed( thrustTmBackwardList, distance);
             if (optimalV < tmMaxSpeed)
@@ -135,9 +161,9 @@ namespace IngameScript
 
             dtmFar = calculateStoppingDistance(thrustTmBackwardList, dtmFarSpeed, 0); // calculate maximum stopping distance at full speed
 
-            sInitResults += "\nFarSpeed=="+niceDoubleMeters(dtmFarSpeed)+" ASpeed=" + niceDoubleMeters(dtmApproachSpeed);
+//  sInitResults += "\nFarSpeed=="+niceDoubleMeters(dtmFarSpeed)+" ASpeed=" + niceDoubleMeters(dtmApproachSpeed);
 
-            sInitResults += "\nFar=="+niceDoubleMeters(dtmFar)+" A=" + niceDoubleMeters(dtmApproach) + " P="+niceDoubleMeters(dtmPrecision);
+//            sInitResults += "\nFar=="+niceDoubleMeters(dtmFar)+" A=" + niceDoubleMeters(dtmApproach) + " P="+niceDoubleMeters(dtmPrecision);
 
             tmCameraElapsedMs = -1; // no delay for next check  
             tmScanElapsedMs = 0;// do delay until check 
@@ -152,7 +178,8 @@ namespace IngameScript
         /// <param name="arrivalDistance">minimum distance for 'arrival'</param>
         /// <param name="arrivalState">state to use when 'arrived'</param>
         /// <param name="colDetectState">state to use when 'collision'</param>
-        void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState)
+        /// <param name="bNoCollision">if True, don't do collision detection</param>
+        void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState, bool bNoCollision=false)
         {
             if(dTMDebug) Echo("dTM:" + arrivalState);
             //		Vector3D vTargetLocation = vHome;// gpsCenter.GetPosition();
@@ -190,14 +217,35 @@ namespace IngameScript
 //            Echo("StoppingD=" + niceDoubleMeters(stoppingDistance));
 
             bool bAimed = false;
-            bAimed = GyroMain("forward", vVec, gpsCenter);
+
+            if (btmSled || btmRotor)
+            {
+                double yawangle = -999;
+                yawangle = CalculateYaw(vTargetLocation, gpsCenter);
+                Echo("yawangle=" + yawangle.ToString());
+                if (btmSled)
+                {
+                    Echo("Sled");
+                    DoRotate(yawangle, "Yaw");
+                }
+                else if (btmRotor)
+                {
+                    Echo("Rotor");
+                    DoRotorRotate(yawangle);
+                }
+                bAimed = Math.Abs(yawangle) < .05;
+            }
+            else
+            {
+                bAimed = GyroMain("forward", vVec, gpsCenter);
+            }
 
             tmShipController.DampenersOverride = true;
 
             if((distance - stoppingDistance) < arrivalDistance)
             { // we are within stopping distance, so start slowing
                 minAngleRad = 0.005f;// aim tighter (next time)
-
+    Echo("Waiting for stop");
                 if (!bAimed) bWantFast = true;
                 ResetMotion();
                 return;
@@ -207,7 +255,7 @@ namespace IngameScript
             {
                 bWantMedium = true;
                 // we are aimed at location
-               if(dTMDebug)  Echo("Aimed");
+                Echo("Aimed");
                 gyrosOff();
 
                 if (sensorsList.Count > 0)
@@ -216,7 +264,7 @@ namespace IngameScript
                     float fScanDist = Math.Min(50f, (float)stoppingDistance * 1.5f);
                     setSensorShip(tmSB, 0, 0, 0, 0, fScanDist, 0);
                 }
-                if (tmScanElapsedMs > tmScanWaitMs || tmScanElapsedMs<0)
+                if (tmScanElapsedMs > tmScanWaitMs || tmScanElapsedMs < 0 && !bNoCollision)
                 {
                     tmScanElapsedMs = 0;
                     aSensors = activeSensors();
@@ -247,22 +295,27 @@ namespace IngameScript
                             return;
                         }
                     }
-                   else lastDetectedInfo = new MyDetectedEntityInfo(); // since we found nothing, clear it.
+                    else lastDetectedInfo = new MyDetectedEntityInfo(); // since we found nothing, clear it.
                 }
-                double scanDistance = stoppingDistance*2;
-                if (scanDistance < 100)
-                    if (distance < 1000)
-                        scanDistance = distance;
-                    else scanDistance = 1000;
-                scanDistance = Math.Min(distance, scanDistance);
+ //               double scanDistance = stoppingDistance * 2;
+                double scanDistance = stoppingDistance * 1.05;
+                //                if (btmRotor || btmSled)
+                {
+                    if (scanDistance < 100)
+                        if (distance < 1000)
+                            scanDistance = distance;
+                        else scanDistance = 1000;
+                    scanDistance = Math.Min(distance, scanDistance);
+                }
 
-                if (dTMDebug)
+                //               if (dTMDebug)
                 {
                     Echo("Scanning distance=" + scanDistance);
                 }
                 if (
-                    (tmCameraElapsedMs > tmCameraWaitMs || tmCameraElapsedMs<0) // it is time to scan..
-                    && distance>tmMaxSensorM // if we are in sensor range, we don't need to scan with cameras
+                    (tmCameraElapsedMs > tmCameraWaitMs || tmCameraElapsedMs < 0) // it is time to scan..
+                    && distance > tmMaxSensorM // if we are in sensor range, we don't need to scan with cameras
+                    && !bNoCollision
                     )
                 {
                     tmCameraElapsedMs = 0;
@@ -277,7 +330,7 @@ namespace IngameScript
                                 //                            Echo(s);
                                 StatusLog("Camera Trigger collision", textLongStatus);
                             }
-
+                            sInitResults += "Camera collision: "+scanDistance+"\n" + lastDetectedInfo.Name+":"+ lastDetectedInfo.Type +"\n";
                             // something in way.
                             ResetTravelMovement(); // reset our brain for next call
                             current_state = colDetectState; // set the detetected state
@@ -317,8 +370,11 @@ namespace IngameScript
                     // we are 'far' from target location.  use fastest movement
 //                    if(dTMDebug)
                         Echo("dtmFar");
+
+                    TmDoForward(dtmFarSpeed, 100f);
+                    /*
                     if (velocityShip < 1)
-                        powerUpThrusters(thrustTmForwardList, 100);
+                        powerUpThrusters(thrustTmForwardList, 100f);
                     else if (velocityShip < dtmFarSpeed * .75)
                         powerUpThrusters(thrustTmForwardList, 25f);
                     else if (velocityShip < dtmFarSpeed * .85)
@@ -337,6 +393,7 @@ namespace IngameScript
                         powerDownThrusters(thrustTmBackwardList, thrustAll, true); // turns off the 'backward' thrusters... so we don't slow down
 //                        tmShipController.DampenersOverride = false; // this would also work, but then we don't get ship moving towards aim point as we correct
                     }
+                    */
                 }
                 else if (distance > dtmApproach && !btmPrecision)
                 {
@@ -344,6 +401,8 @@ namespace IngameScript
 //                    if(dTMDebug)
                         Echo("Approach");
                     btmApproach = true;
+                    TmDoForward(dtmApproachSpeed, 100f);
+                    /*
                     if (velocityShip < 1)
                         powerUpThrusters(thrustTmForwardList, 100);
                     else if (velocityShip < dtmApproachSpeed * .75)
@@ -364,6 +423,7 @@ namespace IngameScript
                         powerDownThrusters(thrustTmBackwardList, thrustAll, true); // turns off the 'backward' thrusters... so we don't slow down
 //                        tmShipController.DampenersOverride = false; // this would also work, but then we don't get ship moving towards aim point as we correct
                     }
+                    */
                 }
                 else if (distance > dtmPrecision && !btmClose)
                 {
@@ -372,6 +432,8 @@ namespace IngameScript
                         Echo("Precision");
                     if(!btmPrecision) minAngleRad = 0.005f;// aim tighter (next time)
                     btmPrecision = true;
+                    TmDoForward(dtmPrecisionSpeed, 55f);
+                    /*
 
                      if (velocityShip < 1)
                         powerUpThrusters(thrustTmForwardList, 55f);
@@ -393,16 +455,7 @@ namespace IngameScript
                         powerDownThrusters(thrustTmBackwardList, thrustAll, true); // turns off the 'backward' thrusters... so we don't slow down
 //                        tmShipController.DampenersOverride = false; // this would also work, but then we don't get ship moving towards aim point as we correct
                     }
-                   /*
-                    if (velocityShip < 1)
-                        powerUpThrusters(thrustTmForwardList, 55f);
-                    else if (velocityShip < dtmPrecisionSpeed)
-                        powerUpThrusters(thrustTmForwardList, 1f);
-                    //				else if (velocityShip <= 25)
-                    //					powerUpThrusters(thrustForwardList, 1);
-                    else
-                        powerDownThrusters(thrustAllList);
-                        */
+                    */
                 }
                 else
                 {
@@ -411,6 +464,8 @@ namespace IngameScript
                         Echo("Close");
                      if(!btmClose) minAngleRad = 0.005f;// aim tighter (next time)
                    btmClose = true;
+                    TmDoForward(dtmCloseSpeed, 55f);
+                    /*
                      if (velocityShip < 1)
                         powerUpThrusters(thrustTmForwardList, 55f);
                     else if (velocityShip < dtmCloseSpeed * .75)
@@ -431,16 +486,7 @@ namespace IngameScript
                         powerDownThrusters(thrustTmBackwardList, thrustAll, true); // turns off the 'backward' thrusters... so we don't slow down
 //                        tmShipController.DampenersOverride = false; // this would also work, but then we don't get ship moving towards aim point as we correct
                     }
-/*
-                    if (velocityShip < 1)
-                        powerUpThrusters(thrustTmForwardList, 25f);
-                    else if (velocityShip < 5)
-                        powerUpThrusters(thrustTmForwardList, 5f);
-                    //				else if (velocityShip <= 15)
-                    //					powerUpThrusters(thrustForwardList, 1);
-                    else
-                        powerDownThrusters(thrustAllList);
-                        */
+                    */
                 }
             }
             else
@@ -850,6 +896,63 @@ namespace IngameScript
 
             return false;
         }
+
+        void TmPowerForward(float fPower)
+        {
+            if (btmRotor)
+            {
+                /*
+                // need to ramp up/down rotor power or they will flip small vehicles and spin a lot
+                float maxVelocity = rotorNavLeftList[0].GetMaximum<float>("Velocity");
+                float currentVelocity = rotorNavLeftList[0].GetValueFloat("Velocity");
+                float cPower = (currentVelocity / maxVelocity * 100);
+                cPower = Math.Abs(cPower);
+                if (fPower > (cPower + 5f))
+                    fPower = cPower + 5;
+                if (fPower < (cPower - 5))
+                    fPower = cPower - 5;
+
+                if (fPower < 0f) fPower = 0f;
+                if (fPower > 100f) fPower = 100f;
+                */
+                powerUpRotors(fPower);
+            }
+            else
+                powerUpThrusters(thrustTmForwardList, fPower);
+        }
+
+        void TmDoForward(double maxSpeed, float maxThrust)
+        {
+            if (!btmRotor)
+            {
+                if (velocityShip < 1)
+                    powerUpThrusters(thrustTmForwardList, maxThrust);
+                else if (velocityShip < maxSpeed * .75)
+                    powerUpThrusters(thrustTmForwardList, 25f);
+                else if (velocityShip < maxSpeed * .85)
+                    powerUpThrusters(thrustTmForwardList, 15f);
+                else if (velocityShip <= maxSpeed * .98)
+                {
+                    powerUpThrusters(thrustTmForwardList, 1f);
+                }
+                else if (velocityShip >= maxSpeed * 1.02)
+                {
+                    powerDownThrusters(thrustAllList);
+                }
+                else // sweet spot
+                {
+                    powerDownThrusters(thrustAllList); // turns ON all thrusters
+                    powerDownThrusters(thrustTmBackwardList, thrustAll, true); // turns off the 'backward' thrusters... so we don't slow down
+                                                                               //                        tmShipController.DampenersOverride = false; // this would also work, but then we don't get ship moving towards aim point as we correct
+                }
+            }
+            else
+            { // rotor control
+                TmPowerForward(maxThrust);
+            }
+
+        }
+
 
     }
 }
