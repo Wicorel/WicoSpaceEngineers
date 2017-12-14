@@ -35,8 +35,7 @@ namespace IngameScript
 
         IMyTerminalBlock lastCamera = null;
 
-        private MyDetectedEntityInfo lastDetectedInfo;
-
+        MyDetectedEntityInfo lastDetectedInfo;
 
         bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
         {
@@ -78,7 +77,6 @@ namespace IngameScript
             }
 
             return false;
-
         }
 
         bool doCameraScan(List<IMyTerminalBlock> cameraList, Vector3D targetPos)
@@ -144,6 +142,8 @@ namespace IngameScript
             cameraLeftList.Clear();
             cameraRightList.Clear();
             cameraAllList.Clear();
+
+            if (orientationBlock == null) return "\nCameras:No OrientationBlock";
 
             GridTerminalSystem.GetBlocksOfType<IMyCameraBlock>(cameraAllList, (x1 => x1.CubeGrid == Me.CubeGrid));
             Matrix fromGridToReference;
@@ -238,6 +238,188 @@ namespace IngameScript
         }
 
         #endregion
+
+        public class QuadrantCameraScanner
+        {
+            double SCAN_DISTANCE = 100; // default scan distance
+
+            float YAWSCANRANGE = 25f; // maximum scan range YAW (width)
+
+            float PITCHSCANRANGE = 25f; // maximum scan range YAW (height)
+
+            double SCAN_SCALE_ON_MISS = 5;// scale distance to go further when nothing is found by scanner.
+
+            float SCAN_CENTER_SCALE_FACTOR = 3; // scale factor for adjusting pitch and yaw based on distance from center scan. Higher numbers mean more scans
+
+            float SCAN_MINIMUMADJUST = 0.5f;
+
+            float PITCH = 0;
+            float YAW = 0;
+            float NEXTYAW = 0;
+            float NEXTPITCH = 0;
+
+            List<IMyTerminalBlock> cameras = new List<IMyTerminalBlock>();
+
+            private int quadrant = 0;
+
+            private int scansPerCall = 1;
+            //            public MyDetectedEntityInfo info;
+
+            public MyDetectedEntityInfo lastDetectedInfo;
+            public IMyTerminalBlock lastCamera = null;
+
+            public QuadrantCameraScanner(List<IMyTerminalBlock> blocks, double startScanDist = 100, float defaultYawRange = 25f, float defaultPitchRange = 25f,
+            double defaultScaleOnMiss = 5, float defaultScanCenterScale = 1, float defaultMinAdjust = 0.5f)
+//            double defaultScaleOnMiss = 5, float defaultScanCenterScale = 3, float defaultMinAdjust = 0.5f)
+            {
+                cameras.Clear();
+                foreach (var b in blocks)
+                {
+                    if (b is IMyCameraBlock)
+                    {
+                        cameras.Add(b);
+                        IMyCameraBlock c = b as IMyCameraBlock;
+                        c.EnableRaycast = true;
+                        if (YAWSCANRANGE > c.RaycastConeLimit) YAWSCANRANGE = c.RaycastConeLimit;
+                        if (PITCHSCANRANGE > c.RaycastConeLimit) PITCHSCANRANGE = c.RaycastConeLimit;
+                    }
+
+                }
+                //                cameras = blocks;
+                SCAN_DISTANCE = startScanDist;
+                YAWSCANRANGE = defaultYawRange;
+                PITCHSCANRANGE = defaultPitchRange;
+                SCAN_SCALE_ON_MISS = defaultScaleOnMiss;
+                SCAN_CENTER_SCALE_FACTOR = defaultScanCenterScale;
+                SCAN_MINIMUMADJUST = defaultMinAdjust;
+
+                PITCH = 0;
+                YAW = 0;
+                NEXTYAW = 0;
+                NEXTPITCH = 0;
+                quadrant = 0;
+
+                scansPerCall = cameras.Count;
+            }
+
+            public bool DoScans()
+            {
+                bool bSomethingFound = false;
+                for (int scan = 0; scan < scansPerCall; scan++)
+                {
+                    if (doCameraScan(cameras, SCAN_DISTANCE, NEXTPITCH, NEXTYAW))
+                    {
+                        quadrant++;
+
+                        if (!lastDetectedInfo.IsEmpty())
+                        {
+                            bSomethingFound = true;
+                            SCAN_DISTANCE = Vector3D.Distance(lastCamera.GetPosition(), lastDetectedInfo.Position);
+                            break;
+                        }
+
+                        if (NEXTPITCH == 0 && NEXTYAW == 0)
+                        { // no reason to rotate about 'center', so skip to next scan
+                            PITCH = SCAN_MINIMUMADJUST;
+                            YAW = SCAN_MINIMUMADJUST;
+                            quadrant = 0;
+                        }
+
+                        if (quadrant > 3)
+                        {
+                            quadrant = 0;
+                            YAW += Math.Abs(YAW / SCAN_CENTER_SCALE_FACTOR) + SCAN_MINIMUMADJUST;
+                            if (Math.Abs(YAW) > YAWSCANRANGE)
+                            {
+                                // end of line. move to next line.
+                                quadrant = 0;
+                                YAW = 0;
+                                PITCH += Math.Abs(PITCH / SCAN_CENTER_SCALE_FACTOR) + SCAN_MINIMUMADJUST;
+                            }
+                            if (Math.Abs(PITCH) > PITCHSCANRANGE)
+                            {
+                                // end of scan box.. restart at 'center'
+                                PITCH = 0;
+                                YAW = 0;
+                                quadrant = 0;
+                                if (!bSomethingFound) // nothing found
+                                {
+                                    // scan further
+                                    SCAN_DISTANCE *= SCAN_SCALE_ON_MISS; // scale distance to go further.
+                                }
+                                bSomethingFound = false;
+
+                            }
+                        }
+                        switch (quadrant)
+                        {
+                            case 0:
+                                NEXTPITCH = PITCH;
+                                NEXTYAW = YAW;
+                                break;
+                            case 1:
+                                NEXTPITCH = -PITCH;
+                                NEXTYAW = YAW;
+                                break;
+                            case 2:
+                                NEXTPITCH = PITCH;
+                                NEXTYAW = -YAW;
+                                break;
+                            case 3:
+                                NEXTPITCH = -PITCH;
+                                NEXTYAW = -YAW;
+                                break;
+                        }
+
+                    }
+                }
+                return bSomethingFound;
+
+            }
+
+            bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
+            {
+                double foundmax = 0;
+                lastCamera = null;
+                for (int i = 0; i < cameraList.Count; i++)
+                {
+                    double thismax = ((IMyCameraBlock)cameraList[i]).AvailableScanRange;
+                    //		Echo(cameraList[i].CustomName + ":maxRange:" + thismax.ToString("N0"));
+                    // find camera with highest scan range.
+                    if (thismax > foundmax)
+                    {
+                        foundmax = thismax;
+                        lastCamera = cameraList[i];
+                    }
+                }
+
+                IMyCameraBlock camera = lastCamera as IMyCameraBlock;
+                if (lastCamera == null)
+                {
+                    return false;
+                }
+
+                if (camera.CanScan(scandistance))
+                {
+                    //		Echo("simple Scan with Camera:" + camera.CustomName);
+
+                    lastDetectedInfo = camera.Raycast(scandistance, pitch, yaw);
+                    lastCamera = camera;
+
+                    //                    if (!lastDetectedInfo.IsEmpty())
+                    //                        addDetectedEntity(lastDetectedInfo);
+
+                    return true;
+                }
+                else
+                {
+                    //                    Echo(camera.CustomName + ":" + camera.AvailableScanRange.ToString("N0"));
+                }
+
+                return false;
+            }
+
+        }
 
 
     }
