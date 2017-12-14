@@ -59,6 +59,7 @@ namespace IngameScript
             public void UpdateGyroList(List<IMyGyro> GyroList)
             {
                 Gyros.Clear();
+                if (GyroList == null) return;
                 for (int i = 0; i < GyroList.Count; i++)
                 {
                     Gyros.Add((GyroList[i] as IMyTerminalBlock));//  ;
@@ -365,8 +366,17 @@ namespace IngameScript
             else targetRoll = 0;
 
             GyroControl.SetYaw(targetRoll);
-            GyroControl.SetOverride(true);
-            GyroControl.RequestEnable(true);
+            if (Math.Abs(rollAngle) < minAngleRad)
+            {
+                GyroControl.SetOverride(false);
+//                GyroControl.RequestEnable(true);
+            }
+            else
+            {
+                GyroControl.SetOverride(true);
+                GyroControl.RequestEnable(true);
+                return false;
+            }
 
             return true;
         }
