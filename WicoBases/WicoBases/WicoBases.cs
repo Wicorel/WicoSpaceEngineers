@@ -98,10 +98,17 @@ namespace IngameScript
 
         void checkBases(bool bForceRequest=false)
         {
+            string sName = Me.CubeGrid.CustomName;
+            Vector3D vPosition = Me.GetPosition();
+            if (gpsCenter != null)
+            {
+                sName = gpsCenter.CubeGrid.CustomName;
+                vPosition = gpsCenter.GetPosition();
+            }
             if (dBaseRequestLastTransmit > dBaseRequestTransmitWait || bForceRequest)
             {
                 dBaseRequestLastTransmit = 0;
-                antSend("WICO:BASE?:" + gpsCenter.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                antSend("WICO:BASE?:" + sName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(vPosition));
             }
             else
             {
@@ -120,7 +127,7 @@ namespace IngameScript
         {
             double bestRange = double.MaxValue;
             int iBest = findNearestBase();
-            if (iBest >= 0)
+            if (iBest >= 0 && gpsCenter!=null)
             {
                 bestRange = (gpsCenter.GetPosition() - baseList[iBest].position).Length();
             }
@@ -129,6 +136,8 @@ namespace IngameScript
         int findNearestBase()
         {
             int iBest = -1;
+            if (gpsCenter == null) return iBest;
+
             double distanceSQ = double.MaxValue;
 //sInitResults += baseList.Count + " Bases";
             for(int i=0;i<baseList.Count;i++)

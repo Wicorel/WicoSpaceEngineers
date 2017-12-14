@@ -23,6 +23,10 @@ namespace IngameScript
         List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
         List<IMyLaserAntenna> antennaLList = new List<IMyLaserAntenna>();
 
+        /// <summary>
+        /// Initialize the antenna code. Also sets "OurName" to name of first found antenna
+        /// </summary>
+        /// <returns>string with antenna count</returns>
         string antennaInit()
         {
             antennaList.Clear();
@@ -43,7 +47,9 @@ namespace IngameScript
             return "A" + antennaList.Count.ToString("0");
         }
 
-        //// Verify antenna stays on to fix keen bug where antenna will turn itself off when you try to remote control
+        /// <summary>
+        ///  Verify antenna stays on to fix keen bug where antenna will turn itself off when you try to remote control. Possibly obsolete if bug has been fixed
+        /// </summary>
         void verifyAntenna()
         {
             for (int i = 0; i < antennaList.Count; i++)
@@ -54,6 +60,9 @@ namespace IngameScript
 
         string sLastReceivedMessage = "";
         
+        /// <summary>
+        /// Check if there are any messages that were waiting to be processed by modules and clear them if needed.
+        /// </summary>
         void AntennaCheckOldMessages()
         {
 	        if (sReceivedMessage != "")
@@ -70,6 +79,9 @@ namespace IngameScript
 	        else sLastReceivedMessage = "";
         }
 
+        /// <summary>
+        /// debug.  Currently commented out
+        /// </summary>
         void DebugAntenna()
         {
 /*
@@ -83,26 +95,43 @@ namespace IngameScript
 */
         }
 
+        /// <summary>
+        /// Set the antenna with the highest radius to call this script.
+        /// </summary>
         void SetAntennaMe()
         {
             float maxRadius = 0;
             int iMax = -1;
             for(int i=0;i<antennaList.Count;i++)
             {
-                if(antennaList[i].Radius>maxRadius)
+                if(antennaList[i].AttachedProgrammableBlock == Me.EntityId)
+                {
+                    // we are already set as a target, so stop looking
+                    iMax = i;
+                    break;
+                }
+                if(antennaList[i].Radius>maxRadius && antennaList[i].AttachedProgrammableBlock==0)
                 {
                     iMax = i;
                     maxRadius = antennaList[i].Radius;
                 }
-                if(iMax>=0)
-                {
-                    if (antennaList[iMax].AttachedProgrammableBlock != Me.EntityId)
-                        sInitResults += "\nSetting Antenna PB";
-                    antennaList[iMax].AttachedProgrammableBlock = Me.EntityId;
-                }
+            }
+            if (iMax >= 0)
+            {
+                if (antennaList[iMax].AttachedProgrammableBlock != Me.EntityId)
+                    sInitResults += "\nSetting Antenna PB";
+                antennaList[iMax].AttachedProgrammableBlock = Me.EntityId;
+            }
+            else
+            {
+                // no available antenna
             }
         }
 
+        /// <summary>
+        /// Set All antennas to lower power mode
+        /// </summary>
+        /// <param name="bAll">Ensures All, or just ones that have script attached are also Enabled</param>
         void antennaLowPower(bool bAll = false)
         {
             if (antennaList.Count < 1) antennaInit();
@@ -117,6 +146,11 @@ namespace IngameScript
            }
         }
 
+        /// <summary>
+        /// Set antenna radius (power) to the specfied radius.
+        /// </summary>
+        /// <param name="fRadius">radius in meters.  Default 200</param>
+        /// <param name="bAll">Set all antennas (true) or just ones that have script attached (default) (false)</param>
         void antennaSetRadius(float fRadius=200, bool bAll=false)
         {
             if (antennaList.Count < 1) antennaInit();
@@ -130,13 +164,16 @@ namespace IngameScript
             }
         }
 
+        /// <summary>
+        /// Returns position of the antenna that we are attached to
+        /// </summary>
+        /// <returns>position of the antenna block, or empty</returns>
         Vector3D antennaPosition()
         {
-           
             if (antennaList.Count < 1) antennaInit();
             foreach (var a in antennaList)
             {
-                if (a.AttachedProgrammableBlock > 0 )
+                if (a.AttachedProgrammableBlock == Me.EntityId )
                 {
                     // return the position of one we are listening to
                     return a.GetPosition();
@@ -151,6 +188,11 @@ namespace IngameScript
             return vNone;
         }
 
+        /// <summary>
+        /// Sets the max power of the antenna(s)
+        /// </summary>
+        /// <param name="bAll">Sets all the antennas.  Default to set only the ones that have script attached</param>
+        /// <param name="desiredRange">Range. Default is max</param>
         void antennaMaxPower(bool bAll=false, float desiredRange=float.MaxValue)
         {
             if (antennaList.Count < 1) antennaInit();
@@ -167,10 +209,24 @@ namespace IngameScript
                 }
             }
         }
+
+        /// <summary>
+        /// Returns the number of antennas available
+        /// </summary>
+        /// <returns></returns>
+        int AntennaCount()
+        {
+            if (antennaList.Count < 1) antennaInit();
+            return (antennaList.Count);
+        }
+
         #region AntennaSend
 
         List<string> lPendingMessages = new List<string>();
 
+        /// <summary>
+        /// Process any pending sends that are in the queue
+        /// </summary>
         void processPendingSends()
         {
             if (lPendingMessages.Count > 0)
@@ -180,6 +236,11 @@ namespace IngameScript
             }
             if (lPendingMessages.Count > 0) bWantFast = true; // if there are more, process quickly
         }
+
+        /// <summary>
+        /// Send a message. Queues messages if it cannot be sent immediately
+        /// </summary>
+        /// <param name="message">The message to send</param>
         void antSend(string message)
         {
 //            Echo("Sending:\n" + message);
@@ -194,8 +255,11 @@ namespace IngameScript
             }
             if (!bSent)
             {
-                lPendingMessages.Add(message);
-                bWantFast = true;
+                if (AntennaCount() > 0)
+                { // no sense queueing if we don't have any antennas.
+                    lPendingMessages.Add(message);
+                    bWantFast = true;
+                }
             }
         }
         #endregion
@@ -205,6 +269,10 @@ namespace IngameScript
 
         List<string> lPendingIncomingMessages = new List<string>();
 
+        /// <summary>
+        /// Process pending receives.
+        /// </summary>
+        /// <param name="bMain">set to true if we are a 'Main' craft control. default false if we are a sub-module</param>
         void processPendingReceives(bool bMain=false)
         {
             if (lPendingIncomingMessages.Count > 0)
@@ -231,6 +299,11 @@ namespace IngameScript
 //                bWantFast = true; 
             }
         }
+
+        /// <summary>
+        /// Add the received message to the queue
+        /// </summary>
+        /// <param name="message">The message to add to the queue</param>
         void antReceive(string message)
         {
 //            Echo("RECEIVE:\n" + message);
@@ -239,6 +312,18 @@ namespace IngameScript
 
 //            doTriggerMain();
             //bWantFast = true;
+        }
+
+        void AntDisplayPendingMessages()
+        {
+            if (antennaList.Count > 0)
+            {
+                Echo(lPendingIncomingMessages.Count + " Pending Incoming Messages");
+                for (int i = 0; i < lPendingIncomingMessages.Count; i++)
+                    Echo(i + ":" + lPendingIncomingMessages[i]);
+            }
+            else
+                Echo("No antennas found");
         }
         #endregion
 
