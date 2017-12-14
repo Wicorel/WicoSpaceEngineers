@@ -40,9 +40,7 @@ namespace IngameScript
 
         void modulePostProcessing()
         {
-	        Echo(lPendingIncomingMessages.Count + " Pending Incoming Messages");
-	        for (int i = 0; i < lPendingIncomingMessages.Count; i++)
-		        Echo(i + ":" + lPendingIncomingMessages[i]);
+            AntDisplayPendingMessages();
 
             Echo(sInitResults);
             echoInstructions();
