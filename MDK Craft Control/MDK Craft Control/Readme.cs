@@ -74,6 +74,10 @@
 * 3.1B Handle no controller (stations, etc)
 * 12092017
 * 
+* 3.1C 12132017
+* don't count ejectors in cargo%
+* fix bug in DoTriggerMain() causing updates to stop
+* 
 * 
 * Handles:
 * Master timer for sub-modules
