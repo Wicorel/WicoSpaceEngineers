@@ -40,8 +40,14 @@ namespace IngameScript
 
             grid.Clear();
             GridTerminalSystem.GetBlocksOfType<IMyShipConnector>(grid, localGridFilter);
-            // should probably eliminate ejectors..
-            lContainers.AddRange(grid);
+            foreach(var c in grid)
+            { // don't count ejectors
+                if (c.CustomName.Contains("Ejector") || c.CustomData.Contains("Ejector"))
+                    continue;
+                else
+                    lContainers.Add(c);
+            }
+//            lContainers.AddRange(grid);
 
             grid.Clear();
             GridTerminalSystem.GetBlocksOfType<IMyShipDrill>(grid, localGridFilter);
