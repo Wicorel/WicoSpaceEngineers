@@ -13,6 +13,11 @@
  * 
  * SearchShift/Orient WIP
  * 
+ * 3.1B
+ * Quadrant scans for asteroid if not in scanner range
+ * use DoTravelMovemnent without collision detection if long-range to target asteroid
+ * 
+ * 
  * NEED:  
  *  
  * WANTED: 

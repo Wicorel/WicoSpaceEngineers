@@ -157,6 +157,11 @@ namespace IngameScript
         string modeOnInit()
         {
             // check current state and perform reload init to correct state
+            if(iMode==MODE_FINDORE)
+            {
+                if (current_state == 410)
+                    current_state = 400;// reinit
+            }
             return ">";
         }
 

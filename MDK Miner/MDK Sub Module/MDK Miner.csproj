@@ -132,6 +132,8 @@
   <Import Project="..\..\WicoAsteroids\WicoAsteroids\WicoAsteroids.projitems" Label="Shared" />
   <Import Project="..\..\ModeMiniMine\ModeMiniMine\ModeMiniMine.projitems" Label="Shared" />
   <Import Project="..\..\ModeMinerSearch\ModeMinerSearch\ModeMinerSearch.projitems" Label="Shared" />
+  <Import Project="..\..\WicoTravelMovement\WicoTravelMovement\WicoTravelMovement.projitems" Label="Shared" />
+  <Import Project="..\..\WicoNavRotors\WicoNavRotors\WicoNavRotors.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="mdk\mdk.options" DestinationFolder="$(TargetDir)\mdk" />
