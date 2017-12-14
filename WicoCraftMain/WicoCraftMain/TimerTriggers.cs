@@ -69,7 +69,7 @@ namespace IngameScript
 
         void doTriggerMain()
         {
-            Runtime.UpdateFrequency = UpdateFrequency.Once;
+            Runtime.UpdateFrequency |= UpdateFrequency.Once;
         }
     }
 }

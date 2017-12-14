@@ -38,7 +38,7 @@ namespace IngameScript
             if(!doSubModuleTimerTriggers(sMainTimer)) // try to trigger MAIN timer in case it stopped.
             {
                 // if no main timer, then use UpdateFrequency
-                Runtime.UpdateFrequency = UpdateFrequency.Update100;
+                Runtime.UpdateFrequency |= UpdateFrequency.Update100;
             }
                                                 //	if (!Me.CustomName.Contains(moduleName))
                                                 //		Me.CustomName = "PB " + OurName+ " "+moduleName;
