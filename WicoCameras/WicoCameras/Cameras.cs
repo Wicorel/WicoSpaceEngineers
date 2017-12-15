@@ -241,7 +241,10 @@ namespace IngameScript
 
         public class QuadrantCameraScanner
         {
-            double SCAN_DISTANCE = 100; // default scan distance
+            bool bDoneScanning = false;
+            Program _pg;
+            public double SCAN_DISTANCE = 1250; // default scan distance
+            double _maxScanDist = 5000; // maximum scan distance.
 
             float YAWSCANRANGE = 25f; // maximum scan range YAW (width)
 
@@ -268,10 +271,11 @@ namespace IngameScript
             public MyDetectedEntityInfo lastDetectedInfo;
             public IMyTerminalBlock lastCamera = null;
 
-            public QuadrantCameraScanner(List<IMyTerminalBlock> blocks, double startScanDist = 100, float defaultYawRange = 25f, float defaultPitchRange = 25f,
-            double defaultScaleOnMiss = 5, float defaultScanCenterScale = 1, float defaultMinAdjust = 0.5f)
-//            double defaultScaleOnMiss = 5, float defaultScanCenterScale = 3, float defaultMinAdjust = 0.5f)
+            public QuadrantCameraScanner(Program pg,List<IMyTerminalBlock> blocks, double startScanDist = 1250, float defaultYawRange = 45f, float defaultPitchRange = 45f,
+            float defaultScaleOnMiss = 2, float defaultScanCenterScale = 1, float defaultMinAdjust = 0.5f, double maxScanDist=5000)
             {
+                _pg = pg;
+                bDoneScanning = false;
                 cameras.Clear();
                 foreach (var b in blocks)
                 {
@@ -302,21 +306,44 @@ namespace IngameScript
                 scansPerCall = cameras.Count;
             }
 
+            public bool DoneScanning()
+            {
+                return bDoneScanning;
+            }
+
             public bool DoScans()
             {
+                if (bDoneScanning) return false;
+
                 bool bSomethingFound = false;
                 for (int scan = 0; scan < scansPerCall; scan++)
                 {
                     if (doCameraScan(cameras, SCAN_DISTANCE, NEXTPITCH, NEXTYAW))
                     {
-                        quadrant++;
 
+                        bool bValidScan = true;
                         if (!lastDetectedInfo.IsEmpty())
                         {
-                            bSomethingFound = true;
-                            SCAN_DISTANCE = Vector3D.Distance(lastCamera.GetPosition(), lastDetectedInfo.Position);
-                            break;
+                            // TODO: NEED TO CHECK FOR US and not count it.
+                            if (
+                                (lastDetectedInfo.Type == MyDetectedEntityType.LargeGrid) 
+                                || (lastDetectedInfo.Type == MyDetectedEntityType.SmallGrid)
+                                )
+                            {
+                                if(_pg.IsGridLocal(lastDetectedInfo.EntityId))
+                                {
+                                    // we scanned ourselves
+                                    bValidScan=false;
+                                }
+                            }
+                            if (bValidScan)
+                            {
+                                bSomethingFound = true;
+                                SCAN_DISTANCE = Vector3D.Distance(lastCamera.GetPosition(), lastDetectedInfo.Position);
+                                break;
+                            }
                         }
+                        quadrant++;
 
                         if (NEXTPITCH == 0 && NEXTYAW == 0)
                         { // no reason to rotate about 'center', so skip to next scan
@@ -346,6 +373,11 @@ namespace IngameScript
                                 {
                                     // scan further
                                     SCAN_DISTANCE *= SCAN_SCALE_ON_MISS; // scale distance to go further.
+                                    if(SCAN_DISTANCE>_maxScanDist)
+                                    {
+                                        bDoneScanning = true;
+                                        return false;
+                                    }
                                 }
                                 bSomethingFound = false;
 
@@ -374,7 +406,6 @@ namespace IngameScript
                     }
                 }
                 return bSomethingFound;
-
             }
 
             bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
