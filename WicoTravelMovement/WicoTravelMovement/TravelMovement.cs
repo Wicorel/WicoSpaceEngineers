@@ -178,8 +178,8 @@ namespace IngameScript
         /// <param name="arrivalDistance">minimum distance for 'arrival'</param>
         /// <param name="arrivalState">state to use when 'arrived'</param>
         /// <param name="colDetectState">state to use when 'collision'</param>
-        /// <param name="bNoCollision">if True, don't do collision detection</param>
-        void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState, bool bNoCollision=false)
+        /// <param name="bAsteroidTarget">if True, target location is in/near an asteroid.  don't collision detect with it</param>
+        void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState, bool bAsteroidTarget=false)
         {
             if(dTMDebug) Echo("dTM:" + arrivalState);
             //		Vector3D vTargetLocation = vHome;// gpsCenter.GetPosition();
@@ -264,7 +264,7 @@ namespace IngameScript
                     float fScanDist = Math.Min(50f, (float)stoppingDistance * 1.5f);
                     setSensorShip(tmSB, 0, 0, 0, 0, fScanDist, 0);
                 }
-                if (tmScanElapsedMs > tmScanWaitMs || tmScanElapsedMs < 0 && !bNoCollision)
+                if (tmScanElapsedMs > tmScanWaitMs || tmScanElapsedMs < 0 ) //&& !bAsteroidTarget)
                 {
                     tmScanElapsedMs = 0;
                     aSensors = activeSensors();
@@ -315,28 +315,52 @@ namespace IngameScript
                 if (
                     (tmCameraElapsedMs > tmCameraWaitMs || tmCameraElapsedMs < 0) // it is time to scan..
                     && distance > tmMaxSensorM // if we are in sensor range, we don't need to scan with cameras
-                    && !bNoCollision
+//                    && !bAsteroidTarget
                     )
                 {
-                    tmCameraElapsedMs = 0;
 
                     if (doCameraScan(cameraForwardList, scanDistance))
                     {
+                        tmCameraElapsedMs = 0;
                         // the routine sets lastDetetedInfo itself if scan succeeds
                         if (!lastDetectedInfo.IsEmpty())
                         {
+                            bool bValidCollision = true;
+                            if(bAsteroidTarget)
+                            {
+                                if(lastDetectedInfo.Type==MyDetectedEntityType.Asteroid)
+                                {
+                                    if(lastDetectedInfo.BoundingBox.Contains(vTargetLocation)!=ContainmentType.Disjoint)
+                                    { // if the target is inside the BB of the target, ignore the collision
+                                        bValidCollision = false;
+                                        // check to see if we are close enough to surface of asteroid
+                                        double astDistance=((Vector3D)lastDetectedInfo.HitPosition-gpsCenter.GetPosition()).Length();
+                                        if((astDistance-stoppingDistance)<arrivalDistance)
+                                        {
+                                            ResetMotion();
+                                            current_state = arrivalState;
+                                            ResetTravelMovement();
+                                            // don't need 'fast'...
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
                             if (dTMDebug)
                             {
                                 //                            Echo(s);
                                 StatusLog("Camera Trigger collision", textLongStatus);
                             }
-                            sInitResults += "Camera collision: "+scanDistance+"\n" + lastDetectedInfo.Name+":"+ lastDetectedInfo.Type +"\n";
-                            // something in way.
-                            ResetTravelMovement(); // reset our brain for next call
-                            current_state = colDetectState; // set the detetected state
-                            bWantFast = true; // process next state quickly
-                            ResetMotion(); // start stopping
-                            return;
+                            if (bValidCollision)
+                            {
+//                                sInitResults += "Camera collision: " + scanDistance + "\n" + lastDetectedInfo.Name + ":" + lastDetectedInfo.Type + "\n";
+                                // something in way.
+                                ResetTravelMovement(); // reset our brain for next call
+                                current_state = colDetectState; // set the detetected state
+                                bWantFast = true; // process next state quickly
+                                ResetMotion(); // start stopping
+                                return;
+                            }
                         }
                         else
                         {
