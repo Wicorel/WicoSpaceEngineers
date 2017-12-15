@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "UnderConstruction";
-        string sVersion = "3.1B";
+        string sVersion = "3.1C";
 
         const string sGPSCenter = "Craft Remote Control";
 
@@ -52,10 +52,13 @@ namespace IngameScript
 
         void ResetMotion(bool bNoDrills = false)  
         { 
-        //	if (navEnable != null)	blockApplyAction(navEnable,"OnOff_Off"); //navEnable.ApplyAction("OnOff_Off"); 
-//	        powerDownThrusters(thrustAllList);
-//            gyrosOff();
-	        blockApplyAction(gpsCenter, "AutoPilot_Off"); 
+	        powerDownThrusters(thrustAllList);
+            gyrosOff();
+//            powerDownRotors(rotorNavLeftList);
+//            powerDownRotors(rotorNavRightList);
+
+	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
+	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
         } 
 
     }

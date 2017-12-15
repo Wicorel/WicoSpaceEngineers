@@ -15,6 +15,7 @@
  * Start of stockpile and battery recharge checks
  * Still needs reactor checks.
  * 
+ * 3.1C Handle null gpsCenter
  * 
  * NEED:  
  *  
