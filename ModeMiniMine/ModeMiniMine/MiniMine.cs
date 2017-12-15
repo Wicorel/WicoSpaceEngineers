@@ -96,7 +96,7 @@ namespace IngameScript
 
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":FindOre", textPanelReport);
-            Echo("current_state=" + current_state.ToString());
+            Echo("FIND ORE:current_state=" + current_state.ToString());
             double maxThrust = calculateMaxThrust(thrustForwardList);
             Echo("maxThrust=" + maxThrust.ToString("N0"));
 
@@ -129,7 +129,7 @@ namespace IngameScript
             //            if(vExpectedExit.AbsMax()>.5)
             {
                 Vector3D vT = gpsCenter.GetPosition() + vExpectedExit * 150;
-                debugGPSOutput("ExpectedExit", vT);
+//                debugGPSOutput("ExpectedExit", vT);
             }
             switch (current_state)
             {
@@ -238,7 +238,7 @@ namespace IngameScript
                     current_state = 35;
                     break;
                 case 35:
-                    {
+                    { // active mining
                         aSensors = activeSensors();
                         // TODO: check just the front sensor and we are 'exiting' if no asteroid active.
                         //
@@ -313,7 +313,8 @@ namespace IngameScript
 //                                GyroMain("forward", vExpectedExit, gpsCenter);
                                 turnDrillsOn();
                                 mineMoveForward(fTargetMiningmps, fAbortmps);
-                                bWantFast = true;
+                                //                                bWantFast = true;
+                                bWantMedium = true;
                             }
                         }
                     }
@@ -481,14 +482,27 @@ namespace IngameScript
                         bool bAimed = true;
 
                         Echo(bValidExit.ToString() + " " + Vector3DToString(vExpectedExit));
-                        double scandist = 500;
-                        if(bValidAsteroid) scandist = (vTargetAsteroid - gpsCenter.GetPosition()).Length();
                         bAimed = GyroMain("forward", vExpectedExit, gpsCenter);
                         if (bAimed)
                         {
+                            double scandist;
+                            double distanceSQ = 0;
+                            if (bValidAsteroid)
+                            {
+                                distanceSQ = (vTargetAsteroid - gpsCenter.GetPosition()).LengthSquared();
+                                scandist = distanceSQ;
+                                if (distanceSQ > 150 * 150)
+                                {
+                                    current_state = 130;
+                                    bWantFast = true;
+                                    return;
+                                }
+                            }
+                            else scandist = 500; // unknown scan distance
+
                             bWantFast = false;
                             bWantMedium = true;
-                            if (doCameraScan(cameraForwardList, scandist))
+                            if ( doCameraScan(cameraForwardList, scandist))
                             {
                                 if (!lastDetectedInfo.IsEmpty())
                                 {
@@ -549,7 +563,7 @@ namespace IngameScript
                     break;
                 case 130:
                     { // far travel to asteroid. use doTravelMovement
-                        doTravelMovement(vInitialContact, 45, 120, 140, true);
+                        doTravelMovement(vTargetAsteroid, 45, 120, 140, true);
                         break;
                     }
                 case 140:
@@ -602,21 +616,22 @@ namespace IngameScript
                         turnEjectorsOn();
                         sleepAllSensors();
                         miningElapsedMs = 0;
+
                         // initialize cameras
-                        // TODO:
-                        frontScanner = new QuadrantCameraScanner(cameraForwardList);
-                        backScanner = new QuadrantCameraScanner(cameraBackwardList);
-                        leftScanner = new QuadrantCameraScanner(cameraLeftList);
-                        rightScanner = new QuadrantCameraScanner(cameraRightList);
-                        topScanner = new QuadrantCameraScanner(cameraUpList);
-                        bottomScanner = new QuadrantCameraScanner(cameraDownList);
+                        frontScanner = new QuadrantCameraScanner(this, cameraForwardList);
+                        backScanner = new QuadrantCameraScanner(this, cameraBackwardList);
+                        leftScanner = new QuadrantCameraScanner(this, cameraLeftList);
+                        rightScanner = new QuadrantCameraScanner(this, cameraRightList);
+                        topScanner = new QuadrantCameraScanner(this, cameraUpList);
+                        bottomScanner = new QuadrantCameraScanner(this, cameraDownList);
 
                         current_state = 410;
                         break;
                     }
                 case 410:
                     {
-                        if (frontScanner == null)
+                        StatusLog("Long Range Scan", textPanelReport);
+                        if (frontScanner == null) // in case we reload/compile in this state..
                             current_state = 400;
                         bWantMedium = true;
                         miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
@@ -652,6 +667,77 @@ namespace IngameScript
                         }
                         if (bValidAsteroid)
                             current_state = 120;
+
+                        string s = "";
+                        s += "Front: ";
+                        if (frontScanner.DoneScanning())
+                            s += "DONE!";
+                        else
+                        {
+                            s += frontScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                        }
+                        s += "\n";
+
+                        s += "Back: ";
+                        if (backScanner.DoneScanning())
+                            s += "DONE!";
+                        else
+                        {
+                            s += backScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                        }
+                        s += "\n";
+
+                        s += "Left: ";
+                        if (leftScanner.DoneScanning())
+                            s += "DONE!";
+                        else
+                        {
+                            s += leftScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                        }
+                        s += "\n";
+
+                        s += "Right: ";
+                        if (rightScanner.DoneScanning())
+                            s += "DONE!";
+                        else
+                        {
+                            s += rightScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                        }
+                        s += "\n";
+
+                        s += "Top: ";
+                        if (topScanner.DoneScanning())
+                            s += "DONE!";
+                        else
+                        {
+                            s += topScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                        }
+                        s += "\n";
+
+                        s += "Bottom: ";
+                        if (bottomScanner.DoneScanning())
+                            s += "DONE!";
+                        else
+                        {
+                            s += bottomScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                        }
+                        s += "\n";
+
+                        StatusLog(s, textPanelReport);
+
+                        if (
+                            frontScanner.DoneScanning() &&
+                            backScanner.DoneScanning() &&
+                            leftScanner.DoneScanning() &&
+                            rightScanner.DoneScanning() &&
+                            topScanner.DoneScanning() &&
+                            bottomScanner.DoneScanning()
+                            )
+                        {
+                            // all scans have run and didn't find asteroid..
+                            //
+                            setMode(MODE_ATTENTION);
+                        }
                         break;
                     }
                 case 425:
@@ -681,7 +767,7 @@ namespace IngameScript
 
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":GotoOre!", textPanelReport);
-            Echo("current_state=" + current_state.ToString());
+            Echo("GOTO ORE:current_state=" + current_state.ToString());
             MyShipMass myMass;
             myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
@@ -714,7 +800,7 @@ namespace IngameScript
 
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":MiningOre!", textPanelReport);
-            Echo("current_state=" + current_state.ToString());
+            Echo("MINIG:current_state=" + current_state.ToString());
             MyShipMass myMass;
             myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
@@ -747,7 +833,7 @@ namespace IngameScript
 
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":Exiting!", textPanelReport);
-            Echo("current_state=" + current_state.ToString());
+            Echo("Exiting: current_state=" + current_state.ToString());
             MyShipMass myMass;
             myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
@@ -805,7 +891,7 @@ namespace IngameScript
                 case 11://11 - await sensor set
                     miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
                     if (miningElapsedMs < 1) return;
-                    current_state = 120;
+                    current_state = 20;
                     break;
                 case 20: //20 - turn around until aimed ->30
                     {
@@ -887,6 +973,11 @@ namespace IngameScript
                         setMode(MODE_DOCKING);
                     }
                     break;
+                default:
+                    {
+                        Echo("UNKNOWN STATE!");
+                        break;
+                    }
             }
         }
 
