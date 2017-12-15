@@ -234,6 +234,22 @@ namespace IngameScript
             return calculateLocalGrids().Contains(block.CubeGrid);
         }
 
+        bool IsGridLocal(long myCubeGrid)
+        {
+            bool bFound = false;
+            for(int i=0;i<localGrids.Count;i++)
+            {
+                if ((long)localGrids[i].EntityId == myCubeGrid)
+                    return true;
+            }
+            return false;
+        }
+
+        bool IsGridLocal(IMyCubeGrid myCubeGrid)
+        {
+            return calculateLocalGrids().Contains(myCubeGrid);
+        }
+
         bool dockedGridFilter(IMyTerminalBlock block)
         {
             List<IMyCubeGrid> g = calculateDockedGrids();
