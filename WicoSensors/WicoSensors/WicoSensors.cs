@@ -38,14 +38,14 @@ namespace IngameScript
 
         List<IMySensorBlock> activeSensors(string sKey = null)
         {
-            List<IMySensorBlock> activeSensors = new List<IMySensorBlock>(); ;
+            List<IMySensorBlock> activeSensors = new List<IMySensorBlock>();
             for (int i = 0; i < sensorsList.Count; i++)
             {
                 IMySensorBlock s = sensorsList[i] as IMySensorBlock;
                 if (s == null) continue;
                 if (s.IsActive && s.Enabled && !s.LastDetectedEntity.IsEmpty())
                 {
-                    Echo("Adding Active:" + s.CustomName + ":" + s.Enabled);
+//                    Echo("Adding Active:" + s.CustomName + ":" + s.Enabled);
                     activeSensors.Add(sensorsList[i]);
                 }
             }
@@ -94,6 +94,37 @@ namespace IngameScript
             sb.Enabled = true;
 
         }
+
+        bool SensorActive(IMySensorBlock s, ref bool bAsteroidFound, ref bool bLargeFound, ref bool bSmallFound)
+        {
+ //           bool bAnyFound = false;
+            bAsteroidFound=false;
+            bLargeFound=false;
+            bSmallFound=false;
+
+            if (s!=null && s.IsActive && s.Enabled && !s.LastDetectedEntity.IsEmpty())
+            {
+                List<MyDetectedEntityInfo> lmyDEI = new List<MyDetectedEntityInfo>();
+                s.DetectedEntities(lmyDEI);
+                for (int j = 0; j < lmyDEI.Count; j++)
+                {
+                    if (lmyDEI[j].Type == MyDetectedEntityType.Asteroid)
+                    {
+                        bAsteroidFound = true;
+                    }
+                    else if (lmyDEI[j].Type == MyDetectedEntityType.LargeGrid)
+                    {
+                        bLargeFound = true;
+                    }
+                    else if (lmyDEI[j].Type == MyDetectedEntityType.SmallGrid)
+                    {
+                        bSmallFound = true;
+                    }
+                }
+            }
+            return bAsteroidFound || bLargeFound || bSmallFound;// bAnyFound;
+        }
+
         #endregion
 
 
