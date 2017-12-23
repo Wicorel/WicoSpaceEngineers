@@ -70,7 +70,6 @@ namespace IngameScript
         bool btmSled = false;
         // else it's gyros and thrusters
 
-
         /// <summary>
         /// reset so the next call to doTravelMovement will re-initialize.
         /// </summary>
@@ -80,6 +79,8 @@ namespace IngameScript
             tmShipController = null;
             sleepAllSensors(); // set sensors to lower power
             minAngleRad = 0.01f; // reset Gyro aim tolerance to default
+            tmScanElapsedMs = 0;
+            tmCameraElapsedMs = -1;
         }
 
         /// <summary>
@@ -192,14 +193,17 @@ namespace IngameScript
             if(tmCameraElapsedMs>=0) tmCameraElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
             if(tmScanElapsedMs>=0) tmScanElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
 
+
             Vector3D vVec = vTargetLocation - tmShipController.CenterOfMass;
-            //	Vector3D vVec = vTargetLocation - gpsCenter.GetPosition();
-            //		debugGPSOutput("vTargetLocation", vTargetLocation);
+
             double distance = vVec.Length();
 
-            if(dTMDebug) Echo("dTM:distance=" + niceDoubleMeters(distance));
-            if(dTMDebug) Echo("dTM:velocity=" + velocityShip.ToString("0.00"));
-            if(dTMDebug) Echo("dTM:tmMaxSpeed=" + tmMaxSpeed.ToString("0.00"));
+            if(dTMDebug)
+                Echo("dTM:distance=" + niceDoubleMeters(distance));
+            if(dTMDebug)
+                Echo("dTM:velocity=" + velocityShip.ToString("0.00"));
+            if(dTMDebug)
+                Echo("dTM:tmMaxSpeed=" + tmMaxSpeed.ToString("0.00"));
 
             if (distance < arrivalDistance)
             {
@@ -214,8 +218,14 @@ namespace IngameScript
             List<IMySensorBlock> aSensors = null;
 
             double stoppingDistance = calculateStoppingDistance(thrustTmBackwardList, velocityShip, 0);
-//            Echo("StoppingD=" + niceDoubleMeters(stoppingDistance));
+            Echo("StoppingD=" + niceDoubleMeters(stoppingDistance));
 
+            if (sensorsList.Count > 0)
+            {
+                //                    float fScanDist = Math.Min(1f, (float)stoppingDistance * 1.5f);
+                float fScanDist = Math.Min(50f, (float)stoppingDistance * 1.5f);
+                setSensorShip(tmSB, 0, 0, 0, 0, fScanDist, 0);
+            }
             bool bAimed = false;
 
             if (btmSled || btmRotor)
@@ -250,7 +260,6 @@ namespace IngameScript
                 ResetMotion();
                 return;
             }
-
             if (bAimed)
             {
                 bWantMedium = true;
@@ -258,12 +267,6 @@ namespace IngameScript
                 Echo("Aimed");
                 gyrosOff();
 
-                if (sensorsList.Count > 0)
-                {
-                    //                    float fScanDist = Math.Min(1f, (float)stoppingDistance * 1.5f);
-                    float fScanDist = Math.Min(50f, (float)stoppingDistance * 1.5f);
-                    setSensorShip(tmSB, 0, 0, 0, 0, fScanDist, 0);
-                }
                 if (tmScanElapsedMs > tmScanWaitMs || tmScanElapsedMs < 0 ) //&& !bAsteroidTarget)
                 {
                     tmScanElapsedMs = 0;
@@ -297,8 +300,9 @@ namespace IngameScript
                     }
                     else lastDetectedInfo = new MyDetectedEntityInfo(); // since we found nothing, clear it.
                 }
- //               double scanDistance = stoppingDistance * 2;
-                double scanDistance = stoppingDistance * 1.05;
+                double scanDistance = stoppingDistance * 2;
+ //               double scanDistance = stoppingDistance * 1.05;
+//                if (bAsteroidTarget) scanDistance *= 2;
                 //                if (btmRotor || btmSled)
                 {
                     if (scanDistance < 100)
