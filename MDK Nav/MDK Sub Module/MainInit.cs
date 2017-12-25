@@ -49,7 +49,7 @@ namespace IngameScript
             string sProgress = progressBar(progress);
             StatusLog(sProgress, getTextBlock(sTextPanelReport));
 */
-            Echo("Init");
+            Echo("Init:"+currentInit);
             if (currentInit == 0)
             {
                 //StatusLog("clear",textLongStatus,true);
@@ -64,7 +64,7 @@ namespace IngameScript
                 sInitResults += gridsInit();
                 sInitResults += BlockInit();
                 initLogging();
-
+            Echo("AInit:"+currentInit);
                 sInitResults += thrustersInit(gpsCenter);
                 sInitResults += rotorsNavInit();
                 sInitResults += wheelsInit(gpsCenter);
@@ -72,10 +72,14 @@ namespace IngameScript
                 sInitResults += sensorInit();
                 //        sInitResults += camerasensorsInit(gpsCenter);
                 sInitResults += connectorsInit();
+            Echo("BInit:"+currentInit);
 
                 sInitResults += gyrosetup(); 
+            Echo("CInit:"+currentInit);
                 GyroControl.UpdateGyroList(gyros);
+            Echo("DInit:"+currentInit);
                 GyroControl.SetRefBlock(gpsCenter);
+            Echo("EInit:"+currentInit);
 
                 sInitResults += lightsInit();
                 sInitResults += camerasensorsInit(gpsCenter);
@@ -95,6 +99,7 @@ namespace IngameScript
             }
 
             Log(sInitResults);
+            Echo("XXInit:"+currentInit);
 
             return sInitResults;
         }
