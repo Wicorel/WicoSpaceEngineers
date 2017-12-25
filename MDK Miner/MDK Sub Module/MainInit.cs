@@ -77,6 +77,7 @@ namespace IngameScript
 		        sInitResults += drillInit();
 		        sInitResults += ejectorsInit();
                 initCargoCheck();
+                initAsteroidsInfo();
 
                 Deserialize();
 //                bWantFast = false;
