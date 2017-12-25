@@ -57,7 +57,6 @@ namespace IngameScript
                 if (!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
 
                 sInitResults += gridsInit();
-
                 initTimers();
 
                 sInitResults += initSerializeCommon();
@@ -67,6 +66,7 @@ namespace IngameScript
                 sInitResults += BlockInit();
 
                 sInitResults += thrustersInit(gpsCenter);
+                sInitResults += rotorsNavInit();
                 sInitResults += sensorInit();
                 sInitResults += camerasensorsInit(gpsCenter);
 

@@ -26,7 +26,6 @@ namespace IngameScript
 	        {
 		        setMode(MODE_DOCKED);
 	        }
-
 	        doModeAlways();
 
 	        if(iMode==MODE_IDLE && (craft_operation & CRAFT_MODE_SLED) > 0)
@@ -104,7 +103,6 @@ namespace IngameScript
             Echo("Length=" + length.ToString("0.0"));
 
             */
-
             if (iMode != MODE_ATTENTION)
             {
                 float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
@@ -217,6 +215,7 @@ namespace IngameScript
 
             string sShipName = "";
 
+            // should use cached antenna list...
             List<IMyTerminalBlock> Antenna = new List<IMyTerminalBlock>();
             GridTerminalSystem.GetBlocksOfType<IMyRadioAntenna>(Antenna, localGridFilter);
             if (Antenna.Count > 0)
@@ -240,15 +239,18 @@ namespace IngameScript
 
             if (bValidHome)
             {
-                dist = (gpsCenter.GetPosition() - vHome).Length();
+                dist = 0;
+                if(gpsCenter!=null)   dist = (gpsCenter.GetPosition() - vHome).Length();
                 s += ": " + dist.ToString("0") + "m";
                 s2 = "GPS:" + sShipName + " Home Entry:" + Vector3DToString(vHome) + ":";
                 StatusLog(s2, gpsPanel);
             }
             else s += ": NOT SET";
-            s2 = "GPS:" + sShipName + " Current Position:" + Vector3DToString(gpsCenter.GetPosition()) + ":";
-            StatusLog(s2, gpsPanel);
-
+            if (gpsCenter != null)
+            {
+                s2 = "GPS:" + sShipName + " Current Position:" + Vector3DToString(gpsCenter.GetPosition()) + ":";
+                StatusLog(s2, gpsPanel);
+            }
         }
         #endregion
 
