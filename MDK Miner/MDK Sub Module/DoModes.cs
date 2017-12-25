@@ -23,17 +23,19 @@ namespace IngameScript
         {
             Echo("mode=" + iMode.ToString());
             doModeAlways();
-/*            
-            if (AnyConnectorIsConnected() && !((craft_operation & CRAFT_MODE_ORBITAL) > 0))
-            {
-                Echo("DM:docked");
-                setMode(MODE_DOCKED);
-            }
-*/
+            /*            
+                        if (AnyConnectorIsConnected() && !((craft_operation & CRAFT_MODE_ORBITAL) > 0))
+                        {
+                            Echo("DM:docked");
+                            setMode(MODE_DOCKED);
+                        }
+            */
+
+//            if (iMode == MODE_DOSCAN) doModeScans();
 
             if (iMode == MODE_FINDORE) doModeFindOre();
             if (iMode == MODE_GOTOORE) doModeGotoOre();
-            if (iMode == MODE_MININGORE) doModeMiningOre();
+//            if (iMode == MODE_BORINGMINE) doModeBoringMine();
             if (iMode == MODE_EXITINGASTEROID) doModeExitingAsteroid();
 
             if (iMode == MODE_SEARCHORIENT) doModeSearchOrient();
@@ -98,12 +100,16 @@ namespace IngameScript
             Echo(sInitResults);
             echoInstructions();
         }
+
         void processReceives()
         {
-
             if (sReceivedMessage != "")
             {
                 Echo("Received Message=\n" + sReceivedMessage);
+
+                if (AsteroidProcessMessage(sReceivedMessage))
+                    return;
+
                 string[] aMessage = sReceivedMessage.Trim().Split(':');
 
                 if (aMessage.Length > 1)
@@ -115,7 +121,7 @@ namespace IngameScript
                     }
                     if (aMessage.Length > 2)
                     {
-/*
+                        /*
                         if (aMessage[1] == "MOM")
                         {
                         }
@@ -123,19 +129,6 @@ namespace IngameScript
                     }
                 }
             }
-/*
-            if (lMomID == 0)
-            {
-                Echo("Orphan!!!");
-                if (!bMomRequestSent)
-                {
-                    antSend("WICO:HELLO:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
-                    bMomRequestSent = true;
-                }
-            }
-            else
-                Echo("Mom=" + sMomName);
-                */
         }
 
     }
