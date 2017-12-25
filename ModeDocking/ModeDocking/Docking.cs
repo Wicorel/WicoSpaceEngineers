@@ -107,7 +107,7 @@ namespace IngameScript
             StatusLog(moduleName + ":DOCKING!", textPanelReport);
             StatusLog(moduleName + ":Docking: current_state=" + current_state, textPanelReport);
             StatusLog(moduleName + ":Docking: current_state=" + current_state, textLongStatus, true);
-            bWantFast = true;
+ //           bWantFast = true;
             Echo("DOCKING: state=" + current_state);
 
             IMySensorBlock sb;
@@ -284,6 +284,7 @@ namespace IngameScript
                 ResetTravelMovement();
                 calcCollisionAvoid(basePositionOf(iTargetBase));
                 current_state = 107;
+                bWantFast = false;
             }
             else if (current_state == 107)
             {
@@ -309,7 +310,7 @@ namespace IngameScript
                 if (bValidHome)
                 {
                     double distancesqHome = Vector3D.DistanceSquared(vHome, gpsCenter.GetPosition());
-                    if (distancesqHome > 25000) // max SG antenna range
+                    if (distancesqHome > 25000) // max SG antenna range //TODO: get max from antenna module
                     {
                         current_state = 115;
                     }
@@ -322,6 +323,7 @@ namespace IngameScript
                 ResetTravelMovement();
                 calcCollisionAvoid(vHome);
                 current_state = 112;
+                bWantFast = false;
             }
             else if (current_state == 112)
             { // avoid collision
@@ -555,7 +557,7 @@ namespace IngameScript
                 else
                 {
                     bWantMedium = true;
-                    bWantFast = false;
+//                    bWantFast = false;
                 }
             }
             else if (current_state == 170 || current_state == 172)
@@ -575,6 +577,7 @@ namespace IngameScript
                 // may need to change direction if non- 'back' connector
                 bAimed = GyroMain("up", vDockAlign, gpsCenter);
                 if (bAimed) current_state++; // 170->171 172->173
+                else bWantFast = true;
             }
             else if (current_state == 171)
             { //171 align to dock
@@ -592,6 +595,7 @@ namespace IngameScript
                 minAngleRad = 0.03f;
                 bAimed = GyroMain("forward", vVec, dockingConnector);
                 if (bAimed) current_state = 172;
+                else bWantFast = true;
 
             }
             else if (current_state == 173)
@@ -668,6 +672,7 @@ namespace IngameScript
                 {
                     Echo("Aiming");
                     powerDownThrusters(thrustAllList);
+                    bWantFast = true;
                 }
             }
         }

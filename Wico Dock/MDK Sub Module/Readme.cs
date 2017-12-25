@@ -85,4 +85,9 @@ Handle case where requested to dock, but have not heard from a base yet; request
 
 3.2d new travelmovement
 
+3.2E 
+Increase scan delay time in tm to .225
+only use fast when needed for docking.
+use .Once for FAST
+12232017
 */
