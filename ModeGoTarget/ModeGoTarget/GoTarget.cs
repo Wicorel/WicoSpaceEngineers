@@ -119,8 +119,6 @@ namespace IngameScript
                 if (bValidTarget)
                     vTargetLocation = vTargetMine;
 
-
-
                 Vector3D vVec = vTargetLocation - gpsCenter.GetPosition();
                 double distance = vVec.Length();
                 Echo("distance=" + niceDoubleMeters(distance));
@@ -134,7 +132,7 @@ namespace IngameScript
                 {
                     Echo("we have arrived");
                     //				bValidTargetLocation = false;
-                    gyrosOff();
+//                    gyrosOff();
                     ResetMotion();
                     bValidHome = false; // we used this one up.
                     setMode(MODE_ARRIVEDTARGET);
@@ -146,6 +144,7 @@ namespace IngameScript
                 debugGPSOutput("TargetLocation", vTargetLocation);
 
                 bool bAimed = false;
+                /*
                 double yawangle = -999;
                 if (bYawOnly)
                 {
@@ -156,10 +155,102 @@ namespace IngameScript
                     else bWantMedium = true;
 
                     if (bSled)
+                    {
                         DoRotate(yawangle, "Yaw");
+                    }
                     else if (bRotor)
+                    {
                         DoRotorRotate(yawangle);
+                    }
                     // else:  WE DON"T KNOW WHAT WE ARE
+                    if (bAimed)
+                    {
+                        Echo("Aimed");
+                        gyrosOff();
+                        if (!bGoOption)
+                        {
+                            powerDownRotors(rotorNavLeftList);
+                            powerDownRotors(rotorNavRightList);
+
+                            powerDownThrusters(thrustAllList);
+                            setMode(MODE_ARRIVEDTARGET);
+                            return;
+                        }
+                        double stoppingDistance = calculateStoppingDistance(thrustBackwardList, velocityShip, 0);
+                        double dFar = 100;
+                        double dApproach = 50;
+                        double dPrecision = 15;
+                        if (velocityShip > 5) dFar = stoppingDistance * 5;
+                        if (velocityShip > 5) dApproach = stoppingDistance * 2;
+                        Echo("distance=" + niceDoubleMeters(distance));
+                                           Echo("DFar=" + dFar);
+                                           Echo("dApproach=" + dApproach);
+                                           Echo("dPrecision=" + dPrecision);
+                        Echo("shipSpeedMax=" + shipSpeedMax);
+                        Echo("velocityShip=" + velocityShip);
+                        if (distance > dFar)
+                        {
+                                                   Echo("DFAR");
+                            if (velocityShip < 1)
+                            {
+                                Echo("DFAR*1");
+                                powerForward(100);
+                            }
+                            else if (velocityShip < (shipSpeedMax * 0.85))
+                            //                        else if (velocityShip < shipSpeedMax / 2)
+                            {
+                                Echo("DFAR**2");
+                                powerForward(55);
+                            }
+                            else if (velocityShip < (shipSpeedMax * 1.05))
+                            {
+                                Echo("DFAR***3");
+                                powerForward(1);
+                            }
+                            else
+                            {
+                                Echo("DFAR****4");
+                                powerDown();
+                            }
+                        }
+                        else if (distance > dApproach)
+                        {
+                            Echo("Approach");
+
+                            if (velocityShip < 1)
+                                powerForward(100);
+                            else if (velocityShip < shipSpeedMax / 2)
+                                powerForward(25);
+                            else if (velocityShip < shipSpeedMax)
+                                powerForward(1);
+                            else
+                                powerDown();
+                        }
+                        else if (distance > dPrecision)
+                        {
+                            Echo("Precision");
+                            // almost  to target.  should take stoppingdistance into account.
+                            if (velocityShip < 1)
+                                powerForward(100);
+                            else if (velocityShip < shipSpeedMax / 2)
+                                powerForward(25);
+                            else if (velocityShip < shipSpeedMax)
+                                powerForward(1);
+                            else
+                                powerDown();
+                        }
+                        else
+                        {
+                            Echo("Close");
+                            if (velocityShip < 1)
+                                powerForward(25);
+                            else if (velocityShip < 5)
+                                powerForward(5);
+                            else
+                                powerDown();
+                        }
+
+                    }
 
                 }
                 else if (bRotor)
@@ -269,6 +360,7 @@ namespace IngameScript
                     }
                 }
                 else
+                */
                 {
                     doTravelMovement(vTargetLocation, 3.0f, 200, 170);
                 }
@@ -299,9 +391,9 @@ namespace IngameScript
 
             else if (current_state == 172)
             {
-//                 Vector3D vVec = vAvoid - gpsCenter.GetPosition();
-//                double distanceSQ = vVec.LengthSquared();
-               
+                //                 Vector3D vVec = vAvoid - gpsCenter.GetPosition();
+                //                double distanceSQ = vVec.LengthSquared();
+                Echo("Collision Avoid"); 
                 doTravelMovement(vAvoid, 5.0f, 160, 173);
             }
             else if (current_state == 173)
