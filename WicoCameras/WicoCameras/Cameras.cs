@@ -35,7 +35,8 @@ namespace IngameScript
 
         IMyTerminalBlock lastCamera = null;
 
-        MyDetectedEntityInfo lastDetectedInfo;
+        private MyDetectedEntityInfo lastDetectedInfo;
+
 
         bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
         {
@@ -77,6 +78,7 @@ namespace IngameScript
             }
 
             return false;
+
         }
 
         bool doCameraScan(List<IMyTerminalBlock> cameraList, Vector3D targetPos)
@@ -239,6 +241,13 @@ namespace IngameScript
 
         #endregion
 
+        //stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
+        /* Random Point on a sphere
+         var z = Rand(-radius, radius)
+        var long = Rand(0, 2*pi)
+        var xyr = sqrt(1-z*z)
+        return <x*cos(long), y*sin(long), z>
+        */
         public class QuadrantCameraScanner
         {
             bool bDoneScanning = false;
@@ -269,14 +278,17 @@ namespace IngameScript
             //            public MyDetectedEntityInfo info;
 
             public MyDetectedEntityInfo lastDetectedInfo;
+            public List<MyDetectedEntityInfo> myLDEI = new List<MyDetectedEntityInfo>();
             public IMyTerminalBlock lastCamera = null;
 
-            public QuadrantCameraScanner(Program pg,List<IMyTerminalBlock> blocks, double startScanDist = 1250, float defaultYawRange = 45f, float defaultPitchRange = 45f,
-            float defaultScaleOnMiss = 2, float defaultScanCenterScale = 1, float defaultMinAdjust = 0.5f, double maxScanDist=5000)
+            public QuadrantCameraScanner(Program pg, List<IMyTerminalBlock> blocks, double startScanDist = 1250, float defaultYawRange = 45f, float defaultPitchRange = 45f,
+            float defaultScaleOnMiss = 2, float defaultScanCenterScale = 1, float defaultMinAdjust = 0.5f, double maxScanDist = 5000)
             {
                 _pg = pg;
                 bDoneScanning = false;
                 cameras.Clear();
+                myLDEI.Clear();
+                lastDetectedInfo = new MyDetectedEntityInfo();
                 foreach (var b in blocks)
                 {
                     if (b is IMyCameraBlock)
@@ -290,12 +302,16 @@ namespace IngameScript
 
                 }
                 //                cameras = blocks;
+                if (startScanDist > maxScanDist)
+                    maxScanDist = startScanDist; // don't stop with zero scans..
+
                 SCAN_DISTANCE = startScanDist;
                 YAWSCANRANGE = defaultYawRange;
                 PITCHSCANRANGE = defaultPitchRange;
                 SCAN_SCALE_ON_MISS = defaultScaleOnMiss;
                 SCAN_CENTER_SCALE_FACTOR = defaultScanCenterScale;
                 SCAN_MINIMUMADJUST = defaultMinAdjust;
+                _maxScanDist = maxScanDist;
 
                 PITCH = 0;
                 YAW = 0;
@@ -311,6 +327,22 @@ namespace IngameScript
                 return bDoneScanning;
             }
 
+            void AddLocalEntity(MyDetectedEntityInfo lastDetectedInfo)
+            { 
+//                _pg.Echo("ALE");
+                bool bFoundNew = true;
+                for (int i = 0; i < myLDEI.Count; i++)
+                {
+                    if (myLDEI[i].EntityId == lastDetectedInfo.EntityId)
+                        bFoundNew = false;
+                }
+                if (bFoundNew)
+                {
+                    myLDEI.Add(lastDetectedInfo);
+//                    _pg.Echo("Added");
+                }
+            }
+
             public bool DoScans()
             {
                 if (bDoneScanning) return false;
@@ -320,27 +352,32 @@ namespace IngameScript
                 {
                     if (doCameraScan(cameras, SCAN_DISTANCE, NEXTPITCH, NEXTYAW))
                     {
+//                        lastDetectedInfo = _pg.lastDetectedInfo;
 
-                        bool bValidScan = true;
                         if (!lastDetectedInfo.IsEmpty())
                         {
-                            // TODO: NEED TO CHECK FOR US and not count it.
+                            bool bValidScan = true;
+                            // CHECK FOR US and not count it.
                             if (
-                                (lastDetectedInfo.Type == MyDetectedEntityType.LargeGrid) 
+                                (lastDetectedInfo.Type == MyDetectedEntityType.LargeGrid)
                                 || (lastDetectedInfo.Type == MyDetectedEntityType.SmallGrid)
                                 )
                             {
                                 if(_pg.IsGridLocal(lastDetectedInfo.EntityId))
                                 {
                                     // we scanned ourselves
-                                    bValidScan=false;
+                                    bValidScan = false;
                                 }
                             }
                             if (bValidScan)
                             {
+//                                _pg.sInitResults += "\nDoScan HIT!";
+                                AddLocalEntity(lastDetectedInfo);
+//                                if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid)
+//                                    _pg.addAsteroid(lastDetectedInfo);
                                 bSomethingFound = true;
-                                SCAN_DISTANCE = Vector3D.Distance(lastCamera.GetPosition(), lastDetectedInfo.Position);
-                                break;
+//                                SCAN_DISTANCE = Vector3D.Distance(lastCamera.GetPosition(), lastDetectedInfo.Position);
+// keep searching                                break;
                             }
                         }
                         quadrant++;
@@ -369,17 +406,17 @@ namespace IngameScript
                                 PITCH = 0;
                                 YAW = 0;
                                 quadrant = 0;
-                                if (!bSomethingFound) // nothing found
+ //                               if (!bSomethingFound) // nothing found
                                 {
                                     // scan further
                                     SCAN_DISTANCE *= SCAN_SCALE_ON_MISS; // scale distance to go further.
-                                    if(SCAN_DISTANCE>_maxScanDist)
+                                    if (SCAN_DISTANCE > _maxScanDist)
                                     {
                                         bDoneScanning = true;
                                         return false;
                                     }
                                 }
-                                bSomethingFound = false;
+//                                bSomethingFound = false;
 
                             }
                         }
@@ -402,7 +439,6 @@ namespace IngameScript
                                 NEXTYAW = -YAW;
                                 break;
                         }
-
                     }
                 }
                 return bSomethingFound;
@@ -451,6 +487,7 @@ namespace IngameScript
             }
 
         }
+
 
 
     }
