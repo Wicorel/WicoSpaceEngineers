@@ -236,7 +236,7 @@ namespace IngameScript
 
         bool IsGridLocal(long myCubeGrid)
         {
-            bool bFound = false;
+ //           bool bFound = false;
             for(int i=0;i<localGrids.Count;i++)
             {
                 if ((long)localGrids[i].EntityId == myCubeGrid)
