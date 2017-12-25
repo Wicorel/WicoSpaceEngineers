@@ -21,15 +21,17 @@ namespace IngameScript
 
         Dictionary<string, int> modeCommands = new Dictionary<string, int>();
         string sBanner = "";
-        UpdateFrequency ufFast = UpdateFrequency.Update1; // default value for "Fast" for this module
+//        UpdateFrequency ufFast = UpdateFrequency.Update1; // default value for "Fast" for this module
+        UpdateFrequency ufFast = UpdateFrequency.Once; // default value for "Fast" for this module
 
         public Program()
         {
             doModuleConstructor();
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
             Echo(sBanner + "Creator");
-            gridsInit();
-            initLogging();
+            //            gridsInit(); //GridTerminalSystem cannot be relied on at initial compile
+            //            initLogging();
+ // Only needed for 'main' module           Runtime.UpdateFrequency |= UpdateFrequency.Once;
             if (!Me.CustomName.Contains(moduleName))
                 Me.CustomName = "PB " + OurName + " " + moduleName;
         }
