@@ -291,7 +291,6 @@ namespace IngameScript
                         //
                         //                            Echo("BASE says hello!");
                         int iOffset = 2;
-//                        string sName = aMessage[iOffset++];
 
                         long id = 0;
                         long.TryParse(aMessage[iOffset++], out id);
@@ -311,7 +310,7 @@ namespace IngameScript
 
                         BoundingBoxD box = new BoundingBoxD(vMin, vMax);
                         AsteroidAdd(asteroidID, box, false);
-                        sInitResults += "\nIncoming AST Processed!";
+//                        sInitResults += "\nIncoming AST Processed!";
                         return true; // we processed it
                     }
                     else if(aMessage[1] == "AST?")
