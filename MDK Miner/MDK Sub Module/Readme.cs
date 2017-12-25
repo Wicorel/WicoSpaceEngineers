@@ -17,6 +17,10 @@
  * Quadrant scans for asteroid if not in scanner range
  * use DoTravelMovemnent without collision detection if long-range to target asteroid
  * 
+ * 3.1C
+ * More WIP for mining/searching
+ * 
+ * 3.1D Asteroid processing and saving to text panel
  * 
  * NEED:  
  *  
