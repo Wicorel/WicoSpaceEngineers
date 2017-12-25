@@ -130,8 +130,8 @@ namespace IngameScript
             bool bLocalFoundAsteroid = false;
 
             IMySensorBlock sb;
- //           IMySensorBlock sb2;
-            if (sensorsList.Count < 1)
+            IMySensorBlock sb2;
+            if (sensorsList.Count < 2)
             {
                 StatusLog(OurName + ":" + moduleName + " Search Shift: Not Enough Sensors!", textLongStatus, true);
                 setMode(MODE_ATTENTION);
@@ -139,25 +139,27 @@ namespace IngameScript
             }
 
             sb = sensorsList[0];
-//            sb2 = sensorsList[1];
+            sb2 = sensorsList[1];
             switch (current_state)
             {
                 case 0:
                     ResetMotion();
                     sleepAllSensors();
+                    sb2.DetectAsteroids = true;
                     sb.DetectAsteroids = true;
- //                   sensorsList[1].DetectAsteroids = true;
                     setSensorShip(sb, 0, 0, 0, 0, 45, 0);
                     current_state = 10;
                     shiftElapsedMs = 0;
                     break;
-                case 10: // delay for sensors
+                case 10:
+                    Echo("Check for front");
                     shiftElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
-                    if (shiftElapsedMs < 1) return;
+                    if (shiftElapsedMs < 1) return;// delay for sensors
                     if (velocityShip > 0.2f) return;
-
+                    Echo("Checking");
                     aSensors = activeSensors();
                     bLocalFoundAsteroid = false;
+                    Echo(aSensors.Count + ": Sensors active");
                     for (int i = 0; i < aSensors.Count; i++)
                     {
                         IMySensorBlock s = aSensors[i] as IMySensorBlock;
@@ -165,32 +167,96 @@ namespace IngameScript
 
                         List<MyDetectedEntityInfo> lmyDEI = new List<MyDetectedEntityInfo>();
                         s.DetectedEntities(lmyDEI);
-
-                        for (int j = 0; j < lmyDEI.Count; j++)
+                        if (AsteroidProcessLDEI(lmyDEI))
                         {
-
-                            if (lmyDEI[j].Type == MyDetectedEntityType.Asteroid)
-                            {
-                                addDetectedEntity(lmyDEI[j]);
-                                bLocalFoundAsteroid = true;
-                                currentAst.EntityId = lmyDEI[j].EntityId;
-                                currentAst.BoundingBox = lmyDEI[j].BoundingBox;
-                                if (!bValidAsteroid)
-                                {
-                                    bValidAsteroid = true;
-                                    vTargetAsteroid = lmyDEI[j].Position;
-                                }
-                            }
+                            Echo("Found Asteroid");
+                            bLocalFoundAsteroid = true;
                         }
+                        else Echo("Did NOT find asteroid");
                     }
                     if (bLocalFoundAsteroid) current_state = 20;
-                    else current_state = 100;
+//                    else current_state = 100;
                     break;
                 case 20:
                     setMode(MODE_FINDORE);
                     break;
                 case 100:
+                    // asteroid not in sensor range
+                    // check 'down' for asteroid.
+                    setSensorShip(sb, 0, 0, 0, 0, 45, 0);
+                    setSensorShip(sb2, 0, 0, 0, 45, 45, 0);
+                    current_state = 110;
+                    shiftElapsedMs = 0;
                     break;
+                case 110:
+                    {
+                        // search 'down'
+                        shiftElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
+                        if (shiftElapsedMs < 1) return;
+                        if (velocityShip > 0.2f) return;
+
+                        bool bDownAsteroid = false;
+                        bool bForwardAsteroid = false;
+                        bool bLarge = false;
+                        bool bSmall =false;
+                        SensorActive(sb2, ref bDownAsteroid, ref bLarge, ref bSmall);
+                        SensorActive(sb, ref bForwardAsteroid, ref bLarge, ref bSmall);
+                        if (bDownAsteroid || bForwardAsteroid) current_state = 120;
+                        else current_state = 130;
+                        break;
+                    }
+                case 120:
+                    {
+                        // we found asteroid 'below'.  Move down
+
+                        // check 'down' for asteroid.
+                        setSensorShip(sb, 0, 0, 0, 45, 1, 0);
+                        current_state = 122;
+                        shiftElapsedMs = 0;
+                        break;
+                    }
+                case 122:
+                    {
+                        Echo("Move Down");
+                        // move down until sensor sees asteroid
+                        bool bDownAsteroid = false;
+                        bool bForwardAsteroid = false;
+                        bool bLarge = false;
+                        bool bSmall = false;
+                        SensorActive(sb2, ref bDownAsteroid, ref bLarge, ref bSmall);
+                        SensorActive(sb, ref bForwardAsteroid, ref bLarge, ref bSmall);
+                        Echo(bForwardAsteroid + ":" + bDownAsteroid);
+                        if (bForwardAsteroid)
+                        {
+                            Echo("Forward");
+                            ResetMotion();
+                            current_state = 120;
+                        }
+                        else if(bDownAsteroid)
+                        {
+                            Echo("Down");
+                            if (velocityShip < 0.5)
+                                powerUpThrusters(thrustDownList, 100f);
+                            else if (velocityShip > fTargetMiningmps)
+                                powerDownThrusters();
+                            else powerUpThrusters(thrustDownList, 1f);
+                        }
+                        else
+                        {
+                            Echo("Neither");
+                            // we ran out of asteroid.
+                            ResetMotion();
+                            current_state = 130;
+                        }
+
+                        break;
+                    }
+                case 130:
+                    {
+                        // No asteroid 'below'.
+                        // need to shift (left) (old state 2)
+                        break;
+                    }
             }
         }
     }

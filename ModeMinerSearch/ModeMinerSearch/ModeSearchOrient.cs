@@ -31,10 +31,11 @@ namespace IngameScript
 
         void doModeSearchOrient()
         {
+            /*
             List<IMySensorBlock> aSensors = null;
             IMySensorBlock sb;
             IMySensorBlock sb2;
-
+            */
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":SearchOrient", textPanelReport);
             Echo("Search Orient:current_state=" + current_state.ToString());
