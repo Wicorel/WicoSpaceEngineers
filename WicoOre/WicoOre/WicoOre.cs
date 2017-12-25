@@ -182,7 +182,7 @@ namespace IngameScript
                 Vector3D vVec = Vector3D.Normalize(refOrientation.Forward);
 
                 long astEntity = 0;
-                if (currentAst != null) astEntity = currentAst.EntityId;
+//                if (currentAst != null) astEntity = currentAst.EntityId;
                 addOreLoc(astEntity, oreIndex, gpsCenter.GetPosition(), vVec, 69);
                 //		addOreLoc(currentAst.EntityId, oreIndex, gpsCenter.GetPosition(), vVec, 69);
             }
