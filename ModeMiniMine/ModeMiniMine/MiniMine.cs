@@ -70,9 +70,25 @@ namespace IngameScript
          *  120 found asteroid in front. (approach)
          *     move forward until close.  then ->31
          *     
+         *     130 far travel to asteroid.
+         *     Arrive->135
+         *     Collision ->140
+         *     135 We have arrived from far travel. Await slower movement ->120
+         *     
+         *     140 Collision during far travel ->150
+         *     150 avoid collision during far travel. 
+         *      Arrive ->130 
+                Collision ->160
+
+            160 2nd collision. 
+                Stop, ->MODE_ATTENTION
+         *     
+         *     
          *  300 exited asteroid
          * 
          * 400 start camera scan for near-by asteroids
+         * 410 do camera scan.
+         * 
          * 
          */
         private StringBuilder strbMining = new StringBuilder();
@@ -81,12 +97,12 @@ namespace IngameScript
 
         bool bValidExit = false;
 
-        QuadrantCameraScanner frontScanner;
-        QuadrantCameraScanner backScanner;
-        QuadrantCameraScanner leftScanner;
-        QuadrantCameraScanner rightScanner;
-        QuadrantCameraScanner topScanner;
-        QuadrantCameraScanner bottomScanner;
+        QuadrantCameraScanner miningfrontScanner;
+        QuadrantCameraScanner miningbackScanner;
+        QuadrantCameraScanner miningleftScanner;
+        QuadrantCameraScanner miningrightScanner;
+        QuadrantCameraScanner miningtopScanner;
+        QuadrantCameraScanner miningbottomScanner;
 
         void doModeFindOre()
         {
@@ -98,19 +114,19 @@ namespace IngameScript
             StatusLog(moduleName + ":FindOre", textPanelReport);
             Echo("FIND ORE:current_state=" + current_state.ToString());
             double maxThrust = calculateMaxThrust(thrustForwardList);
-            Echo("maxThrust=" + maxThrust.ToString("N0"));
+//            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
             MyShipMass myMass;
             myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
-            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
+//            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
 
             double maxDeltaV = (maxThrust) / effectiveMass;
-            Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+//            Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
 
-            Echo("Cargo=" + cargopcent.ToString() + "%");
+//            Echo("Cargo=" + cargopcent.ToString() + "%");
 
-            Echo("velocity=" + velocityShip.ToString("0.00"));
+//            Echo("velocity=" + velocityShip.ToString("0.00"));
 //            Echo("miningElapsedMs=" + miningElapsedMs.ToString("0.00"));
 
             IMyTextPanel txtPanel = getTextBlock("Sensor Report");
@@ -516,7 +532,6 @@ namespace IngameScript
                         }
                         else Echo("Aiming");
                         // BUG: Gets stuck in state if nothing hit.. (ie, donut)
-
                     }
                     break;
                 case 130:
@@ -588,12 +603,12 @@ namespace IngameScript
                         miningElapsedMs = 0;
 
                         // initialize cameras
-                        frontScanner = new QuadrantCameraScanner(this, cameraForwardList);
-                        backScanner = new QuadrantCameraScanner(this, cameraBackwardList);
-                        leftScanner = new QuadrantCameraScanner(this, cameraLeftList);
-                        rightScanner = new QuadrantCameraScanner(this, cameraRightList);
-                        topScanner = new QuadrantCameraScanner(this, cameraUpList);
-                        bottomScanner = new QuadrantCameraScanner(this, cameraDownList);
+                        miningfrontScanner = new QuadrantCameraScanner(this, cameraForwardList, 5000);
+                        miningbackScanner = new QuadrantCameraScanner(this, cameraBackwardList, 5000);
+                        miningleftScanner = new QuadrantCameraScanner(this, cameraLeftList, 5000);
+                        miningrightScanner = new QuadrantCameraScanner(this, cameraRightList, 5000);
+                        miningtopScanner = new QuadrantCameraScanner(this, cameraUpList, 5000);
+                        miningbottomScanner = new QuadrantCameraScanner(this, cameraDownList, 5000);
 
                         current_state = 410;
                         break;
@@ -601,116 +616,141 @@ namespace IngameScript
                 case 410:
                     {
                         StatusLog("Long Range Scan", textPanelReport);
-                        if (frontScanner == null) // in case we reload/compile in this state..
+                        if (miningfrontScanner == null) // in case we reload/compile in this state..
                             current_state = 400;
                         bWantMedium = true;
                         miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
                         // use for timeout...
 
                         // do camera scans
-                        if (frontScanner.DoScans())
+
+                        if (miningfrontScanner.DoScans())
                         {
-                            if(frontScanner.lastDetectedInfo.Type== MyDetectedEntityType.Asteroid)
-                            {
-                                MinerProcessScan(frontScanner.lastDetectedInfo);
-                            }
+                            AsteroidProcessLDEI(miningfrontScanner.myLDEI);
                         }
-                        else if (backScanner.DoScans())
+                        if (miningbackScanner.DoScans())
                         {
-                            MinerProcessScan(backScanner.lastDetectedInfo);
+                            AsteroidProcessLDEI(miningbackScanner.myLDEI);
                         }
-                        else if (leftScanner.DoScans())
+                        if (miningleftScanner.DoScans())
                         {
-                            MinerProcessScan(leftScanner.lastDetectedInfo);
+                            AsteroidProcessLDEI(miningleftScanner.myLDEI);
                         }
-                        else if (rightScanner.DoScans())
+                        if (miningrightScanner.DoScans())
                         {
-                            MinerProcessScan(rightScanner.lastDetectedInfo);
+                            AsteroidProcessLDEI(miningrightScanner.myLDEI);
                         }
-                        else if (topScanner.DoScans())
+                        if (miningtopScanner.DoScans())
                         {
-                            MinerProcessScan(topScanner.lastDetectedInfo);
+                            AsteroidProcessLDEI(miningtopScanner.myLDEI);
                         }
-                        else if(bottomScanner.DoScans())
+                        if(miningbottomScanner.DoScans())
                         {
-                            MinerProcessScan(bottomScanner.lastDetectedInfo);
+                            AsteroidProcessLDEI(miningbottomScanner.myLDEI);
                         }
+
                         // take the first one found.
                         // TODO: do all search and then choose 'best' (closest?)
                         // TODO: Aim at the hit position and not 'CENTER' for more randomized start on asteroid
                         // TODO: once we find asteroid(s) choose how to find ore intelligently and not just randomly
+                        /*
                         if (bValidAsteroid)
                             current_state = 120;
-
+                            */
                         string s = "";
                         s += "Front: ";
-                        if (frontScanner.DoneScanning())
+                        if (miningfrontScanner.DoneScanning())
                             s += "DONE!";
                         else
                         {
-                            s += frontScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                            s += miningfrontScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
+                        s+=" " +miningfrontScanner.myLDEI.Count +" asteroids";
                         s += "\n";
 
                         s += "Back: ";
-                        if (backScanner.DoneScanning())
+                        if (miningbackScanner.DoneScanning())
                             s += "DONE!";
                         else
                         {
-                            s += backScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                            s += miningbackScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
+                        s += " " + miningbackScanner.myLDEI.Count + " asteroids";
                         s += "\n";
 
                         s += "Left: ";
-                        if (leftScanner.DoneScanning())
+                        if (miningleftScanner.DoneScanning())
                             s += "DONE!";
                         else
                         {
-                            s += leftScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                            s += miningleftScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
+                        s += " " + miningleftScanner.myLDEI.Count + " asteroids";
                         s += "\n";
 
                         s += "Right: ";
-                        if (rightScanner.DoneScanning())
+                        if (miningrightScanner.DoneScanning())
                             s += "DONE!";
                         else
                         {
-                            s += rightScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                            s += miningrightScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
+                        s += " " + miningrightScanner.myLDEI.Count + " asteroids";
                         s += "\n";
 
                         s += "Top: ";
-                        if (topScanner.DoneScanning())
+                        if (miningtopScanner.DoneScanning())
                             s += "DONE!";
                         else
                         {
-                            s += topScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                            s += miningtopScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
+                        s += " " + miningtopScanner.myLDEI.Count + " asteroids";
                         s += "\n";
 
                         s += "Bottom: ";
-                        if (bottomScanner.DoneScanning())
+                        if (miningbottomScanner.DoneScanning())
                             s += "DONE!";
                         else
                         {
-                            s += bottomScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                            s += miningbottomScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
+                        s += " " + miningbottomScanner.myLDEI.Count + " asteroids";
                         s += "\n";
 
+                        if (AsteroidFindNearest() < 0)
+                            s += "No Known Asteroid";
+                        else s += "FOUND at least one asteroid!";
+
                         StatusLog(s, textPanelReport);
+                        Echo(s);
+
 
                         if (
-                            frontScanner.DoneScanning() &&
-                            backScanner.DoneScanning() &&
-                            leftScanner.DoneScanning() &&
-                            rightScanner.DoneScanning() &&
-                            topScanner.DoneScanning() &&
-                            bottomScanner.DoneScanning()
+                            miningfrontScanner.DoneScanning() &&
+                            miningbackScanner.DoneScanning() &&
+                            miningleftScanner.DoneScanning() &&
+                            miningrightScanner.DoneScanning() &&
+                            miningtopScanner.DoneScanning() &&
+                            miningbottomScanner.DoneScanning()
                             )
                         {
-                            // all scans have run and didn't find asteroid..
-                            //
-                            setMode(MODE_ATTENTION);
+                            long asteroidID = -1;
+                            asteroidID=AsteroidFindNearest();
+                            if (asteroidID < 0)
+                            {
+                                // all scans have run and didn't find asteroid..
+                                setMode(MODE_ATTENTION);
+                            }
+                            else
+                            {
+                                bValidAsteroid = true;
+                                vTargetAsteroid = AsteroidGetPosition(asteroidID);
+                                vExpectedExit = vTargetAsteroid - gpsCenter.GetPosition();
+                                vExpectedExit.Normalize();
+
+                                current_state = 120;
+                            }
                         }
                         break;
                     }
