@@ -21,7 +21,7 @@ namespace IngameScript
 
         void Deserialize()
         {
-            double x, y, z;
+            double x1, y1, z1;
 
             string sSave;
             if (SaveFile == null)
@@ -90,16 +90,16 @@ namespace IngameScript
 
             craft_operation = Convert.ToInt32(getLine());
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vDock = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vDock = new Vector3D(x1, y1, z1);
             bValidDock = asBool(getLine());
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vLaunch1 = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vLaunch1 = new Vector3D(z1, y1, z1);
             bValidLaunch1 = asBool(getLine().ToLower());
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vHome = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vHome = new Vector3D(z1, y1, z1);
             bValidHome = asBool(getLine());
 
             dtStartShip = DateTime.Parse(getLine());
@@ -109,40 +109,40 @@ namespace IngameScript
             dtLastRan = DateTime.Parse(getLine());
             dtStartNav = DateTime.Parse(getLine());
             /*
-            ParseVector3d(getLine(), out x, out y, out z);
-            vLastPos = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vLastPos = new Vector3D(z1, y1, z1);
             */
-            ParseVector3d(getLine(), out x, out y, out z);
-            vInitialContact = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vInitialContact = new Vector3D(z1, y1, z1);
             bValidInitialContact = asBool(getLine());
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vInitialExit = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vInitialExit = new Vector3D(z1, y1, z1);
             bValidInitialExit = asBool(getLine());
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vLastContact = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vLastContact = new Vector3D(z1, y1, z1);
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vLastExit = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vLastExit = new Vector3D(z1, y1, z1);
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vExpectedExit = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vExpectedExit = new Vector3D(z1, y1, z1);
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vTargetMine = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vTargetMine = new Vector3D(z1, y1, z1);
             bValidTarget = asBool(getLine());
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vTargetAsteroid = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vTargetAsteroid = new Vector3D(z1, y1, z1);
             bValidAsteroid = asBool(getLine());
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vNextTarget = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vNextTarget = new Vector3D(z1, y1, z1);
             bValidNextTarget = asBool(getLine());
 
-            ParseVector3d(getLine(), out x, out y, out z);
-            vCurrentNavTarget = new Vector3D(x, y, z);
+            ParseVector3d(getLine(), out x1, out y1, out z1);
+            vCurrentNavTarget = new Vector3D(z1, y1, z1);
 
             bAutopilotSet = asBool(getLine());
             bAutoRelaunch = asBool(getLine());
