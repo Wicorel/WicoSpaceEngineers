@@ -40,7 +40,7 @@ namespace IngameScript
             // when all initialization is done, set init to true.
             initLogging();
 
-            Echo("Init");
+            Echo(moduleName+ " Init:" + currentInit);
             if (currentInit == 0)
             {
                 StatusLog(DateTime.Now.ToString() + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
