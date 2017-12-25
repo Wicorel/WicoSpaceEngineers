@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoScans", "WicoScans\WicoScans.shproj", "{BD6E2A62-24C5-4115-A92E-64E4A2C3CFA9}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoScans\WicoScans.projitems*{bd6e2a62-24c5-4115-a92e-64e4a2c3cfa9}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F11EC222-F90D-44B0-8B35-4230B2671822}
+	EndGlobalSection
+EndGlobal
