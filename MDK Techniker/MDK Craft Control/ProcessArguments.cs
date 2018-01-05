@@ -97,7 +97,13 @@ namespace IngameScript
 
                         if (thrustBackwardList.Count > 1)
                         {
-                            blockApplyAction(thrustBackwardList, "OnOff");
+                            foreach (var t1 in thrustBackwardList)
+                                if(t1 is IMyFunctionalBlock)
+                                {
+                                    var f1 = t1 as IMyFunctionalBlock;
+                                    f1.Enabled = !f1.Enabled;
+                                }
+                            //                            blockApplyAction(thrustBackwardList, "OnOff");
                         }
 
                     }

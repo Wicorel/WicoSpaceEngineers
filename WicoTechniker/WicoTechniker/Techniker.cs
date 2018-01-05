@@ -238,8 +238,10 @@ namespace IngameScript
 			        // EMERGENCY STOP
 			        powerDownThrusters(thrustAllList, thrustAll, false);  // turns on all thrusters (non-override)
 
-			        if (imsc != null && !imsc.DampenersOverride)
-				        blockApplyAction(gpsCenter, "DampenersOverride");
+                    if (imsc != null && !imsc.DampenersOverride)
+                    {
+                        imsc.DampenersOverride = true;
+                    }
 			        s = "EMERGENCY STOP";
 		        }
 		        else if (stoppingDistance * 6 > targetRange || targetRange < 100)
