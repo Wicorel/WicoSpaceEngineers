@@ -90,10 +90,10 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="MDKUtilities">
-      <HintPath>C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\qlznkrcn.dop\MDKUtilities.dll</HintPath>
+      <HintPath>C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\2jgibfoa.tni\MDKUtilities.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Analyzer Include="C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\qlznkrcn.dop\Analyzers\MDKAnalyzer.dll" />
+    <Analyzer Include="C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\2jgibfoa.tni\Analyzers\MDKAnalyzer.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DoModes.cs" />
@@ -107,6 +107,7 @@
     <Compile Include="Readme.cs" />
     <AdditionalFiles Include="thumb.png" />
     <AdditionalFiles Include="MDK\whitelist.cache" />
+    <Compile Include="WicoINI.cs" />
   </ItemGroup>
   <Import Project="..\..\WicoGrid\WicoGrid\WicoGrid.projitems" Label="Shared" />
   <Import Project="..\..\WicoSerialize\WicoSerialize\WicoSerialize.projitems" Label="Shared" />
