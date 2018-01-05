@@ -88,7 +88,7 @@ namespace IngameScript
             float totalCapacity = 0;
             float totalCharge = 0;
             bool bFoundRecharging = false;
-            float f;
+            float f1;
 
             if (batteryList.Count < 1) initBatteries();
             if (batteryList.Count < 1) return false;
@@ -101,17 +101,17 @@ namespace IngameScript
                 int percentthisbattery = 100;
                 IMyBatteryBlock b;
                 b = batteryList[ib] as IMyBatteryBlock;
-                f = b.MaxStoredPower;
-                capacity += f;
-                totalCapacity += f;
-                f = b.CurrentStoredPower;
-                charge += f;
-                totalCharge += f;
+                f1 = b.MaxStoredPower;
+                capacity += f1;
+                totalCapacity += f1;
+                f1 = b.CurrentStoredPower;
+                charge += f1;
+                totalCharge += f1;
                 if (capacity > 0)
                 {
-                    f = ((charge * 100) / capacity);
-                    f = (float)Math.Round(f, 0);
-                    percentthisbattery = (int)f;
+                    f1 = ((charge * 100) / capacity);
+                    f1 = (float)Math.Round(f1, 0);
+                    percentthisbattery = (int)f1;
                 }
                 string s;
                 s = "";
@@ -130,35 +130,36 @@ namespace IngameScript
                 s += percentthisbattery + "%";
                 s += ":" + batteryList[ib].CustomName;
                 if (bEcho) Echo(s);
-                if (textBlock != null) StatusLog(s, textBlock);
-                if (bProgress)
+                if (textBlock != null)
                 {
-                    s = progressBar(percentthisbattery);
-                    if (textBlock != null) StatusLog(s, textBlock);
+                    StatusLog(s, textBlock);
+                    if (bProgress)
+                    {
+                        s = progressBar(percentthisbattery);
+                        StatusLog(s, textBlock);
+                    }
                 }
-                if (isRechargeSet(batteryList[ib]))
+                if (isRechargeSet(batteryList[ib]) && targetMax>0)
                 {
                     if (percentthisbattery < targetMax)
                         bFoundRecharging = true;
                     else if (percentthisbattery > 99)
                         b.OnlyRecharge = false;
-//                    batteryList[ib].ApplyAction("Recharge");
                 }
                 if (!b.OnlyRecharge && percentthisbattery < targetMax && !bFoundRecharging)
                 {
-                    Echo("Turning on Recharge for " + b.CustomName);
+//                    Echo("Turning on Recharge for " + b.CustomName);
                     b.OnlyDischarge = false;
                     b.OnlyRecharge = true;
                     b.SemiautoEnabled = false;
-//                    batteryList[ib].ApplyAction("Recharge");
                     bFoundRecharging = true;
                 }
             }
             if (totalCapacity > 0)
             {
-                f = ((totalCharge * 100) / totalCapacity);
-                f = (float)Math.Round(f, 0);
-                batteryPercentage = (int)f;
+                f1 = ((totalCharge * 100) / totalCapacity);
+                f1 = (float)Math.Round(f1, 0);
+                batteryPercentage = (int)f1;
             }
             else
                 batteryPercentage = -1;
