@@ -78,11 +78,15 @@ namespace IngameScript
             }
             else if (currentInit == 1)
             {
-//            Echo("Init1:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 Deserialize();// get info from savefile to avoid blind-rewrite of (our) defaults
 
                 sInitResults += BlockInit();
                 initCargoCheck();
+                if (gpsCenter != null)
+                {
+                    anchorPosition = gpsCenter;
+                    currentPosition = anchorPosition.GetPosition();
+                }
                 initPower();
                 sInitResults += thrustersInit(gpsCenter);
                sInitResults += gyrosetup();
@@ -90,7 +94,6 @@ namespace IngameScript
             }
             if (currentInit == 2)
             {
-//            Echo("Init2:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 sInitResults += wheelsInit(gpsCenter);
                 sInitResults += rotorsNavInit();
 
@@ -98,7 +101,6 @@ namespace IngameScript
             }
             if (currentInit == 3)
             {
-//            Echo("Init3:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                sInitResults += connectorsInit();
                 sInitResults += tanksInit();
                 sInitResults += drillInit();
@@ -107,7 +109,6 @@ namespace IngameScript
             }
             if (currentInit == 4)
             {
-//            Echo("Init4:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 sInitResults += ejectorsInit();
                 sInitResults += antennaInit();
                 sInitResults += gasgenInit();
@@ -133,20 +134,11 @@ namespace IngameScript
                     myMass = ((IMyShipController)anchorPosition).CalculateShipMass();
 
                     gridBaseMass = myMass.BaseMass;
+                }////
 
-                    sInitResults += modeOnInit(); // handle mode initializing from load/recompile..
+                sInitResults += modeOnInit(); // handle mode initializing from load/recompile..
 
-                    init = true; // we are done
-
-                }
-                else
-                {
-                    // we are not complete.  try again..
-                    currentInit = 0;
-                    bWantFast = false;
-                    Echo("Missing Required Item; Please add");
-                    return sInitResults;
-                }
+                init = true; // we are done
             }
 
             currentInit++;
