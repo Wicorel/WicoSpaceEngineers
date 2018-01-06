@@ -39,9 +39,9 @@ namespace IngameScript
             /// </summary>
             public bool IsDirty { get; private set; } = false;
 
-//            bool _IsTextInvalid = false;
-//            bool _IsLinesInvalid = false;
-//            bool _IsKeysInvalid = false;
+            //            bool _IsTextInvalid = false;
+            //            bool _IsLinesInvalid = false;
+            //            bool _IsKeysInvalid = false;
 
             /// <summary>
             /// Constructor,  Pass MyGridProgram so it can access things like Echo()
@@ -49,7 +49,7 @@ namespace IngameScript
             /// </summary>
             /// <param name="pg">Allow access to things like Echo()</param>
             /// <param name="sINI">String to parse</param>
-            public INIHolder(MyGridProgram pg,  string sINI)
+            public INIHolder(MyGridProgram pg, string sINI)
             {
                 _pg = pg;
                 _Sections = new Dictionary<string, string>();
@@ -71,10 +71,10 @@ namespace IngameScript
 
                 if (_sLastINI == sINI)
                 {
-//                    _pg.Echo("INI:Same");
+                    //                    _pg.Echo("INI:Same");
                     return _Sections.Count;
                 }
-//                else _pg.Echo("INI: NOT SAME");
+                //                else _pg.Echo("INI: NOT SAME");
 
 
                 _Sections.Clear();
@@ -86,8 +86,8 @@ namespace IngameScript
 
                 string[] aLines = sINI.Split('\n');
 
- //               _pg.Echo("INI: " + aLines.Count() + " Lines to process");
-                for (int iLine=0;iLine<aLines.Count();iLine++)
+                //               _pg.Echo("INI: " + aLines.Count() + " Lines to process");
+                for (int iLine = 0; iLine < aLines.Count(); iLine++)
                 {
                     string sSection = "";
                     aLines[iLine].Trim();
@@ -107,14 +107,14 @@ namespace IngameScript
 
                         iLine++;
                         string sText = "";
-                        string[] asLines= new string[aLines.Count()-iLine]; // maximum size.
+                        string[] asLines = new string[aLines.Count() - iLine]; // maximum size.
                         int iSectionLine = 0;
                         Dictionary<string, string> dKeyValue = new Dictionary<string, string>();
 
-                        for(; iLine < aLines.Count(); iLine++)
+                        for (; iLine < aLines.Count(); iLine++)
                         {
                             aLines[iLine].Trim();
-                            if(aLines[iLine].StartsWith(_sectionStart.ToString()))
+                            if (aLines[iLine].StartsWith(_sectionStart.ToString()))
                             {
                                 iLine--;
                                 break;
@@ -125,17 +125,17 @@ namespace IngameScript
                             sText += aLines[iLine] + "\n";
                             asLines[iSectionLine++] = aLines[iLine];
 
-                            if(aLines[iLine].Contains("="))
+                            if (aLines[iLine].Contains("="))
                             {
                                 string[] aKeyValue = aLines[iLine].Split('=');
-                                if(aKeyValue.Count()>1)
+                                if (aKeyValue.Count() > 1)
                                 {
                                     string key = aKeyValue[0];
                                     string value = "";
-                                    for(int i1=1;i1<aKeyValue.Count();i1++)
+                                    for (int i1 = 1; i1 < aKeyValue.Count(); i1++)
                                     {
                                         value += aKeyValue[i1];
-                                        if (i1 < aKeyValue.Count()) value += "=";
+                                        if (i1 + 1 < aKeyValue.Count()) value += "=";
                                     }
                                     dKeyValue.Add(key, value);
                                 }
@@ -173,10 +173,10 @@ namespace IngameScript
             /// <returns>string array of the lines in the section</returns>
             public string[] GetLines(string section)
             {
-                string[] as1= { "" };
+                string[] as1 = { "" };
                 if (_Lines.ContainsKey(section))
                     as1 = _Lines[section];
-                _pg.Echo("GetLines(" + section + ") : " + as1.Count() + " Lines");
+                //                _pg.Echo("GetLines(" + section + ") : " + as1.Count() + " Lines");
                 return as1;
             }
 
@@ -189,12 +189,15 @@ namespace IngameScript
             public string GetValue(string section, string key)
             {
                 string sValue = null;
-
-                if(_Keys.ContainsKey(section))
+                //                _pg.Echo(".GetValue(" + section+", " + key + ")");
+                if (_Keys.ContainsKey(section))
                 {
                     var dValue = _Keys[section];
                     if (dValue.ContainsKey(key))
+                    {
                         sValue = dValue[key];
+                        //                        _pg.Echo(" value=" + sValue);
+                    }
                 }
 
                 return sValue;
@@ -232,20 +235,20 @@ namespace IngameScript
             /// <param name="sText">the text to set as the new text</param>
             public void WriteSection(string section, string sText)
             {
-                sText.TrimEnd(); 
+                sText.TrimEnd();
                 section = section.ToUpper();
                 if (_Sections.ContainsKey(section))
                 {
                     if (_Sections[section] != sText)
                     {
-//                        _pg.Echo("INI WriteSection: Now Dirty:"+section);
+                        //                        _pg.Echo("INI WriteSection: Now Dirty:"+section);
                         _Sections[section] = sText;
                         IsDirty = true;
                     }
                 }
                 else
                 {
-//                    _pg.Echo("INI WriteSection: Adding new Section:" + section);
+                    //                    _pg.Echo("INI WriteSection: Adding new Section:" + section);
                     IsDirty = true;
                     _Sections.Add(section, sText);
                 }
@@ -256,17 +259,17 @@ namespace IngameScript
             /// </summary>
             /// <param name="bClearDirty">clear the dirty flag. Use if you are writing the text back to the original location</param>
             /// <returns>full text including ALL sections and header information</returns>
-            public string GenerateINI(bool bClearDirty=true)
+            public string GenerateINI(bool bClearDirty = true)
             {
                 string sIni = "";
                 sIni += _sHeaderText;
-                _pg.Echo("INI Generate: " + _Sections.Count() + "sections");
+                //                _pg.Echo("INI Generate: " + _Sections.Count() + "sections");
                 foreach (var kv in _Sections)
                 {
                     sIni += _sectionStart + kv.Key + _sectionEnd + "\n";
                     sIni += kv.Value; // ends in "\n"
                 }
-                if(bClearDirty) IsDirty = false;
+                if (bClearDirty) IsDirty = false;
                 return sIni;
 
             }
