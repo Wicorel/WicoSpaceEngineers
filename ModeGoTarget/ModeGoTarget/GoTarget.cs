@@ -143,7 +143,7 @@ namespace IngameScript
 
                 debugGPSOutput("TargetLocation", vTargetLocation);
 
-                bool bAimed = false;
+ //               bool bAimed = false;
                 /*
                 double yawangle = -999;
                 if (bYawOnly)
