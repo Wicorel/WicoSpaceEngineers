@@ -322,10 +322,10 @@ namespace IngameScript
         { Matrix blk2grid; blk.Orientation.GetMatrix(out blk2grid); return blk2grid * MatrixD.CreateTranslation(((Vector3D)new Vector3D(blk.Min + blk.Max)) / 2.0) * GetGrid2WorldTransform(blk.CubeGrid); }
         #endregion
 
-        bool DoRotate(double rollAngle, string sPlane = "Roll", float maxYPR=-1)
+        bool DoRotate(double rollAngle, string sPlane = "Roll", float maxYPR=-1, float facingFactor=1f)
         {
 //            Echo("DR:angle=" + rollAngle.ToString("0.00"));
-            float targetRoll = 0;
+            float targetYaw = 0;
             IMyGyro gyro = gyros[0] as IMyGyro;
             float maxRoll = gyro.GetMaximum<float>(sPlane);
             if (maxYPR > 0) maxRoll = maxYPR;
@@ -335,37 +335,37 @@ namespace IngameScript
             if (Math.Abs(rollAngle) > 1.0)
             {
 //                Echo("MAx gyro");
-                targetRoll = (float)maxRoll * (float)(rollAngle);
+                targetYaw = maxRoll * (float)(rollAngle) * facingFactor;
             }
             else if (Math.Abs(rollAngle) > .7)
             {
                 // need to dampen 
 //                 Echo(".7 gyro");
-               targetRoll = (float)maxRoll * (float)(rollAngle) / 4;
+               targetYaw = maxRoll * (float)(rollAngle) / 4;
             }
             else if (Math.Abs(rollAngle) > 0.5)
             {
 //                 Echo(".5 gyro");
-                targetRoll = 0.11f * Math.Sign(rollAngle);
+                targetYaw = 0.11f * Math.Sign(rollAngle);
             }
             else if (Math.Abs(rollAngle) > 0.1)
             {
 //                 Echo(".1 gyro");
-                targetRoll = 0.11f * Math.Sign(rollAngle);
+                targetYaw = 0.11f * Math.Sign(rollAngle);
             }
             else if (Math.Abs(rollAngle) > 0.01)
             {
 //                 Echo(".01 gyro");
-                targetRoll = 0.11f * Math.Sign(rollAngle);
+                targetYaw = 0.11f * Math.Sign(rollAngle);
             }
             else if (Math.Abs(rollAngle) > 0.001)
             {
 //                 Echo(".001 gyro");
-                targetRoll = 0.09f * Math.Sign(rollAngle);
+                targetYaw = 0.09f * Math.Sign(rollAngle);
             }
-            else targetRoll = 0;
+            else targetYaw = 0;
 
-            GyroControl.SetYaw(targetRoll);
+            GyroControl.SetYaw(targetYaw);
             if (Math.Abs(rollAngle) < minAngleRad)
             {
                 GyroControl.SetOverride(false);
