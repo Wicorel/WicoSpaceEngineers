@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoINI", "WicoINI\WicoINI.shproj", "{AF4E1641-F4BB-4496-B66C-0F6388717061}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoINI\WicoINI.projitems*{af4e1641-f4bb-4496-b66c-0f6388717061}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6A2F62D3-EF10-4BF8-9B48-FBB1F59F4F46}
+	EndGlobalSection
+EndGlobal
