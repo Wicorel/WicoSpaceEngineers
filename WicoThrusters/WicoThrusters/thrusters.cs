@@ -488,6 +488,14 @@ namespace IngameScript
 	        return iCount;
 
         }
+
+        /// <summary>
+        /// Stopping distance based on thrust available, mass, current velocity and an optional gravity factor
+        /// </summary>
+        /// <param name="thrustUpList">list of thrusters to use</param>
+        /// <param name="currentV">velocity to calculage</param>
+        /// <param name="dGrav">optional gravity factor</param>
+        /// <returns>stopping distance in meters</returns>
         double calculateStoppingDistance(List<IMyTerminalBlock> thrustUpList, double currentV, double dGrav)
         {
             MyShipMass myMass;
