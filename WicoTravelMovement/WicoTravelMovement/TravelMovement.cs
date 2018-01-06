@@ -567,29 +567,6 @@ namespace IngameScript
             return optimalV;
         }
 
-        /// <summary>
-        /// Stopping distance based on thrust available, mass, current velocity and an optional gravity factor
-        /// </summary>
-        /// <param name="thrustUpList">list of thrusters to use</param>
-        /// <param name="currentV">velocity to calculage</param>
-        /// <param name="dGrav">optional gravity factor</param>
-        /// <returns>stopping distance in meters</returns>
-        double calculateStoppingDistance(List<IMyTerminalBlock> thrustUpList, double currentV, double dGrav=0)
-        {
-            MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
-            double hoverthrust = 0;
-            hoverthrust = myMass.PhysicalMass * dGrav * 9.810;
-            double maxThrust = calculateMaxThrust(thrustUpList);
-            double maxDeltaV = (maxThrust - hoverthrust) / myMass.PhysicalMass;
-            double secondstozero = currentV / maxDeltaV;
-//            Echo("secondstozero=" + secondstozero.ToString("0.00"));
-            // velocity will drop as we brake. at half way we should be at half speed
-            double stoppingM = currentV / 2 * secondstozero; 
-//            Echo("stoppingM=" + stoppingM.ToString("0.00"));
-            return stoppingM;
-        }
-
 
 
         // Collision Avoidance routines:
