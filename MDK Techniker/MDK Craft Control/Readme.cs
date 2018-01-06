@@ -15,6 +15,9 @@
 * Current Source.  
 * Change BatteryCheck() to not unset recharge when targetMax <=0
 * 
+* T3.2A 01052018
+* flags for turning on/off Techniker features
+* 
 * 
 * 
 * Handles:

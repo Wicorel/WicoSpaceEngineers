@@ -32,6 +32,9 @@
  *  3.1a Buld with current Source 11/26/2017
  *  
  *  3.1b Remove (almost) all ApplyActons 12032017
+ *  12222017
+ *  
+ *  3.2 INI WCCM 01062018
  *  
  * NEED:  
  *  

@@ -204,6 +204,9 @@ namespace IngameScript
         {
             ResetToIdle();
             ResetMotion();
+
+            autoConfig();
+
             bValidDock = false;
             bValidLaunch1 = false;
             bValidHome = false;
@@ -220,7 +223,12 @@ namespace IngameScript
             iDetects = 0;
             sReceivedMessage = "";
             sLastLoad = "";
+            iniWicoCraftSave.ParseINI("");
+            sPassedArgument = "init";
             Serialize();
+
+            init = false;
+            bWantFast = true;
         }
 
         // need to use me.CustomData

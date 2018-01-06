@@ -90,4 +90,10 @@ Increase scan delay time in tm to .225
 only use fast when needed for docking.
 use .Once for FAST
 12232017
+
+3.2F INI Save 12262017
+fix bug in serialize wrting z,y z, instead of x,y,z (oops)
+MODE_DOCKED tries to fill tanks and batteries.
+
+3.2g 01062018
 */

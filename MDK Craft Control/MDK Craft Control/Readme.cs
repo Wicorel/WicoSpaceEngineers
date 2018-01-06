@@ -3,8 +3,57 @@
 *
 * Control Script for Rovers and Drones and Oribtal craft
 * 
-* Version 3.1A
+* Uncompressed source for this script here: https://github.com/Wicorel/SpaceEngineers/tree/master/MDK%20Craft%20Control
+ * 
+ * 
+ * Handles:
+* Master timer for sub-modules
+* Calculates ship speed and vectors (obsolete)
+* Calculates simspeed (obsolete)
+* Configure craft_operation settings
+* making sure antenna doesn't get turned off (bug in SE turn off antenna when trying to remotely connect to grid)
 * 
+* Calculates cargo and power percentages and cargo multiplier and hydro fill and oxy tank fill
+ * 
+ * Detects grid changes and initiates re-init
+ * 
+* * 
+* MODE_IDLE
+* MODE_ATTENTION
+* 
+* Commands:
+* 
+* setsimspeed <value>: sets the current simspeed so the calculations can be accurate. (obsolete)
+* init: re-init all blocks
+* idle : force MODE_IDLE
+* coast: turns on/off backward thrusters
+* setvaluef <blockname>:<property>:<value>  -> sets specified block's property to specified value
+* Example:
+*  setvaluef Advanced Rotor:UpperLimit:-24
+*
+* Need:
+
+* Want:
+* 
+* menu management for commands (including sub-modules)
+* 
+* minimize serialized data and make sub-modules pass their own seperately, OR support extra data in state
+* 
+* common function for 'handle this' combining 'me' grid and an exclusion name check
+*
+* multi-script handling for modes
+* 
+* * advanced trigger: only when module handles that mode... (so need mode->module dictionary)
+* override base modes?
+*
+*
+*
+* WANT:
+* setvalueb
+* Actions
+* Trigger timers on 'events'.
+* set antenna name to match mode?
+* *
 * 2.0 Removed many built-in functions to make script room. These functions were duplicated in sub-modules anyway.
 * 2.0.1
 * 0.2 Remove items from serialize that main control no longer calculates (cargo, battery, etc).
@@ -78,54 +127,10 @@
 * don't count ejectors in cargo%
 * fix bug in DoTriggerMain() causing updates to stop
 * 
+* 3.1D Section processing for save information (text panels)
+* fix bug in serialize wrting z,y z, instead of x,y,z (oops)
 * 
-* Handles:
-* Master timer for sub-modules
-* Calculates ship speed and vectors
-* Calculates simspeed
-* Configure craft_operation settings
-* making sure antenna doesn't get turned off (bug in SE turn off antenna when trying to remotely connect to grid)
-* 
-* Calculates cargo and power percentages and cargo multiplier and hydro fill and oxy tank fill
- * 
- * Detects grid changes and initiates re-init
- * 
-* * 
-* MODE_IDLE
-* MODE_ATTENTION
-* 
-* Commands:
-* 
-* setsimspeed <value>: sets the current simspeed so the calculations can be accurate.
-* init: re-init all blocks
-* idle : force MODE_IDLE
-* coast: turns on/off backward thrusters
-* setvaluef <blockname>:<property>:<value>  -> sets specified block's property to specified value
-* Example:
-*  setvaluef Advanced Rotor:UpperLimit:-24
-*
-* Need:
-
-* Want:
-* 
-* menu management for commands (including sub-modules)
-* 
-* minimize serialized data and make sub-modules pass their own seperately, OR support extra data in state
-* 
-* common function for 'handle this' combining 'me' grid and an exclusion name check
-*
-* multi-script handling for modes
-* 
-* * advanced trigger: only when module handles that mode... (so need mode->module dictionary)
-* override base modes?
-*
-*
-*
-* WANT:
-* setvalueb
-* Actions
-* Trigger timers on 'events'.
-* set antenna name to match mode?
+* 3.2 INI WCCM 01062018
 *
 *
 */

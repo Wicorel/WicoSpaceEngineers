@@ -45,6 +45,9 @@
 * 
 *3.2 Drone height, width and length in docking requests
 * 
+* 3.2A 12262017 INI Save
+* 01062018
+* 
 * TODO: Process size info to select connectors
 * TODO: drones may take up more than one connector depending on height, width.
 * 

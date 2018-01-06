@@ -1,11 +1,18 @@
 ﻿/* Wico Craft NAV Control sub-module
 	* 
+    * Commands:
+    * XXX
+    * 
+    * 
+    * 
 	* Handles MODES:
 	* MODE_DOCKED
 	* MODE_LAUNCH
 	* MODE_RELAUNCH
     * MODE_SLEDMOVE
     * MODE_ARRIVEDTARGET
+    * 
+    * 
 	* 
 	* 2.0.4 Upate to new save format
 	*  .04A Camera Scans for Obstacles...!!!one
@@ -47,6 +54,10 @@
 
     3.2B Sled Testing
 
+    3.2C INI Save
+        fix bug in serialize wrting z,y z, instead of x,y,z (oops)
+ 
+    3.2D INI WCCM 01062018
 
 	* TODO: 
 	*/

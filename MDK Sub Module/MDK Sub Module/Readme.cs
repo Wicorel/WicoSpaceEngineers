@@ -9,6 +9,8 @@
  * 
  * 3.1 Updates for SE V1.185
  * 
+ * 3.2 INI Save
+ * 
  * NEED:  
  *  
  * WANTED: 

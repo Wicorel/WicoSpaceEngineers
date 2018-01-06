@@ -5,6 +5,9 @@
  * 
  * Commands:
  * 
+ * 
+ * Steam Workshop: http://steamcommunity.com/sharedfiles/filedetails/?id=906484973
+ * 
  * 3.0a MDK Version https://github.com/malware-dev/MDK-SE/wiki
  * 
  * 3.0B search order for text panels
@@ -17,8 +20,11 @@
  * 
  * 3.1C Handle null gpsCenter
  * 
+ * 3.1D INI Save 12262017
+ * fix bug in serialize wrting z,y, z, instead of x,y,z (oops)
+ * 
  * NEED:  
  *  
  * WANTED: 
  *  
-*/ 
+*/

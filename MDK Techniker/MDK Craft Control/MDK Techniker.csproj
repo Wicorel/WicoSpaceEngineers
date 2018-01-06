@@ -107,7 +107,6 @@
     <Compile Include="Readme.cs" />
     <AdditionalFiles Include="thumb.png" />
     <AdditionalFiles Include="MDK\whitelist.cache" />
-    <Compile Include="WicoINI.cs" />
   </ItemGroup>
   <Import Project="..\..\WicoGrid\WicoGrid\WicoGrid.projitems" Label="Shared" />
   <Import Project="..\..\WicoSerialize\WicoSerialize\WicoSerialize.projitems" Label="Shared" />
@@ -131,6 +130,7 @@
   <Import Project="..\..\WicoTechniker\WicoTechniker\WicoTechniker.projitems" Label="Shared" />
   <Import Project="..\..\WicoAirVents\WicoAirVents\WicoAirVents.projitems" Label="Shared" />
   <Import Project="..\..\WicoControllers\WicoControllers\WicoControllers.projitems" Label="Shared" />
+  <Import Project="..\..\WicoINI\WicoINI\WicoINI.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="mdk\mdk.options" DestinationFolder="$(TargetDir)\mdk" />

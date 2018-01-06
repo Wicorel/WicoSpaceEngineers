@@ -28,6 +28,10 @@
 * 
 * 3.1a build with current source
 * 
+* 3.1B current source 12/22/2017
+* 
+* 3.2 INI WCCM Serialize 01062018
+* 
 * Need:
 *  circumnavigate planet to target spot
 *  'ask' for docking position after arriving at 'spot'

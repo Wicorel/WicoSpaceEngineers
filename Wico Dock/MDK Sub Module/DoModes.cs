@@ -136,7 +136,7 @@ namespace IngameScript
                 Echo("Received Message=\n" + sReceivedMessage);
 //                sInitResults += "Received Message=\n" + sReceivedMessage;
 
-                if (processBaseMessages(sReceivedMessage))
+                if (BaseProcessMessages(sReceivedMessage))
                     return;
 
                 string[] aMessage = sReceivedMessage.Trim().Split(':');

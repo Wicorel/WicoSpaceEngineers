@@ -34,6 +34,8 @@
  * INI for Asteroids->Mining
  * fix bug in serialize wrting z,y z, instead of x,y,z (oops)
  * 
+ * 3.2 01062018
+ * 
  * NEED:  
  *  
  * WANTED: 

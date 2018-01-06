@@ -35,7 +35,10 @@ namespace IngameScript
         string doInit()
         {
 
-            if (currentInit == 0) initLogging();
+            if (currentInit == 0)
+            {
+                initLogging(); //also does gridsInit()
+            }
 
             // set autogyro defaults.
             LIMIT_GYROS = 1;
@@ -56,7 +59,7 @@ namespace IngameScript
                 if (!modeCommands.ContainsKey("launch")) modeCommands.Add("launch", MODE_LAUNCH);
                 if (!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
 
-                sInitResults += gridsInit();
+//                sInitResults += gridsInit();
                 initTimers();
 
                 sInitResults += initSerializeCommon();
@@ -75,6 +78,9 @@ namespace IngameScript
 
                 sInitResults += lightsInit();
                 initShipDim();
+
+                BaseInitInfo();
+
                 sInitResults += modeOnInit();
                 init = true;
 

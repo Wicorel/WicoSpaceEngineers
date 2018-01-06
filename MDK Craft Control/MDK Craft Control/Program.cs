@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Master";
-        string sVersion = "3.1C";
+        string sVersion = "3.2";
 
         const string sGPSCenter = "Craft Remote Control";
 
@@ -221,6 +221,7 @@ namespace IngameScript
             iDetects = 0;
             sReceivedMessage = "";
             sLastLoad = "";
+            iniWicoCraftSave.ParseINI("");
             Serialize();
         }
 
