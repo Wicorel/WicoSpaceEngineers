@@ -97,14 +97,28 @@ namespace IngameScript
             sb += maxBatteryPower.ToString() + "\n";
             sb += sReceivedMessage + "\n";
 
-            if (SaveFile == null)
-            {
-                Storage = sb.ToString();
-                return;
-            }
             if (sLastLoad != sb)
             {
-                SaveFile.WritePublicText(sb.ToString(), false);
+                sLastLoad = sb; // so we can call serialize multiple times in a run with no (extra) performance hit
+                iniWicoCraftSave.WriteSection("WCCM", sb.ToString());
+            }
+            if( iniWicoCraftSave.IsDirty) // others may have changed it, so check if any section is dirty
+            {
+                if (iniWicoCraftSave.IsDirty)
+                {
+                    string sINI = iniWicoCraftSave.GenerateINI();
+                    if (SaveFile == null)
+                    {
+                        Storage = sINI;
+                        //                    Storage = sb.ToString();
+                        //                    return;
+                    }
+                    else
+                    {
+                        //                    SaveFile.WritePublicText(sb.ToString(), false);
+                        SaveFile.WritePublicText(sINI, false);
+                    }
+                }
             }
             else
             {

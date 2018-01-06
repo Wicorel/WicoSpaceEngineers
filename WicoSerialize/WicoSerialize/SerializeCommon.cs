@@ -20,12 +20,15 @@ namespace IngameScript
     {
         bool bVerboseSerialize=false;
 
+        // 122317 INI processing
         // 1105 allow save file to use contains()
         // V3.0 - redo all variables & cleanup
         #region serializecommon
         const string SAVE_FILE_NAME = "Wico Craft Save";
         float savefileversion = 3.00f;
         IMyTextPanel SaveFile = null;
+
+        INIHolder iniWicoCraftSave;
 
         // Saved info:
         int current_state = 0;
@@ -122,6 +125,7 @@ namespace IngameScript
                 }
             }
             else SaveFile = blocks[0] as IMyTextPanel;
+            iniWicoCraftSave = new INIHolder(this, "");
 
             if (SaveFile == null)
             {

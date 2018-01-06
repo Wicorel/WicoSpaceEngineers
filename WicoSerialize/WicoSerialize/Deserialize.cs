@@ -34,6 +34,9 @@ namespace IngameScript
                 Echo("Saved information not available");
                 return;
             }
+            iniWicoCraftSave.ParseINI(sSave);
+            sSave = iniWicoCraftSave.GetSection("WCCM");
+
             sLastLoad = sSave;
 
             int i = 1;
@@ -46,6 +49,8 @@ namespace IngameScript
             {
                 return (i >= 0 && atheStorage.Length > i ? atheStorage[i++] : null);
             };
+
+//            Echo("DS:" + atheStorage.Count() + " Lines");
 
             if (atheStorage.Length < 3)
             {
@@ -95,11 +100,11 @@ namespace IngameScript
             bValidDock = asBool(getLine());
 
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vLaunch1 = new Vector3D(z1, y1, z1);
+            vLaunch1 = new Vector3D(x1, y1, z1);
             bValidLaunch1 = asBool(getLine().ToLower());
 
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vHome = new Vector3D(z1, y1, z1);
+            vHome = new Vector3D(x1, y1, z1);
             bValidHome = asBool(getLine());
 
             dtStartShip = DateTime.Parse(getLine());
@@ -110,39 +115,39 @@ namespace IngameScript
             dtStartNav = DateTime.Parse(getLine());
             /*
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vLastPos = new Vector3D(z1, y1, z1);
+            vLastPos = new Vector3D(x1, y1, z1);
             */
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vInitialContact = new Vector3D(z1, y1, z1);
+            vInitialContact = new Vector3D(x1, y1, z1);
             bValidInitialContact = asBool(getLine());
 
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vInitialExit = new Vector3D(z1, y1, z1);
+            vInitialExit = new Vector3D(x1, y1, z1);
             bValidInitialExit = asBool(getLine());
 
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vLastContact = new Vector3D(z1, y1, z1);
+            vLastContact = new Vector3D(x1, y1, z1);
 
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vLastExit = new Vector3D(z1, y1, z1);
+            vLastExit = new Vector3D(x1, y1, z1);
 
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vExpectedExit = new Vector3D(z1, y1, z1);
+            vExpectedExit = new Vector3D(x1, y1, z1);
 
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vTargetMine = new Vector3D(z1, y1, z1);
+            vTargetMine = new Vector3D(x1, y1, z1);
             bValidTarget = asBool(getLine());
 
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vTargetAsteroid = new Vector3D(z1, y1, z1);
+            vTargetAsteroid = new Vector3D(x1, y1, z1);
             bValidAsteroid = asBool(getLine());
 
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vNextTarget = new Vector3D(z1, y1, z1);
+            vNextTarget = new Vector3D(x1, y1, z1);
             bValidNextTarget = asBool(getLine());
 
             ParseVector3d(getLine(), out x1, out y1, out z1);
-            vCurrentNavTarget = new Vector3D(z1, y1, z1);
+            vCurrentNavTarget = new Vector3D(x1, y1, z1);
 
             bAutopilotSet = asBool(getLine());
             bAutoRelaunch = asBool(getLine());
