@@ -71,7 +71,6 @@ namespace IngameScript
             if (bWorkingProjector)
                 Echo("Working local Projector found!");
 
-
             if (sArgument != "" && sArgument != "timer" && sArgument != "wccs") Echo("Arg=" + sArgument);
 
             if (sArgument == "init")
@@ -155,6 +154,7 @@ namespace IngameScript
                 processPendingReceives();
                 processPendingSends();
 
+
                 moduleDoPreModes();
 
                 doModes();
@@ -191,7 +191,7 @@ namespace IngameScript
             float fper = 0;
             fper = Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount;
             if (sBanner == null) sBanner = "Instructions=";
-            Echo(sBanner + (fper * 100).ToString("0.00") + "%");
+            Echo(sBanner + " " + (fper * 100).ToString("0.00") + "%");
 
         }
 
