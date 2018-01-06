@@ -116,22 +116,11 @@ namespace IngameScript
                     myMass = ((IMyShipController)anchorPosition).CalculateShipMass();
 
                     gridBaseMass = myMass.BaseMass;
-                }////
-
-                    sInitResults += modeOnInit(); // handle mode initializing from load/recompile..
-
-                    init = true; // we are done
-                /*
                 }
-                else
-                {
-                    // we are not complete.  try again..
-                    currentInit = 0;
-                    bWantFast = false;
-                    Echo("Missing Required Item; Please add");
-                    return sInitResults;
-                }
-                */
+
+                sInitResults += modeOnInit(); // handle mode initializing from load/recompile..
+
+                init = true; // we are done
             }
 
             currentInit++;
