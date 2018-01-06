@@ -20,6 +20,18 @@ namespace IngameScript
     {
         List<baseInfo> baseList = new List<baseInfo>();
 
+        const string sBaseSection = "BASE1.0";
+
+        /*
+         * TODO:
+         * 
+         * check validity of saved bases every once in a while (age).
+         * add info like source, sink
+         * get messages for 'base moving', etc
+         * 
+         * 
+         */
+
         public class baseInfo
         {
           //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition())XXX
@@ -35,29 +47,121 @@ namespace IngameScript
 
             // SINK:
             // TODO:
+
+            // TODO: flag to Ignore for communications range calc
+
+            // TODO: Age of last contact
+
+            // TODO: time-out for docking selection.  So can choose 'next' if base says 'no room', etc.
+
         }
 
-        void initbaseInfo()
+        void BaseInitInfo()
         {
             baseList.Clear();
             // load from text panel
+            BaseDeserialize();
+        }
+        void BaseSerialize()
+        {
+            if (iniWicoCraftSave == null) return;
+
+            string sb="";
+            sb += baseList.Count + "\n";
+            for (int i = 0; i < baseList.Count; i++)
+            {
+                sb += baseList[i].baseId.ToString() + "\n";
+                sb += baseList[i].baseName + "\n";
+                sb += Vector3DToString(baseList[i].position) + "\n";
+                sb += baseList[i].bJumpCapable.ToString() + "\n";
+            }
+            iniWicoCraftSave.WriteSection(sBaseSection, sb);
+
         }
 
-        void addBase(long baseId, string baseName, Vector3D Position, bool bJumpCapable = false)
+        int BaseDeserialize()
+        {
+            Echo("BD()");
+            if (iniWicoCraftSave == null)
+            {
+                return -2;
+            }
+
+ //           string sSection = iniWicoCraftSave.GetSection(sBaseSection);
+
+            double x1, y1, z1;
+            Echo("BD():A");
+            //            string[] atheStorage = sSection.Split('\n');
+            string[] atheStorage = iniWicoCraftSave.GetLines(sBaseSection);
+            Echo("BD():B");
+
+            int iLine = 0;
+            /*
+            // Trick using a "local method", to get the next line from the array `atheStorage`.
+            Func<string> getLine = () =>
+            {
+                return (iLine >= 0 && atheStorage.Length > iLine ? atheStorage[iLine++] : null);
+            };
+            */
+            int iCount = -1;
+            if (atheStorage.Length < 2)
+                return -1; // nothing to parse
+            Echo("BD():C");
+            Echo(atheStorage.Count() + " Lines");
+
+            for (int j0 = 0; j0 < atheStorage.Count(); j0++)
+                Echo(atheStorage[j0]);
+
+            Echo(atheStorage[iLine]);
+            Echo("total bases=" + iCount);
+
+            iCount = Convert.ToInt32(atheStorage[iLine++]);
+
+            for (int j1 = 0; j1 < iCount && j1<atheStorage.Count(); j1++)
+            {
+                                Echo("#="+j1);
+
+                long eId;
+                                Echo(atheStorage[iLine]);
+                eId = Convert.ToInt64(atheStorage[iLine++]);
+
+                string sBaseName=atheStorage[iLine++];
+
+                Vector3D position;
+                ParseVector3d(atheStorage[iLine++], out x1, out y1, out z1);
+                position = new Vector3D(x1, y1, z1);
+
+                bool bJumpCapable = atheStorage[iLine++].ToLower().Contains("true") ? true : false;
+
+                baseInfo b1 = new baseInfo();
+                b1.baseId = eId;
+                b1.baseName = sBaseName;
+                b1.position = position;
+                b1.bJumpCapable = bJumpCapable;
+
+                baseList.Add(b1);
+            }
+
+            return iCount;
+        }
+
+        void BaseAdd(long baseId, string baseName, Vector3D Position, bool bJumpCapable = false)
         {
             if (baseList.Count < 1)
-                initbaseInfo();
+                BaseInitInfo();
 
-            baseInfo basei= new baseInfo();
-            basei.baseId = baseId;
-            basei.baseName = baseName;
-            basei.position = Position;
-            basei.bJumpCapable = bJumpCapable;
+            baseInfo basei = new baseInfo
+            {
+                baseId = baseId,
+                baseName = baseName,
+                position = Position,
+                bJumpCapable = bJumpCapable
+            };
 
             //TODO:
             // Source:
             // Sink:
-            for(int i=0; i<baseList.Count; i++)
+            for (int i=0; i<baseList.Count; i++)
             {
                 if(baseList[i].baseId==baseId)
                 {
@@ -71,25 +175,26 @@ namespace IngameScript
             baseList.Add(basei);
 
             // write data back to text panel if changed..
+            BaseSerialize();
         }
 
         string baseInfoString()
         {
-            string s;
+            string s1;
             if (baseList.Count == 0)
                 return "No Known Bases";
             if(baseList.Count>1)
-                s=  baseList.Count.ToString() +" Known Bases\n";
-            else s=  baseList.Count.ToString() +" Known Base\n";
+                s1=  baseList.Count.ToString() +" Known Bases\n";
+            else s1=  baseList.Count.ToString() +" Known Base\n";
 
             for(int i=0;i<baseList.Count; i++)
             {
 //                s += baseList[i].baseId + ":";
-                s += baseList[i].baseName + ":";
-                s+= Vector3DToString(baseList[i].position) +":";
-                s += "\n";
+                s1 += baseList[i].baseName + ":";
+                s1+= Vector3DToString(baseList[i].position) +":";
+                s1 += "\n";
             }
-            return s;
+            return s1;
         }
 
         double dBaseRequestTransmitWait = 25; //seconds between active transmits
@@ -126,14 +231,14 @@ namespace IngameScript
         float RangeToNearestBase()
         {
             double bestRange = double.MaxValue;
-            int iBest = findNearestBase();
+            int iBest = BaseIndexOf(BaseFindNearest());
             if (iBest >= 0 && gpsCenter!=null)
             {
                 bestRange = (gpsCenter.GetPosition() - baseList[iBest].position).Length();
             }
             return (float) bestRange;
         }
-        int findNearestBase()
+        long BaseFindNearest()
         {
             int iBest = -1;
             if (gpsCenter == null) return iBest;
@@ -150,15 +255,18 @@ namespace IngameScript
                     distanceSQ = curDistanceSQ;
                 }
             }
-            return iBest;
+            if (iBest < 0) return 0;
+            else return baseList[iBest].baseId;
 
         }
-        int findBestBase()
+
+        long BaseFindBest()
         {
-            return findNearestBase();
+            return BaseFindNearest();
         }
 
-        long baseIdOf(int baseIndex)
+        /*
+        long BaseIdOf(int baseIndex)
         {
             long lID = 0;
 
@@ -168,8 +276,20 @@ namespace IngameScript
             }
             return lID;
         }
+        */
 
-        string baseNameOf(int baseIndex)
+        int BaseIndexOf(long baseID)
+        {
+            for(int i1=0;i1<baseList.Count;i1++)
+            {
+                if (baseList[i1].baseId == baseID)
+                    return i1;
+            }
+            return -1;
+        }
+
+        /*
+        string BaseNameOf(int baseIndex)
         {
             string sName = "INVALID";
             if(baseIndex>=0 & baseIndex<baseList.Count)
@@ -178,20 +298,20 @@ namespace IngameScript
             }
             return sName;
         }
+        */
 
-        Vector3D basePositionOf(int baseIndex)
+        Vector3D BasePositionOf(long baseId)
         {
             Vector3D vPos = new Vector3D();
-            if(baseIndex>=0 & baseIndex<baseList.Count)
-            {
-                vPos = baseList[baseIndex].position;
-            }
+            for (int i1 = 0; i1 < baseList.Count; i1++)
+                if (baseList[i1].baseId == baseId)
+                    return baseList[i1].position;
             return vPos;
         }
 
-        bool processBaseMessages(string sMessage)
+        bool BaseProcessMessages(string sMessage)
         {
-            double x, y, z;
+            double x1, y1, z1;
 
             string[] aMessage = sMessage.Trim().Split(':');
 
@@ -220,14 +340,14 @@ namespace IngameScript
                         long id = 0;
                         long.TryParse(aMessage[iOffset++], out id);
 
-                        x = Convert.ToDouble(aMessage[iOffset++]);
-                        y = Convert.ToDouble(aMessage[iOffset++]);
-                        z = Convert.ToDouble(aMessage[iOffset++]);
-                        Vector3D vPosition = new Vector3D(x, y, z);
+                        x1 = Convert.ToDouble(aMessage[iOffset++]);
+                        y1 = Convert.ToDouble(aMessage[iOffset++]);
+                        z1 = Convert.ToDouble(aMessage[iOffset++]);
+                        Vector3D vPosition = new Vector3D(x1, y1, z1);
 
                         bool bJumpCapable = stringToBool(aMessage[iOffset++]);
 
-                        addBase(id, sName, vPosition, bJumpCapable);
+                        BaseAdd(id, sName, vPosition, bJumpCapable);
                         return true; // we processed it
                     }
 
