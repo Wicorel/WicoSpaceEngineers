@@ -18,7 +18,10 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+
+        const string sOreSection = "ORE";
         List<OreLocInfo> oreLocs = new List<OreLocInfo>();
+        string sLastOreLoad = "";
 
         public class OreLocInfo
         {
@@ -37,10 +40,105 @@ namespace IngameScript
         void initOreLocInfo()
         {
             oreLocs.Clear();
-            // load from text panel
+            InitMinerInfo();
+
+            // load from text panel...
+            OreDeserialize();
         }
 
-        void addOreLoc(long asteroidId, int OreID, Vector3D Position, Vector3D vVec, long detectionType)
+        int OreDeserialize()
+        {
+            string sOreSave;
+
+            if (iniWicoCraftSave == null) return -1;
+
+            sOreSave = iniWicoCraftSave.GetSection(sOreSection);
+            if (sOreSave == sLastOreLoad) return -2; // no changes in saved info.
+
+            if (sOreSave.Length < 1)           return -3;
+
+            oreLocs.Clear();
+            double x1, y1, z1;
+
+            sLastOreLoad = sOreSave;
+            string[] atheStorage = sOreSave.Split('\n');
+
+            int iLine = 0;
+            /*
+            // Trick using a "local method", to get the next line from the array `atheStorage`.
+            Func<string> getLine = () =>
+            {
+                return (iLine >= 0 && atheStorage.Length > iLine ? atheStorage[iLine++] : null);
+            };
+            */
+            int iCount = -1;
+            if (atheStorage.Length < 2)
+                return -4; // nothing to parse
+
+            //            Echo(atheStorage[iLine]);
+            iCount = Convert.ToInt32(atheStorage[iLine++]);
+            //            Echo("total="+iCount);
+
+            for (int j = 0; j < iCount; j++)
+            {
+                //                Echo("#="+j);
+
+                //                Echo(atheStorage[iLine]);
+                long eId = Convert.ToInt64(atheStorage[iLine++]);
+
+                int oreID = Convert.ToInt32(atheStorage[iLine++]);
+
+                //                Echo(atheStorage[iLine]);
+                ParseVector3d(atheStorage[iLine++], out x1, out y1, out z1);
+                Vector3D position = new Vector3D(x1, y1, z1);
+
+                //                Echo(atheStorage[iLine]);
+                ParseVector3d(atheStorage[iLine++], out x1, out y1, out z1);
+                Vector3D vector = new Vector3D(x1, y1, z1);
+
+                //                Echo(atheStorage[iLine]);
+                long detectionType = Convert.ToInt64(atheStorage[iLine++]);
+
+                OreLocInfo ore = new OreLocInfo();
+                ore.AstEntityId = eId;
+                ore.oreId = oreID;
+                ore.position = position;
+                ore.vector = vector;
+                ore.detectionType = detectionType;
+                oreLocs.Add(ore);
+                //                Echo("----");
+            }
+            return iCount;
+        }
+
+
+        void OreSerialize()
+        {
+            if (iniWicoCraftSave == null)
+            {
+                return;
+            }
+            string S1 = "";
+            S1 += oreLocs.Count + "\n";
+            for (int i1 = 0; i1 < oreLocs.Count; i1++)
+            {
+                S1 += oreLocs[i1].AstEntityId.ToString() + "\n";
+                S1 += oreLocs[i1].oreId.ToString() + "\n";
+                S1 += Vector3DToString(oreLocs[i1].position) + "\n";
+                S1 += Vector3DToString(oreLocs[i1].vector) + "\n";
+                S1 += oreLocs[i1].detectionType.ToString() + "\n";
+            }
+            if (sLastOreLoad != S1)
+            {
+                iniWicoCraftSave.WriteSection(sOreSection, S1);
+            }
+            else
+            {
+                if (bVerboseSerialize) Echo("Not saving ORE: Same");
+            }
+
+        }
+        void OreAddLoc(long asteroidId, int OreID, Vector3D Position, Vector3D vVec, long detectionType)
         {
             OreLocInfo oli = new OreLocInfo();
             oli.oreId = OreID;
@@ -51,6 +149,7 @@ namespace IngameScript
             //TODO:
             // search by position and only add if NOT 'near' another entry
             oreLocs.Add(oli);
+            OreSerialize();
             // transmit found location...
             antSend("WICO:ORE:" + Me.CubeGrid.EntityId.ToString() + ":" + asteroidId + ":" + OreID + ":" + Vector3DToString(Position) + ":" + Vector3DToString(vVec) + ":" + detectionType.ToString());
 
@@ -174,17 +273,16 @@ namespace IngameScript
 
         void foundOre(int oreIndex)
         {
-            Echo("FIRST FIND!:" + oreInfos[oreIndex].oreName);
+//            Echo("FIRST FIND!:" + oreInfos[oreIndex].oreName);
             if (oreInfos[oreIndex].desireability > 0)
             {
                 // add ore found loc...
                 MatrixD refOrientation = GetBlock2WorldTransform(gpsCenter);
                 Vector3D vVec = Vector3D.Normalize(refOrientation.Forward);
 
-                long astEntity = 0;
-//                if (currentAst != null) astEntity = currentAst.EntityId;
-                addOreLoc(astEntity, oreIndex, gpsCenter.GetPosition(), vVec, 69);
-                //		addOreLoc(currentAst.EntityId, oreIndex, gpsCenter.GetPosition(), vVec, 69);
+                // but only if we got it inside asteroid.
+                long astEntity = AsteroidFindNearest(true);
+                if(astEntity > 0)  OreAddLoc(astEntity, oreIndex, gpsCenter.GetPosition(), vVec, 69);
             }
         }
 
