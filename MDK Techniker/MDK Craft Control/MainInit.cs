@@ -42,7 +42,7 @@ namespace IngameScript
         string doInit()
         {
 
-             Echo("InitA:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
+//             Echo("InitA:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
            // initialization of each module goes here:
 
             // when all initialization is done, set init to true.
@@ -69,8 +69,8 @@ namespace IngameScript
                 /*
                 if(!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
                 */
-               sInitResults += gridsInit();
-                 initLogging();
+                sInitResults += gridsInit();
+                initLogging();
                 initTimers();
                 sInitResults += initSerializeCommon();
 
@@ -89,7 +89,7 @@ namespace IngameScript
                 }
                 initPower();
                 sInitResults += thrustersInit(gpsCenter);
-               sInitResults += gyrosetup();
+                sInitResults += gyrosetup();
                 if (gtsAllBlocks.Count < 300) currentInit = 2; // go ahead and do next step.
             }
             if (currentInit == 2)
@@ -217,14 +217,40 @@ namespace IngameScript
 
         #endregion
 
+        string sTechnikerSection = "TECHKNIKER";
         void initCustomData()
         {
-	        string sData = Me.CustomData;
+            INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
+
+            string value = "";
+
+            value = iniCustomData.GetValue(sTechnikerSection, "DoForwardScans");
+            if (value != null)
+                bDoForwardScans = value.Trim().ToLower() == "true" ? true : false;
+
+            value = iniCustomData.GetValue(sTechnikerSection, "CheckGasGens");
+            if (value != null)
+                bCheckGasGens = value.Trim().ToLower() == "true" ? true : false;
+
+            value = iniCustomData.GetValue(sTechnikerSection, "TechnikerCalcs");
+            if (value != null)
+                bTechnikerCalcs = value.Trim().ToLower() == "true" ? true : false;
+
+            value = iniCustomData.GetValue(sTechnikerSection, "GPSFromEntities");
+            if (value != null)
+                bGPSFromEntities = value.Trim().ToLower() == "true" ? true : false;
+
+            value = iniCustomData.GetValue(sTechnikerSection, "AirVents");
+            if (value != null)
+                bAirVents = value.Trim().ToLower() == "true" ? true : false;
+
+            // the old way
+            string sData = Me.CustomData;
 	        string[] lines = sData.Trim().Split('\n');
-	        Echo(lines.Length + " Lines");
+//	        Echo(lines.Length + " Lines");
 	        for(int i=0;i<lines.Length;i++)
 	        {
-        Echo("|" + lines[i].Trim());
+//        Echo("|" + lines[i].Trim());
 		        string[] keys = lines[i].Trim().Split('=');
 		        if(lines[i].ToLower().Contains("thrustignore"))
 		        {
