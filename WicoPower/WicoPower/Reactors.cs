@@ -24,7 +24,8 @@ namespace IngameScript
         void initReactors()
         {
             reactorList.Clear();
-            GridTerminalSystem.GetBlocksOfType<IMyReactor>(reactorList, localGridFilter);
+            GetTargetBlocks<IMyReactor>(ref reactorList);
+//            GridTerminalSystem.GetBlocksOfType<IMyReactor>(reactorList, localGridFilter);
 
             float currentOutput;
             reactorCheck(out currentOutput);
