@@ -213,16 +213,26 @@ namespace IngameScript
 	        // handle turning off air vents if pressurization is off to save power.
 	        if (bPressurization)
 	        {
-		        blockApplyAction(airventList, "OnOff_On");
+                foreach (var a1 in airventList)
+                    if(a1 is IMyFunctionalBlock)
+                    {
+                        var f1 = a1 as IMyFunctionalBlock;
+                        f1.Enabled = true;
+                    }
 	        }
 	        else // no pressurization or no vents.
 	        {
 		        if (airventList.Count > 0)
 		        {
 			        StatusLog("Pressurization turned OFF\n in World Settings\n", textPanelReport);
-			        blockApplyAction(airventList, "OnOff_Off");
-		        }
-	        }
+                    foreach (var a1 in airventList)
+                        if (a1 is IMyFunctionalBlock)
+                        {
+                            var f1 = a1 as IMyFunctionalBlock;
+                            f1.Enabled = true;
+                        }
+                }
+            }
 
         }
 
