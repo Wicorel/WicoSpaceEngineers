@@ -40,8 +40,8 @@ namespace IngameScript
                 // if no main timer, then use UpdateFrequency
                 Runtime.UpdateFrequency |= UpdateFrequency.Update100;
             }
-                                                //	if (!Me.CustomName.Contains(moduleName))
-                                                //		Me.CustomName = "PB " + OurName+ " "+moduleName;
+            //	if (!Me.CustomName.Contains(moduleName))
+            //		Me.CustomName = "PB " + OurName+ " "+moduleName;
         }
 
         #region MAIN
