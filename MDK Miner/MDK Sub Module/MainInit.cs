@@ -24,6 +24,7 @@ namespace IngameScript
 //            bGotAntennaName = false;
         }
 
+//        INIHolder iniOptions;
 
         #region maininit
 

@@ -81,6 +81,10 @@ namespace IngameScript
             // only need to do these like once per second. or if something major changes.
                 doCargoOreCheck();
                 dumpFoundOre();
+
+                // do every run.
+                SaveMinerInfo();
+
                 //dumpOreLocs();
 
                 double maxThrust = calculateMaxThrust(thrustForwardList);

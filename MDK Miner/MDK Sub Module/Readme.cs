@@ -5,7 +5,14 @@
  * 
  * Commands:
  * 
- * 3.0a MDK Version https://github.com/malware-dev/MDK-SE/wiki
+ * findore : starts searching for asteroid, then chooses one, then searches for ore
+ * 
+ * 
+ * WorkShop: http://steamcommunity.com/sharedfiles/filedetails/?id=883866371
+ * Source: https://github.com/Wicorel/WicoSpaceEngineers/tree/master/MDK%20Miner
+ * MDK: https://github.com/malware-dev/MDK-SE/wiki
+ * 
+ * 3.0a 1st MDK Version
  * 
  * 3.1 First version for new PB changes in SE 1.185
  * 
@@ -22,8 +29,13 @@
  * 
  * 3.1D Asteroid processing and saving to text panel
  * 
+ * 3.1E 12262017
+ * INI for Save
+ * INI for Asteroids->Mining
+ * fix bug in serialize wrting z,y z, instead of x,y,z (oops)
+ * 
  * NEED:  
  *  
  * WANTED: 
  *  
-*/ 
+*/
