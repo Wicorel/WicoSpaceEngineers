@@ -36,6 +36,8 @@ namespace IngameScript
 
         void initLogging()
         {
+            if (localGrids.Count < 1) gridsInit();
+
             statustextblock = getTextStatusBlock(true);
             textLongStatus = getTextBlock(sLongStatus); ;
             textPanelReport = getTextBlock(sTextPanelReport);
