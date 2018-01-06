@@ -27,6 +27,7 @@ namespace IngameScript
 
         float fTargetMiningmps = 0.85f;
         float fAbortmps = 2.0f;
+        float fMinThrust = 1.2f;
 
         float fApproachMps = 5.0f;
         float fApproachAbortMps = 7.0f;
@@ -144,8 +145,18 @@ namespace IngameScript
             switch (current_state)
             {
                 case 0:
+                    if (fMinThrust < fTargetMiningmps * 1.1f)
+                        fMinThrust = fTargetMiningmps * 1.1f;
+                    bValidAsteroid = false; /// really?  shouuldn't we be keepint this?
+                    bValidExit = false;
+
+                    ResetMotion();
+                    //                    turnDrillsOff();
+                    turnEjectorsOff();
+
                     current_state = 10;
                     bWantFast = true;
+
                     if (sensorsList.Count < 2)
                     {
                         StatusLog(OurName + ":" + moduleName + " Find Ore: Not Enough Sensors!", textLongStatus, true);
@@ -154,12 +165,6 @@ namespace IngameScript
                     sensorsList[0].DetectAsteroids = true;
                     sensorsList[1].DetectAsteroids = true;
 
-                    bValidAsteroid = false; /// really?  shouuldn't we be keepint this?
-                    bValidExit = false;
-
-                    ResetMotion();
-//                    turnDrillsOff();
-                    turnEjectorsOff();
                     break;
                 case 10:
                     //sb = sensorsList[0];
@@ -282,7 +287,7 @@ namespace IngameScript
                         { // we have exited the asteroid.
                             Echo("No Local Asteroid found");
                             ResetMotion();
-                            if (cargopcent > cargopctlowwater || maxDeltaV < (fTargetMiningmps/2))
+                            if (cargopcent > cargopctlowwater || maxDeltaV < (fMinThrust))
                             {
                                 // we need to dump our contents
                                 turnEjectorsOn();
@@ -295,7 +300,7 @@ namespace IngameScript
                             turnEjectorsOn();
                             GyroMain("forward", vExpectedExit, gpsCenter);
                             //                            blockApplyAction(ejectorList, "OnOff_On");
-                            if (maxDeltaV < (fTargetMiningmps/2) || cargopcent > cargopcthighwater && !bWaitingCargo) //
+                            if (maxDeltaV < fMinThrust || cargopcent > cargopcthighwater && !bWaitingCargo) //
                             {
                                 ResetMotion();
                                 turnEjectorsOn();
@@ -314,7 +319,7 @@ namespace IngameScript
                                 }
                                 // TODO: Needs time-out
                                 Echo("Cargo above low water: Waiting");
-                                if (maxDeltaV > (fTargetMiningmps/2) && cargopcent < cargopctlowwater)
+                                if (maxDeltaV > fMinThrust && cargopcent < cargopctlowwater)
                                     bWaitingCargo = false; // can now move.
                             }
                             else
@@ -576,7 +581,7 @@ namespace IngameScript
                         ResetMotion();
                         sleepAllSensors();
 
-                        if (maxDeltaV < (fTargetMiningmps/2) || cargopcent > cargopctlowwater)
+                        if (maxDeltaV < fMinThrust || cargopcent > cargopctlowwater)
                         {
                             setMode(MODE_DOCKING);
                         }
@@ -845,6 +850,7 @@ namespace IngameScript
          * 0 - Master Init
          * 10 - Init sensors, turn drills on
          * 11 - await sensor set
+         * Turn by quarters.  Left, then Left until about 180   
          * 20 - turn around until aimed 
          * and them move forward until exittedasteroid ->40
          * 
@@ -894,9 +900,10 @@ namespace IngameScript
 
                         // turn slower when >180 since we are in tunnel and drills are cutting a path
                         float maxYPR = GyroControl.MaxYPR;
+                Echo("maxYPR=" + maxYPR.ToString("0.00"));
                         if (aYawAngle > 1.0) maxYPR = maxYPR / 3; 
 
-                        DoRotate(yawangle, "Yaw", maxYPR);
+                        DoRotate(yawangle, "Yaw", maxYPR, 0.33f);
 
                         /*
                         //minAngleRad = 0.1f;
