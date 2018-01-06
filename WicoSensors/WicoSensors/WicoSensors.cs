@@ -28,9 +28,9 @@ namespace IngameScript
             List<IMyTerminalBlock> ltb = new List<IMyTerminalBlock>();
             sensorsList = new List<IMySensorBlock>();
             GridTerminalSystem.GetBlocksOfType<IMySensorBlock>(ltb, localGridFilter);
-            foreach (var sb in ltb)
+            foreach (var sb1 in ltb)
             {
-                sensorsList.Add(sb as IMySensorBlock);
+                sensorsList.Add(sb1 as IMySensorBlock);
             }
             if(bSleep) sleepAllSensors();
             return "S" + sensorsList.Count.ToString("00");
@@ -39,14 +39,14 @@ namespace IngameScript
         List<IMySensorBlock> activeSensors(string sKey = null)
         {
             List<IMySensorBlock> activeSensors = new List<IMySensorBlock>();
-            for (int i = 0; i < sensorsList.Count; i++)
+            for (int i1 = 0; i1 < sensorsList.Count; i1++)
             {
-                IMySensorBlock s = sensorsList[i] as IMySensorBlock;
+                IMySensorBlock s = sensorsList[i1] as IMySensorBlock;
                 if (s == null) continue;
                 if (s.IsActive && s.Enabled && !s.LastDetectedEntity.IsEmpty())
                 {
 //                    Echo("Adding Active:" + s.CustomName + ":" + s.Enabled);
-                    activeSensors.Add(sensorsList[i]);
+                    activeSensors.Add(sensorsList[i1]);
                 }
             }
             return activeSensors;
@@ -54,69 +54,69 @@ namespace IngameScript
 
         void sleepAllSensors()
         {
-            for (int i = 0; i < sensorsList.Count; i++)
+            for (int i1 = 0; i1 < sensorsList.Count; i1++)
             {
-                IMySensorBlock sb = sensorsList[i] as IMySensorBlock;
-                if (sb == null) continue;
-                sb.LeftExtend = sb.RightExtend = sb.TopExtend = sb.BottomExtend = sb.FrontExtend = sb.BackExtend = 1;
-                sb.Enabled = false;
+                IMySensorBlock sb1 = sensorsList[i1] as IMySensorBlock;
+                if (sb1 == null) continue;
+                sb1.LeftExtend = sb1.RightExtend = sb1.TopExtend = sb1.BottomExtend = sb1.FrontExtend = sb1.BackExtend = 1;
+                sb1.Enabled = false;
             }
         }
 
         void setSensorShip(IMyTerminalBlock tb, float fLeft, float fRight, float fUp, float fDown, float fFront, float fBack)
         {
             // need to use world matrix to get orientation correctly
-            IMySensorBlock sb = tb as IMySensorBlock;
-            if (sb == null) return;
+            IMySensorBlock sb1 = tb as IMySensorBlock;
+            if (sb1 == null) return;
             //		Echo(sb.CustomName);
             //	Echo(sb.Position.ToString());
             //x=width, y=height, z=back/forth. (fw=+z) (right=-y)
-            float fXOffset = sb.Position.X * 0.5f; // small grid only?
-            float fYOffset = sb.Position.Y * 0.5f;
-            float fZOffset = sb.Position.Z * 0.5f;
+            float fXOffset = sb1.Position.X * 0.5f; // small grid only?
+            float fYOffset = sb1.Position.Y * 0.5f;
+            float fZOffset = sb1.Position.Z * 0.5f;
 
             // need to use grid orientation to main orientation block
             float fSet;
             fSet = (float)(shipDim.WidthInMeters() / 2 - fXOffset + fLeft);
-            sb.LeftExtend = Math.Max(fSet, 1.0f);
+            sb1.LeftExtend = Math.Max(fSet, 1.0f);
             fSet = (float)(shipDim.WidthInMeters() / 2 + fXOffset + fRight);
-            sb.RightExtend = Math.Max(fSet, 1.0f);
+            sb1.RightExtend = Math.Max(fSet, 1.0f);
 
             fSet = (float)(shipDim.HeightInMeters() / 2 - fYOffset + fUp);
-            sb.TopExtend = Math.Max(fSet, 1.0f);
+            sb1.TopExtend = Math.Max(fSet, 1.0f);
             fSet = (float)(shipDim.HeightInMeters() / 2 + fYOffset + fDown);
-            sb.BottomExtend = Math.Max(fSet, 1.0f);
+            sb1.BottomExtend = Math.Max(fSet, 1.0f);
             fSet = (float)(shipDim.LengthInMeters() + fZOffset + fFront);
-            sb.FrontExtend = Math.Max(fSet, 1.0f);
+            sb1.FrontExtend = Math.Max(fSet, 1.0f);
             fSet = (float)(shipDim.LengthInMeters() - fZOffset + fBack);
-            sb.BackExtend = Math.Max(fSet, 1.0f);
+            sb1.BackExtend = Math.Max(fSet, 1.0f);
 
-            sb.Enabled = true;
+            sb1.Enabled = true;
 
         }
 
-        bool SensorActive(IMySensorBlock s, ref bool bAsteroidFound, ref bool bLargeFound, ref bool bSmallFound)
+        bool SensorActive(IMySensorBlock s1, ref bool bAsteroidFound, ref bool bLargeFound, ref bool bSmallFound)
         {
  //           bool bAnyFound = false;
             bAsteroidFound=false;
             bLargeFound=false;
             bSmallFound=false;
 
-            if (s!=null && s.IsActive && s.Enabled && !s.LastDetectedEntity.IsEmpty())
+            if (s1!=null && s1.IsActive && s1.Enabled && !s1.LastDetectedEntity.IsEmpty())
             {
                 List<MyDetectedEntityInfo> lmyDEI = new List<MyDetectedEntityInfo>();
-                s.DetectedEntities(lmyDEI);
-                for (int j = 0; j < lmyDEI.Count; j++)
+                s1.DetectedEntities(lmyDEI);
+                for (int j1 = 0; j1 < lmyDEI.Count; j1++)
                 {
-                    if (lmyDEI[j].Type == MyDetectedEntityType.Asteroid)
+                    if (lmyDEI[j1].Type == MyDetectedEntityType.Asteroid)
                     {
                         bAsteroidFound = true;
                     }
-                    else if (lmyDEI[j].Type == MyDetectedEntityType.LargeGrid)
+                    else if (lmyDEI[j1].Type == MyDetectedEntityType.LargeGrid)
                     {
                         bLargeFound = true;
                     }
-                    else if (lmyDEI[j].Type == MyDetectedEntityType.SmallGrid)
+                    else if (lmyDEI[j1].Type == MyDetectedEntityType.SmallGrid)
                     {
                         bSmallFound = true;
                     }
