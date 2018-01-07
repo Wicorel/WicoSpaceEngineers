@@ -28,6 +28,20 @@ namespace IngameScript
             GridTerminalSystem.GetBlocksOfType<IMySmallGatlingGun>(gatlingsList, localGridFilter);
             return "G" + gatlingsList.Count.ToString("00");
         }
+
+        void WeaponsFireForward()
+        {
+            string sAction = "ShootOnce";
+            for (int i = 0; i < gatlingsList.Count; i++)
+            {
+                ITerminalAction ita;
+                ita = gatlingsList[i].GetActionWithName(sAction);
+                if (ita != null)
+                    ita.Apply(gatlingsList[i]);
+                else
+                    Echo("Unsupported action:" + sAction);
+            }
+        }
         #endregion
 
     }

@@ -322,7 +322,7 @@ namespace IngameScript
                                     if (distance < 700)
                                     {
                                         // SHOOT!
-                                        if (bWeaponsHot) blockApplyAction(gatlingsList, "ShootOnce");
+                                        if (bWeaponsHot) WeaponsFireForward();// blockApplyAction(gatlingsList, "ShootOnce");
                                     }
                                 }
                             }
@@ -475,7 +475,7 @@ namespace IngameScript
                                     if (distance < 975)
                                     {
                                         // SHOOT!
-                                        if (bWeaponsHot) blockApplyAction(gatlingsList, "ShootOnce");
+                                        if (bWeaponsHot) WeaponsFireForward();// blockApplyAction(gatlingsList, "ShootOnce");
                                     }
                                 }
                             }
