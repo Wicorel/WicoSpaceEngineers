@@ -34,6 +34,12 @@ namespace IngameScript
 
             string _sLastINI = "";
 
+            // From Malware:
+            static readonly string[] TrueValues = { "true", "yes", "on", "1" };
+            const StringComparison Cmp = StringComparison.OrdinalIgnoreCase;
+            const char SeparatorChar = '=';
+
+
             /// <summary>
             /// Have the sections been modified?  If so, they should be written back out/saved
             /// </summary>
@@ -125,7 +131,7 @@ namespace IngameScript
                             sText += aLines[iLine] + "\n";
                             asLines[iSectionLine++] = aLines[iLine];
 
-                            if (aLines[iLine].Contains("="))
+                            if (aLines[iLine].Contains(SeparatorChar))
                             {
                                 string[] aKeyValue = aLines[iLine].Split('=');
                                 if (aKeyValue.Count() > 1)
@@ -135,7 +141,7 @@ namespace IngameScript
                                     for (int i1 = 1; i1 < aKeyValue.Count(); i1++)
                                     {
                                         value += aKeyValue[i1];
-                                        if (i1 + 1 < aKeyValue.Count()) value += "=";
+                                        if (i1 + 1 < aKeyValue.Count()) value += SeparatorChar; // untested: add back together values with multiple seperatorChar
                                     }
                                     dKeyValue.Add(key, value);
                                 }
@@ -147,6 +153,7 @@ namespace IngameScript
                     }
                     else
                     {
+                        // we are before any sections. Save the text as-is
                         _sHeaderText += aLines[iLine] + "\n";
                     }
                 }
@@ -181,55 +188,210 @@ namespace IngameScript
             }
 
             /// <summary>
-            /// Returns the value of the key in the section
+            /// Gets the string value of the key in the section
             /// </summary>
-            /// <param name="section">the section to check</param>
-            /// <param name="key">the key to look for</param>
-            /// <returns>the string of the value, null if key not found</returns>
-            public string GetValue(string section, string key)
+            /// <param name="section">the section to check. Case sensitive</param>
+            /// <param name="key">the key to look for. Case Sensitive</param>
+            /// <param name="sValue">the value in the key</param>
+            /// <returns>true if the key was found. The value is unmodified if unfound</returns>
+            public bool GetValue(string section, string key, ref string sValue, bool bSetDefault = false)
             {
-                string sValue = null;
+//                sValue = null;
                 //                _pg.Echo(".GetValue(" + section+", " + key + ")");
-                if (_Keys.ContainsKey(section))
+                if (_Keys.ContainsKey(section)) // case sensitive
                 {
                     var dValue = _Keys[section];
-                    if (dValue.ContainsKey(key))
+                    if (dValue.ContainsKey(key)) // case sensitive
                     {
                         sValue = dValue[key];
                         //                        _pg.Echo(" value=" + sValue);
+                        return true;
                     }
                 }
+                if (bSetDefault)
+                    SetValue(section, key, sValue);
 
-                return sValue;
+                return false;
             }
-            /*
-            public void WriteValue(string section, string key, string value)
+
+            /// <summary>
+            /// gets the long value of the key in the section
+            /// </summary>
+            /// <param name="section">the section to check. Case sensitive</param>
+            /// <param name="key">the key to look for. Case Sensitive</param>
+            /// <param name="lValue">the value in the key</param>
+            /// <returns>true if the key was found. The value is unmodified if unfound</returns>
+            public bool GetValue(string section, string key, ref long lValue, bool bSetDefault = false)
             {
-                _IsTextInvalid = true;
-                _IsLinesInvalid = true;
-                IsDirty = true;
+                string sVal = "";
+
+                if (!GetValue(section, key, ref sVal))
+                {
+                    if(bSetDefault)
+                    {
+                        SetValue(section, key, lValue.ToString());
+                    }
+                    return false;
+                }
+
+                lValue = Convert.ToInt64(sVal);
+                return true;
+            }
+
+            /// <summary>
+            /// gets the double value of the key in the section
+            /// </summary>
+            /// <param name="section">the section to check. Case sensitive</param>
+            /// <param name="key">the key to look for. Case Sensitive</param>
+            /// <param name="lValue">the value in the key</param>
+            /// <returns>true if the key was found. The value is unmodified if unfound</returns>
+            public bool GetValue(string section, string key, ref double dVal, bool bSetDefault = false)
+            {
+                string sVal = "";
+                if (!GetValue(section, key, ref sVal))
+                {
+                    if (bSetDefault)
+                    {
+                        SetValue(section, key, dVal.ToString());
+                    }
+                    return false;
+                }
+
+                bool pOK = double.TryParse(sVal, out dVal);
+                return true;
+            }
+
+           /// <summary>
+            /// gets the DateTime value of the key in the section
+            /// </summary>
+            /// <param name="section">the section to check. Case sensitive</param>
+            /// <param name="key">the key to look for. Case Sensitive</param>
+            /// <param name="lValue">the value in the key</param>
+            /// <returns>true if the key was found. The value is unmodified if unfound</returns>
+            public bool GetValue(string section, string key, ref DateTime dtVal, bool bSetDefault = false)
+            {
+                string sVal = "";
+                if (!GetValue(section, key, ref sVal))
+                {
+                    if (bSetDefault)
+                    {
+                        SetValue(section, key, dtVal.ToString());
+                    }
+                    return false;
+                }
+
+
+                dtVal = DateTime.Parse(sVal);
+                return true;
+            }
+
+            /// <summary>
+            /// gets the Vector3D value of the key in the section
+            /// </summary>
+            /// <param name="section">the section to check. Case sensitive</param>
+            /// <param name="key">the key to look for. Case Sensitive</param>
+            /// <param name="lValue">the value in the key</param>
+            /// <returns>true if the key was found. The value is unmodified if unfound</returns>
+            public bool GetValue(string section, string key, ref Vector3D vVal, bool bSetDefault = false)
+            {
+                string sVal = "";
+                if (!GetValue(section, key, ref sVal))
+                {
+                    if (bSetDefault)
+                    {
+                        SetValue(section, key, Vector3DToString(vVal));
+                    }
+                    return false;
+                }
+
+
+                double x1, y1, z1;
+                ParseVector3d(sVal, out x1, out y1, out z1);
+                vVal.X = x1;
+                vVal.Y = y1;
+                vVal.Z = z1;
+                return true;
+            }
+
+            /// <summary>
+            /// gets the Bool value of the key in the sectin
+            /// </summary>
+            /// <param name="section">the section to check. Case sensitive</param>
+            /// <param name="key">the key to look for. Case Sensitive</param>
+            /// <param name="lValue">the value in the key</param>
+            /// <returns>true if the key was found. The value is unmodified if unfound</returns>
+            public bool GetValue(string section, string key, ref bool bVal, bool bSetDefault=false)
+            {
+                string sVal = "";
+                if (!GetValue(section, key, ref sVal))
+                {
+                    if (bSetDefault)
+                    {
+                        SetValue(section, key, bVal.ToString());
+                    }
+                    return false;
+                }
+
+                bVal = TrueValues.Any(c => string.Equals(sVal, c, Cmp)); // From Malware
+                return true;
+            }
+
+            public bool SetValue(string section, string key, string sVal)
+            {
+//                _pg.Echo("SetValue(" + section + "," + key + "," + sVal+")");
+
+                // we are no longer caching direct text
+                if (_Sections.ContainsKey(section))
+                {
+ //                   _pg.Echo("ContainsKey(" + section + ")");
+                    _Sections[section] = "";
+                }
+                else
+                {
+//                    _pg.Echo("addsection(" + section + ")");
+                    _Sections.Add(section, "");// no cached text for now.
+                    IsDirty = true; 
+                }
+                // if there is a set of keys for the section
                 if (_Keys.ContainsKey(section))
                 {
+//                    _pg.Echo("keysContain");
                     Dictionary<string, string> dKeyValue = new Dictionary<string, string>();
 
                     var dValue = _Keys[section];
                     if (dValue.ContainsKey(key))
-                        dValue[key] =value;
+                    {
+//                        _pg.Echo("valueContains");
+                        if (dValue[key] == sVal) return false;
+
+                        dValue[key] = sVal;
+                    }
                     else
-                        dValue.Add(key, value);
+                    {
+//                        _pg.Echo("addkey");
+                        dValue.Add(key, sVal);
+                    }
+                    IsDirty = true;
                 }
                 else
-                {
+                { // no keys for the section
+//                    _pg.Echo("keysNoContain");
+                    // add the key value dictionary and the new section
                     Dictionary<string, string> dKeyValue = new Dictionary<string, string>();
-                    dKeyValue.Add(key, value);
+                    dKeyValue.Add(key, sVal);
 
+//                    _pg.Echo("keyvalueadd");
                     _Keys.Add(section, dKeyValue);
+
+
+                    IsDirty = true;
                 }
+                return true;
             }
-            */
+
 
             /// <summary>
-            /// Modify the section to have the specified text
+            /// Modify the section to have the specified text.. NOTE: This will overwrite any keys.  Use either full text and lines interfaces or keys interface
             /// </summary>
             /// <param name="section">the name of the section to modify</param>
             /// <param name="sText">the text to set as the new text</param>
@@ -262,17 +424,74 @@ namespace IngameScript
             public string GenerateINI(bool bClearDirty = true)
             {
                 string sIni = "";
-                sIni += _sHeaderText;
-                //                _pg.Echo("INI Generate: " + _Sections.Count() + "sections");
+                string s1 = _sHeaderText.Trim();
+                if (s1 != "") sIni = s1 + "\n";
+
+//_pg.Echo("INI Generate: " + _Sections.Count() + "sections");
                 foreach (var kv in _Sections)
                 {
-                    sIni += _sectionStart + kv.Key + _sectionEnd + "\n";
-                    sIni += kv.Value; // ends in "\n"
+                    // TODO: if key values set, regenerate ini text from keys
+//_pg.Echo("Section:" + kv.Key);
+                    sIni += _sectionStart + kv.Key.Trim() + _sectionEnd + "\n";
+                    if (kv.Value.TrimEnd() == "")
+                    {
+//_pg.Echo("Generate from keys");
+                        string sSectionText = "";
+                        // if raw text is cleared, regenerate from keys
+                        if (_Keys.ContainsKey(kv.Key))
+                        {
+                            foreach (var dk in _Keys[kv.Key])
+                            {
+//_pg.Echo(" Key:" + dk.Key);
+                                sSectionText += dk.Key + SeparatorChar + dk.Value + "\n";
+                            }
+                        }
+                        sIni += sSectionText;
+//_pg.Echo("Set Cached Vavlue");
+//                        _Sections[kv.Key] = sSectionText; // set cached value -- CANNOT because we are in enumeration loop
+//_pg.Echo("Set");
+                    }
+                    else
+                    {
+                        sIni += kv.Value.Trim() + "\n";
+                    }
                 }
-                if (bClearDirty) IsDirty = false;
+                if (bClearDirty)
+                {
+                    IsDirty = false;
+                    _sLastINI = sIni;
+                }
                 return sIni;
-
             }
+
+            bool ParseVector3d(string sVector, out double x, out double y, out double z)
+            {
+                string[] coordinates = sVector.Trim().Split(',');
+                if (coordinates.Length < 3)
+                {
+                    coordinates = sVector.Trim().Split(':');
+                }
+                x = 0;
+                y = 0;
+                z = 0;
+                if (coordinates.Length < 3) return false;
+
+                bool xOk = double.TryParse(coordinates[0].Trim(), out x);
+                bool yOk = double.TryParse(coordinates[1].Trim(), out y);
+                bool zOk = double.TryParse(coordinates[2].Trim(), out z);
+                if (!xOk || !yOk || !zOk)
+                {
+                    return false;
+                }
+                return true;
+            }
+            string Vector3DToString(Vector3D v)
+            {
+                string s;
+                s = v.X.ToString("0.00") + ":" + v.Y.ToString("0.00") + ":" + v.Z.ToString("0.00");
+                return s;
+            }
+
         }
 
 
