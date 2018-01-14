@@ -131,6 +131,11 @@
   <Import Project="..\..\WicoAirVents\WicoAirVents\WicoAirVents.projitems" Label="Shared" />
   <Import Project="..\..\WicoControllers\WicoControllers\WicoControllers.projitems" Label="Shared" />
   <Import Project="..\..\WicoINI\WicoINI\WicoINI.projitems" Label="Shared" />
+  <Import Project="..\..\ModeGoTarget\ModeGoTarget\ModeGoTarget.projitems" Label="Shared" />
+  <Import Project="..\..\AvionicsGyroControl\AvionicsGyroControl\AvionicsGyroControl.projitems" Label="Shared" />
+  <Import Project="..\..\WicoTravelMovement\WicoTravelMovement\WicoTravelMovement.projitems" Label="Shared" />
+  <Import Project="..\..\ShipDim\ShipDim\ShipDim.projitems" Label="Shared" />
+  <Import Project="..\..\WicoSensors\WicoSensors\WicoSensors.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="mdk\mdk.options" DestinationFolder="$(TargetDir)\mdk" />

@@ -90,14 +90,17 @@ namespace IngameScript
                 initPower();
                 sInitResults += thrustersInit(gpsCenter);
                 sInitResults += gyrosetup();
+                GyroControl.UpdateGyroList(gyros);
                 if (gtsAllBlocks.Count < 300) currentInit = 2; // go ahead and do next step.
             }
             if (currentInit == 2)
             {
                 sInitResults += wheelsInit(gpsCenter);
                 sInitResults += rotorsNavInit();
+                sInitResults += wheelsInit(gpsCenter);
+                sInitResults += sensorInit(true);
 
-                 if (gtsAllBlocks.Count < 100) currentInit = 3; // go ahead and do next step.
+                if (gtsAllBlocks.Count < 100) currentInit = 3; // go ahead and do next step.
             }
             if (currentInit == 3)
             {
@@ -135,6 +138,7 @@ namespace IngameScript
 
                     gridBaseMass = myMass.BaseMass;
                 }////
+                initShipDim();
 
                 sInitResults += modeOnInit(); // handle mode initializing from load/recompile..
 
@@ -222,8 +226,33 @@ namespace IngameScript
         {
             INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
 
-            string value = "";
+            string sValue="";
 
+            iniCustomData.GetValue(sTechnikerSection, "DoForwardScans", ref bDoForwardScans, true);
+            iniCustomData.GetValue(sTechnikerSection, "CheckGasGens", ref bCheckGasGens, true);
+            iniCustomData.GetValue(sTechnikerSection, "TechnikerCalcs", ref bTechnikerCalcs, true);
+            iniCustomData.GetValue(sTechnikerSection, "GPSFromEntities", ref bGPSFromEntities, true);
+            iniCustomData.GetValue(sTechnikerSection, "AirVents", ref bAirVents, true);
+
+//            iniCustomData.GetValue(sTechnikerSection, "thrustignore", ref sIgnoreThruster, true);
+            if(iniCustomData.GetValue(sTechnikerSection, "shipname", ref sValue))
+            {
+                OurName = "Wico " + sValue;
+                bGotAntennaName = true;
+            }
+
+            iniCustomData.GetValue(sTechnikerSection, "shortrangemax", ref shortRangeMax, true);
+            iniCustomData.GetValue(sTechnikerSection, "longrangemax", ref longRangeMax,true);
+
+            ThrustersInitCustomData(iniCustomData);
+            SensorInitCustomData(iniCustomData);
+
+            if (iniCustomData.IsDirty)
+            {
+                Me.CustomData = iniCustomData.GenerateINI(true);
+            }
+            
+            /*
             value = iniCustomData.GetValue(sTechnikerSection, "DoForwardScans");
             if (value != null)
                 bDoForwardScans = value.Trim().ToLower() == "true" ? true : false;
@@ -244,6 +273,37 @@ namespace IngameScript
             if (value != null)
                 bAirVents = value.Trim().ToLower() == "true" ? true : false;
 
+            value = iniCustomData.GetValue(sTechnikerSection, "thrustignore");
+            if (value != null)
+                sIgnoreThruster = value;
+
+            value = iniCustomData.GetValue(sTechnikerSection, "shipname");
+            if (value != null)
+            {
+                OurName = "Wico " + value;
+                bGotAntennaName = true;
+            }
+            value = iniCustomData.GetValue(sTechnikerSection, "shortrangemax");
+            if (value != null)
+            {
+                double d;
+                if (double.TryParse(value, out d))
+                    shortRangeMax = d;
+                else Echo("Error Converting" + value);
+            }
+            value = iniCustomData.GetValue(sTechnikerSection, "longrangemax");
+            if (value != null)
+            {
+                double d;
+                if (double.TryParse(value, out d))
+                    longRangeMax = d;
+                else Echo("Error Converting" + value);
+            }
+
+            */
+
+
+            /*
             // the old way
             string sData = Me.CustomData;
 	        string[] lines = sData.Trim().Split('\n');
@@ -267,7 +327,7 @@ namespace IngameScript
 				        bGotAntennaName = true;
 			        }
 		        }
-		        if(lines[i].ToLower().Contains("shortrangemax"))
+		        if(lines[i].ToLower().Contains(""))
 		        {
 			        if (keys.Length > 1)
 			        {
@@ -290,7 +350,8 @@ namespace IngameScript
 			        else Echo("Error parsing");
 		        }
 	        }
-	        if (bLongRange)
+            */
+            if (bLongRange)
 		        maxScan = longRangeMax;
 	        else
 		        maxScan = shortRangeMax;

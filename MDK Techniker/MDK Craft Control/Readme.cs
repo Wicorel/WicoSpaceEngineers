@@ -18,7 +18,12 @@
 * T3.2A 01052018
 * flags for turning on/off Techniker features
 * 
+* T3.3 
+* Added NAV
 * 
+* T3.3a
+* INI helper additions
+* Active name for sensor selection [WICO]
 * 
 * Handles:
 * Master timer for sub-modules

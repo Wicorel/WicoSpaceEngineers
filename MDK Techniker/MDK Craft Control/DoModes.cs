@@ -31,16 +31,6 @@ namespace IngameScript
                 Echo("got antenna Name");
             Echo("AList="+antennaList.Count);
             */
-    		IMyShipController isc = GetActiveController();
-            if(isc==null)
-            {
-                Runtime.UpdateFrequency &= ~UpdateFrequency.Update10;
-            }
-            else
-            {
-                Runtime.UpdateFrequency |= UpdateFrequency.Update10;
-            }
-
             doModeAlways();
             if (iMode == MODE_IDLE)
                 doModeIdle();
@@ -53,6 +43,19 @@ namespace IngameScript
                 StatusLog("\nCraft Needs attention", textPanelReport);
 
             }
+            if (iMode == MODE_GOINGTARGET) { doModeGoTarget(); }
+
+            IMyShipController isc = GetActiveController();
+            if (isc == null)
+            {
+                //                if(!bWantMedium)  Runtime.UpdateFrequency &= ~UpdateFrequency.Update10;
+            }
+            else
+            {
+                bWantMedium = true;
+                //                Runtime.UpdateFrequency |= UpdateFrequency.Update10;
+            }
+
         }
 
         void ResetToIdle()
