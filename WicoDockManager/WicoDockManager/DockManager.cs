@@ -47,7 +47,8 @@ namespace IngameScript
             string s = "";
 
             dockingInfo.Clear();
-            dockingAlllights = GetTargetBlocks<IMyLightingBlock>();
+            dockingAlllights = GetBlocksContains<IMyLightingBlock>(sBaseConnector);
+                //GetTargetBlocks<IMyLightingBlock>();
 
             if (localBaseConnectors.Count < 1) s += connectorsInit();
 
@@ -59,7 +60,7 @@ namespace IngameScript
             }
             // load from text panel...
             s += "DI:" + dockingInfo.Count;
-            Echo("EO:iDI()");
+//            Echo("EO:iDI()");
             return s;
         }
 

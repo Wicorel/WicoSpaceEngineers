@@ -60,7 +60,7 @@ namespace IngameScript
                 StatusLog(DateTime.Now.ToString() + " StartSearchOrient", textLongStatus, true);
                 dtStartSearch = dtStartNav = DateTime.Now;
                 ResetMotion();
-                if (maxDeltaV < (fTargetMiningmps/2) || cargopcent > cargopctlowwater)
+                if (maxDeltaV < (fTargetMiningMps/2) || cargopcent > cargopctlowwater)
 //                if (cargopcent > 99)
                 {
                     setMode(MODE_DOCKING);

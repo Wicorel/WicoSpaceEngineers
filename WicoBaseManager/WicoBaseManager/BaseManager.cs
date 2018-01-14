@@ -18,9 +18,16 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        const double dBaseTransmitWait = 55; //seconds between active transmits
+        double dBaseTransmitWait = 55; //seconds between active transmits
 
         double dBaseLastTransmit = -1;
+
+        string sBaseSection = "BASE";
+        void BaseInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sBaseSection, "BaseTransmitWait", ref dBaseTransmitWait, true);
+
+        }
 
         void doBaseAnnounce(bool bForceAnnounce=false)
         {

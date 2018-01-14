@@ -20,7 +20,7 @@ namespace IngameScript
     {
         List<baseInfo> baseList = new List<baseInfo>();
 
-        const string sBaseSection = "BASE1.0";
+        const string sBaseSavedListSection = "BASE1.0";
 
         /*
          * TODO:
@@ -75,7 +75,7 @@ namespace IngameScript
                 sb += Vector3DToString(baseList[i].position) + "\n";
                 sb += baseList[i].bJumpCapable.ToString() + "\n";
             }
-            iniWicoCraftSave.WriteSection(sBaseSection, sb);
+            iniWicoCraftSave.WriteSection(sBaseSavedListSection, sb);
 
         }
 
@@ -92,7 +92,7 @@ namespace IngameScript
             double x1, y1, z1;
             Echo("BD():A");
             //            string[] atheStorage = sSection.Split('\n');
-            string[] atheStorage = iniWicoCraftSave.GetLines(sBaseSection);
+            string[] atheStorage = iniWicoCraftSave.GetLines(sBaseSavedListSection);
             Echo("BD():B");
 
             int iLine = 0;

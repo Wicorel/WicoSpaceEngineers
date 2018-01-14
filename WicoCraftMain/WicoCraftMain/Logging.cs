@@ -116,6 +116,30 @@ namespace IngameScript
 
         #endregion
         //////
+        void debugGPSOutput(string sName, Vector3D vPosition)
+        {
+            string s;
+            s = "GPS:" + sName + ":" + Vector3DToString(vPosition) + ":";
+            StatusLog(s, gpsPanel);
+        }
+
+        string gpsName(string ShipName, string sQual)
+        {
+            //NOTE: GPS Name can be a MAX of 32 total chars.
+            string s;
+            int iName = ShipName.Length;
+            int iQual = sQual.Length;
+            if (iName + iQual > 32)
+            {
+                if (iQual > 31) return "INVALID";
+                iName = 32 - iQual;
+            }
+            s = ShipName.Substring(0, iName) + sQual;
+            s.Replace(":", "_"); // filter out bad characters
+            s.Replace(";", "_"); // filter out bad characters
+            return s;
+
+        }
 
         string niceDoubleMeters(double thed)
         {

@@ -175,7 +175,7 @@ namespace IngameScript
                         else Echo("Did NOT find asteroid");
                     }
                     if (bLocalFoundAsteroid) current_state = 20;
-//                    else current_state = 100;
+                    else current_state = 100;
                     break;
                 case 20:
                     setMode(MODE_FINDORE);
@@ -210,14 +210,17 @@ namespace IngameScript
                         // we found asteroid 'below'.  Move down
 
                         // check 'down' for asteroid.
-                        setSensorShip(sb, 0, 0, 0, 45, 1, 0);
+ //                       setSensorShip(sb, 0, 0, 0, 0, 45, 0);
+                        // don't need to change sensors
                         current_state = 122;
-                        shiftElapsedMs = 0;
+//                        shiftElapsedMs = 0;
                         break;
                     }
                 case 122:
                     {
                         Echo("Move Down");
+//                        if (shiftElapsedMs < 1) return;
+//                        if (velocityShip > 0.2f) return;
                         // move down until sensor sees asteroid
                         bool bDownAsteroid = false;
                         bool bForwardAsteroid = false;
@@ -230,14 +233,16 @@ namespace IngameScript
                         {
                             Echo("Forward");
                             ResetMotion();
-                            current_state = 120;
+                            // we have it right in front of us.
+                            setMode(MODE_FINDORE);
+//                            current_state = 120;
                         }
                         else if(bDownAsteroid)
                         {
                             Echo("Down");
                             if (velocityShip < 0.5)
                                 powerUpThrusters(thrustDownList, 100f);
-                            else if (velocityShip > fTargetMiningmps)
+                            else if (velocityShip > fTargetMiningMps)
                                 powerDownThrusters();
                             else powerUpThrusters(thrustDownList, 1f);
                         }
@@ -255,6 +260,7 @@ namespace IngameScript
                     {
                         // No asteroid 'below'.
                         // need to shift (left) (old state 2)
+                        Echo("Shift Left");
                         break;
                     }
             }

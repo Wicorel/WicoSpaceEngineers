@@ -32,6 +32,9 @@
 * 
 * 3.2 INI WCCM Serialize 01062018
 * 
+* 3.2a
+* FilledRatio Change
+* 
 * Need:
 *  circumnavigate planet to target spot
 *  'ask' for docking position after arriving at 'spot'

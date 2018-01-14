@@ -21,7 +21,6 @@ namespace IngameScript
 
         Dictionary<string, int> modeCommands = new Dictionary<string, int>();
         string sBanner = "";
-//        UpdateFrequency ufFast = UpdateFrequency.Update1; // default value for "Fast" for this module
         UpdateFrequency ufFast = UpdateFrequency.Once; // default value for "Fast" for this module
 
         public Program()
@@ -31,9 +30,13 @@ namespace IngameScript
             Echo(sBanner + "Creator");
             //            gridsInit(); //GridTerminalSystem cannot be relied on at initial compile
             //            initLogging();
- // Only needed for 'main' module           Runtime.UpdateFrequency |= UpdateFrequency.Once;
+            // Only needed for 'main' module           Runtime.UpdateFrequency |= UpdateFrequency.Once;
             if (!Me.CustomName.Contains(moduleName))
                 Me.CustomName = "PB " + OurName + " " + moduleName;
+            if (!Me.Enabled)
+            {
+                Echo("I am turned OFF!");
+            }
         }
 
         // added UpdateType and UpdateFrequency

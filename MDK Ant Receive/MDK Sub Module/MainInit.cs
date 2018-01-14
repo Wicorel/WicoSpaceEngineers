@@ -21,7 +21,7 @@ namespace IngameScript
         void doModuleConstructor()
         {
             // called from main constructor.
-
+            ModuleInitCustomData();
         }
 
 
@@ -147,6 +147,21 @@ namespace IngameScript
             return ">";
         }
 
+        void ModuleInitCustomData()
+        {
+            INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
 
+//            string sValue = "";
+            ConnectorInitCustomData(iniCustomData);
+            BaseInitCustomData(iniCustomData);
+
+//            ThrustersInitCustomData(iniCustomData);
+
+            if (iniCustomData.IsDirty)
+            {
+                Me.CustomData = iniCustomData.GenerateINI(true);
+            }
+
+        }
     }
 }

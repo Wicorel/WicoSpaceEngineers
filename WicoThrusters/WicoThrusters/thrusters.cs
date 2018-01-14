@@ -43,8 +43,15 @@ namespace IngameScript
         const int thrustAll = 0xff;
         readonly Matrix thrustIdentityMatrix = new Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
+
         string sIgnoreThruster = "IGNORE";
         string sCutterThruster = "cutter";
+        string sThrusterSection = "THRUSTERS";
+        void ThrustersInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sThrusterSection, "IgnoreThruster", ref sIgnoreThruster);
+            iNIHolder.GetValue(sThrusterSection, "CutterThruster", ref sCutterThruster);
+        }
 
         void thrustersInit(IMyTerminalBlock orientationBlock, ref List<IMyTerminalBlock> thrustForwardList, 
             ref List<IMyTerminalBlock> thrustBackwardList, ref List<IMyTerminalBlock> thrustDownList,ref List<IMyTerminalBlock> thrustUpList,
@@ -372,7 +379,7 @@ namespace IngameScript
                         thruster.Enabled = true;// ApplyAction("OnOff_On");
                     }
                     iCount += 1;
-                    thruster.ThrustOverridePercentage = fPower;
+                    thruster.ThrustOverridePercentage = fPower/100f;
 //                    thruster.SetValueFloat("Override", maxThrust * (fPower / 100.0f));
                 }
             }

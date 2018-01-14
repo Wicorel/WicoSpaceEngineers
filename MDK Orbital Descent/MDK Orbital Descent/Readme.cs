@@ -36,6 +36,9 @@
  *  
  *  3.2 INI WCCM 01062018
  *  
+ *  3.2a
+ * FilledRatio Change
+
  * NEED:  
  *  
  *  trigger timers on stages of descent (see rotor legs example)
@@ -55,4 +58,4 @@
  * predict acceleration/decel and adjust thrust on launch based on what's it's GOING to be.. 
  * choose ROCKET/VTOL/NORMAL automatically based on thruster arrangement determination 
  *  
-*/ 
+*/

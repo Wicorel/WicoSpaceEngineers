@@ -22,14 +22,27 @@ namespace IngameScript
 
         List<IMySensorBlock> sensorsList = new List<IMySensorBlock>();
 
+        string sSensorUse = "[WICO]";
+        const string sSensorSection = "SENSORS";
+
+        void SensorInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sSensorSection, "SensorUse", ref sSensorUse, true);
+        }
+
         string sensorInit(bool bSleep=true)
         {
             sensorsList.Clear();
+            /*
             List<IMyTerminalBlock> ltb = new List<IMyTerminalBlock>();
             sensorsList = new List<IMySensorBlock>();
             GridTerminalSystem.GetBlocksOfType<IMySensorBlock>(ltb, localGridFilter);
+            */
+            List<IMyTerminalBlock> ltb = GetBlocksContains<IMySensorBlock>("[WICO]");
+
             foreach (var sb1 in ltb)
             {
+ //               if (sb1.CustomName.Contains("WICO") || sb1.CustomData.Contains("WICO")) ;
                 sensorsList.Add(sb1 as IMySensorBlock);
             }
             if(bSleep) sleepAllSensors();

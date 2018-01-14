@@ -22,16 +22,16 @@ namespace IngameScript
 
         Dictionary<string, int> modeCommands = new Dictionary<string, int>();
         string sBanner = "";
-        UpdateFrequency ufFast = UpdateFrequency.Update1; // default value for "Fast" for this module
+        UpdateFrequency ufFast = UpdateFrequency.Once; // default value for "Fast" for this module
 
         bool bSubModules = true;
         bool bCraftOperation = true;
 
         public Program()
         {
+            doModuleConstructor();
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
             Echo(sBanner + "Creator");
-            doModuleConstructor();
 
             initLogging();
             StatusLog("clear", textLongStatus, true); // only MAIN module should clear long status on init.
@@ -42,6 +42,10 @@ namespace IngameScript
             }
             //	if (!Me.CustomName.Contains(moduleName))
             //		Me.CustomName = "PB " + OurName+ " "+moduleName;
+            if (!Me.Enabled)
+            {
+                Echo("I am turned OFF!");
+            }
         }
 
         #region MAIN
@@ -49,6 +53,7 @@ namespace IngameScript
         bool init = false;
         bool bWasInit = false;
         bool bWantFast = false;
+        bool bWantMedium = false;
 
         bool bWorkingProjector = false;
 
@@ -66,6 +71,7 @@ namespace IngameScript
            Echo(sBanner + tick());
             Echo(ut.ToString());
             bWantFast = false;
+            bWantMedium = false;
             //ProfilerGraph();
 
             if (dProjectorCheckLast > dProjectorCheckWait)
@@ -98,15 +104,8 @@ namespace IngameScript
                 }
                 dProjectorCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
             }
-//            Echo("MainInst1:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
             sPassedArgument = "";
-/*
-            if (sArgument != "" && sArgument != "timer" || sArgument != "wcct")
-            {
-                Echo("Arg=" + sArgument);
-            }
-*/
             double newgridBaseMass = 0;
 
             if (anchorPosition != null)
@@ -116,19 +115,11 @@ namespace IngameScript
                    Echo("DO Grid Check");
                     dGridCheckLast = 0;
 
-//                    IMyTextPanel masstextBlock = getTextBlock("MASS");
                     MyShipMass myMass;
                     myMass = ((IMyShipController)anchorPosition).CalculateShipMass();
 
-//                    StatusLog("clear", masstextBlock);
-//                    StatusLog("BaseMass=" + myMass.BaseMass.ToString(), masstextBlock);
-//                    StatusLog("TotalMass=" + myMass.TotalMass.ToString(), masstextBlock);
-//                    StatusLog("Physicalmass=" + myMass.PhysicalMass.ToString(), masstextBlock);
-                    //		Echo("Physicalmass=" + myMass.PhysicalMass.ToString());
-//                    StatusLog("gridBaseMass=" + gridBaseMass.ToString(), masstextBlock);
                     newgridBaseMass = myMass.BaseMass;
                     Echo("New=" + newgridBaseMass + " CurrentM=" + gridBaseMass);
-             Echo("MASS:" + currentInit + ":"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                     if (myMass.BaseMass == 0)
                         Echo("No Mass--Station?");
                     if (newgridBaseMass != gridBaseMass && gridBaseMass > 0)
@@ -155,7 +146,6 @@ namespace IngameScript
 //                Echo("No anchorPosition to check");
                 gridBaseMass = newgridBaseMass = 0;
             }
-//            Echo("MainInst1A:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
             if (sArgument == "init" || (Math.Abs(newgridBaseMass - gridBaseMass) > 1 && gridBaseMass > 0 && currentInit==0) || (currentInit == 0 && calcGridSystemChanged()))
             {
@@ -170,7 +160,6 @@ namespace IngameScript
             }
             Log("clear");
 
-//            Echo("MainInst2:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
             if (!init)
             {
@@ -188,7 +177,6 @@ namespace IngameScript
             }
             else
             {
-//            Echo("MainInst2a:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 if(bSubModules) Deserialize();
                 sPassedArgument = sArgument;
 
@@ -196,42 +184,22 @@ namespace IngameScript
                 {
                     StatusLog(DateTime.Now.ToString() + " " + sInitResults, textLongStatus, true);
                 }
-                //        Echo(sInitResults);
 
-//            Echo("MainInst2b:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
-//                Log(craftOperation());
                 IMyTerminalBlock anchorOrientation = gpsCenter;
-                /*
-                if (anchorOrientation != null)
-                {
-                    Matrix mTmp;
-                    anchorOrientation.Orientation.GetMatrix(out mTmp);
-                    mTmp *= -1;
-                    iForward = new Vector3I(mTmp.Forward);
-                    iUp = new Vector3I(mTmp.Up);
-                    iLeft = new Vector3I(mTmp.Left);
-                }
-                */
-                //        Vector3D mLast = vCurrentPos;
                 if (gpsCenter != null)
                 {
                     vCurrentPos = gpsCenter.GetPosition();
                 }
 
-//            Echo("MainInst2c:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 if (gpsCenter is IMyShipController)
                 //		if (gpsCenter is IMyRemoteControl)
                 {
-//            Echo("MainInst2c1:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                     velocityShip = ((IMyShipController)gpsCenter).GetShipSpeed();
-//            Echo("MainInst2c2:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
                     Vector3D vNG = ((IMyShipController)gpsCenter).GetNaturalGravity();
                     //			Vector3D vNG = ((IMyRemoteControl)gpsCenter).GetNaturalGravity();
-//            Echo("MainInst2c3:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                     double dLength = vNG.Length();
                     dGravity = dLength / 9.81;
-//            Echo("MainInst2c4:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
                     if (dGravity > 0)
                     {
@@ -245,7 +213,6 @@ namespace IngameScript
                         Echo("Sea Level=" + altitude.ToString("0.00"));
 
                     }
-//            Echo("MainInst2cX:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
                 }
                 else
@@ -253,18 +220,14 @@ namespace IngameScript
                     dGravity = -1.0;
                 }
 
-//              Echo("MainInst3:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                if (processArguments(sArgument))
                     return;
 
-//               Echo("MainInst3A:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                moduleDoPreModes();
 
-//              Echo("MainInst3B:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
                 doModes();
             }
             if(bSubModules) Serialize();
-//             Echo("MainInst4:"+Runtime.CurrentInstructionCount+ "/"+Runtime.MaxInstructionCount);
 
 //            if ((anchorPosition == null || SaveFile == null ))
             if ((SaveFile == null ))
@@ -282,12 +245,16 @@ namespace IngameScript
             {
                 Runtime.UpdateFrequency &= ~(ufFast);
             }
+            if (bWantMedium)
+            {
+                Runtime.UpdateFrequency |= UpdateFrequency.Update10;
+            }
+            else
+            {
+                Runtime.UpdateFrequency &= ~(UpdateFrequency.Update10);
+            }
 
             bWasInit = false;
-
-//verifyAntenna();
-
-//            Echo("Passing:'" + sPassedArgument + "'");
 
             if(bCraftOperation) Echo(craftOperation());
 

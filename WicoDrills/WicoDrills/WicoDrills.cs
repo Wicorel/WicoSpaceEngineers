@@ -51,6 +51,17 @@ namespace IngameScript
             }
 
         }
+
+        bool HasDrills()
+        {
+            if (drillList.Count < 1)
+                drillInit();
+
+            if (drillList.Count < 1)
+                return false;
+
+            return true;
+        }
         #endregion
         #region ejectors
 

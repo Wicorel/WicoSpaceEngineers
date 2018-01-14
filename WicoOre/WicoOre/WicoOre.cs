@@ -156,11 +156,11 @@ namespace IngameScript
             // write data back to text panel if changed..
         }
 
-        void dumpOreLocs()
+        void OreDumpLocs()
         {
             for (int i = 0; i < oreLocs.Count; i++)
             {
-                Echo(oreName(oreLocs[i].oreId) + ":" + oreLocs[i].position.ToString() + ":" + oreLocs[i].detectionType.ToString());
+                Echo(OreName(oreLocs[i].oreId) + ":" + oreLocs[i].position.ToString() + ":" + oreLocs[i].detectionType.ToString());
             }
 
         }
@@ -168,11 +168,11 @@ namespace IngameScript
         List<OreInfo> oreInfos = new List<OreInfo>();
         public class OreInfo
         {
-            public int oreID;
-            public string oreName;
-            public long desireability;
-            public bool bFound;
-            public double localAmount;
+            public int      oreID;
+            public string   oreName;
+            public long     desireability;
+            public bool     bFound;
+            public double   localAmount;
         }
 
         const string URANIUM = "Uranium";
@@ -191,7 +191,7 @@ namespace IngameScript
         string[] aOres = { "Unknown", URANIUM, PLATINUM, ICE, COBALT, GOLD, MAGNESIUM, NICKEL, SILICON, SILVER, IRON, STONE };
         long[] lOreDesirability = { 0, 100, 95, 75, 55, 45, 45, 45, 45, 45, 45, -1 };
 
-        void initOreInfo()
+        void OreInitInfo()
         {
             oreInfos.Clear();
             // read from text panel..
@@ -210,7 +210,7 @@ namespace IngameScript
             // write data back to text panel if changed.
         }
 
-        string oreName(int oreId)
+        string OreName(int oreId)
         {
             for (int i = 0; i < oreInfos.Count; i++)
                 if (oreInfos[i].oreID == oreId)
@@ -219,21 +219,21 @@ namespace IngameScript
             return "INVALID ID";
         }
 
-        void clearOreAmounts()
+        void OreClearAmounts()
         {
             if (oreInfos.Count < 1)
-                initOreInfo();
+                OreInitInfo();
             for (int i = 0; i < oreInfos.Count; i++)
             {
                 oreInfos[i].localAmount = 0;
             }
         }
 
-        void addOreAmount(string sOre, double lAmount, bool bNoFind = false)
+        void OreAddAmount(string sOre, double lAmount, bool bNoFind = false)
         {
  //       	Echo("addOreAmount:" + sOre + ":" + lAmount.ToString());
             if (oreInfos.Count < 1)
-                initOreInfo();
+                OreInitInfo();
 
             for (int i = 0; i < oreInfos.Count; i++)
             {
@@ -245,7 +245,7 @@ namespace IngameScript
                     if (!bNoFind && lAmount > 0 && !oreInfos[i].bFound)
                     {
                         oreInfos[i].bFound = true;
-                        foundOre(i);
+                        OreFound(i);
                     }
 //                    else Echo("already 'found'");
                     oreInfos[i].localAmount += lAmount;
@@ -271,7 +271,7 @@ namespace IngameScript
             return oreInfos[iStoneOreId].localAmount;
         }
 
-        void foundOre(int oreIndex)
+        void OreFound(int oreIndex)
         {
 //            Echo("FIRST FIND!:" + oreInfos[oreIndex].oreName);
             if (oreInfos[oreIndex].desireability > 0)
@@ -286,7 +286,7 @@ namespace IngameScript
             }
         }
 
-        void dumpFoundOre()
+        void OreDumpFound()
         {
             Echo("Ore Contents:");
             for (int i = 0; i < oreInfos.Count; i++)
@@ -297,7 +297,7 @@ namespace IngameScript
         }
 
         // uses lContainers from WicoCargo
-        void doCargoOreCheck()
+        void OreDoCargoCheck()
         {
             if (lContainers.Count < 1)
                 initCargoCheck();
@@ -307,7 +307,7 @@ namespace IngameScript
                 // No cargo containers found.
                 return;
             }
-            clearOreAmounts();
+            OreClearAmounts();
 //            Echo(lContainers.Count + " Containers");
             for (int i = 0; i < lContainers.Count; i++)
             {
@@ -331,7 +331,7 @@ namespace IngameScript
                     if (item.Content.ToString().Contains("Ore"))
                     {
 //                        Echo("Adding " + item.Content.SubtypeName);
-                        addOreAmount(item.Content.SubtypeName, (double)item.Amount);
+                        OreAddAmount(item.Content.SubtypeName, (double)item.Amount);
                         //				stoneamount+=(double)item.Amount;
                     }
                 }

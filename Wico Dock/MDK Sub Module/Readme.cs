@@ -96,4 +96,7 @@ fix bug in serialize wrting z,y z, instead of x,y,z (oops)
 MODE_DOCKED tries to fill tanks and batteries.
 
 3.2g 01062018
+
+3.2h
+
 */

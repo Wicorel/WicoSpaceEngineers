@@ -79,8 +79,8 @@ namespace IngameScript
             if (init)
             {
             // only need to do these like once per second. or if something major changes.
-                doCargoOreCheck();
-                dumpFoundOre();
+                OreDoCargoCheck();
+                OreDumpFound();
 
                 // do every run.
                 SaveMinerInfo();

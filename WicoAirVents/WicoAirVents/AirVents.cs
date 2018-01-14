@@ -45,6 +45,7 @@ namespace IngameScript
         bool bPressurization = false; // pressurization enabled in world settings
         bool bAVInit = false;
 
+
         string airventInit()
         {
             airventList.Clear();

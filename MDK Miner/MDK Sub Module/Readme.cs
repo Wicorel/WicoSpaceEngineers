@@ -36,6 +36,11 @@
  * 
  * 3.2 01062018
  * 
+ * 3.2A
+ * search shift work
+ * remember previous asteroidID and go back to it
+ * also use sensors for approach (120/1)
+ * 
  * NEED:  
  *  
  * WANTED: 

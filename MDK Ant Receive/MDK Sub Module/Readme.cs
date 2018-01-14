@@ -48,7 +48,16 @@
 * 3.2A 12262017 INI Save
 * 01062018
 * 
+* 3.2B 01132018
+* Getting settings from CustomData
+* All ignore for !WCC
+* SenorUse
+* For docking, only use lights with [BASE]
+* 
 * TODO: Process size info to select connectors
 * TODO: drones may take up more than one connector depending on height, width.
+* 
+* TODO: Hangar door control: open/close by antenna request
+* 
 * 
 */
