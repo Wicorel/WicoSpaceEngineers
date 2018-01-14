@@ -32,8 +32,10 @@ namespace IngameScript
         }
 
         void AsteroidSerialize()
-        { 
-//            Echo("AS()");
+        {
+            //            Echo("AS()");
+            if (iniWicoCraftSave == null) return;
+
             string S1 = ""; 
             S1 += asteroidsInfo.Count + "\n";
             for(int i=0;i<asteroidsInfo.Count;i++)
@@ -45,7 +47,7 @@ namespace IngameScript
 //            Echo(sb);
             if (sLastAsteroidLoad != S1)
             {
-                iniMiner.WriteSection(sAsteroidSection, S1);
+                iniWicoCraftSave.WriteSection(sAsteroidSection, S1);
 //                AsteroidSaveFile.WritePublicText(sb);
             }
             else
@@ -56,6 +58,8 @@ namespace IngameScript
 
         void AsteroidsDeserialize()
         {
+            if (iniWicoCraftSave == null) return;
+
             string sAsteroidSave;
             /*
             if (AsteroidSaveFile == null)
@@ -63,7 +67,8 @@ namespace IngameScript
             else
             */
             //                sAsteroidSave = AsteroidSaveFile.GetPublicText();
-            sAsteroidSave = iniMiner.GetSection(sAsteroidSection);
+            sAsteroidSave = iniWicoCraftSave.GetSection(sAsteroidSection);
+//            sAsteroidSave = iniMiner.GetSection(sAsteroidSection);
 
             if (sAsteroidSave.Length < 1)
             {
@@ -236,6 +241,20 @@ namespace IngameScript
             return pos;
         }
 
+        BoundingBoxD AsteroidGetBB(long AsteroidID)
+        {
+            if (asteroidsInfo.Count < 1)
+                AsteroidsDeserialize();
+
+            BoundingBoxD box = new BoundingBoxD();
+            for (int i = 0; i < asteroidsInfo.Count; i++)
+            {
+                if (asteroidsInfo[i].EntityId == AsteroidID)
+                    box = asteroidsInfo[i].BoundingBox;
+            }
+            return box;
+        }
+
         bool AsteroidProcessMessage(string sMessage)
         {
             double x1, y1, z1;
@@ -294,13 +313,14 @@ namespace IngameScript
         }
 
 
-        INIHolder iniMiner;
+        //INIHolder iniMiner;
 
-        IMyTextPanel MinerSaveFile = null;
-        const string MINER_SAVE_FILE_NAME = "Wico Miner Save";
+        //IMyTextPanel MinerSaveFile = null;
+        //const string MINER_SAVE_FILE_NAME = "Wico Miner Save";
 
         void InitMinerInfo()
         {
+            /*
             if (iniMiner == null)
             {
                 MinerSaveFile = null;
@@ -322,23 +342,28 @@ namespace IngameScript
                 }
                 else MinerSaveFile = blocks[0] as IMyTextPanel;
 
+                string sIni = "";
                 if (MinerSaveFile == null)
                 {
                     Echo(MINER_SAVE_FILE_NAME + " (TextPanel) is missing or Named incorrectly. ");
+//                    return;
                 }
-                string sIni = MinerSaveFile.GetPublicText();
+                else sIni = MinerSaveFile.GetPublicText();
+
                 iniMiner = new INIHolder(this, sIni);
             }
-
+            */
         }
 
         void SaveMinerInfo()
         {
-            if(iniMiner.IsDirty)
+            /*
+            if(iniMiner.IsDirty && MinerSaveFile!=null)
             {
                 string sINI = iniMiner.GenerateINI(true);
                 MinerSaveFile.WritePublicText(sINI);
             }
+            */
         }
 
     }
