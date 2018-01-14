@@ -310,7 +310,11 @@ namespace IngameScript
             List<IMyTerminalBlock> Output = new List<IMyTerminalBlock>();
             for (int e = 0; e < gtsAllBlocks.Count; e++)
             {
-                if (localGridFilter(gtsAllBlocks[e]) && gtsAllBlocks[e] is T && Keyword != null && (gtsAllBlocks[e].CustomName.Contains(Keyword) || gtsAllBlocks[e].CustomData.Contains(Keyword)))
+                if (gtsAllBlocks[e] is T
+                    && localGridFilter(gtsAllBlocks[e])
+                    && Keyword != null && (gtsAllBlocks[e].CustomName.Contains(Keyword) || gtsAllBlocks[e].CustomData.Contains(Keyword))
+                    && !(gtsAllBlocks[e].CustomName.Contains("!WCC") || gtsAllBlocks[e].CustomData.Contains("!WCC"))
+                    )
                 {
                     Output.Add(gtsAllBlocks[e]);
                 }
@@ -323,7 +327,12 @@ namespace IngameScript
             List<IMyTerminalBlock> Output = new List<IMyTerminalBlock>();
             for (int e = 0; e < gtsAllBlocks.Count; e++)
             {
-                if (Me.CubeGrid==gtsAllBlocks[e].CubeGrid && gtsAllBlocks[e] is T && Keyword != null && (gtsAllBlocks[e].CustomName.Contains(Keyword) || gtsAllBlocks[e].CustomData.Contains(Keyword)))
+                if (gtsAllBlocks[e] is T
+                    && Me.CubeGrid==gtsAllBlocks[e].CubeGrid 
+                    && Keyword != null && (gtsAllBlocks[e].CustomName.Contains(Keyword) || gtsAllBlocks[e].CustomData.Contains(Keyword))
+                    && !(gtsAllBlocks[e].CustomName.Contains("!WCC") || gtsAllBlocks[e].CustomData.Contains("!WCC"))
+
+                    )
                 {
                     Output.Add(gtsAllBlocks[e]);
                 }
@@ -336,7 +345,10 @@ namespace IngameScript
             List<IMyTerminalBlock> Output = new List<IMyTerminalBlock>();
             for (int e = 0; e < gtsAllBlocks.Count; e++)
             {
-                if (localGridFilter(gtsAllBlocks[e]) && gtsAllBlocks[e] is T && Keyword != null && gtsAllBlocks[e].CustomName == Keyword)
+                if (gtsAllBlocks[e] is T 
+                    && localGridFilter(gtsAllBlocks[e])
+                    && Keyword != null 
+                    && gtsAllBlocks[e].CustomName == Keyword)
                 {
                     Output.Add(gtsAllBlocks[e]);
                 }
