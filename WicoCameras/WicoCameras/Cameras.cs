@@ -345,6 +345,8 @@ namespace IngameScript
 
             public bool DoScans()
             {
+                if (cameras.Count < 1) bDoneScanning = true; // we have nothing to scan with...
+
                 if (bDoneScanning) return false;
 
                 bool bSomethingFound = false;
