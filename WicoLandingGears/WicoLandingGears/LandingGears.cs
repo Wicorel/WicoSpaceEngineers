@@ -22,11 +22,19 @@ namespace IngameScript
         // check for gears with "[DOCK]"
         #region gears 
 
+        string sGearUse = "[DOCK]";
+
         List<IMyTerminalBlock> gearList = new List<IMyTerminalBlock>();
+
+        void GearsInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sConnectorSection, "GearUse", ref sGearUse, true);
+
+        }
 
         void getLocalGears()
         {
-            if (gearList.Count < 1) gearList = GetBlocksContains<IMyLandingGear>("[DOCK]");
+            if (gearList.Count < 1) gearList = GetBlocksContains<IMyLandingGear>(sGearUse);
             if (gearList.Count < 1) gearList = GetTargetBlocks<IMyLandingGear>();
 
             return;

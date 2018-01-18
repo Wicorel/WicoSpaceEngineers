@@ -31,6 +31,15 @@ namespace IngameScript
             initCustomData();
 
         }
+        void ModuleInitCustomData(INIHolder iniCustomData)
+        {
+            ConnectorInitCustomData(iniCustomData);
+            ThrustersInitCustomData(iniCustomData);
+            GyroInitCustomData(iniCustomData);
+            CamerasInitCustomData(iniCustomData);
+            GearsInitCustomData(iniCustomData);
+
+        }
 
         #region maininit
 
@@ -357,6 +366,8 @@ namespace IngameScript
 		        maxScan = shortRangeMax;
 
         }
+
+
 
     }
 }

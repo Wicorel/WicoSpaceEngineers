@@ -77,7 +77,7 @@ namespace IngameScript
                 sInitResults += gearsInit();
                 sInitResults += tanksInit();
 
-//                sInitResults += NAVInit();
+                //                sInitResults += NAVInit();
                 sInitResults += gyrosetup();
                 sInitResults += doorsInit();
                 sInitResults += landingsInit(gpsCenter);
@@ -164,6 +164,16 @@ namespace IngameScript
         }
 
         #endregion
+        void ModuleInitCustomData(INIHolder iniCustomData)
+        {
+            ConnectorInitCustomData(iniCustomData);
+            ThrustersInitCustomData(iniCustomData);
+            GyroInitCustomData(iniCustomData);
+            CamerasInitCustomData(iniCustomData);
+            GearsInitCustomData(iniCustomData);
+
+            DoorInitCustomData(iniCustomData);
+        }
 
 
     }

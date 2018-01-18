@@ -41,6 +41,8 @@
  * remember previous asteroidID and go back to it
  * also use sensors for approach (120/1)
  * 
+ * 3.2B INI setting lots of things
+ * 
  * NEED:  
  *  
  * WANTED: 

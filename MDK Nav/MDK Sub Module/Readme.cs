@@ -59,5 +59,7 @@
  
     3.2D INI WCCM 01062018
 
+    3.2E Major INI settings
+
 	* TODO: 
 	*/

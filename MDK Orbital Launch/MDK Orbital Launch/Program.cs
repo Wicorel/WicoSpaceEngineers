@@ -21,7 +21,7 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "Orbital Launch";
-        string sVersion = "3.2a";
+        string sVersion = "3.2B";
 
         const string sGPSCenter = "Craft Remote Control";
 
@@ -31,7 +31,6 @@ namespace IngameScript
         Vector3D currentPosition/*, lastPosition, currentVelocity, lastVelocity*/;
         const string velocityFormat = "0.00";
 
-        float fMaxMps = 100;
 
         IMyTerminalBlock anchorPosition;
         IMyTerminalBlock gpsCenter = null;

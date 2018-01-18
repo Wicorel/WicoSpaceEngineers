@@ -299,11 +299,11 @@ namespace IngameScript
                         Echo("Invalid Command:(" + varArgs[iArg] + ")");
                         continue;
                     }
-                    double x;
-                    bool xOk = double.TryParse(args[1].Trim(), out x);
+                    double x1;
+                    bool xOk = double.TryParse(args[1].Trim(), out x1);
                     if (xOk)
                     {
-                        shipSpeedMax = x;
+                        shipSpeedMax = (float)x1;
                         Echo("Set speed to:" + shipSpeedMax.ToString("0.00"));
                         //             setMode(MODE_ARRIVEDTARGET);
                     }

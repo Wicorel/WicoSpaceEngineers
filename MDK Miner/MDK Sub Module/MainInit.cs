@@ -24,7 +24,6 @@ namespace IngameScript
 //            bGotAntennaName = false;
         }
 
-//        INIHolder iniOptions;
 
         #region maininit
 
@@ -165,6 +164,23 @@ namespace IngameScript
                     current_state = 400;// reinit
             }
             return ">";
+        }
+        void ModuleInitCustomData(INIHolder iniCustomData)
+        {
+//            INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
+
+            //            string sValue = "";
+            ConnectorInitCustomData(iniCustomData);
+            MiningInitCustomData(iniCustomData);
+            ThrustersInitCustomData(iniCustomData);
+            SensorInitCustomData(iniCustomData);
+            CamerasInitCustomData(iniCustomData);
+/*
+            if (iniCustomData.IsDirty)
+            {
+                Me.CustomData = iniCustomData.GenerateINI(true);
+            }
+*/
         }
 
 

@@ -25,8 +25,8 @@ namespace IngameScript
             // string output="";
             if (sArgument == "" || sArgument == "timer" || sArgument == "wccs" || sArgument == "wcct")
             {
-                Echo("Arg=" + sArgument);
-                Echo("PassedArg=" + sPassedArgument);
+//                Echo("Arg=" + sArgument);
+//                Echo("PassedArg=" + sPassedArgument);
                 if (sPassedArgument != "" && sPassedArgument != "timer")
                 {
                     Echo("Using Passed Arg=" + sPassedArgument);

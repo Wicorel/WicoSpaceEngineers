@@ -23,11 +23,13 @@ namespace IngameScript
         List<IMySensorBlock> sensorsList = new List<IMySensorBlock>();
 
         string sSensorUse = "[WICO]";
+        double dSensorSettleWaitMS = 0.125;
         const string sSensorSection = "SENSORS";
 
         void SensorInitCustomData(INIHolder iNIHolder)
         {
             iNIHolder.GetValue(sSensorSection, "SensorUse", ref sSensorUse, true);
+            iNIHolder.GetValue(sSensorSection, "SensorSettleWaitMS", ref dSensorSettleWaitMS, true);
         }
 
         string sensorInit(bool bSleep=true)
@@ -38,7 +40,7 @@ namespace IngameScript
             sensorsList = new List<IMySensorBlock>();
             GridTerminalSystem.GetBlocksOfType<IMySensorBlock>(ltb, localGridFilter);
             */
-            List<IMyTerminalBlock> ltb = GetBlocksContains<IMySensorBlock>("[WICO]");
+            List<IMyTerminalBlock> ltb = GetBlocksContains<IMySensorBlock>(sSensorUse);
 
             foreach (var sb1 in ltb)
             {

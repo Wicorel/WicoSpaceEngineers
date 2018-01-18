@@ -18,6 +18,9 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+
+        //TODO: Add loading and saving NAV specific settings to its own section
+
         // NAV
         /// <summary>
         /// the minimum distance to be from the target to be considered 'arrived'
@@ -138,8 +141,8 @@ namespace IngameScript
                     setMode(MODE_ARRIVEDTARGET);
                     return;
                 }
-                bool bYawOnly = false;
-                if (bSled || bRotor) bYawOnly = true;
+//                bool bYawOnly = false;
+//                if (bSled || bRotor) bYawOnly = true;
 
                 debugGPSOutput("TargetLocation", vTargetLocation);
 

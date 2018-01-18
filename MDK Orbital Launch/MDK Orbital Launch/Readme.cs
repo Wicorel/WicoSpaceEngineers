@@ -35,6 +35,8 @@
 * 3.2a
 * FilledRatio Change
 * 
+* 3.2b remove atmocrossover alt and use effectiveness of atmothrusters
+* 
 * Need:
 *  circumnavigate planet to target spot
 *  'ask' for docking position after arriving at 'spot'

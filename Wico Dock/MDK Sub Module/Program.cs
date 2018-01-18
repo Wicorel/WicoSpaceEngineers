@@ -40,13 +40,14 @@ namespace IngameScript
         //IMyTerminalBlock gpsCenter = null;
         class OurException : Exception
         {
-            public OurException(string msg) : base("WicoExampleModule" + ": " + msg) { }
+            public OurException(string msg) : base("WicoDock" + ": " + msg) { }
         }
 
 
         void moduleDoPreModes()
         {
             string output = "";
+            /*
             if (AnyConnectorIsConnected()) output += "Connected";
             else
             {
@@ -56,12 +57,14 @@ namespace IngameScript
                 else
                     output += " : Not Locked";
             }
+            */
             Echo(output);
         }
 
         void modulePostProcessing()
         {
-            Echo(sInitResults);
+//            Echo(sInitResults);
+//            Echo(craftOperation());
             echoInstructions();
         }
 

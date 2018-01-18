@@ -164,5 +164,14 @@ namespace IngameScript
             return ">";
         }
 
+        void ModuleInitCustomData(INIHolder iniCustomData)
+        {
+            ConnectorInitCustomData(iniCustomData);
+            ThrustersInitCustomData(iniCustomData);
+            GyroInitCustomData(iniCustomData);
+            CamerasInitCustomData(iniCustomData);
+            SensorInitCustomData(iniCustomData);
+        }
+
     }
 }

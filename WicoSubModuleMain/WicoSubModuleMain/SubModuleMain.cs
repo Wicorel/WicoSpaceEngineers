@@ -23,9 +23,33 @@ namespace IngameScript
         string sBanner = "";
         UpdateFrequency ufFast = UpdateFrequency.Once; // default value for "Fast" for this module
 
+        float fMaxWorldMps = 100;
+        string sWorldSection = "WORLD";
+
+        void WorldInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sWorldSection, "MaxWorldMps", ref fMaxWorldMps, true);
+        }
+
+        void ProcessInitCustomData()
+        {
+            INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
+            WorldInitCustomData(iniCustomData);
+            GridsInitCustomData(iniCustomData);
+            LoggingInitCustomData(iniCustomData);
+
+            ModuleInitCustomData(iniCustomData);
+            if (iniCustomData.IsDirty)
+            {
+                Me.CustomData = iniCustomData.GenerateINI(true);
+            }
+        }
+
         public Program()
         {
             doModuleConstructor();
+            ProcessInitCustomData();
+
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
             Echo(sBanner + "Creator");
             //            gridsInit(); //GridTerminalSystem cannot be relied on at initial compile
@@ -56,7 +80,7 @@ namespace IngameScript
         void Main(string sArgument, UpdateType ut)
         {
             Echo(sBanner + tick());
-            Echo(ut.ToString());
+//            Echo(ut.ToString());
             bWantFast = false;
             bWantMedium = false;
 
@@ -101,7 +125,6 @@ namespace IngameScript
 
                 Deserialize();
 
-                Echo(craftOperation());
                 if (gpsCenter != null)
                 {
                     vCurrentPos = gpsCenter.GetPosition();

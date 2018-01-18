@@ -18,6 +18,13 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        string sLoggingSection = "LOGGING";
+
+        void LoggingInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sLoggingSection, "LongStatus", ref sLongStatus, true);
+            iNIHolder.GetValue(sLoggingSection, "TextPanelReport", ref sTextPanelReport, true);
+        }
         // 110517 search order for the text panels
         // 2/25: Performance: only check blocks once, re-check on init.
         // use cached blocks 12/xx

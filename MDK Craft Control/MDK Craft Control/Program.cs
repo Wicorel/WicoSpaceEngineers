@@ -20,9 +20,9 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Master";
-        string sVersion = "3.2A";
+        string sVersion = "3.2B";
 
-        const string sGPSCenter = "Craft Remote Control";
+        string sGPSCenter = "Craft Remote Control";
 
         IMyTerminalBlock gpsCenter = null;
 
@@ -49,6 +49,14 @@ namespace IngameScript
             StatusLog("clear", textPanelReport);
 
             string output = "";
+            if (gridBaseMass > 0)
+            {
+                output += "Ship\n";
+            }
+            else
+            {
+                output += "Station\n";
+            }
             if (AnyConnectorIsConnected()) output += "Connected";
             else output += "Not Connected";
 
@@ -186,7 +194,7 @@ namespace IngameScript
 
         void modulePostProcessing()
         {
-            Echo(sInitResults);
+//            Echo(sInitResults);
             echoInstructions();
         }
 

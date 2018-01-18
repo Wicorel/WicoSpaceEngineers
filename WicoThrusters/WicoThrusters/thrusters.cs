@@ -53,9 +53,9 @@ namespace IngameScript
             iNIHolder.GetValue(sThrusterSection, "CutterThruster", ref sCutterThruster);
         }
 
-        void thrustersInit(IMyTerminalBlock orientationBlock, ref List<IMyTerminalBlock> thrustForwardList, 
-            ref List<IMyTerminalBlock> thrustBackwardList, ref List<IMyTerminalBlock> thrustDownList,ref List<IMyTerminalBlock> thrustUpList,
-            ref List<IMyTerminalBlock> thrustLeftList, ref List<IMyTerminalBlock> thrustRightList, int iThrustCheckType=thrustAll)
+        void thrustersInit(IMyTerminalBlock orientationBlock, ref List<IMyTerminalBlock> thrustForwardList,
+            ref List<IMyTerminalBlock> thrustBackwardList, ref List<IMyTerminalBlock> thrustDownList, ref List<IMyTerminalBlock> thrustUpList,
+            ref List<IMyTerminalBlock> thrustLeftList, ref List<IMyTerminalBlock> thrustRightList, int iThrustCheckType = thrustAll)
         {
             thrustForwardList.Clear();
             thrustBackwardList.Clear();
@@ -67,19 +67,19 @@ namespace IngameScript
             thrustAllList.Clear();
 
             if (orientationBlock == null) return;
-//            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustAllList, localGridFilter);
-	        List<IMyTerminalBlock> thrustLocal = new List<IMyTerminalBlock>();
+            //            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustAllList, localGridFilter);
+            List<IMyTerminalBlock> thrustLocal = new List<IMyTerminalBlock>();
 
             // Add 'cutter' exclusion from thrusters.
-	        GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
-	        for(int i=0;i<thrustLocal.Count;i++)
-	        {
-		        if (thrustLocal[i].CustomName.ToLower().Contains(sCutterThruster) || thrustLocal[i].CustomData.ToLower().Contains(sCutterThruster))
-			        continue;
-		        if (thrustLocal[i].CustomName.ToLower().Contains(sIgnoreThruster) || thrustLocal[i].CustomData.ToLower().Contains(sIgnoreThruster))
-			        continue;
-		        thrustAllList.Add(thrustLocal[i]);
-	        }
+            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
+            for (int i = 0; i < thrustLocal.Count; i++)
+            {
+                if (thrustLocal[i].CustomName.ToLower().Contains(sCutterThruster) || thrustLocal[i].CustomData.ToLower().Contains(sCutterThruster))
+                    continue;
+                if (thrustLocal[i].CustomName.ToLower().Contains(sIgnoreThruster) || thrustLocal[i].CustomData.ToLower().Contains(sIgnoreThruster))
+                    continue;
+                thrustAllList.Add(thrustLocal[i]);
+            }
 
             Matrix fromGridToReference;
             orientationBlock.Orientation.GetMatrix(out fromGridToReference);
@@ -137,7 +137,7 @@ namespace IngameScript
                 }
             }
 
-           }
+        }
 
         string thrustersInit(IMyTerminalBlock orientationBlock)
         {
@@ -150,19 +150,19 @@ namespace IngameScript
             thrustAllList.Clear();
 
             if (orientationBlock == null) return "No Orientation Block";
-//            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustAllList, localGridFilter);
-	        List<IMyTerminalBlock> thrustLocal = new List<IMyTerminalBlock>();
+            //            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustAllList, localGridFilter);
+            List<IMyTerminalBlock> thrustLocal = new List<IMyTerminalBlock>();
 
             // Add 'cutter' exclusion from thrusters.
-	        GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
-	        for(int i=0;i<thrustLocal.Count;i++)
-	        {
-		        if (thrustLocal[i].CustomName.ToLower().Contains(sCutterThruster) || thrustLocal[i].CustomData.ToLower().Contains(sCutterThruster))
-			        continue;
-		        if (thrustLocal[i].CustomName.ToLower().Contains(sIgnoreThruster) || thrustLocal[i].CustomData.ToLower().Contains(sIgnoreThruster))
-			        continue;
-		        thrustAllList.Add(thrustLocal[i]);
-	        }
+            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
+            for (int i = 0; i < thrustLocal.Count; i++)
+            {
+                if (thrustLocal[i].CustomName.ToLower().Contains(sCutterThruster) || thrustLocal[i].CustomData.ToLower().Contains(sCutterThruster))
+                    continue;
+                if (thrustLocal[i].CustomName.ToLower().Contains(sIgnoreThruster) || thrustLocal[i].CustomData.ToLower().Contains(sIgnoreThruster))
+                    continue;
+                thrustAllList.Add(thrustLocal[i]);
+            }
 
             Matrix fromGridToReference;
             orientationBlock.Orientation.GetMatrix(out fromGridToReference);
@@ -286,7 +286,7 @@ namespace IngameScript
             double hoverthrust = 0;
             hoverthrust = myMass.PhysicalMass * dGravity * 9.810;
 
-//            Echo("hoverthrust=" + hoverthrust.ToString("N0"));
+            //            Echo("hoverthrust=" + hoverthrust.ToString("N0"));
 
             if (atmoThrust > 0)
             {
@@ -373,14 +373,14 @@ namespace IngameScript
                 if ((iThrusterType & iTypes) > 0)
                 {
                     IMyThrust thruster = thrusters[thrusterIndex] as IMyThrust;
-//                    float maxThrust = thruster.GetMaximum<float>("Override");
+                    //                    float maxThrust = thruster.GetMaximum<float>("Override");
                     if (!thruster.IsWorking)
                     {
                         thruster.Enabled = true;// ApplyAction("OnOff_On");
                     }
                     iCount += 1;
-                    thruster.ThrustOverridePercentage = fPower/100f;
-//                    thruster.SetValueFloat("Override", maxThrust * (fPower / 100.0f));
+                    thruster.ThrustOverridePercentage = fPower / 100f;
+                    //                    thruster.SetValueFloat("Override", maxThrust * (fPower / 100.0f));
                 }
             }
             return iCount;
@@ -417,7 +417,7 @@ namespace IngameScript
                     iCount++;
                     IMyThrust thruster = thrusters[thrusterIndex] as IMyThrust;
                     thruster.ThrustOverride = 0;
-//                    thruster.SetValueFloat("Override", 0);
+                    //                    thruster.SetValueFloat("Override", 0);
                     if (thruster.IsWorking && bForceOff)
                         thruster.Enabled = false;// ApplyAction("OnOff_Off");
                     else if (!thruster.IsWorking && !bForceOff)
@@ -483,17 +483,38 @@ namespace IngameScript
         int countThrusters(List<IMyTerminalBlock> theBlocks, int iTypes = thrustAll)
         {
 
-	        int iCount = 0;
-	        for (int i = 0; i < theBlocks.Count; i++)
-	        {
-		        int iThrusterType = thrusterType(theBlocks[i]);
-		        if ((iThrusterType & iTypes) > 0 && theBlocks[i].IsWorking)
-		        {
-			        iCount++;
-		        }
-	        }
-	        return iCount;
+            int iCount = 0;
+            for (int i = 0; i < theBlocks.Count; i++)
+            {
+                int iThrusterType = thrusterType(theBlocks[i]);
+                if ((iThrusterType & iTypes) > 0 && theBlocks[i].IsWorking)
+                {
+                    iCount++;
+                }
+            }
+            return iCount;
 
+        }
+
+        IMyThrust ThrustFindFirst(List<IMyTerminalBlock> list, int iType = thrustAll)
+        {
+            foreach(var thrust in thrustAllList)
+            {
+                if (thrust is IMyThrust && (thrusterType(thrust) & iType) > 0)
+                    return thrust as IMyThrust;
+            }
+            return null;
+        }
+
+        double AtmoEffectiveness()
+        {
+            if (atmoThrustCount < 1) return 0;
+
+            IMyThrust myThrust = ThrustFindFirst(thrustAllList, thrustatmo);
+
+            if (myThrust == null) return 0;
+
+            return myThrust.MaxEffectiveThrust / myThrust.MaxThrust;
         }
 
         /// <summary>

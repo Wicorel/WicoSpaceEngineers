@@ -18,6 +18,12 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        string sGyroIgnore = "!NAV";
+
+        void GyroInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sGridSection, "GyroIgnore", ref sGyroIgnore, true);
+        }
         // 12/09 Add Summaries to members and functions
         // 09/11 Turn on gyros we are going to use
         // 04/30 only .ToLower ONCE
@@ -196,7 +202,7 @@ namespace IngameScript
             for (int i = 0; i < l.Count; i++)
             {
                 //       s += "\n" + l[i].CustomName;
-                if (l[i].CustomName.Contains("!NAV") || l[i].CustomData.Contains("!NAV"))
+                if (l[i].CustomName.Contains(sGyroIgnore) || l[i].CustomData.Contains(sGyroIgnore))
                 {
                     skipped++;
                     continue;

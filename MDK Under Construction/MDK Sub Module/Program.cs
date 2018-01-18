@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "UnderConstruction";
-        string sVersion = "3.1D";
+        string sVersion = "3.1E";
 
         const string sGPSCenter = "Craft Remote Control";
 
@@ -36,7 +36,7 @@ namespace IngameScript
         //IMyTerminalBlock gpsCenter = null;
         class OurException : Exception
         {
-            public OurException(string msg) : base("WicoExampleModule" + ": " + msg) { }
+            public OurException(string msg) : base("WicoUC" + ": " + msg) { }
         }
 
 

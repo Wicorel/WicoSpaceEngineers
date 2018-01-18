@@ -193,6 +193,7 @@ namespace IngameScript
             /// <param name="section">the section to check. Case sensitive</param>
             /// <param name="key">the key to look for. Case Sensitive</param>
             /// <param name="sValue">the value in the key</param>
+            /// <param name="bSetDefault">Optional. Set to true to set the current value as default is key not found.</param>
             /// <returns>true if the key was found. The value is unmodified if unfound</returns>
             public bool GetValue(string section, string key, ref string sValue, bool bSetDefault = false)
             {
@@ -220,6 +221,7 @@ namespace IngameScript
             /// <param name="section">the section to check. Case sensitive</param>
             /// <param name="key">the key to look for. Case Sensitive</param>
             /// <param name="lValue">the value in the key</param>
+            /// <param name="bSetDefault">Optional. Set to true to set the current value as default is key not found.</param>
             /// <returns>true if the key was found. The value is unmodified if unfound</returns>
             public bool GetValue(string section, string key, ref long lValue, bool bSetDefault = false)
             {
@@ -227,7 +229,7 @@ namespace IngameScript
 
                 if (!GetValue(section, key, ref sVal))
                 {
-                    if(bSetDefault)
+                    if (bSetDefault)
                     {
                         SetValue(section, key, lValue.ToString());
                     }
@@ -239,11 +241,37 @@ namespace IngameScript
             }
 
             /// <summary>
+            /// gets the long value of the key in the section
+            /// </summary>
+            /// <param name="section">the section to check. Case sensitive</param>
+            /// <param name="key">the key to look for. Case Sensitive</param>
+            /// <param name="iValue">the value in the key</param>
+            /// <param name="bSetDefault">Optional. Set to true to set the current value as default is key not found.</param>
+            /// <returns>true if the key was found. The value is unmodified if unfound</returns>
+            public bool GetValue(string section, string key, ref int iValue, bool bSetDefault = false)
+            {
+                string sVal = "";
+
+                if (!GetValue(section, key, ref sVal))
+                {
+                    if (bSetDefault)
+                    {
+                        SetValue(section, key, iValue.ToString());
+                    }
+                    return false;
+                }
+
+                iValue = Convert.ToInt32(sVal);
+                return true;
+            }
+
+            /// <summary>
             /// gets the double value of the key in the section
             /// </summary>
             /// <param name="section">the section to check. Case sensitive</param>
             /// <param name="key">the key to look for. Case Sensitive</param>
-            /// <param name="lValue">the value in the key</param>
+            /// <param name="dVal">the value in the key</param>
+            /// <param name="bSetDefault">Optional. Set to true to set the current value as default is key not found.</param>
             /// <returns>true if the key was found. The value is unmodified if unfound</returns>
             public bool GetValue(string section, string key, ref double dVal, bool bSetDefault = false)
             {
@@ -261,12 +289,37 @@ namespace IngameScript
                 return true;
             }
 
-           /// <summary>
+            /// <summary>
+            /// gets the float value of the key in the section
+            /// </summary>
+            /// <param name="section">the section to check. Case sensitive</param>
+            /// <param name="key">the key to look for. Case Sensitive</param>
+            /// <param name="fVal">the value in the key</param>
+            /// <param name="bSetDefault">Optional. Set to true to set the current value as default is key not found.</param>
+            /// <returns>true if the key was found. The value is unmodified if unfound</returns>
+            public bool GetValue(string section, string key, ref float fVal, bool bSetDefault = false)
+            {
+                string sVal = "";
+                if (!GetValue(section, key, ref sVal))
+                {
+                    if (bSetDefault)
+                    {
+                        SetValue(section, key, fVal.ToString());
+                    }
+                    return false;
+                }
+
+                bool pOK = float.TryParse(sVal, out fVal);
+                return true;
+            }
+
+            /// <summary>
             /// gets the DateTime value of the key in the section
             /// </summary>
             /// <param name="section">the section to check. Case sensitive</param>
             /// <param name="key">the key to look for. Case Sensitive</param>
-            /// <param name="lValue">the value in the key</param>
+            /// <param name="dtVal">the value in the key</param>
+            /// <param name="bSetDefault">Optional. Set to true to set the current value as default is key not found.</param>
             /// <returns>true if the key was found. The value is unmodified if unfound</returns>
             public bool GetValue(string section, string key, ref DateTime dtVal, bool bSetDefault = false)
             {
@@ -290,7 +343,8 @@ namespace IngameScript
             /// </summary>
             /// <param name="section">the section to check. Case sensitive</param>
             /// <param name="key">the key to look for. Case Sensitive</param>
-            /// <param name="lValue">the value in the key</param>
+            /// <param name="vVal">the value in the key</param>
+            /// <param name="bSetDefault">Optional. Set to true to set the current value as default is key not found.</param>
             /// <returns>true if the key was found. The value is unmodified if unfound</returns>
             public bool GetValue(string section, string key, ref Vector3D vVal, bool bSetDefault = false)
             {
@@ -318,7 +372,8 @@ namespace IngameScript
             /// </summary>
             /// <param name="section">the section to check. Case sensitive</param>
             /// <param name="key">the key to look for. Case Sensitive</param>
-            /// <param name="lValue">the value in the key</param>
+            /// <param name="bVal">the value in the key</param>
+            /// <param name="bSetDefault">Optional. Set to true to set the current value as default is key not found.</param>
             /// <returns>true if the key was found. The value is unmodified if unfound</returns>
             public bool GetValue(string section, string key, ref bool bVal, bool bSetDefault=false)
             {
@@ -446,6 +501,7 @@ namespace IngameScript
                                 sSectionText += dk.Key + SeparatorChar + dk.Value + "\n";
                             }
                         }
+                        sSectionText += "\n"; // add empty line at end
                         sIni += sSectionText;
 //_pg.Echo("Set Cached Vavlue");
 //                        _Sections[kv.Key] = sSectionText; // set cached value -- CANNOT because we are in enumeration loop
@@ -453,7 +509,7 @@ namespace IngameScript
                     }
                     else
                     {
-                        sIni += kv.Value.Trim() + "\n";
+                        sIni += kv.Value.Trim() + "\n\n"; // close last line + add empty line at end
                     }
                 }
                 if (bClearDirty)

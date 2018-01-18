@@ -24,7 +24,8 @@ namespace IngameScript
         string lightsInit()
         {
             lightsList.Clear();
-            GridTerminalSystem.GetBlocksOfType<IMyLightingBlock>(lightsList, localGridFilter);
+            lightsList = GetTargetBlocks<IMyLightingBlock>();
+ //           GridTerminalSystem.GetBlocksOfType<IMyLightingBlock>(lightsList, localGridFilter);
 
             return "L" + lightsList.Count.ToString("00");
         }
@@ -37,15 +38,17 @@ namespace IngameScript
                 var light = lightsList[i] as IMyLightingBlock;
                 if (light == null) continue;
 
-                if (light.GetValue<Color>("Color").Equals(c) && light.Enabled)
-                {
-                    continue;
+                if (light.Color.Equals(c) && light.Enabled)
+//                    if (light.GetValue<Color>("Color").Equals(c) && light.Enabled)
+                    {
+                        continue;
                 }
 
-                light.SetValue("Color", c);
+//                light.SetValue("Color", c);
+                light.Color = c;
                 // make sure we switch the color of the texture as well
-                light.ApplyAction("OnOff_Off");
-                light.ApplyAction("OnOff_On");
+//                light.ApplyAction("OnOff_Off");
+//                light.ApplyAction("OnOff_On");
             }
         }
         #endregion

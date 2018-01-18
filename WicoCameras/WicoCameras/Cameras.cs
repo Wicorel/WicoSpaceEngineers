@@ -37,6 +37,12 @@ namespace IngameScript
 
         private MyDetectedEntityInfo lastDetectedInfo;
 
+        string sCameraSection = "CAMERAS";
+        void CamerasInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sCameraSection, "CameraViewOnly", ref sCameraViewOnly, true);
+
+        }
 
         bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
         {

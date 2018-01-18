@@ -25,6 +25,24 @@ namespace IngameScript
         List<IMyTerminalBlock> innerairlockDoorList = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> allDoorList = new List<IMyTerminalBlock>();
 
+        string sDoorHangar = "Hangar Door";
+        string sDoorBay = "bay";
+        string sDoorAirlock = "airlock";
+        string sDoorAirlockOutside = "outside";
+        string sDoorAirlockInside = "inside";
+        string sDoorBridge = "bridge";
+
+        void DoorInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sGridSection, "DoorHangar", ref sDoorHangar, true);
+            iNIHolder.GetValue(sGridSection, "DoorBay", ref sDoorBay, true);
+            iNIHolder.GetValue(sGridSection, "DoorAirlock", ref sDoorAirlock, true);
+            iNIHolder.GetValue(sGridSection, "DoorAirlockOutside", ref sDoorAirlockOutside, true);
+            iNIHolder.GetValue(sGridSection, "DoorAirlockInside", ref sDoorAirlockInside, true);
+            iNIHolder.GetValue(sGridSection, "DoorBridge", ref sDoorBridge, true);
+        }
+
+
         string doorsInit()
         {
             {

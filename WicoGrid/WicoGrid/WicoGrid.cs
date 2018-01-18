@@ -18,6 +18,7 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        // 01142018 INI init for settings
 
         // 04/08: NOFOLLOW for rotors (for print heads)
         // 03/10 moved definition of allBlocksCount to serialize. Fixed piston localgrid
@@ -26,6 +27,15 @@ namespace IngameScript
         // cross-grid 12/19
         // split grids/blocks
         #region getgrids
+
+        string sNoFollow = "NOFOLLOW";
+        string sGridSection = "GRIDS";
+        string sBlockIgnore = "!WCC";
+        void GridsInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sGridSection, "NoFollow", ref sNoFollow, true);
+            iNIHolder.GetValue(sGridSection, "BlockIgnore", ref sBlockIgnore, true);
+        }
         List<IMyTerminalBlock> gtsAllBlocks = new List<IMyTerminalBlock>();
 
         List<IMyCubeGrid> localGrids = new List<IMyCubeGrid>();
@@ -107,7 +117,7 @@ namespace IngameScript
             s += "L" + localGrids.Count.ToString();
             s += "D" + dockedGrids.Count.ToString();
             s += "R" + remoteGrids.Count.ToString();
-
+/*
             Echo("Found " + gtsAllBlocks.Count.ToString() + " Blocks");
             Echo("Found " + allGrids.Count.ToString() + " Grids");
             Echo("Found " + localGrids.Count.ToString() + " Local Grids");
@@ -116,7 +126,7 @@ namespace IngameScript
             for (int i = 0; i < dockedGrids.Count; i++) Echo("|" + dockedGrids[i].CustomName);
             Echo("Found " + remoteGrids.Count.ToString() + " Remote Grids");
             for (int i = 0; i < remoteGrids.Count; i++) Echo("|" + remoteGrids[i].CustomName);
-
+            */
             return s;
         }
 
@@ -140,7 +150,7 @@ namespace IngameScript
             GridTerminalSystem.GetBlocksOfType<IMyMotorStator>(gridRotors, (x => x.TopGrid == grid));
             foreach (var rotor in gridRotors)
             {
-                if (rotor.CustomName.Contains("NOFOLLOW") || rotor.CustomData.Contains("NOFOLLOW"))
+                if (rotor.CustomName.Contains(sNoFollow) || rotor.CustomData.Contains(sNoFollow))
                     continue;
                 addGridToLocal(rotor.CubeGrid);
             }
@@ -148,7 +158,7 @@ namespace IngameScript
             GridTerminalSystem.GetBlocksOfType<IMyMotorAdvancedStator>(gridARotors, (x => x.TopGrid == grid));
             foreach (var rotor in gridARotors)
             {
-                if (rotor.CustomName.Contains("NOFOLLOW") || rotor.CustomData.Contains("NOFOLLOW"))
+                if (rotor.CustomName.Contains(sNoFollow) || rotor.CustomData.Contains(sNoFollow))
                     continue;
                 addGridToLocal(rotor.CubeGrid);
             }
@@ -170,7 +180,7 @@ namespace IngameScript
             GridTerminalSystem.GetBlocksOfType<IMyMotorStator>(gridRotors, (x1 => x1.CubeGrid == grid));
             foreach (var rotor in gridRotors)
             {
-                if (rotor.CustomName.Contains("NOFOLLOW") || rotor.CustomData.Contains("NOFOLLOW"))
+                if (rotor.CustomName.Contains(sNoFollow) || rotor.CustomData.Contains(sNoFollow))
                     continue;
                 IMyCubeGrid topGrid = rotor.TopGrid;
                 if (topGrid != null && topGrid != grid)
@@ -184,7 +194,7 @@ namespace IngameScript
             GridTerminalSystem.GetBlocksOfType<IMyMotorAdvancedStator>(gridARotors, (x1 => x1.CubeGrid == grid));
             foreach (var rotor in gridARotors)
             {
-                if (rotor.CustomName.Contains("NOFOLLOW") || rotor.CustomData.Contains("NOFOLLOW"))
+                if (rotor.CustomName.Contains(sNoFollow) || rotor.CustomData.Contains(sNoFollow))
                     continue;
                 IMyCubeGrid topGrid = rotor.TopGrid;
                 if (topGrid != null && topGrid != grid)
@@ -313,7 +323,7 @@ namespace IngameScript
                 if (gtsAllBlocks[e] is T
                     && localGridFilter(gtsAllBlocks[e])
                     && Keyword != null && (gtsAllBlocks[e].CustomName.Contains(Keyword) || gtsAllBlocks[e].CustomData.Contains(Keyword))
-                    && !(gtsAllBlocks[e].CustomName.Contains("!WCC") || gtsAllBlocks[e].CustomData.Contains("!WCC"))
+                    && !(gtsAllBlocks[e].CustomName.Contains(sBlockIgnore) || gtsAllBlocks[e].CustomData.Contains(sBlockIgnore))
                     )
                 {
                     Output.Add(gtsAllBlocks[e]);
@@ -330,7 +340,7 @@ namespace IngameScript
                 if (gtsAllBlocks[e] is T
                     && Me.CubeGrid==gtsAllBlocks[e].CubeGrid 
                     && Keyword != null && (gtsAllBlocks[e].CustomName.Contains(Keyword) || gtsAllBlocks[e].CustomData.Contains(Keyword))
-                    && !(gtsAllBlocks[e].CustomName.Contains("!WCC") || gtsAllBlocks[e].CustomData.Contains("!WCC"))
+                    && !(gtsAllBlocks[e].CustomName.Contains(sBlockIgnore) || gtsAllBlocks[e].CustomData.Contains(sBlockIgnore))
 
                     )
                 {

@@ -34,6 +34,14 @@ namespace IngameScript
         IMyTextPanel textPanelReport = null;
         bool bLoggingInit = false;
 
+        string sLoggingSection = "LOGGING";
+
+        void LoggingInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sLoggingSection, "LongStatus", ref sLongStatus, true);
+            iNIHolder.GetValue(sLoggingSection, "TextPanelReport", ref sTextPanelReport, true);
+        }
+
         void initLogging()
         {
             if (localGrids.Count < 1) gridsInit();
@@ -42,6 +50,7 @@ namespace IngameScript
             textLongStatus = getTextBlock(sLongStatus); ;
             textPanelReport = getTextBlock(sTextPanelReport);
             bLoggingInit = true;
+            textPanelReport.FontSize = 1.0f;
         }
 
         IMyTextPanel getTextBlock(string stheName)

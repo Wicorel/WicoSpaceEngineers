@@ -22,14 +22,14 @@ namespace IngameScript
 
         // states
         // 0 = init
-        // 1 = powered hovering. No connections
-        // 2 = landing gear locked. 
+        // 10 = powered hovering. No connections
+        // 20 = landing gear locked. 
         // 
 
         void doModeHover()
         {
             StatusLog("clear", textPanelReport);
-            Echo("Hover Mode:" + gpsCenter.CustomName);
+            Echo("Hover Mode:" + current_state);
             StatusLog(OurName + ":" + moduleName + ":Hover", textPanelReport);
             StatusLog("Planet Gravity: " + dGravity.ToString(velocityFormat) + " g", textPanelReport);
             double elevation = 0;
@@ -54,11 +54,22 @@ namespace IngameScript
                     cameraStage1LandingList = cameraDownList;
                 }
             }
+            if (current_state == 0)
+            {
+                float fAtmoPower, fHydroPower, fIonPower;
+                calculateHoverThrust(thrustStage1UpList, out fAtmoPower, out fHydroPower, out fIonPower);
+                if (fAtmoPower > 0) powerDownThrusters(thrustAllList, thrustatmo);
+                if (fHydroPower > 0) powerDownThrusters(thrustAllList, thrusthydro);
+                if (fIonPower > 0) powerDownThrusters(thrustAllList, thrustion);
+                current_state = 10;
+//                powerDownThrusters(thrustAllList, thrustAll);
+            }
 
             bool bGearsLocked = anyGearIsLocked();
             bool bConnectorsConnected = AnyConnectorIsConnected();
             bool bConnectorIsLocked = AnyConnectorIsLocked();
             bool bGearsReadyToLock = anyGearReadyToLock();
+
 
             /*
             Echo("Gears:");
@@ -69,7 +80,7 @@ namespace IngameScript
             */
             if (bGearsLocked)
             {
-                if (current_state != 2)
+                if (current_state != 20)
                 {
                     // gears just became locked
                     Echo("Force thrusters Off!");
@@ -83,17 +94,14 @@ namespace IngameScript
 //                        blockApplyAction(tankList, "Stockpile_On");
 //                        blockApplyAction(gasgenList, "OnOff_On");
                     }
-                    current_state = 2;
+                    current_state = 20;
                 }
                  landingDoMode(1);
            }
             else
             {
-                if (current_state != 1)
+                if (current_state != 10)
                 {
-                    Echo("Force thrusters ON!");
-                    powerDownThrusters(thrustAllList, thrustAll, true);
-//                    blockApplyAction(thrustAllList, "OnOff_On");
                     if ((craft_operation & CRAFT_MODE_NOTANK) == 0)
                     {
                         TanksStockpile(false);
@@ -101,7 +109,7 @@ namespace IngameScript
                         //				blockApplyAction(gasgenList,"OnOff_On");
                     }
 
-                    current_state = 1;
+                    current_state = 10;
                 }
                 landingDoMode(0);
             }
@@ -190,7 +198,7 @@ namespace IngameScript
                 if (hydroPercent >= 0)
                 {
                     StatusLog("Hyd:" + progressBar(hydroPercent * 100), textPanelReport);
-                    Echo("H:" + hydroPercent.ToString("0.0") + "%");
+                    Echo("H:" + (hydroPercent*100).ToString("0.0") + "%");
                     if(hydroPercent<0.20f)
                       StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
                 }

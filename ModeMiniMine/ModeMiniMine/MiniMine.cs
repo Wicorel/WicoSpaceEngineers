@@ -24,7 +24,6 @@ namespace IngameScript
         //        float fMaxSearchMins = 1.0f;
         //        float fMaxShipClearMins = 5.5f;
 
-        float fMiningSensorSettle = 1.0f; // seconds to wait for sensors to become reliable
 
         float fTargetMiningMps = 0.85f;
         float fMiningAbortMps = 2.0f;
@@ -36,7 +35,18 @@ namespace IngameScript
 
         bool bWaitingCargo = false;
 
+        string sMiningSection = "MINING";
 
+        void MiningInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sMiningSection, "cargopcthighwater", ref cargopcthighwater, true);
+            iNIHolder.GetValue(sMiningSection, "cargopctlowwater", ref cargopctlowwater, true);
+            iNIHolder.GetValue(sMiningSection, "TargetMiningMps", ref fTargetMiningMps, true);
+            iNIHolder.GetValue(sMiningSection, "MiningAbortMps", ref fMiningAbortMps, true);
+            iNIHolder.GetValue(sMiningSection, "MiningMinThrust", ref fMiningMinThrust, true);
+            iNIHolder.GetValue(sMiningSection, "AsteroidApproachMps", ref fAsteroidApproachMps, true);
+            iNIHolder.GetValue(sMiningSection, "AsteroidApproachAbortMps", ref fAsteroidApproachAbortMps, true);
+        }
         /*
          * 0 Master Init
          * 10 Init sensors
@@ -201,7 +211,7 @@ namespace IngameScript
                 case 11:
                     {
                         miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
-                        if (miningElapsedMs < fMiningSensorSettle) return;
+                        if (miningElapsedMs < dSensorSettleWaitMS) return;
 
                         aSensors = activeSensors();
                         bool bFoundAsteroid = false;
@@ -279,7 +289,7 @@ namespace IngameScript
                     break;
                 case 32:
                     miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
-                    if (miningElapsedMs < fMiningSensorSettle) return; // delay for sensor settling
+                    if (miningElapsedMs < dSensorSettleWaitMS) return; // delay for sensor settling
                     current_state = 35;
                     break;
                 case 35:
@@ -375,7 +385,7 @@ namespace IngameScript
                     break;
                 case 101:
                     miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
-                    if (miningElapsedMs < fMiningSensorSettle) return; // delay for sensor settling
+                    if (miningElapsedMs < dSensorSettleWaitMS) return; // delay for sensor settling
                     current_state++;
                     break;
 
@@ -444,7 +454,7 @@ namespace IngameScript
                     break;
                 case 111:
                     miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
-                    if (miningElapsedMs < fMiningSensorSettle) return; // delay for sensor settling
+                    if (miningElapsedMs < dSensorSettleWaitMS) return; // delay for sensor settling
                     current_state++;
                     break;
                 case 112:
@@ -496,7 +506,7 @@ namespace IngameScript
                         bAimed = GyroMain("forward", vExpectedExit, gpsCenter);
 
                         miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
-                        if (miningElapsedMs < fMiningSensorSettle) return;
+                        if (miningElapsedMs < dSensorSettleWaitMS) return;
 
                         if (bAimed)
                         {
@@ -953,7 +963,7 @@ namespace IngameScript
                     break;
                 case 11://11 - await sensor set
                     miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
-                    if (miningElapsedMs < fMiningSensorSettle) return;
+                    if (miningElapsedMs < dSensorSettleWaitMS) return;
                     current_state = 20;
                     break;
                 case 20: //20 - turn around until aimed ->30

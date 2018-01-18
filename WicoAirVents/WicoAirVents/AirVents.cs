@@ -45,6 +45,24 @@ namespace IngameScript
         bool bPressurization = false; // pressurization enabled in world settings
         bool bAVInit = false;
 
+        string sAirVentHangar = "hangar";
+        string sAirVentOutside = "outside";
+        string sAirVentBridge = "bridge";
+        string sAirVentCrew = "crew";
+        string sAirVentIsolated = "isolated";
+        string sAirVentAirlock = "airlock";
+        string sAirVentCockpit = "cockpit";
+
+        void AirVentInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sGridSection, "AirVentHangar", ref sAirVentHangar, true);
+            iNIHolder.GetValue(sGridSection, "AirVentOutside", ref sAirVentOutside, true);
+            iNIHolder.GetValue(sGridSection, "AirVentBridge", ref sAirVentBridge, true);
+            iNIHolder.GetValue(sGridSection, "AirVentCrew", ref sAirVentCrew, true);
+            iNIHolder.GetValue(sGridSection, "AirVentIsolated", ref sAirVentIsolated, true);
+            iNIHolder.GetValue(sGridSection, "AirVentAirlock", ref sAirVentAirlock, true);
+            iNIHolder.GetValue(sGridSection, "AirVentCockpit", ref sAirVentCockpit, true);
+        }
 
         string airventInit()
         {
@@ -57,21 +75,21 @@ namespace IngameScript
 
             for (int i = 0; i < airventList.Count; i++)
             {
-                if (airventList[i].CustomName.ToLower().Contains("hangar") || airventList[i].CustomData.ToLower().Contains("hangar"))
+                if (airventList[i].CustomName.ToLower().Contains(sAirVentHangar) || airventList[i].CustomData.ToLower().Contains(sAirVentHangar))
                     hangarairventList.Add(airventList[i]);
-                if (airventList[i].CustomName.ToLower().Contains("outside") || airventList[i].CustomData.ToLower().Contains("outside"))
+                if (airventList[i].CustomName.ToLower().Contains(sAirVentOutside) || airventList[i].CustomData.ToLower().Contains(sAirVentOutside))
                     outsideairventList.Add(airventList[i]);
-                if (airventList[i].CustomName.ToLower().Contains("bridge") || airventList[i].CustomData.ToLower().Contains("bridge"))
+                if (airventList[i].CustomName.ToLower().Contains(sAirVentBridge) || airventList[i].CustomData.ToLower().Contains(sAirVentBridge))
                     bridgeairventList.Add(airventList[i]);
-                if (airventList[i].CustomName.ToLower().Contains("crew") || airventList[i].CustomData.ToLower().Contains("crew"))
+                if (airventList[i].CustomName.ToLower().Contains(sAirVentHangar) || airventList[i].CustomData.ToLower().Contains(sAirVentHangar))
                     bridgeairventList.Add(airventList[i]);
 
-                if (airventList[i].CustomName.ToLower().Contains("isolated") || airventList[i].CustomData.ToLower().Contains("isolated"))
+                if (airventList[i].CustomName.ToLower().Contains(sAirVentIsolated) || airventList[i].CustomData.ToLower().Contains(sAirVentIsolated))
                     isolatedairlockairventList.Add(airventList[i]);
-                else if (airventList[i].CustomName.ToLower().Contains("airlock") || airventList[i].CustomData.ToLower().Contains("airlock"))
+                else if (airventList[i].CustomName.ToLower().Contains(sAirVentAirlock) || airventList[i].CustomData.ToLower().Contains(sAirVentAirlock))
                     airlockairventList.Add(airventList[i]);
 
-                if (airventList[i].CustomName.ToLower().Contains("cockpit") || airventList[i].CustomData.ToLower().Contains("cockpit"))
+                if (airventList[i].CustomName.ToLower().Contains(sAirVentCockpit) || airventList[i].CustomData.ToLower().Contains(sAirVentCockpit))
                     cockpitairventList.Add(airventList[i]);
 
             }

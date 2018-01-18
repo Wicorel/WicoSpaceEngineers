@@ -68,8 +68,8 @@ namespace IngameScript
                     Echo("invalid float value:" + args[1]);
                     return false;
                 }
-                fMaxMps = fValue;
-                sArgResults = "max speed set to " + fMaxMps.ToString() + "mps";
+                fMaxWorldMps = fValue;
+                sArgResults = "max speed set to " + fMaxWorldMps.ToString() + "mps";
 
             }
             else if (args[0] == "resetlaunch")

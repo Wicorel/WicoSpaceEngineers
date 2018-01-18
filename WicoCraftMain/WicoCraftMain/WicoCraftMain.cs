@@ -27,9 +27,30 @@ namespace IngameScript
         bool bSubModules = true;
         bool bCraftOperation = true;
 
+
+        float fMaxWorldMps = 100;
+        string sWorldSection = "WORLD";
+
+        void WorldInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sWorldSection, "MaxWorldMps", ref fMaxWorldMps, true);
+        }
+
         public Program()
         {
             doModuleConstructor();
+
+            INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
+            WorldInitCustomData(iniCustomData);
+            GridsInitCustomData(iniCustomData);
+            LoggingInitCustomData(iniCustomData);
+
+            ModuleInitCustomData(iniCustomData);
+            if (iniCustomData.IsDirty)
+            {
+                Me.CustomData = iniCustomData.GenerateINI(true);
+            }
+
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
             Echo(sBanner + "Creator");
 
@@ -69,7 +90,7 @@ namespace IngameScript
         void Main(string sArgument, UpdateType ut)
         {
            Echo(sBanner + tick());
-            Echo(ut.ToString());
+ //           Echo(ut.ToString());
             bWantFast = false;
             bWantMedium = false;
             //ProfilerGraph();

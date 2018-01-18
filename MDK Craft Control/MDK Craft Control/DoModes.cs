@@ -31,6 +31,8 @@ namespace IngameScript
                     setMode(MODE_DOCKED);
                 }
                 */
+ //           Echo("Grid Mass=" + gridBaseMass);
+
             if (iMode == MODE_IDLE) doModeIdle();
             else if (iMode == MODE_ATTENTION)
             {
@@ -54,7 +56,7 @@ namespace IngameScript
             //    if (navStatus != null) navStatus.CustomName=sNavStatus + " Control Reset";
             //bValidPlayerPosition = false;
             setMode(MODE_IDLE);
-            if (AnyConnectorIsConnected() && iMode != MODE_LAUNCH && iMode != MODE_RELAUNCH && !((craft_operation & CRAFT_MODE_ORBITAL) > 0) && !((craft_operation & CRAFT_MODE_NAD) > 0))
+            if (gridBaseMass>0 && AnyConnectorIsConnected() && iMode != MODE_LAUNCH && iMode != MODE_RELAUNCH && !((craft_operation & CRAFT_MODE_ORBITAL) > 0) && !((craft_operation & CRAFT_MODE_NAD) > 0))
                 setMode(MODE_DOCKED);
         }
         void doModeIdle()
@@ -62,7 +64,7 @@ namespace IngameScript
             StatusLog("clear", textPanelReport);
             StatusLog(OurName + ":" + moduleName + ":Manual Control (idle)", textPanelReport);
 
-            if (AnyConnectorIsConnected() && iMode != MODE_LAUNCH && iMode != MODE_RELAUNCH && !((craft_operation & CRAFT_MODE_ORBITAL) > 0) && !((craft_operation & CRAFT_MODE_NAD) > 0))
+            if (gridBaseMass > 0 && AnyConnectorIsConnected() && iMode != MODE_LAUNCH && iMode != MODE_RELAUNCH && !((craft_operation & CRAFT_MODE_ORBITAL) > 0) && !((craft_operation & CRAFT_MODE_NAD) > 0))
                 setMode(MODE_DOCKED);
         }
         #endregion

@@ -51,6 +51,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoPower", "..\WicoPower\W
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoINI", "..\WicoINI\WicoINI\WicoINI.shproj", "{AF4E1641-F4BB-4496-B66C-0F6388717061}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeDescent", "..\ModeDescent\ModeDescent\ModeDescent.shproj", "{DF7B8A6E-850A-4A20-A7DB-4DDE0D96FECF}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep.projitems*{012b8a6f-b626-488d-994a-f9cd3143aa5b}*SharedItemsImports = 13
@@ -92,6 +94,7 @@ Global
 		..\WicoCameras\WicoCameras\WicoCameras.projitems*{b867062b-ebc6-479b-847c-7b7b95836a9b}*SharedItemsImports = 13
 		..\WicoSerialize\WicoSerialize\WicoSerialize.projitems*{bf4282f6-a87f-4b4e-9c3b-8d6543623371}*SharedItemsImports = 13
 		..\WicoGrid\WicoGrid\WicoGrid.projitems*{cd5d65c2-f2c3-4a71-9c46-ade848dff34b}*SharedItemsImports = 13
+		..\ModeDescent\ModeDescent\ModeDescent.projitems*{df7b8a6e-850a-4a20-a7db-4dde0d96fecf}*SharedItemsImports = 13
 		..\WicoConnectors\WicoConnectors\WicoConnectors.projitems*{ebdc9b7f-652a-45bc-90c3-d16b2e3a6914}*SharedItemsImports = 13
 		..\WicoDetectedEntities\WicoDetectedEntities\WicoDetectedEntities.projitems*{f4a99ae8-36f6-4801-a032-8a03e3d52220}*SharedItemsImports = 13
 		..\ModeHover\ModeHover\ModeHover.projitems*{f6cd999f-d1a8-4f3d-b360-5d7a0141b9de}*SharedItemsImports = 13

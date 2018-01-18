@@ -23,6 +23,15 @@ namespace IngameScript
             // called from main constructor.
 
         }
+        void ModuleInitCustomData(INIHolder iniCustomData)
+        {
+            ConnectorInitCustomData(iniCustomData);
+            ThrustersInitCustomData(iniCustomData);
+            GyroInitCustomData(iniCustomData);
+            CamerasInitCustomData(iniCustomData);
+            GearsInitCustomData(iniCustomData);
+
+        }
 
         #region maininit
 

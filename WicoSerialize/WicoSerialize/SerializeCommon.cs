@@ -24,7 +24,13 @@ namespace IngameScript
         // 1105 allow save file to use contains()
         // V3.0 - redo all variables & cleanup
         #region serializecommon
-        const string SAVE_FILE_NAME = "Wico Craft Save";
+        string SAVE_FILE_NAME = "Wico Craft Save";
+        string sSerializeSection = "SERIALIZE";
+        void SerializeInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sSerializeSection, "SAVE_FILE_NAME", ref SAVE_FILE_NAME, true);
+        }
+
         float savefileversion = 3.00f;
         IMyTextPanel SaveFile = null;
 
