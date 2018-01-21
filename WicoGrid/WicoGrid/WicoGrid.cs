@@ -18,6 +18,7 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        // 01202018 Move grid orientation block here (old shipOrientationBlock)
         // 01142018 INI init for settings
 
         // 04/08: NOFOLLOW for rotors (for print heads)
@@ -29,13 +30,22 @@ namespace IngameScript
         #region getgrids
 
         string sNoFollow = "NOFOLLOW";
-        string sGridSection = "GRIDS";
         string sBlockIgnore = "!WCC";
+        string sOrientationBlockContains = "[NAV]";
+        string sOrientationBlockNamed = "Craft Remote Control";
+
+        // the following function can be removed if you don't want to use my INIHolder code
+        string sGridSection = "GRIDS";
         void GridsInitCustomData(INIHolder iNIHolder)
         {
             iNIHolder.GetValue(sGridSection, "NoFollow", ref sNoFollow, true);
             iNIHolder.GetValue(sGridSection, "BlockIgnore", ref sBlockIgnore, true);
+            iNIHolder.GetValue(sGridSection, "OrientationBlockContains", ref sOrientationBlockContains, true);
+            iNIHolder.GetValue(sGridSection, "OrientationBlockNamed", ref sOrientationBlockNamed, true);
         }
+        // --End removable code
+
+
         List<IMyTerminalBlock> gtsAllBlocks = new List<IMyTerminalBlock>();
 
         List<IMyCubeGrid> localGrids = new List<IMyCubeGrid>();
@@ -285,7 +295,8 @@ namespace IngameScript
         public List<T> GetTargetBlocks<T>(ref List<T> Output, string Keyword = null) where T : class
         {
             if (gtsAllBlocks.Count < 1) gridsInit();
-            Output.Clear();
+            if (Output == null) Output = new List<T>();
+            else   Output.Clear();
             for (int e = 0; e < gtsAllBlocks.Count; e++)
             {
                 if (localGridFilter(gtsAllBlocks[e]) && gtsAllBlocks[e] is T && ((Keyword == null) || (Keyword != null && gtsAllBlocks[e].CustomName.StartsWith(Keyword))))
@@ -298,7 +309,8 @@ namespace IngameScript
         public List<IMyTerminalBlock> GetTargetBlocks<T>(ref List<IMyTerminalBlock> Output, string Keyword = null) where T : class
         {
             if (gtsAllBlocks.Count < 1) gridsInit();
-            Output.Clear();
+            if (Output == null) Output = new List<IMyTerminalBlock>();
+            else Output.Clear();
             for (int e = 0; e < gtsAllBlocks.Count; e++)
             {
                 if (localGridFilter(gtsAllBlocks[e]) && gtsAllBlocks[e] is T && ((Keyword == null) || (Keyword != null && gtsAllBlocks[e].CustomName.StartsWith(Keyword))))
@@ -367,7 +379,69 @@ namespace IngameScript
         }
 
         #endregion
+        IMyTerminalBlock shipOrientationBlock = null;
 
+        string DefaultOrientationBlockInit()
+        {
+            string sInitResults = "";
+
+            List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
+            //            GridTerminalSystem.SearchBlocksOfName(sshipOrientationBlock, centerSearch, localGridFilter);
+            GetTargetBlocks<IMyTerminalBlock>(ref centerSearch, sOrientationBlockNamed);
+
+            if (centerSearch.Count == 0)
+            {
+                centerSearch = GetBlocksContains<IMyRemoteControl>("[NAV]");
+                if (centerSearch.Count == 0)
+                {
+                    //                    GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
+                    GetTargetBlocks<IMyRemoteControl>(ref centerSearch);
+                    if (centerSearch.Count == 0)
+                    {
+                        //                        GridTerminalSystem.GetBlocksOfType<IMyCockpit>(centerSearch, localGridFilter);
+                        GetTargetBlocks<IMyCockpit>(ref centerSearch);
+                        //                GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
+                        int i = 0;
+                        for (; i < centerSearch.Count; i++)
+                        {
+                            Echo("Checking Controller:" + centerSearch[i].CustomName);
+                            if (centerSearch[i] is IMyCryoChamber)
+                                continue;
+                            break;
+                        }
+                        if (i >= centerSearch.Count)
+                        {
+                            sInitResults += "!!NO valid Controller";
+                            Echo("No Controller found");
+                        }
+                        else
+                        {
+                            sInitResults += "S";
+                            Echo("Using good ship Controller: " + centerSearch[i].CustomName);
+                        }
+                    }
+                    else
+                    {
+                        sInitResults += "R";
+                        Echo("Using First Remote control found: " + centerSearch[0].CustomName);
+                    }
+                }
+            }
+            else
+            {
+                sInitResults += "N";
+                Echo("Using Named: " + centerSearch[0].CustomName);
+            }
+            if (centerSearch.Count > 0)
+                shipOrientationBlock = centerSearch[0];
+            /*
+            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
+            blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
+            if (blocks.Count > 0)
+                gpsPanel = blocks[0] as IMyTextPanel;
+            */
+            return sInitResults;
+        }
 
     }
 }
