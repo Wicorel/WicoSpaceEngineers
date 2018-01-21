@@ -136,4 +136,7 @@
 * FilledRatio Change
 * 
 * 3.2B Lots of INI processing
+* 
+* 3.3 Handle multiple output panels.
+* Only write to panels at end
 */

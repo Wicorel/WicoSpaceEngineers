@@ -54,6 +54,9 @@
 * SenorUse
 * For docking, only use lights with [BASE]
 * 
+* 3.3 0119 Lists of panels.
+* Output to panels at END of script.
+* 
 * TODO: Process size info to select connectors
 * TODO: drones may take up more than one connector depending on height, width.
 * 

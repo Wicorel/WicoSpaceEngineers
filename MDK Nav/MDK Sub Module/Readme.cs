@@ -61,5 +61,8 @@
 
     3.2E Major INI settings
 
+    3.3 Lists of text panels
+    Only output to textpanels and end of run
+
 	* TODO: 
 	*/

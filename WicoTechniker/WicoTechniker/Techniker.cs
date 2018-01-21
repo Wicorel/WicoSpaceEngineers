@@ -35,7 +35,7 @@ namespace IngameScript
             StatusLog(output, textPanelReport);
 
             if (bCreative) Echo("Creative!");
-            Echo("Cargomult=" + cargoMult);
+ //           Echo("Cargomult=" + cargoMult);
 
             sb.Clear();
             sb.AppendLine();
@@ -76,10 +76,10 @@ namespace IngameScript
                     double distance = Vector3D.Distance(lastCamera.GetPosition(), lastDetectedInfo.HitPosition.Value);
                     if (lastDetectedInfo.Name == "Asteroid")
                     {
-                        // calculate range to outter edge of boudnign box of asteroid.
+                        // calculate range to outter edge of boudning box of asteroid.
                         targetRange = Vector3D.Distance(lastCamera.GetPosition(), lastDetectedInfo.Position);
                         targetRange -= lastDetectedInfo.BoundingBox.Size.X / 2; // half of bounding box.
-                        Echo("TargetRange=" + targetRange.ToString());
+                        Echo("adjTargetRange=" + targetRange.ToString("0.0"));
                     }
                     else
                     {

@@ -1,17 +1,6 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
+﻿using Sandbox.ModAPI.Ingame;
 using System;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
+using System.Collections.Generic;
 using VRageMath;
 
 namespace IngameScript
@@ -51,16 +40,16 @@ namespace IngameScript
         {
             int next_state = current_state;
 
-            IMyTextPanel textBlock = textPanelReport;
+ //          IMyTextPanel textPanelReport= textPanelReport;
 
-            StatusLog("clear", textBlock);
+            StatusLog("clear", textPanelReport);
             Log("clear");
 
-            StatusLog(OurName + ":" + moduleName + ":Oribital Launch", textBlock);
+            StatusLog(OurName + ":" + moduleName + ":Oribital Launch", textPanelReport);
             Log(OurName + ":" + moduleName + ":Oribital Launch");
 
             StatusLog("Planet Gravity: " + dGravity.ToString(velocityFormat) + " g", textPanelReport);
-            StatusLog(velocityShip.ToString(velocityFormat) + " m/s", textBlock);
+            StatusLog(velocityShip.ToString(velocityFormat) + " m/s", textPanelReport);
             Echo("Orbital Launch. State=" + current_state.ToString());
             if (thrustStage1UpList.Count < 1)
             {
@@ -139,7 +128,7 @@ namespace IngameScript
                 StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + current_state.ToString(), textLongStatus, true);
                 if (AnyConnectorIsConnected() || AnyConnectorIsLocked() || anyGearIsLocked())
                 {
-                    StatusLog("Awaiting release", textBlock);
+                    StatusLog("Awaiting release", textPanelReport);
                     Log("Awaiting release");
                 }
                 else
@@ -173,12 +162,12 @@ namespace IngameScript
             if (bValidTarget)
             {
                 alt = (vCurrentPos - vTarget).Length();
-                StatusLog("Distance: " + alt.ToString("N0") + " Meters", textBlock);
+                StatusLog("Distance: " + alt.ToString("N0") + " Meters", textPanelReport);
 
                 double elevation = 0;
 
                 ((IMyShipController)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
-                StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textBlock);
+                StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textPanelReport);
 
 
             }
@@ -196,7 +185,7 @@ namespace IngameScript
 
             if (current_state == 20)
             { // trying to move
-                StatusLog("Attempting Lift-off", textBlock);
+                StatusLog("Attempting Lift-off", textPanelReport);
                 Log("Attempting Lift-off");
                 // NOTE: need to NOT turn off atmo if we get all the way into using ions for this state.. and others?
                 if (velocityShip < 3f)
@@ -217,11 +206,11 @@ namespace IngameScript
                 if (alt > 5)
                 {
                     if ((craft_operation & CRAFT_MODE_NOAUTOGYRO) > 0)
-                        StatusLog("Wico Gravity Alignment OFF", textBlock);
+                        StatusLog("Wico Gravity Alignment OFF", textPanelReport);
                     else
                     {
 
-                        StatusLog("Gravity Alignment Operational", textBlock);
+                        StatusLog("Gravity Alignment Operational", textPanelReport);
                         string sOrientation = "";
                         if ((craft_operation & CRAFT_MODE_ROCKET) > 0)
                             sOrientation = "rocket";
@@ -234,13 +223,13 @@ namespace IngameScript
 
             if (current_state == 30)
             { // Retract landing config
-                StatusLog("Movement started. Retracting Landing config ", textBlock);
+                StatusLog("Movement started. Retracting Landing config ", textPanelReport);
                 Log("Movement started. Retracting Landing config ");
                 next_state = 31;
             }
             if (current_state == 31)
             { // accelerate to max speed
-                StatusLog("Accelerating to max speed (" + fMaxWorldMps.ToString("0") + ")", textBlock);
+                StatusLog("Accelerating to max speed (" + fMaxWorldMps.ToString("0") + ")", textPanelReport);
                 Log("Accelerating to max speed");
                 if (dLastVelocityShip < velocityShip)
                 { // we are Accelerating
@@ -266,9 +255,9 @@ namespace IngameScript
 
             if (current_state == 40)
             { // maintain max speed
-                StatusLog("Maintain max speed", textBlock);
+                StatusLog("Maintain max speed", textPanelReport);
                 Log("Maintain max speed");
-                if (bOrbitalLaunchDebug) StatusLog("Expectedv=" + expectedV.ToString("0.00") + " max=" + fMaxWorldMps.ToString("0.00"), textBlock);
+                if (bOrbitalLaunchDebug) StatusLog("Expectedv=" + expectedV.ToString("0.00") + " max=" + fMaxWorldMps.ToString("0.00"), textPanelReport);
                 if (bOrbitalLaunchDebug) Echo("Expectedv=" + expectedV.ToString("0.00") + " max=" + fMaxWorldMps.ToString("0.00"));
                 double dMin = (fMaxWorldMps - fMaxWorldMps * .05);
                 if (expectedV > dMin)
@@ -276,7 +265,7 @@ namespace IngameScript
                 {
                     calculateHoverThrust(thrustStage1UpList, out fAtmoPower, out fHydroPower, out fIonPower);
                     if (bOrbitalLaunchDebug) Echo("hover thrust:" + fAtmoPower.ToString("0.00") + ":" + fHydroPower.ToString("0.00") + ":" + fIonPower.ToString("0.00"));
-                    if (bOrbitalLaunchDebug) StatusLog("hover thrust:" + fAtmoPower.ToString("0.00") + ":" + fHydroPower.ToString("0.00") + ":" + fIonPower.ToString("0.00"), textBlock);
+                    if (bOrbitalLaunchDebug) StatusLog("hover thrust:" + fAtmoPower.ToString("0.00") + ":" + fHydroPower.ToString("0.00") + ":" + fIonPower.ToString("0.00"), textPanelReport);
                     /*
                      * Not needed as of 1.185
                     if (fAtmoPower < 1.001)
@@ -303,7 +292,7 @@ namespace IngameScript
             }
             dLastVelocityShip = velocityShip;
 
-            StatusLog("", textBlock);
+            StatusLog("", textPanelReport);
 
             //	if (bValidExtraInfo)
             StatusLog("Car:" + progressBar(cargopcent), textPanelReport);
@@ -335,7 +324,7 @@ namespace IngameScript
                 Log(" WARNING: Low Battery Power");
             }
 
-            StatusLog("", textBlock);
+            StatusLog("", textPanelReport);
             if (dGravity < 0.01)
             {
                 powerDownThrusters(thrustAllList);
@@ -389,11 +378,11 @@ namespace IngameScript
                 powerDownThrusters(thrustStage1DownList, thrustAll, true);
             }
 
-            if (ionThrustCount > 0) StatusLog("ION:" + progressBar(fIonPower), textBlock);
-            if (hydroThrustCount > 0) StatusLog("HYD:" + progressBar(fHydroPower), textBlock);
-            if (atmoThrustCount > 0) StatusLog("ATM:" + progressBar(fAtmoPower), textBlock);
+            if (ionThrustCount > 0) StatusLog("ION:" + progressBar(fIonPower), textPanelReport);
+            if (hydroThrustCount > 0) StatusLog("HYD:" + progressBar(fHydroPower), textPanelReport);
+            if (atmoThrustCount > 0) StatusLog("ATM:" + progressBar(fAtmoPower), textPanelReport);
             if (bOrbitalLaunchDebug)
-                StatusLog("I:" + fIonPower.ToString("0.00") + "H:" + fHydroPower.ToString("0.00") + " A:" + fAtmoPower.ToString("0.00"), textBlock);
+                StatusLog("I:" + fIonPower.ToString("0.00") + "H:" + fHydroPower.ToString("0.00") + " A:" + fAtmoPower.ToString("0.00"), textPanelReport);
             current_state = next_state;
 
         }

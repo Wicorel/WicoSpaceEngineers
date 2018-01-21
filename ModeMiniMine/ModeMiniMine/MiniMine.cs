@@ -144,8 +144,8 @@ namespace IngameScript
 //            Echo("velocity=" + velocityShip.ToString("0.00"));
 //            Echo("miningElapsedMs=" + miningElapsedMs.ToString("0.00"));
 
-            IMyTextPanel txtPanel = getTextBlock("Sensor Report");
-            StatusLog("clear", txtPanel);
+ //           IMyTextPanel txtPanel = getTextBlock("Sensor Report");
+ //           StatusLog("clear", txtPanel);
 
             if (bValidAsteroid)
                 debugGPSOutput("Pre-Valid Ast", vTargetAsteroid);
@@ -218,7 +218,7 @@ namespace IngameScript
                         for (int i = 0; i < aSensors.Count; i++)
                         {
                             IMySensorBlock s = aSensors[i] as IMySensorBlock;
-                            StatusLog(aSensors[i].CustomName + " ACTIVE!", txtPanel);
+//                            StatusLog(aSensors[i].CustomName + " ACTIVE!", txtPanel);
                             Echo(aSensors[i].CustomName + " ACTIVE!");
 
                             List<MyDetectedEntityInfo> lmyDEI = new List<MyDetectedEntityInfo>();
@@ -396,7 +396,7 @@ namespace IngameScript
                         for (int i = 0; i < aSensors.Count; i++)
                         {
                             IMySensorBlock s = aSensors[i] as IMySensorBlock;
-                            StatusLog(aSensors[i].CustomName + " ACTIVE!", txtPanel);
+//                            StatusLog(aSensors[i].CustomName + " ACTIVE!", txtPanel);
                             Echo(aSensors[i].CustomName + " ACTIVE!");
 
                             List<MyDetectedEntityInfo> lmyDEI = new List<MyDetectedEntityInfo>();
@@ -464,7 +464,7 @@ namespace IngameScript
                         for (int i = 0; i < aSensors.Count; i++)
                         {
                             IMySensorBlock s = aSensors[i] as IMySensorBlock;
-                            StatusLog(aSensors[i].CustomName + " ACTIVE!", txtPanel);
+//                            StatusLog(aSensors[i].CustomName + " ACTIVE!", txtPanel);
                             Echo(aSensors[i].CustomName + " ACTIVE!");
 
                             List<MyDetectedEntityInfo> lmyDEI = new List<MyDetectedEntityInfo>();
@@ -891,8 +891,8 @@ namespace IngameScript
             Echo("height=" + shipDim.HeightInMeters().ToString("0.0"));
             Echo("length=" + shipDim.LengthInMeters().ToString("0.0"));
 
-            IMyTextPanel txtPanel = getTextBlock("Sensor Report");
-            StatusLog("clear", txtPanel);
+//            IMyTextPanel txtPanel = getTextBlock("Sensor Report");
+//            StatusLog("clear", txtPanel);
 
         }
 
@@ -926,8 +926,8 @@ namespace IngameScript
             Echo("height=" + shipDim.HeightInMeters().ToString("0.0"));
             Echo("length=" + shipDim.LengthInMeters().ToString("0.0"));
 
-            IMyTextPanel txtPanel = getTextBlock("Sensor Report");
-            StatusLog("clear", txtPanel);
+//            IMyTextPanel txtPanel = getTextBlock("Sensor Report");
+//            StatusLog("clear", txtPanel);
 
         /*
          * 0 - Master Init
@@ -1019,7 +1019,7 @@ namespace IngameScript
                         for (int i = 0; i < aSensors.Count; i++)
                         {
                             IMySensorBlock s = aSensors[i] as IMySensorBlock;
-                            StatusLog(aSensors[i].CustomName + " ACTIVE!", txtPanel);
+//                            StatusLog(aSensors[i].CustomName + " ACTIVE!", txtPanel);
                             Echo(aSensors[i].CustomName + " ACTIVE!");
 
                             List<MyDetectedEntityInfo> lmyDEI = new List<MyDetectedEntityInfo>();

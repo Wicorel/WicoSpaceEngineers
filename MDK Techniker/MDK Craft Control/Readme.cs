@@ -25,6 +25,9 @@
 * INI helper additions
 * Active name for sensor selection [WICO]
 * 
+* T3.3B Multiple text panels
+* Only write panels and end of script
+* 
 * Handles:
 * Master timer for sub-modules
 * Calculates ship speed and vectors

@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Master";
-        string sVersion = "3.2B";
+        string sVersion = "3.3";
 
         string sGPSCenter = "Craft Remote Control";
 
@@ -47,6 +47,7 @@ namespace IngameScript
         void moduleDoPreModes()
         {
             StatusLog("clear", textPanelReport);
+            StatusLog("clear", gpsPanel);
 
             string output = "";
             if (gridBaseMass > 0)

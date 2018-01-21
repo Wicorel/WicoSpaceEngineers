@@ -59,9 +59,6 @@ namespace IngameScript
             MyShipMass myMass;
             myMass = ((IMyShipController)anchorPosition).CalculateShipMass();
 
-            //	double hoverthrust = 0;
-            //	hoverthrust = myMass.TotalMass * dGravity * 9.810;
-
             if (bValidLaunch1)
             {
                 // source position was connector
@@ -246,7 +243,7 @@ namespace IngameScript
                         current_state = 10;
                 }
             }
-            Echo("After init check=" + current_state.ToString());
+ //           Echo("After init check=" + current_state.ToString());
             if (current_state == 10)
             {
                 Echo("Dampeners to on. Aim toward target");
@@ -475,7 +472,6 @@ namespace IngameScript
                     }
                 }
             }
-
 
             if (current_state == 100)
             {

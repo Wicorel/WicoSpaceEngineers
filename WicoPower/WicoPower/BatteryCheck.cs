@@ -83,7 +83,8 @@ namespace IngameScript
          * 
          * This is to prevent overloading power on the mother ship
          */
-        bool batteryCheck(int targetMax, bool bEcho = true, IMyTextPanel textBlock = null, bool bProgress = false)
+//        bool batteryCheck(int targetMax, bool bEcho = true, IMyTextPanel textBlock = null, bool bProgress = false)
+        bool batteryCheck(int targetMax, bool bEcho = true, bool bProgress = false)
         {
             float totalCapacity = 0;
             float totalCharge = 0;
@@ -130,6 +131,7 @@ namespace IngameScript
                 s += percentthisbattery + "%";
                 s += ":" + batteryList[ib].CustomName;
                 if (bEcho) Echo(s);
+                /*
                 if (textBlock != null)
                 {
                     StatusLog(s, textBlock);
@@ -139,6 +141,7 @@ namespace IngameScript
                         StatusLog(s, textBlock);
                     }
                 }
+                */
                 if (isRechargeSet(batteryList[ib]) && targetMax>0)
                 {
                     if (percentthisbattery < targetMax)

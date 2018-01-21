@@ -99,4 +99,7 @@ MODE_DOCKED tries to fill tanks and batteries.
 
 3.2h
 
+3.3 Multiple Text Panels.
+Only write to panels at the end of script.
+
 */

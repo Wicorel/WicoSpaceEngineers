@@ -58,6 +58,7 @@ namespace IngameScript
                         ref thrustLaunchLeftList, ref thrustLaunchRightList);
                 }
                 vDock = ((IMyShipController)gpsCenter).CenterOfMass;
+                TanksStockpile(false);
 //                vDock = gpsCenter.GetPosition();
                 powerDownThrusters(thrustAllList); // turns ON all thrusters.
                 float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;

@@ -99,7 +99,7 @@ namespace IngameScript
 
         }
 
-        IMyTextPanel gpsPanel = null;
+//        IMyTextPanel gpsPanel = null;
 
         string BlockInit()
         {
@@ -150,11 +150,12 @@ namespace IngameScript
             }
             if (centerSearch.Count > 0)
                 gpsCenter = centerSearch[0];
+            /*
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
             if (blocks.Count > 0)
                 gpsPanel = blocks[0] as IMyTextPanel;
-
+                */
             return sInitResults;
         }
         string modeOnInit()

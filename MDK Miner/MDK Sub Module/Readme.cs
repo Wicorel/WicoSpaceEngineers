@@ -43,6 +43,9 @@
  * 
  * 3.2B INI setting lots of things
  * 
+ * 3.3 Lists of Text panels
+ * Only output to panels and end of script.
+ * 
  * NEED:  
  *  
  * WANTED: 

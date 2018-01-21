@@ -112,8 +112,7 @@ namespace IngameScript
             return sInitResults;
         }
 
-        IMyTextPanel gpsPanel = null;
-
+ 
         string BlockInit()
         {
             string sInitResults = "";
@@ -161,10 +160,13 @@ namespace IngameScript
                 gpsCenter = centerSearch[0];
             }
 
+            /*
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
+
             if (blocks.Count > 0)
                 gpsPanel = blocks[0] as IMyTextPanel;
+            */
             if (gpsCenter == null) Echo("ERROR: No control block found!");
             return sInitResults;
         }

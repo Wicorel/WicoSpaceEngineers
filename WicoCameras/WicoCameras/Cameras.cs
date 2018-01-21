@@ -358,7 +358,7 @@ namespace IngameScript
                 bool bSomethingFound = false;
                 for (int scan = 0; scan < scansPerCall; scan++)
                 {
-                    if (doCameraScan(cameras, SCAN_DISTANCE, NEXTPITCH, NEXTYAW))
+                    if (_pg.doCameraScan(cameras, SCAN_DISTANCE, NEXTPITCH, NEXTYAW))
                     {
 //                        lastDetectedInfo = _pg.lastDetectedInfo;
 
@@ -452,47 +452,6 @@ namespace IngameScript
                 return bSomethingFound;
             }
 
-            bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
-            {
-                double foundmax = 0;
-                lastCamera = null;
-                for (int i = 0; i < cameraList.Count; i++)
-                {
-                    double thismax = ((IMyCameraBlock)cameraList[i]).AvailableScanRange;
-                    //		Echo(cameraList[i].CustomName + ":maxRange:" + thismax.ToString("N0"));
-                    // find camera with highest scan range.
-                    if (thismax > foundmax)
-                    {
-                        foundmax = thismax;
-                        lastCamera = cameraList[i];
-                    }
-                }
-
-                IMyCameraBlock camera = lastCamera as IMyCameraBlock;
-                if (lastCamera == null)
-                {
-                    return false;
-                }
-
-                if (camera.CanScan(scandistance))
-                {
-                    //		Echo("simple Scan with Camera:" + camera.CustomName);
-
-                    lastDetectedInfo = camera.Raycast(scandistance, pitch, yaw);
-                    lastCamera = camera;
-
-                    //                    if (!lastDetectedInfo.IsEmpty())
-                    //                        addDetectedEntity(lastDetectedInfo);
-
-                    return true;
-                }
-                else
-                {
-                    //                    Echo(camera.CustomName + ":" + camera.AvailableScanRange.ToString("N0"));
-                }
-
-                return false;
-            }
 
         }
 

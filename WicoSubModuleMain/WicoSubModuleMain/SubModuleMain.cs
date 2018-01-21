@@ -26,6 +26,8 @@ namespace IngameScript
         float fMaxWorldMps = 100;
         string sWorldSection = "WORLD";
 
+        bool bSubModule=true;
+
         void WorldInitCustomData(INIHolder iNIHolder)
         {
             iNIHolder.GetValue(sWorldSection, "MaxWorldMps", ref fMaxWorldMps, true);
@@ -136,6 +138,7 @@ namespace IngameScript
                     if (moduleProcessArguments(sArgument))
                     {
                         Serialize();
+                        UpdateAllPanels();
                         return;
                     }
 
@@ -146,6 +149,7 @@ namespace IngameScript
                     if (moduleProcessArguments(sArgument))
                     {
                         Serialize();
+                        UpdateAllPanels();
                         return;
                     }
 
@@ -156,6 +160,7 @@ namespace IngameScript
                     if (moduleProcessArguments(sArgument))
                     {
                         Serialize();
+                        UpdateAllPanels();
                         return;
                     }
 
@@ -169,6 +174,7 @@ namespace IngameScript
                     }
                     Serialize();
                     doTriggerMain();
+                    UpdateAllPanels();
                     return;
                 }
                 else
@@ -209,8 +215,9 @@ namespace IngameScript
             modulePostProcessing();
 
             bWasInit = false;
+            UpdateAllPanels();
         }
-#endregion
+        #endregion
 
         void echoInstructions(string sBanner = null)
         {

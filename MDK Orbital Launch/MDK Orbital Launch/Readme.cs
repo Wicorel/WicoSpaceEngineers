@@ -37,6 +37,9 @@
 * 
 * 3.2b remove atmocrossover alt and use effectiveness of atmothrusters
 * 
+* 3.3 Support multiple Text Panels
+* Only write to text panels at end of script.
+* 
 * Need:
 *  circumnavigate planet to target spot
 *  'ask' for docking position after arriving at 'spot'

@@ -21,7 +21,7 @@ namespace IngameScript
          void doModuleConstructor()
         {
             // called from main constructor.
-            bDisableLogging = true;
+//            bDisableLogging = true;
 
         }
 
@@ -95,7 +95,7 @@ namespace IngameScript
             return sInitResults;
         }
 
-        IMyTextPanel gpsPanel = null;
+//        IMyTextPanel gpsPanel = null;
 
         string BlockInit()
         {
@@ -143,11 +143,12 @@ namespace IngameScript
                 sInitResults += "N";
                 gpsCenter = centerSearch[0];
             }
-
+            /*
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
             if (blocks.Count > 0)
                 gpsPanel = blocks[0] as IMyTextPanel;
+            */
             if (gpsCenter == null) Echo("ERROR: No control block found!");
             return sInitResults;
         }

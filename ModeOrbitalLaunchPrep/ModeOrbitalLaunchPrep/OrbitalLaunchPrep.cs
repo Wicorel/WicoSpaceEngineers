@@ -21,12 +21,12 @@ namespace IngameScript
 
         void doModeLaunchprep()
         {
-            IMyTextPanel textBlock = textPanelReport;
+ //           IMyTextPanel textPanelReport = this.textPanelReport;
 
-            StatusLog("clear", textBlock);
+            StatusLog("clear", textPanelReport);
 
-            StatusLog(OurName + ":" + moduleName + ":Launch Prep", textBlock);
-            StatusLog("Planet Gravity: " + dGravity.ToString(velocityFormat) + " g", textBlock);
+            StatusLog(OurName + ":" + moduleName + ":Launch Prep", textPanelReport);
+            StatusLog("Planet Gravity: " + dGravity.ToString(velocityFormat) + " g", textPanelReport);
 
             Echo(moduleName + ":LaunchPrep:" + current_state);
  //           Echo("BatteryPercentage=" + batteryPercentage);
@@ -39,7 +39,7 @@ namespace IngameScript
                 {
                     setMode(MODE_INSPACE);
                     gyrosOff();
-                    StatusLog("clear", textBlock);
+                    StatusLog("clear", textPanelReport);
                 }
                 return;
             }
@@ -47,11 +47,11 @@ namespace IngameScript
 
             if (anyGearIsLocked())
             {
-                StatusLog("Landing Gear(s) LOCKED!", textBlock);
+                StatusLog("Landing Gear(s) LOCKED!", textPanelReport);
             }
             if (AnyConnectorIsConnected())
             {
-                StatusLog("Connector connected!\n   auto-prepare for launch", textBlock);
+                StatusLog("Connector connected!\n   auto-prepare for launch", textPanelReport);
             }
             else
             {
@@ -65,7 +65,7 @@ namespace IngameScript
 
             if (AnyConnectorIsLocked())
             {
-                StatusLog("Connector Locked!", textBlock);
+                StatusLog("Connector Locked!", textPanelReport);
             }
 
             if (AnyConnectorIsLocked() || anyGearIsLocked())
@@ -115,29 +115,29 @@ namespace IngameScript
 
             if (batteryList.Count > 0)
             {
-                StatusLog("Bat:" + progressBar(batteryPercentage), textBlock);
+                StatusLog("Bat:" + progressBar(batteryPercentage), textPanelReport);
                 Echo("BatteryPercentage=" + batteryPercentage);
             }
-            else StatusLog("Bat: <NONE>", textBlock);
+            else StatusLog("Bat: <NONE>", textPanelReport);
 
             if (oxyPercent >= 0)
             {
-                StatusLog("O2:" + progressBar(oxyPercent * 100), textBlock);
+                StatusLog("O2:" + progressBar(oxyPercent * 100), textPanelReport);
                 //Echo("O:" + oxyPercent.ToString("000.0%"));
             }
             else Echo("No Oxygen Tanks");
 
             if (hydroPercent >= 0)
             {
-                StatusLog("Hyd:" + progressBar(hydroPercent * 100), textBlock);
+                StatusLog("Hyd:" + progressBar(hydroPercent * 100), textPanelReport);
                 if(hydroPercent<0.20f)
-                    StatusLog(" WARNING: Low Hydrogen Supplies", textBlock);
+                    StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
 
                 Echo("H:" + hydroPercent.ToString("000.0%"));
             }
             else Echo("No Hydrogen Tanks");
             if (batteryList.Count>0 && batteryPercentage < batterypctlow)
-                StatusLog(" WARNING: Low Battery Power", textBlock);
+                StatusLog(" WARNING: Low Battery Power", textPanelReport);
 
 
         }

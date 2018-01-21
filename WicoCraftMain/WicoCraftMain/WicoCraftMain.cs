@@ -31,6 +31,8 @@ namespace IngameScript
         float fMaxWorldMps = 100;
         string sWorldSection = "WORLD";
 
+        bool bSubModule = false;
+
         void WorldInitCustomData(INIHolder iNIHolder)
         {
             iNIHolder.GetValue(sWorldSection, "MaxWorldMps", ref fMaxWorldMps, true);
@@ -241,8 +243,11 @@ namespace IngameScript
                     dGravity = -1.0;
                 }
 
-               if (processArguments(sArgument))
+                if (processArguments(sArgument))
+                {
+                    UpdateAllPanels();
                     return;
+                }
 
                moduleDoPreModes();
 
@@ -280,6 +285,7 @@ namespace IngameScript
             if(bCraftOperation) Echo(craftOperation());
 
             modulePostProcessing();
+            UpdateAllPanels();
         }
 
         #endregion
