@@ -52,7 +52,7 @@ namespace IngameScript
             }
             else
             {
-                if (bVerboseSerialize) Echo("Not saving AST: Same");
+//                if (bVerboseSerialize) Echo("Not saving AST: Same");
             }
         }
 
@@ -76,7 +76,10 @@ namespace IngameScript
                 return;
             }
 
-            if (sAsteroidSave == sLastAsteroidLoad) return; // no changes in saved info.
+            if (sAsteroidSave == sLastAsteroidLoad)
+            {
+                return; // no changes in saved info.
+            }
 
             asteroidsInfo.Clear();
             double x1, y1, z1;
@@ -85,13 +88,6 @@ namespace IngameScript
             string[] atheStorage = sAsteroidSave.Split('\n');
 
             int iLine=0;
-            /*
-            // Trick using a "local method", to get the next line from the array `atheStorage`.
-            Func<string> getLine = () =>
-            {
-                return (iLine >= 0 && atheStorage.Length > iLine ? atheStorage[iLine++] : null);
-            };
-            */
             int iCount = -1;
             if (atheStorage.Length < 2)
                 return; // nothing to parse
@@ -129,7 +125,6 @@ namespace IngameScript
         void initAsteroidsInfo()
         {
             asteroidsInfo.Clear();
-            InitMinerInfo();
 
             // load from text panel...
             AsteroidsDeserialize();
@@ -165,7 +160,7 @@ namespace IngameScript
 
         }
 
-        void addAsteroid(MyDetectedEntityInfo thisDetectedInfo, bool bTransmitAsteroid = true)
+        void AsteroidAdd(MyDetectedEntityInfo thisDetectedInfo, bool bTransmitAsteroid = true)
         {
             if (thisDetectedInfo.IsEmpty() || thisDetectedInfo.Type != MyDetectedEntityType.Asteroid) return;
             AsteroidAdd((long)thisDetectedInfo.EntityId, thisDetectedInfo.BoundingBox, bTransmitAsteroid);
@@ -191,7 +186,7 @@ namespace IngameScript
             bool bFoundAsteroid = false;
             if (dei.Type == MyDetectedEntityType.Asteroid)
             {
-                addAsteroid(dei);
+                AsteroidAdd(dei);
                 bFoundAsteroid = true;
             }
             return bFoundAsteroid;
@@ -200,7 +195,7 @@ namespace IngameScript
         long AsteroidFindNearest(bool bInsideOnly=false)
         {
             long AsteroidID = -1;
-            if (gpsCenter == null) return AsteroidID;
+            if (shipOrientationBlock == null) return AsteroidID;
             if (asteroidsInfo.Count < 1)
                 AsteroidsDeserialize();
 
@@ -209,14 +204,14 @@ namespace IngameScript
             {
                 if (bInsideOnly)
                 {
-                    if(ast.BoundingBox.Contains(gpsCenter.GetPosition())==ContainmentType.Contains)
+                    if(ast.BoundingBox.Contains(shipOrientationBlock.GetPosition())==ContainmentType.Contains)
                     {
                         AsteroidID = ast.EntityId;
                     }
                 }
                 else
                 {
-                    double curDistanceSQ = Vector3D.DistanceSquared(ast.Position, gpsCenter.GetPosition());
+                    double curDistanceSQ = Vector3D.DistanceSquared(ast.Position, shipOrientationBlock.GetPosition());
                     if (curDistanceSQ < distanceSQ)
                     {
                         AsteroidID = ast.EntityId;
@@ -313,58 +308,6 @@ namespace IngameScript
         }
 
 
-        //INIHolder iniMiner;
-
-        //IMyTextPanel MinerSaveFile = null;
-        //const string MINER_SAVE_FILE_NAME = "Wico Miner Save";
-
-        void InitMinerInfo()
-        {
-            /*
-            if (iniMiner == null)
-            {
-                MinerSaveFile = null;
-                List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-                blocks = GetBlocksNamed<IMyTextPanel>(MINER_SAVE_FILE_NAME);
-
-                if (blocks.Count > 1) Echo("Multiple blocks found: \"" + SAVE_FILE_NAME + "\"");
-                else if (blocks.Count == 0)
-                {
-                    blocks = GetBlocksContains<IMyTextPanel>(MINER_SAVE_FILE_NAME);
-                    if (blocks.Count == 1)
-                        MinerSaveFile = blocks[0] as IMyTextPanel;
-                    else
-                    {
-                        blocks = GetMeBlocksContains<IMyTextPanel>(MINER_SAVE_FILE_NAME);
-                        if (blocks.Count == 1)
-                            MinerSaveFile = blocks[0] as IMyTextPanel;
-                    }
-                }
-                else MinerSaveFile = blocks[0] as IMyTextPanel;
-
-                string sIni = "";
-                if (MinerSaveFile == null)
-                {
-                    Echo(MINER_SAVE_FILE_NAME + " (TextPanel) is missing or Named incorrectly. ");
-//                    return;
-                }
-                else sIni = MinerSaveFile.GetPublicText();
-
-                iniMiner = new INIHolder(this, sIni);
-            }
-            */
-        }
-
-        void SaveMinerInfo()
-        {
-            /*
-            if(iniMiner.IsDirty && MinerSaveFile!=null)
-            {
-                string sINI = iniMiner.GenerateINI(true);
-                MinerSaveFile.WritePublicText(sINI);
-            }
-            */
-        }
 
     }
 

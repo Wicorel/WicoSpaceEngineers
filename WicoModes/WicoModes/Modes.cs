@@ -63,6 +63,8 @@ namespace IngameScript
 
         const int MODE_UNDERCONSTRUCTION = 31;
 
+        const int MODE_LAUNCHED = 50; // we have completed launch
+
         const int MODE_PET = 111; // pet that follows the player
 
         // new mining modes

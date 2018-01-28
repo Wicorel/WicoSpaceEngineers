@@ -18,8 +18,23 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        DateTime dtRelaunchActionStart;
 
-        #region relaunch
+        string sRelaunchSection = "RELAUNCH";
+
+        void RelaunchInitCustomData(INIHolder iNIHolder)
+        {
+        }
+        void RelaunchSerialize(INIHolder iNIHolder)
+        {
+            iNIHolder.SetValue(sRelaunchSection, "ActionStart", dtRelaunchActionStart);
+        }
+
+        void RelaunchDeserialize(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sRelaunchSection, "ActionStart", ref dtRelaunchActionStart);
+        }
+
         void doModeRelaunch()
         {
             StatusLog("clear", textPanelReport);
@@ -34,25 +49,25 @@ namespace IngameScript
                     ResetMotion(); setMode(MODE_IDLE);// ResetToIdle();
                     return;
                 }
+                /*
                 if (!bValidTarget && !bValidInitialContact && !bValidAsteroid)
                 {
                     return;
-                }
+                }*/
                 setMode(MODE_RELAUNCH);
-                dtStartShip = DateTime.Now;
+                dtRelaunchActionStart = DateTime.Now;
                 current_state = 1;
                 Serialize();
                 return;
 
 
             }
-            DateTime dtMaxWait = dtStartShip.AddSeconds(5.0f);
+            DateTime dtMaxWait = dtRelaunchActionStart.AddSeconds(5.0f);
             DateTime dtNow = DateTime.Now;
             if (DateTime.Compare(dtNow, dtMaxWait) > 0)
             {
                 setMode(MODE_LAUNCH);
             }
         }
-        #endregion
     }
 }

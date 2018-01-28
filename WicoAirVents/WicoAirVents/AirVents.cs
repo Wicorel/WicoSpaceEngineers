@@ -102,10 +102,7 @@ namespace IngameScript
         {
             for (int i = 0; i < cockpitairventList.Count; i++)
             {
-                IMyAirVent av;
-
-
-                av = airventList[i] as IMyAirVent;
+                var av= airventList[i] as IMyAirVent;
                 if (av != null)
                 {
 
@@ -119,8 +116,7 @@ namespace IngameScript
         {
             for (int i = 0; i < cockpitairventList.Count; i++)
             {
-                IMyAirVent av;
-                av = airventList[i] as IMyAirVent;
+                var av= airventList[i] as IMyAirVent;
                 if (av != null)
                 {
                     //                   if (av.IsDepressurizing)

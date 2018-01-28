@@ -115,7 +115,7 @@ namespace IngameScript
             Echo("maxThrust=" + maxThrust.ToString("N0"));
 
             MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
             Echo("effectiveMass=" + effectiveMass.ToString("N0"));
 

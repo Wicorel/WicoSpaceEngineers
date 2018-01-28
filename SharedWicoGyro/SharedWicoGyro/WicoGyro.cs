@@ -38,7 +38,7 @@ namespace IngameScript
         #region Autogyro 
         // Originally from: http://forums.keenswh.com/threads/aligning-ship-to-planet-gravity.7373513/#post-1286885461 
 
-        // NOTE: uses: gpsCenter from other code as the designated remote or ship controller
+        // NOTE: uses: shipOrientationBlock from other code as the designated remote or ship controller
 
         /// <summary>
         /// GYRO:How much power to use 0 to 1.0
@@ -79,7 +79,7 @@ namespace IngameScript
             if (gyroControl is IMyShipController)
             {
                 Vector3D grav = (gyroControl as IMyShipController).GetNaturalGravity();
-                return GyroMain(argument, grav, gpsCenter);
+                return GyroMain(argument, grav, shipOrientationBlock);
             }
             else
             {
@@ -185,7 +185,7 @@ namespace IngameScript
         {
             string s = "";
             var l = new List<IMyTerminalBlock>();
-            gyroControl = gpsCenter as IMyShipController;
+            gyroControl = shipOrientationBlock as IMyShipController;
 
             if (gyroControl == null)
             {
@@ -195,7 +195,7 @@ namespace IngameScript
             }
             gyrosOff(); // turn off any working gyros from previous runs
                         // NOTE: Uses grid of controller, not ME, nor localgridfilter
-            GridTerminalSystem.GetBlocksOfType<IMyGyro>(l, x => x.CubeGrid == gpsCenter.CubeGrid);
+            GridTerminalSystem.GetBlocksOfType<IMyGyro>(l, x => x.CubeGrid == shipOrientationBlock.CubeGrid);
             //    s += "ALLGYRO#=" + l.Count + "#";
             var l2 = new List<IMyTerminalBlock>();
             int skipped = 0;

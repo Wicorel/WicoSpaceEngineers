@@ -32,8 +32,8 @@ namespace IngameScript
             antennaList.Clear();
             antennaLList.Clear();
 
-            GetTargetBlocks<IMyRadioAntenna>(ref antennaList, "");
-            GetTargetBlocks<IMyLaserAntenna>(ref antennaLList, "");
+            GetTargetBlocks<IMyRadioAntenna>(ref antennaList);
+            GetTargetBlocks<IMyLaserAntenna>(ref antennaLList);
             for (int i = 0; i < antennaList.Count; ++i)
             {
                 if (antennaList[i].CustomName.Contains("unused") || antennaList[i].CustomData.Contains("unused"))

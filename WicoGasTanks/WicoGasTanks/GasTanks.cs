@@ -30,6 +30,16 @@ namespace IngameScript
         const int iTankHydro = 2;
         int iHydroTanks = 0;
         int iOxygenTanks = 0;
+
+        double hydroPercent = -1;
+        double oxyPercent = -1;
+
+        void TanksCalculate()
+        {
+            hydroPercent = tanksFill(iTankHydro);
+            oxyPercent = tanksFill(iTankOxygen);
+
+        }
         string tanksInit()
         {
             {

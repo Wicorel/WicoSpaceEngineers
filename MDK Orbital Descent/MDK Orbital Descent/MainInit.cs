@@ -64,7 +64,7 @@ namespace IngameScript
                 gridsInit();
                 initLogging();
 
-                sInitResults += initSerializeCommon();
+                sInitResults += SerializeInit();
                 Deserialize();
             }
             else if (currentInit == 1)

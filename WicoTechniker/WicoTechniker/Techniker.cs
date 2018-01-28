@@ -226,7 +226,7 @@ namespace IngameScript
 	        string s = "";
         //	double targetRange = 0;
 
-	        IMyShipController imsc=gpsCenter as IMyShipController;
+	        IMyShipController imsc=shipOrientationBlock as IMyShipController;
 
 	        // ESTOP code
 	        if (targetRange > 0)

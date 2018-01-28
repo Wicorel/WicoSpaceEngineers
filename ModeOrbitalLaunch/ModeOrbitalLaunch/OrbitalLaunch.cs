@@ -9,6 +9,7 @@ namespace IngameScript
     {
         //        double dAtmoCrossOver = 7000;
 
+
         // MODE_ORBITAL_LAUNCH states
         // 0 init. prepare for solo
         // check all connections. hold launch until disconnected
@@ -75,14 +76,14 @@ namespace IngameScript
                 bWantFast = true;
                 dLastVelocityShip = 0;
                 if ((craft_operation & CRAFT_MODE_NOTANK) == 0) TanksStockpile(false);
-                //                if ((craft_operation & CRAFT_MODE_NOTANK) == 0) blockApplyAction(tankList, "Stockpile_Off");
+                GasGensEnable(true);
 
                 if (AnyConnectorIsConnected() || AnyConnectorIsLocked() || anyGearIsLocked())
                 {
                     // launch from connected
-                    vLaunch1 = gpsCenter.GetPosition();
-                    bValidLaunch1 = true;
-                    bValidHome = false; // forget any 'home' waypoint.
+                    vOrbitalLaunch = shipOrientationBlock.GetPosition();
+                    bValidOrbitalLaunch = true;
+                    bValidOrbitalHome = false; // forget any 'home' waypoint.
 
                     ConnectAnyConnectors(false, false);// "OnOff_Off");
                     //			blockApplyAction(gearList, "OnOff_Off"); // in case autolock is set.
@@ -93,9 +94,9 @@ namespace IngameScript
                 else
                 {
                     // launch from hover mode
-                    bValidLaunch1 = false;
-                    vHome = gpsCenter.GetPosition();
-                    bValidHome = true;
+                    bValidOrbitalLaunch = false;
+                    vOrbitalHome = shipOrientationBlock.GetPosition();
+                    bValidOrbitalHome = true;
 
                     // assume we are hovering; do FULL POWER launch.
                     fAtmoPower = 0;
@@ -136,9 +137,9 @@ namespace IngameScript
                     StatusLog(DateTime.Now.ToString() + " " + OurName + ":Saved Position", textLongStatus, true);
 
                     // we launched from connected. Save position
-                    vLaunch1 = gpsCenter.GetPosition();
-                    bValidLaunch1 = true;
-                    bValidHome = false; // forget any 'home' waypoint.
+                    vOrbitalLaunch = shipOrientationBlock.GetPosition();
+                    bValidOrbitalLaunch = true;
+                    bValidOrbitalHome = false; // forget any 'home' waypoint.
 
                     next_state = 10;
                 }
@@ -147,26 +148,26 @@ namespace IngameScript
             }
             Vector3D vTarget = new Vector3D(0, 0, 0);
             bool bValidTarget = false;
-            if (bValidLaunch1)
+            if (bValidOrbitalLaunch)
             {
                 bValidTarget = true;
-                vTarget = vLaunch1;
+                vTarget = vOrbitalLaunch;
             }
-            else if (bValidHome)
+            else if (bValidOrbitalHome)
             {
                 bValidTarget = true;
-                vTarget = vHome;
+                vTarget = vOrbitalHome;
             }
 
             double alt = 0;
             if (bValidTarget)
             {
-                alt = (vCurrentPos - vTarget).Length();
-                StatusLog("Distance: " + alt.ToString("N0") + " Meters", textPanelReport);
+ //               alt = (vCurrentPos - vTarget).Length();
+ //               StatusLog("Distance: " + alt.ToString("N0") + " Meters", textPanelReport);
 
                 double elevation = 0;
 
-                ((IMyShipController)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+                ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
                 StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textPanelReport);
 
 
@@ -299,7 +300,13 @@ namespace IngameScript
 
             //	batteryCheck(0, false);//,textPanelReport);
             //	if (bValidExtraInfo)
-            StatusLog("Bat:" + progressBar(batteryPercentage), textPanelReport);
+            if (batteryList.Count > 0)
+            {
+                StatusLog("Bat:" + progressBar(batteryPercentage), textPanelReport);
+                Echo("BatteryPercentage=" + batteryPercentage);
+            }
+            else StatusLog("Bat: <NONE>", textPanelReport);
+
             if (oxyPercent >= 0)
             {
                 StatusLog("O2:" + progressBar(oxyPercent * 100), textPanelReport);
@@ -318,7 +325,7 @@ namespace IngameScript
                 }
             }
             else Echo("No Hydrogen Tanks");
-            if (batteryPercentage < batterypctlow)
+            if (batteryList.Count > 0 && batteryPercentage < batterypctlow)
             {
                 StatusLog(" WARNING: Low Battery Power", textPanelReport);
                 Log(" WARNING: Low Battery Power");
@@ -378,9 +385,29 @@ namespace IngameScript
                 powerDownThrusters(thrustStage1DownList, thrustAll, true);
             }
 
-            if (ionThrustCount > 0) StatusLog("ION:" + progressBar(fIonPower), textPanelReport);
-            if (hydroThrustCount > 0) StatusLog("HYD:" + progressBar(fHydroPower), textPanelReport);
-            if (atmoThrustCount > 0) StatusLog("ATM:" + progressBar(fAtmoPower), textPanelReport);
+            StatusLog("Thrusters", textPanelReport);
+            if (ionThrustCount > 0)
+            {
+                if(fIonPower<10)
+                    StatusLog("ION:\n/10:" + progressBar(fIonPower*10), textPanelReport);
+                else
+                    StatusLog("ION:" + progressBar(fIonPower), textPanelReport);
+            }
+            if (hydroThrustCount > 0)
+            {
+                if(fHydroPower<10)
+
+                    StatusLog("HYD\n/10:" + progressBar(fHydroPower*10), textPanelReport);
+                else
+                StatusLog("HYD:" + progressBar(fHydroPower), textPanelReport);
+            }
+            if (atmoThrustCount > 0)
+            {
+                if(fAtmoPower<10)
+                StatusLog("ATM\n/10:" + progressBar(fAtmoPower*10), textPanelReport);
+                else
+                StatusLog("ATM:" + progressBar(fAtmoPower), textPanelReport);
+            }
             if (bOrbitalLaunchDebug)
                 StatusLog("I:" + fIonPower.ToString("0.00") + "H:" + fHydroPower.ToString("0.00") + " A:" + fAtmoPower.ToString("0.00"), textPanelReport);
             current_state = next_state;

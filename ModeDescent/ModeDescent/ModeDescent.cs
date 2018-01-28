@@ -59,17 +59,17 @@ namespace IngameScript
             MyShipMass myMass;
             myMass = ((IMyShipController)anchorPosition).CalculateShipMass();
 
-            if (bValidLaunch1)
+            if (bValidOrbitalLaunch)
             {
                 // source position was connector
                 bValidTarget = true;
-                vTarget = vLaunch1;
+                vTarget = vOrbitalLaunch;
             }
-            else if (bValidHome)
+            else if (bValidOrbitalHome)
             {
                 // source position was hover
                 bValidTarget = true;
-                vTarget = vHome;
+                vTarget = vOrbitalHome;
             }
             else
             {
@@ -86,7 +86,7 @@ namespace IngameScript
             if (bValidTarget)
             {
 
-                alt = (vCurrentPos - vTarget).Length();
+                alt = (gpsCenter.GetPosition() - vTarget).Length();
 
                 StatusLog("Distance: " + alt.ToString("N0") + " Meters", textPanelReport);
 
@@ -700,7 +700,7 @@ namespace IngameScript
                         gyrosOff();
                         if (bValidTarget)
                         {
-                            GyroMain(sOrientation, vTarget - vCurrentPos, gpsCenter);
+                            GyroMain(sOrientation, vTarget - gpsCenter.GetPosition(), gpsCenter);
                         }
                         else
                             GyroMain(sOrientation);
@@ -731,7 +731,7 @@ namespace IngameScript
                         gyrosOff();
                         if (bValidTarget)
                         {
-                            GyroMain(sOrientation, vTarget - vCurrentPos, gpsCenter);
+                            GyroMain(sOrientation, vTarget - gpsCenter.GetPosition(), gpsCenter);
                         }
                         else
                             GyroMain(sOrientation);
@@ -764,12 +764,12 @@ namespace IngameScript
                         gyrosOff();
                         if (bValidTarget)
                         {
-                            GyroMain(sOrientation, vTarget - vCurrentPos, gpsCenter);
+                            GyroMain(sOrientation, vTarget - gpsCenter.GetPosition(), gpsCenter);
                         }
                         else
                             GyroMain(sOrientation);
 
-                        if (bValidLaunch1)
+                        if (bValidOrbitalLaunch)
                         {
                             if (velocityShip > 3 || !bLandingReady)
                             {
@@ -790,7 +790,7 @@ namespace IngameScript
                                 powerUpThrusters(thrustStage1UpList, (float)(hoverionPercent * 0.81), thrustion);
                             }
                         }
-                        else if (bValidHome)
+                        else if (bValidOrbitalHome)
                         {
                             // we had started from hover.. 
                             setMode(MODE_HOVER);

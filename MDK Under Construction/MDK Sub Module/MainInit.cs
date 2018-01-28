@@ -64,16 +64,14 @@ namespace IngameScript
                 // if(!modeCommands.ContainsKey("orbitaldescent")) modeCommands.Add("orbitaldescent", MODE_DESCENT);
                 gridsInit();
                 //               initLogging();
-                sInitResults += initSerializeCommon();
+                sInitResults += SerializeInit();
                 Deserialize();
             }
             else if (currentInit == 1)
             {
-                sInitResults += BlockInit();
-                anchorPosition = gpsCenter;
-                if(anchorPosition!=null) currentPosition = anchorPosition.GetPosition();
+                sInitResults += DefaultOrientationBlockInit();
 
-                sInitResults += thrustersInit(gpsCenter);
+                sInitResults += thrustersInit(shipOrientationBlock);
                 sInitResults += connectorsInit();
                 sInitResults += gyrosetup();
                 sInitResults += lightsInit();
@@ -99,61 +97,6 @@ namespace IngameScript
 
  //       IMyTextPanel gpsPanel = null;
 
-        string BlockInit()
-        {
-            string sInitResults = "";
-            gpsCenter = null;
-
-            List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
-            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch);
-            if (centerSearch.Count == 0)
-            {
-                GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
-                foreach (var b in centerSearch)
-                {
-                    if (b.CustomName.Contains("[NAV]") || b.CustomData.Contains("[NAV]"))
-                    {
-                        gpsCenter = b;
-                    }
-                    else if (b.CustomName.Contains("[!NAV]") || b.CustomData.Contains("[!NAV]"))
-                    {
-                        continue; // don't use this one.
-                    }
-                    sInitResults = "R";
-                    gpsCenter = b;
-                    break;
-                }
-                if (gpsCenter == null)
-                {
-                    GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
-                    if (centerSearch.Count == 0)
-                    {
-                        sInitResults += "!!NO Controller";
-                        return sInitResults;
-
-                    }
-                    else
-                    {
-                        sInitResults += "S";
-                        gpsCenter = centerSearch[0];
-                    }
-
-                }
-            }
-            else
-            {
-                sInitResults += "N";
-                gpsCenter = centerSearch[0];
-            }
-            /*
-            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-            blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
-            if (blocks.Count > 0)
-                gpsPanel = blocks[0] as IMyTextPanel;
-                */
-            if (gpsCenter == null) Echo("ERROR: No control block found!");
-            return sInitResults;
-        }
 
         #endregion
 

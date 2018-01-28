@@ -46,7 +46,7 @@ namespace IngameScript
 
         109 No known bases.  wait for reply
 
-        //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
+        //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ shipOrientationBlock.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition() +
 
         Use other connector position and vector for docking
         110	Move to 'wait' location (or current location) ?request 'wait' location? ->115 or ->120
@@ -91,10 +91,49 @@ namespace IngameScript
 
         Vector3D vDockAlign;
         bool bDoDockAlign = false;
-
-//        int iTargetBase = -1;
+        Vector3D vDock;
+        Vector3D vLaunch1;
+        Vector3D vHome;
+        bool bValidDock = false;
+        bool bValidLaunch1 = false;
+        bool bValidHome = false;
 
         long lTargetBase = 0;
+        DateTime dtDockingActionStart;
+
+        string sDockingSection = "DOCKING";
+
+        void DockingInitCustomData(INIHolder iNIHolder)
+        {
+        }
+
+        void DockingSerialize(INIHolder iNIHolder)
+        {
+            iNIHolder.SetValue(sDockingSection, "vDock", vDock);
+            iNIHolder.SetValue(sDockingSection, "ValidDock", bValidDock);
+            iNIHolder.SetValue(sDockingSection, "vLaunch1", vLaunch1);
+            iNIHolder.SetValue(sDockingSection, "bValidLaunch1", bValidLaunch1);
+            iNIHolder.SetValue(sDockingSection, "vHome", vHome);
+            iNIHolder.SetValue(sDockingSection, "bValidHome", bValidHome);
+
+            iNIHolder.SetValue(sDockingSection, "TargetBase", lTargetBase);
+            iNIHolder.SetValue(sDockingSection, "ActionStart", dtDockingActionStart);
+
+        }
+
+        void DockingDeserialize(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sDockingSection, "vDock", ref vDock, true);
+            iNIHolder.GetValue(sDockingSection, "ValidDock", ref bValidDock, true);
+            iNIHolder.GetValue(sDockingSection, "vLaunch1", ref vLaunch1, true);
+            iNIHolder.GetValue(sDockingSection, "bValidLaunch1", ref bValidLaunch1, true);
+            iNIHolder.GetValue(sDockingSection, "vHome", ref vHome, true);
+            iNIHolder.GetValue(sDockingSection, "bValidHome", ref bValidHome, true);
+
+            iNIHolder.GetValue(sDockingSection, "TargetBase", ref lTargetBase, true);
+            iNIHolder.GetValue(sDockingSection, "ActionStart", ref dtDockingActionStart);
+
+        }
 
         List<IMyTerminalBlock> thrustDockBackwardList = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> thrustDockForwardList = new List<IMyTerminalBlock>();
@@ -174,7 +213,7 @@ namespace IngameScript
                 {
                     if (lTargetBase <= 0) lTargetBase = BaseFindBest();
                     //                    sInitResults += "101: Base=" + iTargetBase;
-                   dtStartShip = DateTime.Now;
+                   dtDockingActionStart = DateTime.Now;
                    if (lTargetBase > 0)
                     {
                         calculateGridBBPosition(dockingConnector);
@@ -191,11 +230,11 @@ namespace IngameScript
                         sMessage += lTargetBase.ToString() + ":";
                         sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
                         //                    sMessage += shipDim.HeightInMeters() + "," + shipDim.WidthInMeters() + "," + shipDim.LengthInMeters() + ":";
-                        sMessage += gpsCenter.CubeGrid.CustomName + ":";
+                        sMessage += shipOrientationBlock.CubeGrid.CustomName + ":";
                         sMessage += SaveFile.EntityId.ToString() + ":";
-                        sMessage += Vector3DToString(gpsCenter.GetPosition());
+                        sMessage += Vector3DToString(shipOrientationBlock.GetPosition());
                         antSend(sMessage);
-//                        antSend("WICO:CON?:" + baseIdOf(iTargetBase).ToString() + ":" + "mini" + ":" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+//                        antSend("WICO:CON?:" + baseIdOf(iTargetBase).ToString() + ":" + "mini" + ":" + shipOrientationBlock.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
                         current_state = 102;
                     }
                     else // No available base
@@ -212,7 +251,7 @@ namespace IngameScript
             else if (current_state == 102)
             { // wait for reply from base
                 bWantFast = false;
-                DateTime dtMaxWait = dtStartShip.AddSeconds(5.0f);
+                DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
                 DateTime dtNow = DateTime.Now;
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                 {
@@ -296,7 +335,7 @@ namespace IngameScript
             {
                 // no known bases. requested response. wait for a while to see if we get one
                 bWantFast = false;
-                DateTime dtMaxWait = dtStartShip.AddSeconds(2.0f);
+                DateTime dtMaxWait = dtDockingActionStart.AddSeconds(2.0f);
                 DateTime dtNow = DateTime.Now;
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                 {
@@ -311,7 +350,7 @@ namespace IngameScript
             { //110	Move to 'approach' location (or current location) ?request 'wait' location?
                 if (bValidHome)
                 {
-                    double distancesqHome = Vector3D.DistanceSquared(vHome, gpsCenter.GetPosition());
+                    double distancesqHome = Vector3D.DistanceSquared(vHome, shipOrientationBlock.GetPosition());
                     if (distancesqHome > 25000) // max SG antenna range //TODO: get max from antenna module
                     {
                         current_state = 115;
@@ -354,14 +393,14 @@ namespace IngameScript
                     sMessage += lTargetBase.ToString() + ":";
                     sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
 //                    sMessage += shipDim.HeightInMeters() + "," + shipDim.WidthInMeters() + "," + shipDim.LengthInMeters() + ":";
-                    sMessage += gpsCenter.CubeGrid.CustomName + ":";
+                    sMessage += shipOrientationBlock.CubeGrid.CustomName + ":";
                     sMessage += SaveFile.EntityId.ToString() + ":";
-                    sMessage += Vector3DToString(gpsCenter.GetPosition());
+                    sMessage += Vector3DToString(shipOrientationBlock.GetPosition());
                     antSend(sMessage);
 
-                    //                    antSend("WICO:COND?:" + baseIdOf(iTargetBase) + ":" + "mini" + ":" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                    //                    antSend("WICO:COND?:" + baseIdOf(iTargetBase) + ":" + "mini" + ":" + shipOrientationBlock.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
                     {
-                        dtStartShip = DateTime.Now;
+                        dtDockingActionStart = DateTime.Now;
                         current_state = 131;
                     }
                 }
@@ -369,13 +408,13 @@ namespace IngameScript
             }
             else if (current_state == 130)
             {
-                dtStartShip = DateTime.Now;
+                dtDockingActionStart = DateTime.Now;
                 current_state = 131;
             }
             else if (current_state == 131)
             { //131	wait for available connector
                 bWantFast = false;
-                DateTime dtMaxWait = dtStartShip.AddSeconds(5.0f);
+                DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
                 DateTime dtNow = DateTime.Now;
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                 {
@@ -526,13 +565,13 @@ namespace IngameScript
             else if (current_state == 164)
             {
                 initEscapeScan();
-                dtStartShip = DateTime.Now;
+                dtDockingActionStart = DateTime.Now;
                 current_state = 165;
                 bWantFast = true;
             }
             else if (current_state == 165)
             {
-                DateTime dtMaxWait = dtStartShip.AddSeconds(5.0f);
+                DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
                 DateTime dtNow = DateTime.Now;
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                 {
@@ -577,7 +616,7 @@ namespace IngameScript
                 minAngleRad = 0.03f;
 
                 // may need to change direction if non- 'back' connector
-                bAimed = GyroMain("up", vDockAlign, gpsCenter);
+                bAimed = GyroMain("up", vDockAlign, shipOrientationBlock);
                 if (bAimed) current_state++; // 170->171 172->173
                 else bWantFast = true;
             }
@@ -590,8 +629,8 @@ namespace IngameScript
                 if (!bDoDockAlign)
                     current_state = 172;
 
-                //		Vector3D vTargetLocation = gpsCenter.GetPosition() +vDockAlign;
-                //		Vector3D vVec = vTargetLocation - gpsCenter.GetPosition();
+                //		Vector3D vTargetLocation = shipOrientationBlock.GetPosition() +vDockAlign;
+                //		Vector3D vVec = vTargetLocation - shipOrientationBlock.GetPosition();
                 Echo("Aligning to dock");
                 bool bAimed = false;
                 minAngleRad = 0.03f;

@@ -160,9 +160,9 @@ namespace IngameScript
                 {
                     Echo("brake");
                     //toggle brake
-                    if (gpsCenter is IMyShipController)
+                    if (shipOrientationBlock is IMyShipController)
                     {
-                        IMyShipController msc = gpsCenter as IMyShipController;
+                        IMyShipController msc = shipOrientationBlock as IMyShipController;
                         bool bBrake = msc.HandBrake;
                         msc.ApplyAction("HandBrake");
                     }
@@ -283,8 +283,8 @@ namespace IngameScript
                         //			shutdown(gyroList);
                         continue;
                     }
-                    vHome = new Vector3D(x, y, z);
-                    bValidHome = true;
+                    vNavTarget = new Vector3D(x, y, z);
+                    bValidNavTarget = true;
                     if (args[0] == "W")
                         bGoOption = true;
                     else bGoOption = false;

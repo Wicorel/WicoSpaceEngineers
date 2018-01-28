@@ -29,7 +29,21 @@ namespace IngameScript
          * battery charge
          */
 
-        #region docked
+ //       string sDockedSection = "DOCKED";
+
+        void DockedInitCustomData(INIHolder iNIHolder)
+        {
+//            iNIHolder.GetValue(sDockedSection, "ActionStart", ref dtDockedActionStart);
+        }
+        void DockedSerialize(INIHolder iNIHolder)
+        {
+        }
+
+        void DockedDeserialize(INIHolder iNIHolder)
+        {
+        }
+
+
         // 0 = master init
         // 1 = inited.
 
@@ -38,6 +52,7 @@ namespace IngameScript
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":DOCKED!", textPanelReport);
             Echo("Docked!");
+            /*
             if (bAutoRelaunch && bValidDock)
             {
                 Echo("Docked. Checking Relaunch");
@@ -49,7 +64,7 @@ namespace IngameScript
                 else
                     Echo(" Awaiting Relaunch Criteria");
             }
-
+            */
             if (!AnyConnectorIsConnected())
             {
                 // we magically got disconnected..
@@ -125,7 +140,6 @@ namespace IngameScript
             }
 
     }
-        #endregion
 
     }
 }

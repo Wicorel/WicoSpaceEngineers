@@ -34,7 +34,7 @@ namespace IngameScript
             StatusLog("Planet Gravity: " + dGravity.ToString(velocityFormat) + " g", textPanelReport);
             double elevation = 0;
 
-            ((IMyShipController)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+            ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
             StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textPanelReport);
 
             if (thrustStage1UpList.Count < 1)

@@ -23,6 +23,8 @@ namespace IngameScript
 
         float currentSolarOutput = 0;
 
+        double maxSolarPower = -1;
+
         void initSolars()
         {
             solarList.Clear();

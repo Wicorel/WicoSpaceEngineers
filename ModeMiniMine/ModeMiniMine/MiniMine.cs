@@ -35,18 +35,17 @@ namespace IngameScript
 
         bool bWaitingCargo = false;
 
-        string sMiningSection = "MINING";
+        /*
+        Vector3D vDockAlign;
+        bool bDoDockAlign = false;
+        Vector3D vDock;
+        Vector3D vLaunch1;
+        Vector3D vHome;
+        bool bValidDock = false;
+        bool bValidLaunch1 = false;
+        bool bValidHome = false;
+        */
 
-        void MiningInitCustomData(INIHolder iNIHolder)
-        {
-            iNIHolder.GetValue(sMiningSection, "cargopcthighwater", ref cargopcthighwater, true);
-            iNIHolder.GetValue(sMiningSection, "cargopctlowwater", ref cargopctlowwater, true);
-            iNIHolder.GetValue(sMiningSection, "TargetMiningMps", ref fTargetMiningMps, true);
-            iNIHolder.GetValue(sMiningSection, "MiningAbortMps", ref fMiningAbortMps, true);
-            iNIHolder.GetValue(sMiningSection, "MiningMinThrust", ref fMiningMinThrust, true);
-            iNIHolder.GetValue(sMiningSection, "AsteroidApproachMps", ref fAsteroidApproachMps, true);
-            iNIHolder.GetValue(sMiningSection, "AsteroidApproachAbortMps", ref fAsteroidApproachAbortMps, true);
-        }
         /*
          * 0 Master Init
          * 10 Init sensors
@@ -108,7 +107,7 @@ namespace IngameScript
 
         double miningElapsedMs = 0;
 
-        long miningAsteroidID = -1;
+//        long miningAsteroidID = -1;
 
         bool bValidExit = false;
 
@@ -132,7 +131,7 @@ namespace IngameScript
 //            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
             MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
 //            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
 
@@ -154,7 +153,7 @@ namespace IngameScript
 
             //            if(vExpectedExit.AbsMax()>.5)
             {
-//                Vector3D vT = gpsCenter.GetPosition() + vExpectedExit * 150;
+//                Vector3D vT = shipOrientationBlock.GetPosition() + vExpectedExit * 150;
 //                debugGPSOutput("ExpectedExit", vT);
             }
             switch (current_state)
@@ -191,8 +190,8 @@ namespace IngameScript
                     {
                         bValidAsteroid = true;
                         vTargetAsteroid = AsteroidGetPosition(miningAsteroidID);
-                        vExpectedExit = vTargetAsteroid - gpsCenter.GetPosition();
-                        vExpectedExit.Normalize();
+                        vExpectedAsteroidExit = vTargetAsteroid - shipOrientationBlock.GetPosition();
+                        vExpectedAsteroidExit.Normalize();
 
                         current_state = 120;
 
@@ -271,7 +270,7 @@ namespace IngameScript
                         // started find ore while 'inside' asteroid.
                         // point towards exit
                         /*
-                        vExpectedExit = gpsCenter.GetPosition() - currentAst.Position;
+                        vExpectedExit = shipOrientationBlock.GetPosition() - currentAst.Position;
                         vExpectedExit.Normalize();
                         bValidExit = true;
                         */
@@ -357,8 +356,8 @@ namespace IngameScript
                             }
                             else
                             {
-                                GyroMain("forward", vExpectedExit, gpsCenter);
-                                //                                GyroMain("forward", vExpectedExit, gpsCenter);
+                                GyroMain("forward", vExpectedAsteroidExit, shipOrientationBlock);
+                                //                                GyroMain("forward", vExpectedExit, shipOrientationBlock);
                                 turnDrillsOn();
                                 mineMoveForward(fTargetMiningMps, fMiningAbortMps);
                                 //                                bWantFast = true;
@@ -410,7 +409,7 @@ namespace IngameScript
                             /*
                                                         if (bValidAsteroid)
                                                         {
-                                                            scandist = (gpsCenter.GetPosition() - vTargetAsteroid).Length();
+                                                            scandist = (shipOrientationBlock.GetPosition() - vTargetAsteroid).Length();
                                                         }
                                                         */
                             if (doCameraScan(cameraForwardList, scandist))
@@ -425,7 +424,7 @@ namespace IngameScript
                                         addDetectedEntity(lastDetectedInfo);
                                         vTargetAsteroid = (Vector3D)lastDetectedInfo.HitPosition;
                                         bValidAsteroid = true;
-                                        vExpectedExit = vTargetAsteroid - gpsCenter.GetPosition();
+                                        vExpectedExit = vTargetAsteroid - shipOrientationBlock.GetPosition();
                                         vExpectedExit.Normalize();
                                         bValidExit = true;
                                         */
@@ -474,7 +473,7 @@ namespace IngameScript
                         if (bValidAsteroid)
                         {
                             bWantFast = true;
-                            if (GyroMain("forward", vTargetAsteroid - gpsCenter.GetPosition(), gpsCenter))
+                            if (GyroMain("forward", vTargetAsteroid - shipOrientationBlock.GetPosition(), shipOrientationBlock))
                             {
                                 // we are aimed
                                 current_state = 100;
@@ -502,8 +501,8 @@ namespace IngameScript
                         // we should have asteroid in front.
                         bool bAimed = true;
 
-                        Echo(bValidExit.ToString() + " " + Vector3DToString(vExpectedExit));
-                        bAimed = GyroMain("forward", vExpectedExit, gpsCenter);
+                        Echo(bValidExit.ToString() + " " + Vector3DToString(vExpectedAsteroidExit));
+                        bAimed = GyroMain("forward", vExpectedAsteroidExit, shipOrientationBlock);
 
                         miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
                         if (miningElapsedMs < dSensorSettleWaitMS) return;
@@ -514,7 +513,7 @@ namespace IngameScript
                             double distanceSQ = 0;
                             if (bValidAsteroid)
                             {
-                                distanceSQ = (vTargetAsteroid - gpsCenter.GetPosition()).LengthSquared();
+                                distanceSQ = (vTargetAsteroid - shipOrientationBlock.GetPosition()).LengthSquared();
                                 scandist = distanceSQ;
                                 Echo("distanceSQ=" + distanceSQ.ToString("0.00"));
 
@@ -543,18 +542,18 @@ namespace IngameScript
                                         Echo("Distance=" + distance.ToString());
                                         if (distance < 15)
                                         {
-                                            vLastContact = gpsCenter.GetPosition();
-                                            if (!bValidInitialContact)
+                                            vLastAsteroidContact = shipOrientationBlock.GetPosition();
+                                            if (!bValidInitialAsteroidContact)
                                             {
-                                                vInitialContact = vLastContact;
-                                                bValidInitialContact = true;
+                                                vInitialAsteroidContact = vLastAsteroidContact;
+                                                bValidInitialAsteroidContact = true;
                                             }
                                             current_state = 31;
                                             ResetMotion();
                                         }
                                         else if (distance > 100)
                                         {
-                                            vInitialContact = (Vector3D)lastDetectedInfo.HitPosition;
+                                            vInitialAsteroidContact = (Vector3D)lastDetectedInfo.HitPosition;
                                             current_state = 130;// do faster travel
                                         }
                                         else
@@ -563,18 +562,18 @@ namespace IngameScript
                                         }
                                     }
                                     //                                      bValidExit = true;
-                                    //                                        vExpectedExit = vTarget - gpsCenter.GetPosition();
+                                    //                                        vExpectedExit = vTarget - shipOrientationBlock.GetPosition();
                                 }
                                 else
                                 {
                                     /*
                                     // we scanned, but didn't hit anything.  it's likely a donut
-                                    double distance = (vTargetAsteroid - gpsCenter.GetPosition()).Length();
+                                    double distance = (vTargetAsteroid - shipOrientationBlock.GetPosition()).Length();
                                     Echo("Distance=" + distance.ToString());
                             mineMoveForward(fTargetMiningmps,fAbortmps);
                                     if (distance < 5)
                                     {
-                                        vExpectedExit = vTargetAsteroid - gpsCenter.GetPosition();
+                                        vExpectedExit = vTargetAsteroid - shipOrientationBlock.GetPosition();
                                         current_state = 31;
                                         ResetMotion();
                                     }
@@ -634,7 +633,7 @@ namespace IngameScript
                     {
                         ResetTravelMovement();
                         ResetMotion();
-                        calcCollisionAvoid(vInitialContact);
+                        calcCollisionAvoid(vInitialAsteroidContact);
                         current_state = 150;
                         break;
                     }
@@ -663,12 +662,12 @@ namespace IngameScript
                         }
                         else
                         {
-                             vLastExit = gpsCenter.GetPosition();
+                             vLastAsteroidExit = shipOrientationBlock.GetPosition();
  //                           dist = (vLastExit - vInitialExit).Length();
-                            if (!bValidInitialExit)
+                            if (!bValidInitialAsteroidExit)
                             {
-                                vInitialExit = vLastExit;
-                                bValidInitialExit = true;
+                                vInitialAsteroidExit = vLastAsteroidExit;
+                                bValidInitialAsteroidExit = true;
                             }
                             setMode(MODE_SEARCHORIENT);
                            // prepare for another run.
@@ -829,8 +828,8 @@ namespace IngameScript
                                 {
                                     bValidAsteroid = true;
                                     vTargetAsteroid = AsteroidGetPosition(miningAsteroidID);
-                                    vExpectedExit = vTargetAsteroid - gpsCenter.GetPosition();
-                                    vExpectedExit.Normalize();
+                                    vExpectedAsteroidExit = vTargetAsteroid - shipOrientationBlock.GetPosition();
+                                    vExpectedAsteroidExit.Normalize();
 
                                     current_state = 120;
                                 }
@@ -851,7 +850,7 @@ namespace IngameScript
                         }
                         {
                             bWantFast = true;
-                            if (GyroMain("forward", vExpectedExit - gpsCenter.GetPosition(), gpsCenter))
+                            if (GyroMain("forward", vExpectedAsteroidExit - shipOrientationBlock.GetPosition(), shipOrientationBlock))
                             {
                                 // we are aimed
                                 current_state = 120;
@@ -872,7 +871,7 @@ namespace IngameScript
             StatusLog(moduleName + ":GotoOre!", textPanelReport);
             Echo("GOTO ORE:current_state=" + current_state.ToString());
             MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
 
             double maxThrust = calculateMaxThrust(thrustForwardList);
@@ -907,7 +906,7 @@ namespace IngameScript
             StatusLog(moduleName + ":Exiting!", textPanelReport);
             Echo("Exiting: current_state=" + current_state.ToString());
             MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
 
             double maxThrust = calculateMaxThrust(thrustForwardList);
@@ -974,8 +973,8 @@ namespace IngameScript
                         // we want to turn on our horizontal axis as that should be the 'wide' one.
                         bool bAimed = false;
                         double yawangle = -999;
-                        Echo("vTarget=" + Vector3DToString(vLastContact));
-                        yawangle = CalculateYaw(vLastContact, gpsCenter);
+                        Echo("vTarget=" + Vector3DToString(vLastAsteroidContact));
+                        yawangle = CalculateYaw(vLastAsteroidContact, shipOrientationBlock);
             Echo("yawangle=" + yawangle.ToString());
                         double aYawAngle = Math.Abs(yawangle);
                         bAimed = aYawAngle < .05;
@@ -990,10 +989,10 @@ namespace IngameScript
 
                         /*
                         //minAngleRad = 0.1f;
-                        bAimed=GyroMain("backward", vExpectedExit, gpsCenter);
+                        bAimed=GyroMain("backward", vExpectedExit, shipOrientationBlock);
 
                        // minAngleRad = 0.01f;
-                        // GyroMain("backward", vExpectedExit, gpsCenter);
+                        // GyroMain("backward", vExpectedExit, shipOrientationBlock);
                         */
                         if (bAimed)
                         {
@@ -1006,7 +1005,7 @@ namespace IngameScript
                 case 30:
                     {
                         bool bAimed = false;
-                        bAimed = GyroMain("backward", vExpectedExit, gpsCenter);
+                        bAimed = GyroMain("backward", vExpectedAsteroidExit, shipOrientationBlock);
                         if (bAimed)
                         {
                             bWantMedium = true;
@@ -1059,7 +1058,7 @@ namespace IngameScript
             //            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
             MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
             //            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
             double maxDeltaV = (maxThrust) / effectiveMass;
@@ -1109,16 +1108,16 @@ namespace IngameScript
             addDetectedEntity(mydei);
             if (mydei.Type == MyDetectedEntityType.Asteroid)
             {
-                addAsteroid(mydei);
+                AsteroidAdd(mydei);
                 if (!bValidAsteroid)
                 {
                     bValidAsteroid = true;
                     vTargetAsteroid = mydei.Position;
                     //                currentAst.EntityId = mydei.EntityId;
                     //                currentAst.BoundingBox = mydei.BoundingBox;
-                    if (mydei.HitPosition != null) vExpectedExit = (Vector3D)mydei.HitPosition - gpsCenter.GetPosition();
-                    else vExpectedExit = vTargetAsteroid - gpsCenter.GetPosition();
-                    vExpectedExit.Normalize();
+                    if (mydei.HitPosition != null) vExpectedAsteroidExit = (Vector3D)mydei.HitPosition - shipOrientationBlock.GetPosition();
+                    else vExpectedAsteroidExit = vTargetAsteroid - shipOrientationBlock.GetPosition();
+                    vExpectedAsteroidExit.Normalize();
                     bValidExit = true;
                 }
             }

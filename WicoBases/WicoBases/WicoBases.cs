@@ -18,7 +18,7 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        List<baseInfo> baseList = new List<baseInfo>();
+        List<BaseInfo> baseList = new List<BaseInfo>();
 
         const string sBaseSavedListSection = "BASE1.0";
 
@@ -32,9 +32,9 @@ namespace IngameScript
          * 
          */
 
-        public class baseInfo
+        public class BaseInfo
         {
-          //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition())XXX
+          //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition())XXX
 
         // name, ID, position, velocity, Jump Capable, Source, Sink
         // source and sink need to have "priorities". So a support vechicle can take ore from a miner drone.  and then it can deliver to a base.
@@ -62,6 +62,9 @@ namespace IngameScript
             // load from text panel
             BaseDeserialize();
         }
+
+        string sLastBaseLoad = "";
+
         void BaseSerialize()
         {
             if (iniWicoCraftSave == null) return;
@@ -81,7 +84,7 @@ namespace IngameScript
 
         int BaseDeserialize()
         {
-            Echo("BD()");
+//            Echo("BD()");
             if (iniWicoCraftSave == null)
             {
                 return -2;
@@ -89,12 +92,19 @@ namespace IngameScript
 
  //           string sSection = iniWicoCraftSave.GetSection(sBaseSection);
 
-            double x1, y1, z1;
-            Echo("BD():A");
+//            Echo("BD():A");
             //            string[] atheStorage = sSection.Split('\n');
+            string sBaseSave= iniWicoCraftSave.GetSection(sBaseSavedListSection);
             string[] atheStorage = iniWicoCraftSave.GetLines(sBaseSavedListSection);
-            Echo("BD():B");
+            //            Echo("BD():B");
+            if (sBaseSave == sLastBaseLoad)
+            {
+                return -3; // no changes in saved info.
+            }
 
+            sLastBaseLoad = sBaseSave;
+
+            double x1, y1, z1;
             int iLine = 0;
             /*
             // Trick using a "local method", to get the next line from the array `atheStorage`.
@@ -106,14 +116,14 @@ namespace IngameScript
             int iCount = -1;
             if (atheStorage.Length < 2)
                 return -1; // nothing to parse
-            Echo("BD():C");
-            Echo(atheStorage.Count() + " Lines");
+//            Echo("BD():C");
+//            Echo(atheStorage.Count() + " Lines");
 
             for (int j0 = 0; j0 < atheStorage.Count(); j0++)
                 Echo(atheStorage[j0]);
 
-            Echo(atheStorage[iLine]);
-            Echo("total bases=" + iCount);
+//            Echo(atheStorage[iLine]);
+//            Echo("total bases=" + iCount);
 
             iCount = Convert.ToInt32(atheStorage[iLine++]);
 
@@ -133,7 +143,7 @@ namespace IngameScript
 
                 bool bJumpCapable = atheStorage[iLine++].ToLower().Contains("true") ? true : false;
 
-                baseInfo b1 = new baseInfo();
+                BaseInfo b1 = new BaseInfo();
                 b1.baseId = eId;
                 b1.baseName = sBaseName;
                 b1.position = position;
@@ -150,7 +160,7 @@ namespace IngameScript
             if (baseList.Count < 1)
                 BaseInitInfo();
 
-            baseInfo basei = new baseInfo
+            BaseInfo basei = new BaseInfo
             {
                 baseId = baseId,
                 baseName = baseName,
@@ -205,10 +215,10 @@ namespace IngameScript
         {
             string sName = Me.CubeGrid.CustomName;
             Vector3D vPosition = Me.GetPosition();
-            if (gpsCenter != null)
+            if (shipOrientationBlock != null)
             {
-                sName = gpsCenter.CubeGrid.CustomName;
-                vPosition = gpsCenter.GetPosition();
+                sName = shipOrientationBlock.CubeGrid.CustomName;
+                vPosition = shipOrientationBlock.GetPosition();
             }
             if (dBaseRequestLastTransmit > dBaseRequestTransmitWait || bForceRequest)
             {
@@ -232,22 +242,22 @@ namespace IngameScript
         {
             double bestRange = double.MaxValue;
             int iBest = BaseIndexOf(BaseFindNearest());
-            if (iBest >= 0 && gpsCenter!=null)
+            if (iBest >= 0 && shipOrientationBlock!=null)
             {
-                bestRange = (gpsCenter.GetPosition() - baseList[iBest].position).Length();
+                bestRange = (shipOrientationBlock.GetPosition() - baseList[iBest].position).Length();
             }
             return (float) bestRange;
         }
         long BaseFindNearest()
         {
             int iBest = -1;
-            if (gpsCenter == null) return iBest;
+            if (shipOrientationBlock == null) return iBest;
 
             double distanceSQ = double.MaxValue;
 //sInitResults += baseList.Count + " Bases";
             for(int i=0;i<baseList.Count;i++)
             {
-                double curDistanceSQ = Vector3D.DistanceSquared(baseList[i].position, gpsCenter.GetPosition());
+                double curDistanceSQ = Vector3D.DistanceSquared(baseList[i].position, shipOrientationBlock.GetPosition());
                 if( curDistanceSQ<distanceSQ)
                 {
 //                    sInitResults += " Choosing" + baseList[i].baseName;
@@ -265,18 +275,6 @@ namespace IngameScript
             return BaseFindNearest();
         }
 
-        /*
-        long BaseIdOf(int baseIndex)
-        {
-            long lID = 0;
-
-            if(baseIndex>=0 & baseIndex<baseList.Count)
-            {
-                lID = baseList[baseIndex].baseId;
-            }
-            return lID;
-        }
-        */
 
         int BaseIndexOf(long baseID)
         {
@@ -287,18 +285,6 @@ namespace IngameScript
             }
             return -1;
         }
-
-        /*
-        string BaseNameOf(int baseIndex)
-        {
-            string sName = "INVALID";
-            if(baseIndex>=0 & baseIndex<baseList.Count)
-            {
-                sName = baseList[baseIndex].baseName;
-            }
-            return sName;
-        }
-        */
 
         Vector3D BasePositionOf(long baseId)
         {
@@ -327,7 +313,7 @@ namespace IngameScript
                     if (aMessage[1] == "BASE")
                     {
                         // base reponds with BASE information
-                        //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +":"+bJumpCapable)XXX
+                        //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition() +":"+bJumpCapable)XXX
 
                         // 2      3   4         5          6           7+
                         // name, ID, position, velocity, Jump Capable, Source, Sink

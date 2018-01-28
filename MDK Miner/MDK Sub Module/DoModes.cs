@@ -65,6 +65,12 @@ namespace IngameScript
         }
         #endregion
 
+        double dCargoCheckWait = 2; //seconds between checks
+        double dCargoCheckLast = -1;
+
+        double dBatteryCheckWait = 5; //seconds between checks
+        double dBatteryCheckLast = -1;
+
         void doModeAlways()
         {
 	        processPendingSends();
@@ -72,6 +78,100 @@ namespace IngameScript
         }
          void moduleDoPreModes()
         {
+            string output = "";
+            if (dCargoCheckLast > dCargoCheckWait)
+            {
+                dCargoCheckLast = 0;
+
+
+                doCargoCheck();
+            }
+            else
+            {
+                if (dCargoCheckLast < 0)
+                {
+                    // first-time init
+                    //                    dProjectorCheckLast = Me.EntityId % dProjectorCheckWait; // randomize initial check
+                    dCargoCheckLast = dCargoCheckWait + 5; // force check
+                }
+                dCargoCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
+            }
+
+            Echo("Cargo=" + cargopcent.ToString() + "%");
+            //            Echo("Cargo Mult=" + cargoMult.ToString());
+
+            if (dBatteryCheckLast > dBatteryCheckWait)
+            {
+                dBatteryCheckLast = 0;
+                batteryCheck(0, false);
+            }
+            else
+            {
+                if (dBatteryCheckLast < 0)
+                {
+                    // first-time init
+                    dBatteryCheckLast = dBatteryCheckWait + 5; // force check
+                }
+                dBatteryCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
+            }
+
+            output += "Batteries: #=" + batteryList.Count.ToString();
+            if (batteryList.Count > 0 && maxBatteryPower > 0)
+            {
+                output += " : " + (getCurrentBatteryOutput() / maxBatteryPower * 100).ToString("0.00") + "%";
+                output += "\n Storage=" + batteryPercentage.ToString() + "%";
+                /*
+                // Debug Info:
+                foreach (var tb in batteryList)
+                {
+                    float foutput = 0;
+                    IMyBatteryBlock r = tb as IMyBatteryBlock;
+
+                    MyResourceSourceComponent source;
+                    r.Components.TryGet<MyResourceSourceComponent>(out source);
+
+                    if (source != null)
+                    {
+                        foutput = source.MaxOutput;
+                    }
+
+//                    PowerProducer.GetMaxOutput(r, out foutput);
+                    output+=foutput.ToString() + "MW " + r.CustomName;
+                }
+                */
+            }
+
+            Echo(output);
+            output = "";
+
+            Echo("Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW"));
+
+            float fCurrentReactorOutput = 0;
+            reactorCheck(out fCurrentReactorOutput);
+            if (reactorList.Count > 0)
+            {
+                output = "Reactors: #" + reactorList.Count.ToString();
+                output += " - " + maxReactorPower.ToString("0.00") + "MW\n";
+                float fPer = (float)(fCurrentReactorOutput / totalMaxPowerOutput * 100);
+                output += " Curr Output=" + fCurrentReactorOutput.ToString("0.00") + "MW" + " : " + fPer.ToString("0.00") + "%";
+                //			Echo("Reactor total usage=" + fPer.ToString("0.00") + "%");
+
+                /*
+                // debug output
+                foreach (var tb in reactorList)
+                {
+                    IMyReactor r = tb as IMyReactor;
+                    Echo(r.MaxOutput.ToString() + " " + r.CustomName);
+                }
+                */
+
+            }
+            Echo(output);
+            output = "";
+
+            Echo("TotalMaxPower=" + totalMaxPowerOutput.ToString("0.00" + "MW"));
+
+            TanksCalculate();
         }
 
         void modulePostProcessing()
@@ -82,16 +182,13 @@ namespace IngameScript
                 OreDoCargoCheck();
                 OreDumpFound();
 
-                // do every run.
-                SaveMinerInfo();
-
                 //dumpOreLocs();
 
                 double maxThrust = calculateMaxThrust(thrustForwardList);
                 Echo("maxThrust=" + maxThrust.ToString("N0"));
 
                 MyShipMass myMass;
-                myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+                myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
                 double effectiveMass = myMass.PhysicalMass;
                 Echo("effectiveMass=" + effectiveMass.ToString("N0"));
 

@@ -82,7 +82,7 @@ namespace IngameScript
                 blocks = _pg.GetMeBlocksContains<IMyTextPanel>(_sSearchName);
                 if (blocks.Count < 1)
                     blocks = _pg.GetBlocksContains<IMyTextPanel>(_sSearchName);
-                _textPanels = blocks.ConvertAll(x => (IMyTextPanel)x);
+                _textPanels = blocks.ConvertAll(x1 => (IMyTextPanel)x1);
             }
 
             public void StatusLog(string text, bool bReverse=false)
@@ -226,9 +226,9 @@ namespace IngameScript
         //////
         void debugGPSOutput(string sName, Vector3D vPosition)
         {
-            string s;
-            s = "GPS:" + sName + ":" + Vector3DToString(vPosition) + ":";
-            StatusLog(s, gpsPanel);
+            string s1;
+            s1 = "GPS:" + sName + ":" + Vector3DToString(vPosition) + ":";
+            StatusLog(s1, gpsPanel);
         }
 
         string gpsName(string ShipName, string sQual)

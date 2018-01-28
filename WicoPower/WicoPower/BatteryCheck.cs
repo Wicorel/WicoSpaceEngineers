@@ -18,7 +18,8 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        #region batterycheck
+        double maxBatteryPower = -1;
+        int batteryPercentage = -1;
 
         List<IMyTerminalBlock> batteryList = new List<IMyTerminalBlock>();
 
@@ -198,7 +199,6 @@ namespace IngameScript
                 if (bEcho) Echo(s);
             }
         }
-        #endregion
 
     }
 }

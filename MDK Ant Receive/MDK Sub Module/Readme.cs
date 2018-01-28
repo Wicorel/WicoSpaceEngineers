@@ -57,6 +57,9 @@
 * 3.3 0119 Lists of panels.
 * Output to panels at END of script.
 * 
+* 3.3a redo blockinit
+* 
+* 
 * TODO: Process size info to select connectors
 * TODO: drones may take up more than one connector depending on height, width.
 * 

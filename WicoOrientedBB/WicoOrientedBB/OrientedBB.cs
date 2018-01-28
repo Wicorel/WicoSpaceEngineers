@@ -24,7 +24,7 @@ namespace IngameScript
 
         void calculateGridBBPosition(IMyTerminalBlock sourceBlock = null)
         {
-            if (sourceBlock == null) sourceBlock = gpsCenter;
+            if (sourceBlock == null) sourceBlock = shipOrientationBlock;
             _obbf = new OrientedBoundingBoxFaces(sourceBlock);
         }
 

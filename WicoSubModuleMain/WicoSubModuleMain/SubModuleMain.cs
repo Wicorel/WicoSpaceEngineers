@@ -77,6 +77,7 @@ namespace IngameScript
         bool bWorkingProjector = false;
 
         double velocityShip = -1;
+        double dGravity = -2;
 
         //       void Main(string sArgument)
         void Main(string sArgument, UpdateType ut)
@@ -106,7 +107,6 @@ namespace IngameScript
             {
                 sInitResults = "";
                 init = false;
-                currentRun = 0;
             }
 
             if (!init)
@@ -127,10 +127,13 @@ namespace IngameScript
 
                 Deserialize();
 
-                if (gpsCenter != null)
+                if (shipOrientationBlock is IMyShipController)
                 {
-                    vCurrentPos = gpsCenter.GetPosition();
-                    velocityShip = ((IMyShipController)gpsCenter).GetShipSpeed();
+                    velocityShip = ((IMyShipController)shipOrientationBlock).GetShipSpeed();
+                    Vector3D vNG = ((IMyShipController)shipOrientationBlock).GetNaturalGravity();
+                    //			Vector3D vNG = ((IMyRemoteControl)shipOrientationBlock).GetNaturalGravity();
+                    double dLength = vNG.Length();
+                    dGravity = dLength / 9.81;
                 }
                 if ((ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0)
                 {

@@ -271,7 +271,7 @@ namespace IngameScript
 
             Vector3D vAlign;
             MatrixD worldtb;
-            if (gpsCenter != null) worldtb = gpsCenter.WorldMatrix;
+            if (shipOrientationBlock != null) worldtb = shipOrientationBlock.WorldMatrix;
             else worldtb = Me.WorldMatrix;
 
             vAlign = worldtb.Forward;
@@ -326,25 +326,25 @@ namespace IngameScript
         //
         //  OLD
         //
-        // antSend("WICO:DOCK?:" + gpsCenter.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+        // antSend("WICO:DOCK?:" + shipOrientationBlock.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
 
         //antSend("WICO:DOCK:" + aMessage[3] + ":" + connector.EntityId + ":" + connector.CustomName + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
         //antSend("WICO:ADOCK:" + incomingID + ":" + connector.EntityId + ":" + connector.CustomName 	+ ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec)+":" + Vector3DToString(vAlign));
 
 
-        //antSend("WICO:HELLO:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+        //antSend("WICO:HELLO:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
 
-        //antSend("WICO:MOM:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition()));
+        //antSend("WICO:MOM:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition()));
 
             // TODO:
             //
             // NEW
             //
             // drone request base info
-        //antSend("WICO:BASE?:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+        //antSend("WICO:BASE?:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
 
             // base reponds with BASE information
-        //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition())XXX
+        //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition())XXX
 
         // name, ID, position, velocity, Jump Capable, Source, Sink
         // source and sink need to have "priorities".  support vechicle can take ore from a miner drone.  and then it can deliver to a base.
@@ -355,16 +355,16 @@ namespace IngameScript
             // 
             // give: base ID for request, drone ship size/type?, source wanted, sink wanted
 
-        //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
+        //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ shipOrientationBlock.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition() +
         // ship width, height, length
         /*
                         string sMessage = "WICO:CON?:";
                         sMessage += baseIdOf(iTargetBase).ToString() + ":";
                         sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
                         //                    sMessage += shipDim.HeightInMeters() + "," + shipDim.WidthInMeters() + "," + shipDim.LengthInMeters() + ":";
-                        sMessage += gpsCenter.CubeGrid.CustomName + ":";
+                        sMessage += shipOrientationBlock.CubeGrid.CustomName + ":";
                         sMessage += SaveFile.EntityId.ToString() + ":";
-                        sMessage += Vector3DToString(gpsCenter.GetPosition());
+                        sMessage += Vector3DToString(shipOrientationBlock.GetPosition());
                         */
             // NACK response to request
             // approach GPS?
@@ -386,8 +386,8 @@ namespace IngameScript
 
             // Drone arrives at dock position
             // then drone asks for docking
-        //antSend("WICO:COND?:" + baseId +":" + SaveFile.EntityId.ToString(), +":"+ ":"+Vector3DToString(gpsCenter.GetPosition())
-        //antSend("WICO:COND?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
+        //antSend("WICO:COND?:" + baseId +":" + SaveFile.EntityId.ToString(), +":"+ ":"+Vector3DToString(shipOrientationBlock.GetPosition())
+        //antSend("WICO:COND?:" + base.baseID, +":"+ "mini"+ ":"+ shipOrientationBlock.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition() +
 
 
             // base delays for full stop, opening hangar, etc
@@ -436,7 +436,7 @@ namespace IngameScript
                         {
                             // docking request failed
                             // need to have 'target' for message based on request message.
-                            antSend("WICO:DOCKF:" + aMessage[3] + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                            antSend("WICO:DOCKF:" + aMessage[3] + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
                         }
                         return true;
                         */
@@ -444,7 +444,7 @@ namespace IngameScript
                     if (aMessage[1] == "CON?")
                     {
                         Echo("Connector Approach Request!");
-        //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
+        //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ shipOrientationBlock.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition() +
 
                         bool pOK = false;
                         long baseID = 0;
@@ -483,14 +483,14 @@ namespace IngameScript
                         {
                             // docking request failed
                             // need to have 'target' for message based on request message.
-                            antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                            antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
                         }
                         return true;
                     }
                     if (aMessage[1] == "COND?")
                     {
                         Echo("Connector Dock Request!");
-        //antSend("WICO:COND?:" + base.baseID, +":"+ "mini"+ ":"+ gpsCenter.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition() +
+        //antSend("WICO:COND?:" + base.baseID, +":"+ "mini"+ ":"+ shipOrientationBlock.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition() +
 
                         bool pOK = false;
                         long baseID = 0;
@@ -534,7 +534,7 @@ namespace IngameScript
                     }
                     if (aMessage[1] == "BASE?")
                     {
-        //antSend("WICO:BASE?:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+        //antSend("WICO:BASE?:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
                         Echo("Base Request!");
                         sReceivedMessage = ""; // we processed it.
 

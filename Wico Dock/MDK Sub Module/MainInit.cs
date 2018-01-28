@@ -24,8 +24,24 @@ namespace IngameScript
 //            bDisableLogging = true;
 
         }
+        void ModuleInitCustomData(INIHolder iniCustomData)
+        {
+            ConnectorInitCustomData(iniCustomData);
+            ThrustersInitCustomData(iniCustomData);
+            GyroInitCustomData(iniCustomData);
+            CamerasInitCustomData(iniCustomData);
+            SensorInitCustomData(iniCustomData);
+            PowerInitCustomData(iniCustomData);
+//            CargoInitCustomData(iniCustomData);
 
-       #region maininit
+            DockingInitCustomData(iniCustomData);
+            RelaunchInitCustomData(iniCustomData);
+            DockedInitCustomData(iniCustomData);
+            LaunchInitCustomData(iniCustomData);
+        }
+
+
+        #region maininit
 
         string sInitResults = "";
         string sArgResults = "";
@@ -44,12 +60,12 @@ namespace IngameScript
             LIMIT_GYROS = 1;
             minAngleRad = 0.09f;
             CTRL_COEFF = 0.75;
-
+/*
             Log("Init:" + currentInit.ToString());
-            double progress = currentRun * 100 / 3;
+            double progress = currentInit * 100 / 3;
             string sProgress = progressBar(progress);
             StatusLog(sProgress, getTextBlock(sTextPanelReport));
-
+            */
             Echo("Init:" + currentInit.ToString());
             if (currentInit == 0)
             {
@@ -62,16 +78,17 @@ namespace IngameScript
 //                sInitResults += gridsInit();
                 initTimers();
 
-                sInitResults += initSerializeCommon();
+                //                sInitResults += initSerializeCommon();
+                sInitResults += SerializeInit();
 
                 Deserialize();
                 sInitResults += gridsInit();
-                sInitResults += BlockInit();
+                sInitResults += DefaultOrientationBlockInit();
 
-                sInitResults += thrustersInit(gpsCenter);
+                sInitResults += thrustersInit(shipOrientationBlock);
                 sInitResults += rotorsNavInit();
                 sInitResults += sensorInit();
-                sInitResults += camerasensorsInit(gpsCenter);
+                sInitResults += camerasensorsInit(shipOrientationBlock);
 
                 sInitResults += connectorsInit();
                 sInitResults += gyrosetup();
@@ -95,63 +112,6 @@ namespace IngameScript
             return sInitResults;
         }
 
-//        IMyTextPanel gpsPanel = null;
-
-        string BlockInit()
-        {
-            string sInitResults = "";
-            gpsCenter = null;
-
-            List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
-            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch);
-            if (centerSearch.Count == 0)
-            {
-               GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
-                foreach(var b in centerSearch)
-                {
-                    if(b.CustomName.Contains("[NAV]") || b.CustomData.Contains("[NAV]"))
-                    {
-                        gpsCenter = b;
-                    }
-                    else if(b.CustomName.Contains("[!NAV]") || b.CustomData.Contains("[!NAV]"))
-                    {
-                        continue; // don't use this one.
-                    }
-                    sInitResults = "R";
-                    gpsCenter = b;
-                    break;
-                }
-                if(gpsCenter==null)
-                {
-                        GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
-                    if (centerSearch.Count == 0)
-                    {
-                        sInitResults += "!!NO Controller";
-                        return sInitResults;
-
-                    }
-                    else
-                    {
-                        sInitResults += "S";
-                        gpsCenter = centerSearch[0];
-                    }
-
-                }
-            }
-            else
-            {
-                sInitResults += "N";
-                gpsCenter = centerSearch[0];
-            }
-            /*
-            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-            blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
-            if (blocks.Count > 0)
-                gpsPanel = blocks[0] as IMyTextPanel;
-            */
-            if (gpsCenter == null) Echo("ERROR: No control block found!");
-            return sInitResults;
-        }
 
         #endregion
 
@@ -163,15 +123,6 @@ namespace IngameScript
                 current_state = 0;
             }
             return ">";
-        }
-
-        void ModuleInitCustomData(INIHolder iniCustomData)
-        {
-            ConnectorInitCustomData(iniCustomData);
-            ThrustersInitCustomData(iniCustomData);
-            GyroInitCustomData(iniCustomData);
-            CamerasInitCustomData(iniCustomData);
-            SensorInitCustomData(iniCustomData);
         }
 
     }

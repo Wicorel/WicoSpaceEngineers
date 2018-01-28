@@ -26,6 +26,20 @@ namespace IngameScript
         List<IMyTerminalBlock> thrustLaunchUpList = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> thrustLaunchDownList = new List<IMyTerminalBlock>();
 
+ //       string sLaunchSection = "LAUNCH";
+
+        void LaunchInitCustomData(INIHolder iNIHolder)
+        {
+        }
+        void LaunchSerialize(INIHolder iNIHolder)
+        {
+        }
+
+        void LaunchDeserialize(INIHolder iNIHolder)
+        {
+        }
+
+
         void doModeLaunch()
         {
             StatusLog("clear", textPanelReport);
@@ -57,9 +71,9 @@ namespace IngameScript
                         ref thrustLaunchDownList, ref thrustLaunchUpList,
                         ref thrustLaunchLeftList, ref thrustLaunchRightList);
                 }
-                vDock = ((IMyShipController)gpsCenter).CenterOfMass;
+                vDock = ((IMyShipController)shipOrientationBlock).CenterOfMass;
                 TanksStockpile(false);
-//                vDock = gpsCenter.GetPosition();
+//                vDock = shipOrientationBlock.GetPosition();
                 powerDownThrusters(thrustAllList); // turns ON all thrusters.
                 float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
                 antennaMaxPower(false,range);
@@ -80,8 +94,8 @@ namespace IngameScript
                 current_state = 1;
             }
 
-//            Vector3D vPos = gpsCenter.GetPosition();
-            Vector3D vPos = ((IMyShipController)gpsCenter).CenterOfMass;
+//            Vector3D vPos = shipOrientationBlock.GetPosition();
+            Vector3D vPos = ((IMyShipController)shipOrientationBlock).CenterOfMass;
 
             Echo("vDock=" + Vector3DToString(vDock));
             Echo("vPos=" + Vector3DToString(vPos));
@@ -103,11 +117,14 @@ namespace IngameScript
             if (dist > 45)
             {
                 ResetMotion();
+                setMode(MODE_LAUNCHED);
+                /*
                 if (bValidTarget || bValidAsteroid) setMode(MODE_GOINGTARGET);//ActionGoMine();
                 else
                 {
                     setMode(MODE_INSPACE);
                 }
+                */
             }
         }
         #endregion

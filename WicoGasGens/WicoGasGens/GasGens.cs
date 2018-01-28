@@ -22,7 +22,8 @@ namespace IngameScript
         string gasgenInit()
         {
             gasgenList.Clear();
-            GridTerminalSystem.GetBlocksOfType<IMyGasGenerator>(gasgenList, localGridFilter);
+            gasgenList=GetTargetBlocks<IMyGasGenerator>();
+//            GridTerminalSystem.GetBlocksOfType<IMyGasGenerator>(gasgenList, localGridFilter);
             return "GG" + gasgenList.Count.ToString("00");
         }
 

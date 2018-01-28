@@ -92,9 +92,9 @@ namespace IngameScript
                 {
                     Echo("brake");
                     //toggle brake
-                    if (gpsCenter is IMyShipController)
+                    if (shipOrientationBlock is IMyShipController)
                     {
-                        IMyShipController msc = gpsCenter as IMyShipController;
+                        IMyShipController msc = shipOrientationBlock as IMyShipController;
                         bool bBrake = msc.HandBrake;
                         msc.ApplyAction("HandBrake");
                     }

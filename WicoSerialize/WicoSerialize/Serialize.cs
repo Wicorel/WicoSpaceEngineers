@@ -21,97 +21,29 @@ namespace IngameScript
 
         void Serialize()
         {
-            string sb = "";
-            sb += "Wico Craft Controller Saved State Do Not Edit" + "\n";
-            sb += savefileversion.ToString("0.00") + "\n";
+            ModuleSerialize(iniWicoCraftSave);
 
-            sb += iMode.ToString() + "\n";
-            sb += current_state.ToString() + "\n";
-            sb += currentRun.ToString() + "\n";
-            sb += sPassedArgument + "\n";
-            sb += iAlertStates.ToString() + "\n";
-            sb += dGravity.ToString() + "\n";
+            iniWicoCraftSave.SetValue(sSerializeSection, "Mode", iMode.ToString());
+            iniWicoCraftSave.SetValue(sSerializeSection, "current_state", current_state.ToString());
+            iniWicoCraftSave.SetValue(sSerializeSection, "PassedArgument", sPassedArgument);
+            iniWicoCraftSave.SetValue(sSerializeSection, "AlertStates", iAlertStates.ToString());
+            iniWicoCraftSave.SetValue(sSerializeSection, "craft_operation", craft_operation.ToString());
+            iniWicoCraftSave.SetValue(sSerializeSection, "PassedArgument", sPassedArgument);
+            iniWicoCraftSave.SetValue(sSerializeSection, "ReceivedMessage", sReceivedMessage);
+            iniWicoCraftSave.SetValue(sSerializeSection, "SaveID", (long)SaveFile.EntityId);
 
-            sb += allBlocksCount.ToString() + "\n";
+            //            Echo("Writing ReceivedMessage='" + sReceivedMessage + "'");
 
-            sb += craft_operation.ToString() + "\n";
-
-
-            sb += Vector3DToString(vDock) + "\n";
-            sb += bValidDock.ToString() + "\n";
-
-            sb += Vector3DToString(vLaunch1) + "\n";
-            sb += bValidLaunch1.ToString() + "\n";
-
-            sb += Vector3DToString(vHome) + "\n";
-            sb += bValidHome.ToString() + "\n";
-
-            sb += dtStartShip.ToString() + "\n";
-            sb += dtStartCargo.ToString() + "\n";
-            sb += dtStartSearch.ToString() + "\n";
-            sb += dtStartMining.ToString() + "\n";
-            sb += dtLastRan.ToString() + "\n";
-            sb += dtStartNav.ToString() + "\n";
-
-            //	sb += Vector3DToString(vLastPos) + "\n";
-            sb += Vector3DToString(vInitialContact) + "\n";
-            sb += bValidInitialContact.ToString() + "\n";
-
-            sb += Vector3DToString(vInitialExit) + "\n";
-            sb += bValidInitialExit.ToString() + "\n";
-
-            sb += Vector3DToString(vLastContact) + "\n";
-            sb += Vector3DToString(vLastExit) + "\n";
-            sb += Vector3DToString(vExpectedExit) + "\n";
-
-            sb += Vector3DToString(vTargetMine) + "\n";
-            sb += bValidTarget.ToString() + "\n";
-
-            sb += Vector3DToString(vTargetAsteroid) + "\n";
-            sb += bValidAsteroid.ToString() + "\n";
-
-            sb += Vector3DToString(vNextTarget) + "\n";
-            sb += bValidNextTarget.ToString() + "\n";
-
-            sb += Vector3DToString(vCurrentNavTarget) + "\n";
-
-
-            sb += bAutopilotSet.ToString() + "\n";
-            sb += bAutoRelaunch.ToString() + "\n";
-            sb += iDetects.ToString() + "\n";
-
-            sb += batterypcthigh.ToString() + "\n";
-            sb += batterypctlow.ToString() + "\n";
-            sb += batteryPercentage.ToString() + "\n";
-
-            sb += cargopctmin.ToString() + "\n";
-            sb += cargopcent.ToString() + "\n";
-            sb += cargoMult.ToString() + "\n";
-
-            sb += hydroPercent.ToString() + "\n";
-            sb += oxyPercent.ToString() + "\n";
-
-            sb += totalMaxPowerOutput.ToString() + "\n";
-            sb += maxReactorPower.ToString() + "\n";
-            sb += maxSolarPower.ToString() + "\n";
-            sb += maxBatteryPower.ToString() + "\n";
-            sb += sReceivedMessage + "\n";
-
-            if (sLastLoad != sb)
-            {
-                sLastLoad = sb; // so we can call serialize multiple times in a run with no (extra) performance hit
-                iniWicoCraftSave.WriteSection("WCCM", sb.ToString());
-            }
-            if( iniWicoCraftSave.IsDirty) // others may have changed it, so check if any section is dirty
+            if ( iniWicoCraftSave.IsDirty) // others may have changed it, so check if any section is dirty
             {
                 if (iniWicoCraftSave.IsDirty)
                 {
                     string sINI = iniWicoCraftSave.GenerateINI();
                     if (SaveFile == null)
                     {
+                        //                if (bVerboseSerialize)
+                        //                        Echo("WARNING: saving to Storage");
                         Storage = sINI;
-                        //                    Storage = sb.ToString();
-                        //                    return;
                     }
                     else
                     {
@@ -122,7 +54,8 @@ namespace IngameScript
             }
             else
             {
-                if (bVerboseSerialize) Echo("Not saving: Same");
+//                if (bVerboseSerialize)
+                    Echo("Not saving: Same");
             }
 
         }

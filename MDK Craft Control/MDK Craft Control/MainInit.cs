@@ -33,6 +33,8 @@ namespace IngameScript
             GyroInitCustomData(iniCustomData);
             CamerasInitCustomData(iniCustomData);
             GearsInitCustomData(iniCustomData);
+            PowerInitCustomData(iniCustomData);
+            CargoInitCustomData(iniCustomData);
         }
 
         #region maininit
@@ -49,14 +51,8 @@ namespace IngameScript
 
             // when all initialization is done, set init to true.
 
-//            Log("Init:" + currentInit.ToString());
             Echo(gtsAllBlocks.Count.ToString() + " Blocks");
 
-            /*
-            double progress = currentInit * 100 / 3; // 3=Number of expected INIT phases.
-            string sProgress = progressBar(progress);
-            StatusLog(moduleName + sProgress, textPanelReport);
-            */
             Echo("Init:" + currentInit);
             if (currentInit == 0)
             {
@@ -64,12 +60,13 @@ namespace IngameScript
                 StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
 
                 /*
+                 * add commands to set modes
                 if(!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
                 */
                 sInitResults += gridsInit();
                 initLogging();
                 initTimers();
-                sInitResults += initSerializeCommon();
+                sInitResults += SerializeInit();
 
                 Deserialize(); // get info from savefile to avoid blind-rewrite of (our) defaults
             }
@@ -77,21 +74,29 @@ namespace IngameScript
             {
                 Deserialize();// get info from savefile to avoid blind-rewrite of (our) defaults
 
-                sInitResults += BlockInit();
+//                sInitResults += BlockInit();
+                sInitResults += DefaultOrientationBlockInit();
                 initCargoCheck();
-                if (gpsCenter != null)
-                {
-                    anchorPosition = gpsCenter;
-                    currentPosition = anchorPosition.GetPosition();
-                }
                 initPower();
-                sInitResults += thrustersInit(gpsCenter);
+                sInitResults += thrustersInit(shipOrientationBlock);
                 sInitResults += gyrosetup();
                 if (gtsAllBlocks.Count < 300) currentInit = 2; // go ahead and do next step.
+                if (shipOrientationBlock is IMyRemoteControl)
+                {
+                    Vector3D playerPosition;
+                    bool bGotPlayer = ((IMyRemoteControl)shipOrientationBlock).GetNearestPlayer(out playerPosition);
+                    IMyRemoteControl myR= (IMyRemoteControl)shipOrientationBlock;
+                    myR.SetCollisionAvoidance(false);
+                    myR.SetDockingMode(false);
+                    myR.Direction = Base6Directions.Direction.Forward;
+                    myR.FlightMode = FlightMode.OneWay;
+                    myR.ClearWaypoints();
+                    myR.AddWaypoint(playerPosition, "Name");
+                }
             }
             if (currentInit == 2)
             {
-                sInitResults += wheelsInit(gpsCenter);
+                sInitResults += wheelsInit(shipOrientationBlock);
                 sInitResults += rotorsNavInit();
 
                 sInitResults += connectorsInit();
@@ -106,8 +111,6 @@ namespace IngameScript
                 sInitResults += antennaInit();
                 sInitResults += gasgenInit();
 
-                //        Serialize();
-
                 autoConfig();
                 bWantFast = false;
 
@@ -118,10 +121,10 @@ namespace IngameScript
                 {
                     sBanner = OurName + ":" + moduleName + "\nV" + sVersion + " ";
                 }
-                if (anchorPosition != null)
+                if (shipOrientationBlock is IMyShipController)
                 {
                     MyShipMass myMass;
-                    myMass = ((IMyShipController)anchorPosition).CalculateShipMass();
+                    myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
 
                     gridBaseMass = myMass.BaseMass;
                 }
@@ -140,63 +143,6 @@ namespace IngameScript
         }
 
 
-        string BlockInit()
-        {
-            string sInitResults = "";
-
-            List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
-            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch, localGridFilter);
-            if (centerSearch.Count == 0)
-            {
-                centerSearch = GetBlocksContains<IMyRemoteControl>("[NAV]");
-                if (centerSearch.Count == 0)
-                {
-                    GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
-                    if (centerSearch.Count == 0)
-                    {
-                        GridTerminalSystem.GetBlocksOfType<IMyCockpit>(centerSearch, localGridFilter);
-                        //                GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
-                        int i = 0;
-                        for (; i < centerSearch.Count; i++)
-                        {
-                            Echo("Checking Controller:" + centerSearch[i].CustomName);
-                            if (centerSearch[i] is IMyCryoChamber)
-                                continue;
-                            break;
-                        }
-                        if (i >= centerSearch.Count)
-                        {
-                            sInitResults += "!!NO valid Controller";
-                            Echo("No Controller found");
-                        }
-                        else
-                        {
-                            sInitResults += "S";
-                            Echo("Using good ship Controller: " + centerSearch[i].CustomName);
-                        }
-                    }
-                    else
-                    {
-                        sInitResults += "R";
-                        Echo("Using First Remote control found: " + centerSearch[0].CustomName);
-                    }
-                }
-            }
-            else
-            {
-                sInitResults += "N";
-                Echo("Using Named: " + centerSearch[0].CustomName);
-            }
-            if (centerSearch.Count > 0)
-                gpsCenter = centerSearch[0];
-            /*
-            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-            blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
-            if (blocks.Count > 0)
-                gpsPanel = blocks[0] as IMyTextPanel;
-            */
-            return sInitResults;
-        }
 
         string modeOnInit()
         {

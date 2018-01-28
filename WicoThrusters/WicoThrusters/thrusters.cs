@@ -68,10 +68,11 @@ namespace IngameScript
 
             if (orientationBlock == null) return;
             //            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustAllList, localGridFilter);
-            List<IMyTerminalBlock> thrustLocal = new List<IMyTerminalBlock>();
+            var thrustLocal = new List<IMyTerminalBlock>();
 
             // Add 'cutter' exclusion from thrusters.
-            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
+            GetTargetBlocks<IMyThrust>(ref thrustLocal);
+//            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
             for (int i = 0; i < thrustLocal.Count; i++)
             {
                 if (thrustLocal[i].CustomName.ToLower().Contains(sCutterThruster) || thrustLocal[i].CustomData.ToLower().Contains(sCutterThruster))
@@ -94,7 +95,7 @@ namespace IngameScript
 
             for (int i = 0; i < thrustAllList.Count; ++i)
             {
-                IMyThrust thruster = thrustAllList[i] as IMyThrust;
+                var thruster = thrustAllList[i] as IMyThrust;
                 Matrix fromThrusterToGrid;
                 thruster.Orientation.GetMatrix(out fromThrusterToGrid);
                 Vector3 accelerationDirection = Vector3.Transform(fromThrusterToGrid.Backward, fromGridToReference);
@@ -151,10 +152,11 @@ namespace IngameScript
 
             if (orientationBlock == null) return "No Orientation Block";
             //            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustAllList, localGridFilter);
-            List<IMyTerminalBlock> thrustLocal = new List<IMyTerminalBlock>();
+            var thrustLocal = new List<IMyTerminalBlock>();
 
             // Add 'cutter' exclusion from thrusters.
-            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
+            GetTargetBlocks<IMyThrust>(ref thrustLocal);
+//            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
             for (int i = 0; i < thrustLocal.Count; i++)
             {
                 if (thrustLocal[i].CustomName.ToLower().Contains(sCutterThruster) || thrustLocal[i].CustomData.ToLower().Contains(sCutterThruster))
@@ -177,7 +179,7 @@ namespace IngameScript
 
             for (int i = 0; i < thrustAllList.Count; ++i)
             {
-                IMyThrust thruster = thrustAllList[i] as IMyThrust;
+                var thruster = thrustAllList[i] as IMyThrust;
                 Matrix fromThrusterToGrid;
                 thruster.Orientation.GetMatrix(out fromThrusterToGrid);
                 Vector3 accelerationDirection = Vector3.Transform(fromThrusterToGrid.Backward, fromGridToReference);
@@ -282,7 +284,7 @@ namespace IngameScript
             double hydroThrust = calculateMaxThrust(thrusters, thrusthydro);
 
             MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double hoverthrust = 0;
             hoverthrust = myMass.PhysicalMass * dGravity * 9.810;
 
@@ -344,8 +346,8 @@ namespace IngameScript
 
         List<IMyTerminalBlock> findThrusters(string sGroup)
         {
-            List<IMyTerminalBlock> lthrusters = new List<IMyTerminalBlock>();
-            List<IMyBlockGroup> groups = new List<IMyBlockGroup>();
+            var lthrusters = new List<IMyTerminalBlock>();
+            var groups = new List<IMyBlockGroup>();
             GridTerminalSystem.GetBlockGroups(groups);
             for (int groupIndex = 0; groupIndex < groups.Count; groupIndex++)
             {
@@ -393,7 +395,7 @@ namespace IngameScript
         bool powerUpThrusters(string sFThrust, int iPower = 100, int iTypes = thrustAll)
         {
             if (iPower > 100) iPower = 100;
-            List<IMyBlockGroup> groups = new List<IMyBlockGroup>();
+            var groups = new List<IMyBlockGroup>();
             GridTerminalSystem.GetBlockGroups(groups);
             for (int groupIndex = 0; groupIndex < groups.Count; groupIndex++)
             {
@@ -428,7 +430,7 @@ namespace IngameScript
         }
         bool powerDownThrusters(string sFThrust)
         {
-            List<IMyBlockGroup> groups = new List<IMyBlockGroup>(); GridTerminalSystem.GetBlockGroups(groups); for (int groupIndex = 0; groupIndex < groups.Count; groupIndex++)
+            var groups = new List<IMyBlockGroup>(); GridTerminalSystem.GetBlockGroups(groups); for (int groupIndex = 0; groupIndex < groups.Count; groupIndex++)
             {
                 if (groups[groupIndex].Name == sFThrust)
                 {
@@ -454,7 +456,7 @@ namespace IngameScript
                 int iThrusterType = thrusterType(theBlocks[i]);
                 if ((iThrusterType & iTypes) > 0 && theBlocks[i].IsWorking)
                 {
-                    IMyThrust thruster = theBlocks[i] as IMyThrust;
+                    var thruster = theBlocks[i] as IMyThrust;
                     return thruster.ThrustOverride;
                     /*
                     float maxThrust = thruster.GetMaximum<float>("Override");
@@ -510,7 +512,7 @@ namespace IngameScript
         {
             if (atmoThrustCount < 1) return 0;
 
-            IMyThrust myThrust = ThrustFindFirst(thrustAllList, thrustatmo);
+            var myThrust = ThrustFindFirst(thrustAllList, thrustatmo);
 
             if (myThrust == null) return 0;
 
@@ -526,8 +528,7 @@ namespace IngameScript
         /// <returns>stopping distance in meters</returns>
         double calculateStoppingDistance(List<IMyTerminalBlock> thrustUpList, double currentV, double dGrav)
         {
-            MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            var myMass= ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double hoverthrust = 0;
             hoverthrust = myMass.PhysicalMass * dGrav * 9.810;
             double maxThrust = calculateMaxThrust(thrustUpList);

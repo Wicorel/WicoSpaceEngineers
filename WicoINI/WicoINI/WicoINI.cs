@@ -113,9 +113,9 @@ namespace IngameScript
 
                         iLine++;
                         string sText = "";
-                        string[] asLines = new string[aLines.Count() - iLine]; // maximum size.
+                        var asLines = new string[aLines.Count() - iLine]; // maximum size.
                         int iSectionLine = 0;
-                        Dictionary<string, string> dKeyValue = new Dictionary<string, string>();
+                        var dKeyValue = new Dictionary<string, string>();
 
                         for (; iLine < aLines.Count(); iLine++)
                         {
@@ -231,7 +231,7 @@ namespace IngameScript
                 {
                     if (bSetDefault)
                     {
-                        SetValue(section, key, lValue.ToString());
+                        SetValue(section, key, lValue);
                     }
                     return false;
                 }
@@ -256,7 +256,7 @@ namespace IngameScript
                 {
                     if (bSetDefault)
                     {
-                        SetValue(section, key, iValue.ToString());
+                        SetValue(section, key, iValue);
                     }
                     return false;
                 }
@@ -280,7 +280,7 @@ namespace IngameScript
                 {
                     if (bSetDefault)
                     {
-                        SetValue(section, key, dVal.ToString());
+                        SetValue(section, key, dVal);
                     }
                     return false;
                 }
@@ -328,7 +328,7 @@ namespace IngameScript
                 {
                     if (bSetDefault)
                     {
-                        SetValue(section, key, dtVal.ToString());
+                        SetValue(section, key, dtVal);
                     }
                     return false;
                 }
@@ -353,11 +353,10 @@ namespace IngameScript
                 {
                     if (bSetDefault)
                     {
-                        SetValue(section, key, Vector3DToString(vVal));
+                        SetValue(section, key, vVal);
                     }
                     return false;
                 }
-
 
                 double x1, y1, z1;
                 ParseVector3d(sVal, out x1, out y1, out z1);
@@ -382,7 +381,7 @@ namespace IngameScript
                 {
                     if (bSetDefault)
                     {
-                        SetValue(section, key, bVal.ToString());
+                        SetValue(section, key, bVal);
                     }
                     return false;
                 }
@@ -410,8 +409,8 @@ namespace IngameScript
                 // if there is a set of keys for the section
                 if (_Keys.ContainsKey(section))
                 {
-//                    _pg.Echo("keysContain");
-                    Dictionary<string, string> dKeyValue = new Dictionary<string, string>();
+                    //                    _pg.Echo("keysContain");
+                    var dKeyValue = new Dictionary<string, string>();
 
                     var dValue = _Keys[section];
                     if (dValue.ContainsKey(key))
@@ -430,9 +429,9 @@ namespace IngameScript
                 }
                 else
                 { // no keys for the section
-//                    _pg.Echo("keysNoContain");
-                    // add the key value dictionary and the new section
-                    Dictionary<string, string> dKeyValue = new Dictionary<string, string>();
+                  //                    _pg.Echo("keysNoContain");
+                  // add the key value dictionary and the new section
+                    var dKeyValue = new Dictionary<string, string>();
                     dKeyValue.Add(key, sVal);
 
 //                    _pg.Echo("keyvalueadd");
@@ -441,6 +440,42 @@ namespace IngameScript
 
                     IsDirty = true;
                 }
+                return true;
+            }
+
+            public bool SetValue(string section, string key, Vector3D vVal)
+            {
+                SetValue(section, key, Vector3DToString(vVal));
+                return true;
+            }
+            public bool SetValue(string section, string key, bool bVal)
+            {
+                SetValue(section, key, bVal.ToString());
+                return true;
+            }
+            public bool SetValue(string section, string key, int iVal)
+            {
+                SetValue(section, key, iVal.ToString());
+                return true;
+            }
+            public bool SetValue(string section, string key, long lVal)
+            {
+                SetValue(section, key, lVal.ToString());
+                return true;
+            }
+            public bool SetValue(string section, string key, DateTime dtVal)
+            {
+                SetValue(section, key, dtVal.ToString());
+                return true;
+            }
+            public bool SetValue(string section, string key, float fVal)
+            {
+                SetValue(section, key, fVal.ToString());
+                return true;
+            }
+            public bool SetValue(string section, string key, double dVal)
+            {
+                SetValue(section, key, dVal.ToString());
                 return true;
             }
 

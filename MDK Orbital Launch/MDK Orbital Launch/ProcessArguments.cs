@@ -74,8 +74,8 @@ namespace IngameScript
             }
             else if (args[0] == "resetlaunch")
             {
-                bValidHome = false;
-                bValidLaunch1 = false;
+                bValidOrbitalHome = false;
+                bValidOrbitalLaunch = false;
             }
             else if (args[0] == "wccs")
             {

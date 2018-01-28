@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoOrbitalCommon", "WicoOrbitalCommon\WicoOrbitalCommon.shproj", "{B04663CB-CCF9-4999-8E77-C84BA8DC1CD9}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoOrbitalCommon\WicoOrbitalCommon.projitems*{b04663cb-ccf9-4999-8e77-c84ba8dc1cd9}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8342B729-B719-4082-AA4E-E1033B63A447}
+	EndGlobalSection
+EndGlobal

@@ -102,4 +102,7 @@ MODE_DOCKED tries to fill tanks and batteries.
 3.3 Multiple Text Panels.
 Only write to panels at the end of script.
 
+3.3a defaultorientationblock code moved
+
+
 */

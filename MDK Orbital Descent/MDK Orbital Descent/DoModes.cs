@@ -22,11 +22,11 @@ namespace IngameScript
         void doModes()
         {
             Echo("mode=" + iMode.ToString());
-            if (bValidLaunch1)
+            if (bValidOrbitalLaunch)
             {
                 Echo("Target is connector");
             }
-            else if (bValidHome)
+            else if (bValidOrbitalHome)
             {
                 Echo("Target is hover");
             }
@@ -39,7 +39,8 @@ namespace IngameScript
                 setMode(MODE_DOCKED);
             }
             if (iMode == MODE_IDLE) doModeIdle();
-            else if (iMode == MODE_DESCENT) doModeDescent();
+//            else 
+            if (iMode == MODE_DESCENT) doModeDescent();
         }
         #endregion
 

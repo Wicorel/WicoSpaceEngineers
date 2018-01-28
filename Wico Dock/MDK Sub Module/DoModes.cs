@@ -59,7 +59,7 @@ namespace IngameScript
         {
             /*
                         MyShipMass myMass;
-                        myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+                        myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
                         double maxThrust = calculateMaxThrust(thrustBackwardList);
                         double maxDeltaV = maxThrust / myMass.PhysicalMass;
                         Echo("maxDeltaV=" + niceDoubleMeters(maxDeltaV));
@@ -154,7 +154,7 @@ namespace IngameScript
                         {
                         /* OBSOLETE
                             Echo("MOM says hello!");
-                            // FORMAT:			antSend("WICO:MOM:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(gpsCenter.GetPosition()));
+                            // FORMAT:			antSend("WICO:MOM:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition()));
                             int iOffset = 2;
                             string sName = aMessage[iOffset++];
 
@@ -176,8 +176,8 @@ namespace IngameScript
                             }
                             else
                             {
-                                double distancesqmom = Vector3D.DistanceSquared(vMomPosition, gpsCenter.GetPosition());
-                                double distancenewmom = Vector3D.DistanceSquared(vPosition, gpsCenter.GetPosition());
+                                double distancesqmom = Vector3D.DistanceSquared(vMomPosition, shipOrientationBlock.GetPosition());
+                                double distancenewmom = Vector3D.DistanceSquared(vPosition, shipOrientationBlock.GetPosition());
                                 if (distancesqmom > distancenewmom)
                                 {
                                     lMomID = id;
@@ -197,7 +197,7 @@ namespace IngameScript
                 Echo("Orphan!!!");
                 if (!bMomRequestSent)
                 {
-                    antSend("WICO:HELLO:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(gpsCenter.GetPosition()));
+                    antSend("WICO:HELLO:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
                     bMomRequestSent = true;
                 }
             }
@@ -240,15 +240,15 @@ namespace IngameScript
             if (bValidHome)
             {
                 dist = 0;
-                if(gpsCenter!=null)   dist = (gpsCenter.GetPosition() - vHome).Length();
+                if(shipOrientationBlock!=null)   dist = (shipOrientationBlock.GetPosition() - vHome).Length();
                 s += ": " + dist.ToString("0") + "m";
                 s2 = "GPS:" + sShipName + " Home Entry:" + Vector3DToString(vHome) + ":";
                 StatusLog(s2, gpsPanel);
             }
             else s += ": NOT SET";
-            if (gpsCenter != null)
+            if (shipOrientationBlock != null)
             {
-                s2 = "GPS:" + sShipName + " Current Position:" + Vector3DToString(gpsCenter.GetPosition()) + ":";
+                s2 = "GPS:" + sShipName + " Current Position:" + Vector3DToString(shipOrientationBlock.GetPosition()) + ":";
                 StatusLog(s2, gpsPanel);
             }
         }

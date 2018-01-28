@@ -22,26 +22,9 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "Dock";
-        string sVersion = "3.3";
+        string sVersion = "3.3a";
 
-        const string sGPSCenter = "Craft Remote Control";
-
-        Vector3I iForward = new Vector3I(0, 0, 0);
-        Vector3I iUp = new Vector3I(0, 0, 0);
-        Vector3I iLeft = new Vector3I(0, 0, 0);
- //       Vector3D currentPosition;
         const string velocityFormat = "0.00";
-
-//        double shipWidth = 0, shipHeight = 0, shipLength = 0;
-
- //       IMyTerminalBlock anchorPosition;
-        IMyTerminalBlock gpsCenter = null;
-//        Vector3D vCurrentPos;
-        //IMyTerminalBlock gpsCenter = null;
-        class OurException : Exception
-        {
-            public OurException(string msg) : base("WicoDock" + ": " + msg) { }
-        }
 
 
         void moduleDoPreModes()
@@ -73,9 +56,25 @@ namespace IngameScript
         //	if (navEnable != null)	blockApplyAction(navEnable,"OnOff_Off"); //navEnable.ApplyAction("OnOff_Off"); 
 	        powerDownThrusters(thrustAllList);
             gyrosOff();
-	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
+	        if (shipOrientationBlock is IMyRemoteControl) ((IMyRemoteControl)shipOrientationBlock).SetAutoPilotEnabled(false);
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
         } 
+
+        void ModuleSerialize(INIHolder iNIHolder)
+        {
+            DockingSerialize(iNIHolder);
+            RelaunchSerialize(iNIHolder);
+            DockedSerialize(iNIHolder);
+            LaunchSerialize(iNIHolder);
+        }
+
+        void ModuleDeserialize(INIHolder iNIHolder)
+        {
+            DockingDeserialize(iNIHolder);
+            RelaunchDeserialize(iNIHolder);
+            DockedDeserialize(iNIHolder);
+            LaunchDeserialize(iNIHolder);
+        }
 
     }
 }

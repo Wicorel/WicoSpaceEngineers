@@ -181,11 +181,11 @@ namespace IngameScript
         void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState, bool bAsteroidTarget=false)
         {
             if(dTMDebug) Echo("dTM:" + arrivalState);
-            //		Vector3D vTargetLocation = vHome;// gpsCenter.GetPosition();
-            //    gpsCenter.CubeGrid.
+            //		Vector3D vTargetLocation = vHome;// shipOrientationBlock.GetPosition();
+            //    shipOrientationBlock.CubeGrid.
             if (tmShipController == null)
             {
-                InitDoTravelMovement(vTargetLocation, shipSpeedMax, gpsCenter);
+                InitDoTravelMovement(vTargetLocation, shipSpeedMax, shipOrientationBlock);
             }
 
             if(tmCameraElapsedMs>=0) tmCameraElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
@@ -229,7 +229,7 @@ namespace IngameScript
             if (btmSled || btmRotor)
             {
                 double yawangle = -999;
-                yawangle = CalculateYaw(vTargetLocation, gpsCenter);
+                yawangle = CalculateYaw(vTargetLocation, shipOrientationBlock);
                 Echo("yawangle=" + yawangle.ToString());
                 if (btmSled)
                 {
@@ -245,7 +245,7 @@ namespace IngameScript
             }
             else
             {
-                bAimed = GyroMain("forward", vVec, gpsCenter);
+                bAimed = GyroMain("forward", vVec, shipOrientationBlock);
             }
 
             tmShipController.DampenersOverride = true;
@@ -336,7 +336,7 @@ namespace IngameScript
                                     { // if the target is inside the BB of the target, ignore the collision
                                         bValidCollision = false;
                                         // check to see if we are close enough to surface of asteroid
-                                        double astDistance=((Vector3D)lastDetectedInfo.HitPosition-gpsCenter.GetPosition()).Length();
+                                        double astDistance=((Vector3D)lastDetectedInfo.HitPosition-shipOrientationBlock.GetPosition()).Length();
                                         if((astDistance-stoppingDistance)<arrivalDistance)
                                         {
                                             ResetMotion();
@@ -456,7 +456,7 @@ namespace IngameScript
         {
             // 
             MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double maxThrust = calculateMaxThrust(thrustUpList);
             double maxDeltaV = maxThrust / myMass.PhysicalMass;
             // Magic..
@@ -504,7 +504,7 @@ namespace IngameScript
             else
             {
 //                StatusLog("NO hitposition", gpsPanel);
-                vHit = gpsCenter.GetPosition();
+                vHit = shipOrientationBlock.GetPosition();
             }
 
             Vector3D vCenter = lastDetectedInfo.Position;
@@ -532,7 +532,7 @@ namespace IngameScript
             // the OLD way.
 
             //            vAvoid = vCenter - vVec * (radius + shipDim.WidthInMeters() * 5);
-            //	 Vector3D gpsCenter.GetPosition() - vAvoid;
+            //	 Vector3D shipOrientationBlock.GetPosition() - vAvoid;
 
             Vector3D cross;
 
@@ -614,7 +614,7 @@ namespace IngameScript
             if(tmCameraElapsedMs>=0) tmCameraElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
             if(tmScanElapsedMs>=0) tmScanElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
 
-            MatrixD worldtb = gpsCenter.WorldMatrix;
+            MatrixD worldtb = shipOrientationBlock.WorldMatrix;
             Vector3D vVec = worldtb.Forward;
             Echo("ScanEscape()");
             if (bScanLeft)
@@ -627,7 +627,7 @@ namespace IngameScript
                     {
                         vVec = worldtb.Left;
                         vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
+                        vAvoid = shipOrientationBlock.GetPosition() + vVec * 200;
                         return true;
                     }
                 }
@@ -642,7 +642,7 @@ namespace IngameScript
                     {
                         vVec = worldtb.Right;
                         vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
+                        vAvoid = shipOrientationBlock.GetPosition() + vVec * 200;
                         return true;
                     }
                 }
@@ -657,7 +657,7 @@ namespace IngameScript
                     {
                         vVec = worldtb.Up;
                         vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
+                        vAvoid = shipOrientationBlock.GetPosition() + vVec * 200;
                         return true;
                     }
                 }
@@ -672,7 +672,7 @@ namespace IngameScript
                     {
                         vVec = worldtb.Down;
                         vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
+                        vAvoid = shipOrientationBlock.GetPosition() + vVec * 200;
                         return true;
                     }
                 }
@@ -687,7 +687,7 @@ namespace IngameScript
                     {
                         vVec = worldtb.Backward;
                         vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
+                        vAvoid = shipOrientationBlock.GetPosition() + vVec * 200;
                         return true;
                     }
                 }
@@ -701,7 +701,7 @@ namespace IngameScript
                     {
                         vVec = worldtb.Forward;
                         vVec.Normalize();
-                        vAvoid = gpsCenter.GetPosition() + vVec * 200;
+                        vAvoid = shipOrientationBlock.GetPosition() + vVec * 200;
                         return true;
                     }
                 }
@@ -716,7 +716,7 @@ namespace IngameScript
             // nothing was 'clear'.  find longest vector and try to go that direction
             Echo("Scans done. Choose longest");
             MyDetectedEntityInfo furthest = backwardDetectedInfo;
-            Vector3D currentpos = gpsCenter.GetPosition();
+            Vector3D currentpos = shipOrientationBlock.GetPosition();
             vVec = worldtb.Backward;
             if (furthest.HitPosition == null || leftDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)leftDetectedInfo.HitPosition))
             {
@@ -748,7 +748,7 @@ namespace IngameScript
             double distance = Vector3D.Distance(currentpos, (Vector3D)furthest.HitPosition);
             Echo("Distance=" + niceDoubleMeters(distance));
             vVec.Normalize();
-            vAvoid = gpsCenter.GetPosition() + vVec * distance / 2;
+            vAvoid = shipOrientationBlock.GetPosition() + vVec * distance / 2;
 /*
             if (distance<15)
             {

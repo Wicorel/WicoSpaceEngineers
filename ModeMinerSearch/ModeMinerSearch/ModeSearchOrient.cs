@@ -21,6 +21,9 @@ namespace IngameScript
         private StringBuilder strbSearchOrient = new StringBuilder();
 
         double SOElapsedMs = 0;
+
+
+
         /*
          * States
          * 0 Master init
@@ -43,7 +46,7 @@ namespace IngameScript
             Echo("maxThrust=" + maxThrust.ToString("N0"));
 
             MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
             Echo("effectiveMass=" + effectiveMass.ToString("N0"));
 
@@ -58,7 +61,7 @@ namespace IngameScript
             if (current_state == 0)
             {
                 StatusLog(DateTime.Now.ToString() + " StartSearchOrient", textLongStatus, true);
-                dtStartSearch = dtStartNav = DateTime.Now;
+//                dtStartSearch = dtStartNav = DateTime.Now;
                 ResetMotion();
                 if (maxDeltaV < (fTargetMiningMps/2) || cargopcent > cargopctlowwater)
 //                if (cargopcent > 99)
@@ -66,12 +69,14 @@ namespace IngameScript
                     setMode(MODE_DOCKING);
                     return;
                 }
+                /*
                 double dist = (vCurrentPos - vLastContact).Length();
                 if (dist < 14)
                 {
                     setMode(MODE_SEARCHVERIFY);
                     return;
                 }
+                */
                 current_state = 10;
             }
             else if (current_state == 10)
@@ -80,7 +85,7 @@ namespace IngameScript
                 if (velocityShip < 0.2f) 
                 {
 //                    startNavWaypoint(vLastContact, true);
-                    StatusLog(DateTime.Now.ToString() + " Aiming at " + Vector3DToString(vLastContact), textLongStatus, true);
+                    StatusLog(DateTime.Now.ToString() + " Aiming at " + Vector3DToString(vLastAsteroidContact), textLongStatus, true);
                     current_state = 20;
                 }
                 else Echo("Waiting for motion");
@@ -89,10 +94,10 @@ namespace IngameScript
             {
                 // NEED: Time out.
                 bWantFast = true;
-                if(GyroMain("forward",vLastContact-gpsCenter.GetPosition(),gpsCenter))
+                if(GyroMain("forward",vLastAsteroidContact-shipOrientationBlock.GetPosition(),shipOrientationBlock))
                 { // we are aimed
                     ResetMotion();
-                    vLastExit = gpsCenter.GetPosition();
+                    vLastAsteroidExit = shipOrientationBlock.GetPosition();
                     setMode(MODE_SEARCHSHIFT);
                 }
             }

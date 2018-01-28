@@ -60,7 +60,7 @@ namespace IngameScript
                 }
             }
 
-            IMyCameraBlock camera = lastCamera as IMyCameraBlock;
+            var camera = lastCamera as IMyCameraBlock;
             if (lastCamera == null)
             {
                 return false;
@@ -80,7 +80,7 @@ namespace IngameScript
             }
             else
             {
-                Echo(camera.CustomName + ":" + camera.AvailableScanRange.ToString("N0"));
+ //               Echo(camera.CustomName + ":" + camera.AvailableScanRange.ToString("N0"));
             }
 
             return false;
@@ -89,7 +89,7 @@ namespace IngameScript
 
         bool doCameraScan(List<IMyTerminalBlock> cameraList, Vector3D targetPos)
         {
-            Echo("target Scan");
+ //           Echo("target Scan");
             double foundmax = 0;
             lastCamera = null;
             for (int i = 0; i < cameraList.Count; i++)
@@ -104,13 +104,13 @@ namespace IngameScript
                 }
             }
 
-            IMyCameraBlock camera = lastCamera as IMyCameraBlock;
+            var camera = lastCamera as IMyCameraBlock;
             if (lastCamera == null)
                 return false;
 
             //	if (camera.CanScan(scandistance))
             {
-                Echo("Scanning with Camera:" + camera.CustomName);
+//                Echo("Scanning with Camera:" + camera.CustomName);
                 lastDetectedInfo = camera.Raycast(targetPos);
                 lastCamera = camera;
 
@@ -360,7 +360,7 @@ namespace IngameScript
                 {
                     if (_pg.doCameraScan(cameras, SCAN_DISTANCE, NEXTPITCH, NEXTYAW))
                     {
-//                        lastDetectedInfo = _pg.lastDetectedInfo;
+                        lastDetectedInfo = _pg.lastDetectedInfo;
 
                         if (!lastDetectedInfo.IsEmpty())
                         {
@@ -379,7 +379,7 @@ namespace IngameScript
                             }
                             if (bValidScan)
                             {
-//                                _pg.sInitResults += "\nDoScan HIT!";
+                                _pg.sInitResults += "\nDoScan HIT!";
                                 AddLocalEntity(lastDetectedInfo);
 //                                if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid)
 //                                    _pg.addAsteroid(lastDetectedInfo);

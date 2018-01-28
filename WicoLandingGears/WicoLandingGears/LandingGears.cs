@@ -63,7 +63,7 @@ namespace IngameScript
 
         bool gearReadyToLock(IMyTerminalBlock block)
         {
-            IMyLandingGear g = block as IMyLandingGear;
+            var g = block as IMyLandingGear;
             if (g == null) return false;
             return ((int)g.LockMode == 1);// LandingGearMode.ReadyToLock);
             /*
@@ -80,7 +80,7 @@ namespace IngameScript
         }
         bool anyGearReadyToLock()
         {
-            StringBuilder temp = new StringBuilder();
+            var temp = new StringBuilder();
             for (int i = 0; i < gearList.Count; i++)
             {
                 if (gearReadyToLock(gearList[i]))

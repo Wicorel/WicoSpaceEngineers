@@ -135,8 +135,8 @@ namespace IngameScript
                         //			shutdown(gyroList);
                         continue;
                     }
-                    vHome = new Vector3D(x, y, z);
-                    bValidHome = true;
+                    vNavTarget = new Vector3D(x, y, z);
+                    bValidNavTarget = true;
                     if (args[0] == "W")
                         bGoOption = true;
                     else bGoOption = false;

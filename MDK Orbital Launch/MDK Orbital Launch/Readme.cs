@@ -40,6 +40,8 @@
 * 3.3 Support multiple Text Panels
 * Only write to text panels at end of script.
 * 
+* 3.3a Rewrite of serlization
+* 
 * Need:
 *  circumnavigate planet to target spot
 *  'ask' for docking position after arriving at 'spot'

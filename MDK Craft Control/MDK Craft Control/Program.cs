@@ -20,22 +20,9 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Master";
-        string sVersion = "3.3";
-
-        string sGPSCenter = "Craft Remote Control";
-
-        IMyTerminalBlock gpsCenter = null;
-
-        Vector3D currentPosition;
+        string sVersion = "3.3A";
 
         const string velocityFormat = "0.00";
-
-        IMyTerminalBlock anchorPosition;
-
-        class OurException : Exception
-        {
-            public OurException(string msg) : base("WicoCraft" + ": " + msg) { }
-        }
 
         double dCargoCheckWait = 2; //seconds between checks
         double dCargoCheckLast = -1;
@@ -43,6 +30,8 @@ namespace IngameScript
         double dBatteryCheckWait = 5; //seconds between checks
         double dBatteryCheckLast = -1;
 
+//        double hydroPercent = -1;
+//        double oxyPercent = -1;
 
         void moduleDoPreModes()
         {
@@ -162,8 +151,11 @@ namespace IngameScript
 
             Echo("TotalMaxPower=" + totalMaxPowerOutput.ToString("0.00" + "MW"));
 
+            TanksCalculate();
+            /*
             hydroPercent = tanksFill(iTankHydro);
             oxyPercent = tanksFill(iTankOxygen);
+            */
             if (oxyPercent >= 0)
             {
                 Echo("O:" + oxyPercent.ToString("000.0%"));
@@ -205,8 +197,8 @@ namespace IngameScript
             gyrosOff();
             powerDownRotors(rotorNavLeftList);
             powerDownRotors(rotorNavRightList);
-	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
+	        if (shipOrientationBlock is IMyRemoteControl) ((IMyRemoteControl)shipOrientationBlock).SetAutoPilotEnabled(false);
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
             if(!bNoDrills) turnDrillsOff();
         }
 
@@ -214,24 +206,12 @@ namespace IngameScript
         {
             ResetToIdle();
             ResetMotion();
-            bValidDock = false;
-            bValidLaunch1 = false;
-            bValidHome = false;
-            bValidInitialContact = false;
-            bValidInitialExit = false;
-            bValidTarget = false;
-            bValidAsteroid = false;
-            bValidNextTarget = false;
-
-            // operation flags
-            bAutopilotSet = true;
-            bAutoRelaunch = false;
             iAlertStates = 0;
-            iDetects = 0;
             sReceivedMessage = "";
-            sLastLoad = "";
+            sPassedArgument = "init";
             iniWicoCraftSave.ParseINI("");
             Serialize();
+            bWantFast = true;
         }
 
         // need to use me.CustomData
@@ -289,12 +269,21 @@ namespace IngameScript
         void processTimerCommand()
         {
             string output = "";
-            currentPosition = anchorPosition.GetPosition();
+//            currentPosition = anchorPosition.GetPosition();
             output += velocityShip.ToString(velocityFormat) + " m/s";
             output += " (" + (velocityShip * 3.6).ToString(velocityFormat) + "km/h)";
             Log(output);
         }
 
+        void ModuleDeserialize(INIHolder iNIHolder)
+        {
+
+        }
+
+        void ModuleSerialize(INIHolder iNIHolder)
+        {
+
+        }
 
     }
 }

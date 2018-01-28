@@ -66,31 +66,31 @@ namespace IngameScript
 //                if (!modeCommands.ContainsKey("launch")) modeCommands.Add("launch", MODE_LAUNCH);
                 //	if(!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
 
-                sInitResults += initSerializeCommon();
+                sInitResults += SerializeInit();
 
                 Deserialize();
                 sInitResults += gridsInit();
-                sInitResults += BlockInit();
+                sInitResults += DefaultOrientationBlockInit();
                 initLogging();
-            Echo("AInit:"+currentInit);
-                sInitResults += thrustersInit(gpsCenter);
+//            Echo("AInit:"+currentInit);
+                sInitResults += thrustersInit(shipOrientationBlock);
                 sInitResults += rotorsNavInit();
-                sInitResults += wheelsInit(gpsCenter);
+                sInitResults += wheelsInit(shipOrientationBlock);
 
                 sInitResults += sensorInit();
                 //        sInitResults += camerasensorsInit(gpsCenter);
                 sInitResults += connectorsInit();
-            Echo("BInit:"+currentInit);
+//            Echo("BInit:"+currentInit);
 
                 sInitResults += gyrosetup(); 
-            Echo("CInit:"+currentInit);
+//            Echo("CInit:"+currentInit);
                 GyroControl.UpdateGyroList(gyros);
-            Echo("DInit:"+currentInit);
-                GyroControl.SetRefBlock(gpsCenter);
-            Echo("EInit:"+currentInit);
+//            Echo("DInit:"+currentInit);
+                GyroControl.SetRefBlock(shipOrientationBlock);
+//            Echo("EInit:"+currentInit);
 
                 sInitResults += lightsInit();
-                sInitResults += camerasensorsInit(gpsCenter);
+                sInitResults += camerasensorsInit(shipOrientationBlock);
 
                 initShipDim();
 
@@ -107,69 +107,12 @@ namespace IngameScript
             }
 
             Log(sInitResults);
-            Echo("XXInit:"+currentInit);
+//            Echo("XXInit:"+currentInit);
 
             return sInitResults;
         }
 
  
-        string BlockInit()
-        {
-            string sInitResults = "";
-            gpsCenter = null;
-
-            List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
-            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch);
-            if (centerSearch.Count == 0)
-            {
-               GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
-                foreach(var b in centerSearch)
-                {
-                    if(b.CustomName.Contains("[NAV]") || b.CustomData.Contains("[NAV]"))
-                    {
-                        gpsCenter = b;
-                    }
-                    else if(b.CustomName.Contains("[!NAV]") || b.CustomData.Contains("[!NAV]"))
-                    {
-                        continue; // don't use this one.
-                    }
-                    sInitResults = "R";
-                    gpsCenter = b;
-                    break;
-                }
-                if(gpsCenter==null)
-                {
-                        GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
-                    if (centerSearch.Count == 0)
-                    {
-                        sInitResults += "!!NO Controller";
-                        return sInitResults;
-
-                    }
-                    else
-                    {
-                        sInitResults += "S";
-                        gpsCenter = centerSearch[0];
-                    }
-
-                }
-            }
-            else
-            {
-                sInitResults += "N";
-                gpsCenter = centerSearch[0];
-            }
-
-            /*
-            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-            blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
-
-            if (blocks.Count > 0)
-                gpsPanel = blocks[0] as IMyTextPanel;
-            */
-            if (gpsCenter == null) Echo("ERROR: No control block found!");
-            return sInitResults;
-        }
 
         #endregion
 

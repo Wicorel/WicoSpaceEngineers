@@ -71,7 +71,7 @@ namespace IngameScript
 
             for (int i = 0; i < localDockConnectors.Count; i++)
             {
-                IMyShipConnector sc = localDockConnectors[i] as IMyShipConnector;
+                var sc = localDockConnectors[i] as IMyShipConnector;
                 if (sc.Status == MyShipConnectorStatus.Connectable)
                     //		if (sc.IsLocked)
                     return true;
@@ -85,10 +85,10 @@ namespace IngameScript
 
             for (int i = 0; i < localDockConnectors.Count; i++)
             {
-                IMyShipConnector sc = localDockConnectors[i] as IMyShipConnector;
+                var sc = localDockConnectors[i] as IMyShipConnector;
                 if (sc.Status == MyShipConnectorStatus.Connected)
                 {
-                    IMyShipConnector sco = sc.OtherConnector;
+                    var sco = sc.OtherConnector;
                     if (sco.CubeGrid == sc.CubeGrid)
                     {
                         //Echo("Locked-but connected to 'us'");
@@ -120,10 +120,10 @@ namespace IngameScript
 
             for (int i = 0; i < localDockConnectors.Count; i++)
             {
-                IMyShipConnector sc = localDockConnectors[i] as IMyShipConnector;
+                var sc = localDockConnectors[i] as IMyShipConnector;
                 if (sc.Status == MyShipConnectorStatus.Connected)
                 {
-                    IMyShipConnector sco = sc.OtherConnector;
+                    var sco = sc.OtherConnector;
                     if (sco.CubeGrid == sc.CubeGrid)
                     {
                         continue;
@@ -151,10 +151,10 @@ namespace IngameScript
                 //	Echo("CCA:"+ localDockConnectors.Count);
                 for (int i = 0; i < localDockConnectors.Count; i++)
                 {
-                    IMyShipConnector sc = localDockConnectors[i] as IMyShipConnector;
+                    var sc = localDockConnectors[i] as IMyShipConnector;
                     if (sc.Status == MyShipConnectorStatus.Connected)
                     {
-                        IMyShipConnector sco = sc.OtherConnector;
+                        var sco = sc.OtherConnector;
                         if (sco.CubeGrid == sc.CubeGrid)
                         {
                             //Echo("Locked-but connected to 'us'");

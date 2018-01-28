@@ -18,7 +18,7 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        #region reactors
+        double maxReactorPower = -1;
         List<IMyTerminalBlock> reactorList = new List<IMyTerminalBlock>();
 
         void initReactors()
@@ -63,7 +63,6 @@ namespace IngameScript
             return bNeedyReactor;
         }
 
-        #endregion
 
     }
 }

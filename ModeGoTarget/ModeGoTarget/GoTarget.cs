@@ -107,8 +107,8 @@ namespace IngameScript
                 }
                 else bRotor = false;
 
-                GyroControl.SetRefBlock(gpsCenter);
-                if (bValidHome || bValidTarget)
+                GyroControl.SetRefBlock(shipOrientationBlock);
+                if (bValidNavTarget)
                 {
                     current_state = 160;
                 }
@@ -118,11 +118,9 @@ namespace IngameScript
             else if (current_state == 160)
             { //	160 move to Target
                 Echo("Moving to Target");
-                Vector3D vTargetLocation = vHome;
-                if (bValidTarget)
-                    vTargetLocation = vTargetMine;
+                Vector3D vTargetLocation = vNavTarget;
 
-                Vector3D vVec = vTargetLocation - gpsCenter.GetPosition();
+                Vector3D vVec = vTargetLocation - shipOrientationBlock.GetPosition();
                 double distance = vVec.Length();
                 Echo("distance=" + niceDoubleMeters(distance));
                 Echo("velocity=" + velocityShip.ToString("0.00"));
@@ -137,7 +135,7 @@ namespace IngameScript
                     //				bValidTargetLocation = false;
 //                    gyrosOff();
                     ResetMotion();
-                    bValidHome = false; // we used this one up.
+                    bValidNavTarget = false; // we used this one up.
                     setMode(MODE_ARRIVEDTARGET);
                     return;
                 }
@@ -151,7 +149,7 @@ namespace IngameScript
                 double yawangle = -999;
                 if (bYawOnly)
                 {
-                    yawangle = CalculateYaw(vTargetLocation, gpsCenter);
+                    yawangle = CalculateYaw(vTargetLocation, shipOrientationBlock);
                     Echo("yawangle=" + yawangle.ToString());
                     bAimed = Math.Abs(yawangle) < .05;
                     if (!bAimed) bWantFast = true;
@@ -258,7 +256,7 @@ namespace IngameScript
                 }
                 else if (bRotor)
                 {
-                    bAimed = GyroMain("forward", vVec, gpsCenter);
+                    bAimed = GyroMain("forward", vVec, shipOrientationBlock);
                     if (!bAimed) bWantFast = true;
                     else bWantMedium = true;
                     if (bAimed)
@@ -376,9 +374,7 @@ namespace IngameScript
               //           StatusLog("clear", gpsPanel);
 
                 bWantFast = true;
-                Vector3D vTargetLocation = vHome;
-                if (bValidTarget)
-                    vTargetLocation = vTargetMine;
+                Vector3D vTargetLocation = vNavTarget;
                 ResetTravelMovement();
                 calcCollisionAvoid(vTargetLocation);
 
@@ -394,7 +390,7 @@ namespace IngameScript
 
             else if (current_state == 172)
             {
-                //                 Vector3D vVec = vAvoid - gpsCenter.GetPosition();
+                //                 Vector3D vVec = vAvoid - shipOrientationBlock.GetPosition();
                 //                double distanceSQ = vVec.LengthSquared();
                 Echo("Collision Avoid"); 
                 doTravelMovement(vAvoid, 5.0f, 160, 173);
@@ -415,13 +411,13 @@ namespace IngameScript
             {
                 initEscapeScan();
                 ResetTravelMovement();
-                dtStartShip = DateTime.Now;
+                dtNavStartShip = DateTime.Now;
                 current_state = 175;
                 bWantFast = true;
             }
             else if (current_state == 175)
             {
-                DateTime dtMaxWait = dtStartShip.AddSeconds(5.0f);
+                DateTime dtMaxWait = dtNavStartShip.AddSeconds(5.0f);
                 DateTime dtNow = DateTime.Now;
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                 {
@@ -444,7 +440,7 @@ namespace IngameScript
             else if(current_state==200)
             { // we have arrived at target
                 ResetMotion();
-                bValidHome = false; // we used this one up.
+                bValidNavTarget = false; // we used this one up.
 //                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
                 antennaMaxPower(false);
                 sleepAllSensors();

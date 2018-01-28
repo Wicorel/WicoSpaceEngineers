@@ -46,8 +46,9 @@ namespace IngameScript
             landingRotorList.Clear();
             landingPistonList.Clear();
 
-            List<IMyTerminalBlock> rotorsList = new List<IMyTerminalBlock>();
-            GridTerminalSystem.GetBlocksOfType<IMyMotorStator>(rotorsList, (x => x.CubeGrid == blockOrientation.CubeGrid));
+            var rotorsList = new List<IMyTerminalBlock>();
+            rotorsList=GetTargetBlocks<IMyMotorStator>();
+//            GridTerminalSystem.GetBlocksOfType<IMyMotorStator>(rotorsList, (x => x.CubeGrid == blockOrientation.CubeGrid));
 
             for (int i = 0; i < rotorsList.Count; i++)
             {
@@ -59,7 +60,8 @@ namespace IngameScript
                     landingRotorList.Add(gr);
                 }
             }
-            List<IMyTerminalBlock> pistonsList = new List<IMyTerminalBlock>();
+            var pistonsList = new List<IMyTerminalBlock>();
+            pistonsList = GetTargetBlocks<IMyPistonBase>();
             GridTerminalSystem.GetBlocksOfType<IMyPistonBase>(pistonsList, (x => x.CubeGrid == blockOrientation.CubeGrid));
 
             for (int i = 0; i < pistonsList.Count; i++)

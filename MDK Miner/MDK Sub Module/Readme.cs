@@ -46,6 +46,9 @@
  * 3.3 Lists of Text panels
  * Only output to panels and end of script.
  * 
+ * 3.3A Redo serialize
+ * Module Serialize
+ * 
  * NEED:  
  *  
  * WANTED: 

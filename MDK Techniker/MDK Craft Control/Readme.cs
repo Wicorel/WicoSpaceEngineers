@@ -28,6 +28,9 @@
 * T3.3B Multiple text panels
 * Only write panels and end of script
 * 
+* T3.3C NAV 
+* redo blockinit
+* 
 * Handles:
 * Master timer for sub-modules
 * Calculates ship speed and vectors

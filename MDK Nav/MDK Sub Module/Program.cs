@@ -21,25 +21,19 @@ namespace IngameScript
         string OurName = "Wico Craft";
 
         string moduleName = "NAV";
-        string sVersion = "3.3";
+        string sVersion = "3.3A";
 
-        const string sGPSCenter = "Craft Remote Control";
-
-        Vector3I iForward = new Vector3I(0, 0, 0);
-        Vector3I iUp = new Vector3I(0, 0, 0);
-        Vector3I iLeft = new Vector3I(0, 0, 0);
- //       Vector3D currentPosition;
         const string velocityFormat = "0.00";
 
- //       IMyTerminalBlock anchorPosition;
-        IMyTerminalBlock gpsCenter = null;
-//        Vector3D vCurrentPos;
-        //IMyTerminalBlock gpsCenter = null;
-        class OurException : Exception
+        void ModuleDeserialize(INIHolder iNIHolder)
         {
-            public OurException(string msg) : base("WicoNav" + ": " + msg) { }
+            NavDeserialize(iNIHolder);
         }
 
+        void ModuleSerialize(INIHolder iNIHolder)
+        {
+            NavSerialize(iNIHolder);
+        }
 
         void moduleDoPreModes()
         {
@@ -58,8 +52,8 @@ namespace IngameScript
             powerDownRotors(rotorNavLeftList);
             powerDownRotors(rotorNavRightList);
 
-	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
+	        if (shipOrientationBlock is IMyRemoteControl) ((IMyRemoteControl)shipOrientationBlock).SetAutoPilotEnabled(false);
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
         } 
 
     }

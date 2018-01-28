@@ -47,7 +47,8 @@ namespace IngameScript
         {
             {
                 allDoorList = new List<IMyTerminalBlock>();
-                GridTerminalSystem.GetBlocksOfType<IMyDoor>(allDoorList, (x1 => x1.CubeGrid == Me.CubeGrid));
+                allDoorList= GetTargetBlocks<IMyDoor>();
+//                GridTerminalSystem.GetBlocksOfType<IMyDoor>(allDoorList, (x1 => x1.CubeGrid == Me.CubeGrid));
             }
 
             for (int i = 0; i < allDoorList.Count; i++)

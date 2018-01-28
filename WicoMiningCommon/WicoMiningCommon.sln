@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoMiningCommon", "WicoMiningCommon\WicoMiningCommon.shproj", "{C60E04CE-4055-4D86-92DF-F98E99DE1CF2}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoMiningCommon\WicoMiningCommon.projitems*{c60e04ce-4055-4d86-92df-f98e99de1cf2}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CA9F3F5C-D6DE-4032-9E04-C355376B56B4}
+	EndGlobalSection
+EndGlobal

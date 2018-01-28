@@ -18,8 +18,21 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        #region power
+        int batterypcthigh = 80;
+        int batterypctlow = 20;
+        double totalMaxPowerOutput = 0;
 
+
+
+        string sPowerSection = "POWER";
+        void PowerInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sPowerSection, "batterypcthigh", ref batterypcthigh, true);
+            iNIHolder.GetValue(sPowerSection, "batterypctlow", ref batterypctlow, true);
+        }
+
+        // TODO: add reactor uranium pulling.
+        
         void initPower()
         {
             totalMaxPowerOutput = 0;
@@ -37,6 +50,5 @@ namespace IngameScript
                 totalMaxPowerOutput += maxBatteryPower;
         }
 
-        #endregion
     }
 }

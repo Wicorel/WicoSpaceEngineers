@@ -40,8 +40,7 @@ namespace IngameScript
         void initOreLocInfo()
         {
             oreLocs.Clear();
-            InitMinerInfo();
-
+            
             // load from text panel...
             OreDeserialize();
         }
@@ -134,7 +133,7 @@ namespace IngameScript
             }
             else
             {
-                if (bVerboseSerialize) Echo("Not saving ORE: Same");
+//                if (bVerboseSerialize) Echo("Not saving ORE: Same");
             }
 
         }
@@ -277,12 +276,12 @@ namespace IngameScript
             if (oreInfos[oreIndex].desireability > 0)
             {
                 // add ore found loc...
-                MatrixD refOrientation = GetBlock2WorldTransform(gpsCenter);
+                MatrixD refOrientation = GetBlock2WorldTransform(shipOrientationBlock);
                 Vector3D vVec = Vector3D.Normalize(refOrientation.Forward);
 
                 // but only if we got it inside asteroid.
                 long astEntity = AsteroidFindNearest(true);
-                if(astEntity > 0)  OreAddLoc(astEntity, oreIndex, gpsCenter.GetPosition(), vVec, 69);
+                if(astEntity > 0)  OreAddLoc(astEntity, oreIndex, shipOrientationBlock.GetPosition(), vVec, 69);
             }
         }
 

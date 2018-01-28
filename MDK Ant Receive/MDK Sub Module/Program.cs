@@ -20,23 +20,22 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "AntReceive";
-        string sVersion = "3.3";
+        string sVersion = "3.3A";
 
-        const string sGPSCenter = "Craft Remote Control";
-
-        IMyTerminalBlock gpsCenter = null;
-
-        class OurException : Exception
+        void ModuleDeserialize(INIHolder iNIHolder)
         {
-            public OurException(string msg) : base("WicoAntReceiveModule" + ": " + msg) { }
+
         }
 
-        
+        void ModuleSerialize(INIHolder iNIHolder)
+        {
+
+        }
+
         void moduleDoPreModes()
         {
             AntennaCheckOldMessages();
         }
-
 
         void modulePostProcessing()
         {
@@ -52,8 +51,8 @@ namespace IngameScript
 //            gyrosOff();
 //            powerDownRotors(rotorNavLeftList);
 //            powerDownRotors(rotorNavRightList);
-	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
+	        if (shipOrientationBlock is IMyRemoteControl) ((IMyRemoteControl)shipOrientationBlock).SetAutoPilotEnabled(false);
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
 //            if(!bNoDrills) turnDrillsOff();
         } 
 

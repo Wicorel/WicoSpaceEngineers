@@ -88,7 +88,9 @@ namespace IngameScript
         double dGridCheckWait = 3; //seconds between checks
         double dGridCheckLast = -1;
 
-//        void Main(string sArgument)
+        double dGravity = -2;
+
+        //        void Main(string sArgument)
         void Main(string sArgument, UpdateType ut)
         {
            Echo(sBanner + tick());
@@ -131,7 +133,7 @@ namespace IngameScript
             sPassedArgument = "";
             double newgridBaseMass = 0;
 
-            if (anchorPosition != null)
+            if (shipOrientationBlock is IMyShipController)
             {
                 if (dGridCheckLast > dGridCheckWait || !init)
                 {
@@ -139,7 +141,7 @@ namespace IngameScript
                     dGridCheckLast = 0;
 
                     MyShipMass myMass;
-                    myMass = ((IMyShipController)anchorPosition).CalculateShipMass();
+                    myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
 
                     newgridBaseMass = myMass.BaseMass;
                     Echo("New=" + newgridBaseMass + " CurrentM=" + gridBaseMass);
@@ -176,7 +178,6 @@ namespace IngameScript
 
                 Echo("Arg init or grid/mass change!");
                 sInitResults = "";
-                anchorPosition = null;
                 init = false;
                 currentInit = 0;
                 sPassedArgument = "init";
@@ -208,34 +209,37 @@ namespace IngameScript
                     StatusLog(DateTime.Now.ToString() + " " + sInitResults, textLongStatus, true);
                 }
 
-                IMyTerminalBlock anchorOrientation = gpsCenter;
-                if (gpsCenter != null)
+                IMyTerminalBlock anchorOrientation = shipOrientationBlock;
+                if (shipOrientationBlock != null)
                 {
-                    vCurrentPos = gpsCenter.GetPosition();
+//                    vCurrentPos = shipOrientationBlock.GetPosition();
                 }
 
-                if (gpsCenter is IMyShipController)
-                //		if (gpsCenter is IMyRemoteControl)
+                // calculate(get) ship velocity and natural gravity
+                if (shipOrientationBlock is IMyShipController)
+                //		if (shipOrientationBlock is IMyRemoteControl)
                 {
-                    velocityShip = ((IMyShipController)gpsCenter).GetShipSpeed();
+                    velocityShip = ((IMyShipController)shipOrientationBlock).GetShipSpeed();
 
-                    Vector3D vNG = ((IMyShipController)gpsCenter).GetNaturalGravity();
-                    //			Vector3D vNG = ((IMyRemoteControl)gpsCenter).GetNaturalGravity();
+                    Vector3D vNG = ((IMyShipController)shipOrientationBlock).GetNaturalGravity();
+                    //			Vector3D vNG = ((IMyRemoteControl)shipOrientationBlock).GetNaturalGravity();
                     double dLength = vNG.Length();
                     dGravity = dLength / 9.81;
 
+                    /*
                     if (dGravity > 0)
                     {
                         double elevation = 0;
 
-                        ((IMyShipController)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+                        ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
                         Echo("Elevation=" + elevation.ToString("0.00"));
 
                         double altitude = 0;
-                        ((IMyShipController)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Sealevel, out altitude);
+                        ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Sealevel, out altitude);
                         Echo("Sea Level=" + altitude.ToString("0.00"));
 
                     }
+                    */
 
                 }
                 else

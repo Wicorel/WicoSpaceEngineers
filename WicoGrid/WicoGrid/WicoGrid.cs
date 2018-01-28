@@ -322,14 +322,14 @@ namespace IngameScript
         }
         public List<IMyTerminalBlock> GetTargetBlocks<T>(string Keyword = null) where T : class
         {
-            List<IMyTerminalBlock> Output = new List<IMyTerminalBlock>();
+            var Output = new List<IMyTerminalBlock>();
             GetTargetBlocks<T>(ref Output, Keyword);
             return Output;
         }
         public List<IMyTerminalBlock> GetBlocksContains<T>(string Keyword = null) where T : class
         {
             if (gtsAllBlocks.Count < 1) gridsInit();
-            List<IMyTerminalBlock> Output = new List<IMyTerminalBlock>();
+            var Output = new List<IMyTerminalBlock>();
             for (int e = 0; e < gtsAllBlocks.Count; e++)
             {
                 if (gtsAllBlocks[e] is T
@@ -346,7 +346,7 @@ namespace IngameScript
         public List<IMyTerminalBlock> GetMeBlocksContains<T>(string Keyword = null) where T : class
         {
             if (gtsAllBlocks.Count < 1) gridsInit();
-            List<IMyTerminalBlock> Output = new List<IMyTerminalBlock>();
+            var Output = new List<IMyTerminalBlock>();
             for (int e = 0; e < gtsAllBlocks.Count; e++)
             {
                 if (gtsAllBlocks[e] is T
@@ -364,7 +364,7 @@ namespace IngameScript
         public List<IMyTerminalBlock> GetBlocksNamed<T>(string Keyword = null) where T : class
         {
             if (gtsAllBlocks.Count < 1) gridsInit();
-            List<IMyTerminalBlock> Output = new List<IMyTerminalBlock>();
+            var Output = new List<IMyTerminalBlock>();
             for (int e = 0; e < gtsAllBlocks.Count; e++)
             {
                 if (gtsAllBlocks[e] is T 
@@ -385,13 +385,13 @@ namespace IngameScript
         {
             string sInitResults = "";
 
-            List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
+            var centerSearch = new List<IMyTerminalBlock>();
             //            GridTerminalSystem.SearchBlocksOfName(sshipOrientationBlock, centerSearch, localGridFilter);
             GetTargetBlocks<IMyTerminalBlock>(ref centerSearch, sOrientationBlockNamed);
 
             if (centerSearch.Count == 0)
             {
-                centerSearch = GetBlocksContains<IMyRemoteControl>("[NAV]");
+                centerSearch = GetBlocksContains<IMyRemoteControl>(sOrientationBlockContains);
                 if (centerSearch.Count == 0)
                 {
                     //                    GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
@@ -434,12 +434,7 @@ namespace IngameScript
             }
             if (centerSearch.Count > 0)
                 shipOrientationBlock = centerSearch[0];
-            /*
-            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-            blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
-            if (blocks.Count > 0)
-                gpsPanel = blocks[0] as IMyTextPanel;
-            */
+
             return sInitResults;
         }
 

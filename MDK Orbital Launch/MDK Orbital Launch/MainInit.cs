@@ -57,17 +57,18 @@ namespace IngameScript
                 else Echo("NULL modeCommands!");
                 gridsInit();
                 initLogging();
-                sInitResults += initSerializeCommon();
+                sInitResults += SerializeInit();// SeinitSerializeCommon();
                 Deserialize();
             }
             else if (currentInit == 1)
             {
-                sInitResults += BlockInit();
-                anchorPosition = gpsCenter;
-                currentPosition = anchorPosition.GetPosition();
+//                sInitResults += BlockInit();
+                sInitResults += DefaultOrientationBlockInit();
+//                anchorPosition = shipOrientationBlock;
+//                currentPosition = anchorPosition.GetPosition();
                 sInitResults += connectorsInit();
-                sInitResults += thrustersInit(gpsCenter);
-                sInitResults += camerasensorsInit(gpsCenter);
+                sInitResults += thrustersInit(shipOrientationBlock);
+                sInitResults += camerasensorsInit(shipOrientationBlock);
 
                 /*
                 }
@@ -80,7 +81,7 @@ namespace IngameScript
                 //                sInitResults += NAVInit();
                 sInitResults += gyrosetup();
                 sInitResults += doorsInit();
-                sInitResults += landingsInit(gpsCenter);
+                sInitResults += landingsInit(shipOrientationBlock);
 
                 Deserialize();
 
@@ -106,7 +107,7 @@ namespace IngameScript
             string sInitResults = "";
 
             List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
-            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch, localGridFilter);
+            GridTerminalSystem.SearchBlocksOfName(sshipOrientationBlock, centerSearch, localGridFilter);
             if (centerSearch.Count == 0)
             {
                 centerSearch = GetBlocksContains<IMyRemoteControl>("[NAV]");
@@ -149,7 +150,7 @@ namespace IngameScript
                 Echo("Using Named: " + centerSearch[0].CustomName);
             }
             if (centerSearch.Count > 0)
-                gpsCenter = centerSearch[0];
+                shipOrientationBlock = centerSearch[0];
             /*
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
@@ -172,6 +173,7 @@ namespace IngameScript
             GyroInitCustomData(iniCustomData);
             CamerasInitCustomData(iniCustomData);
             GearsInitCustomData(iniCustomData);
+            CargoInitCustomData(iniCustomData);
 
             DoorInitCustomData(iniCustomData);
         }
