@@ -36,6 +36,21 @@ namespace IngameScript
                     //			Echo("Using Passed Arg=" + sPassedArgument);
                     sArgument = sPassedArgument;
                 }
+                // SPECIAL to emulate old Nav
+                if (NAVEmulateOld)
+                {
+                    var tList = GetBlocksContains<IMyTerminalBlock>("NAV:");
+                    for (int i1 = 0; i1 < tList.Count(); i1++)
+                    {
+                        // don't want to get blocks that have "NAV:" in customdata..
+                        if (tList[i1].CustomName.StartsWith("NAV:"))
+                        {
+                            Echo("Found NAV: command:");
+                            sArgument = tList[i1].CustomName.Substring("NAV:".Length);
+                            break;
+                        }
+                    }
+                }
             }
 
             if (sArgument == "init")
@@ -87,13 +102,13 @@ namespace IngameScript
                         sArg = sArg.Trim();
                     }
 
-                    Echo("sArg=\n'" + sArg+"'");
+//                    Echo("sArg=\n'" + sArg+"'");
                     string[] coordinates = sArg.Split(',');
                     if (coordinates.Length < 3)
                     {
                         coordinates = sArg.Split(':');
                     }
-                    Echo(coordinates.Length + " Coordinates");
+//                    Echo(coordinates.Length + " Coordinates");
                     for (int icoord = 0; icoord < coordinates.Length; icoord++)
                         Echo(coordinates[icoord]);
                     //Echo("coordiantes.Length="+coordinates.Length);  

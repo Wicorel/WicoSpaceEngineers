@@ -42,6 +42,7 @@ namespace IngameScript
             orientationBlock.Orientation.GetMatrix(out fromGridToReference);
             Matrix.Transpose(ref fromGridToReference, out fromGridToReference);
             */
+            GetTargetBlocks<IMyMotorSuspension>(ref wheelList);
             for (int i = 0; i < wheelList.Count; i++)
             {
                 if (wheelList[i].CustomName.Contains("[SLED]") || wheelList[i].CustomData.Contains("[SLED]"))
@@ -58,6 +59,25 @@ namespace IngameScript
                 }
             }
             return "W" + wheelList.Count.ToString("0") + "WS" + wheelSledList.Count.ToString("0") + "SR" + wheelRearSledList.Count.ToString("0") + "SF" + wheelFrontSledList.Count.ToString("0");
+        }
+
+        bool HasSledWheels()
+        {
+            if (wheelSledList.Count > 0)
+                return true;
+
+            return false;
+        }
+
+        void PrepareSledTravel()
+        {
+            for(int i1=0;i1<wheelSledList.Count;i1++)
+            {
+                var w1 = wheelSledList[i1] as IMyMotorSuspension;
+                w1.SetValueFloat("Friction", 0);
+//                w1.SetValueFloat("Strength", 20);
+//                w1.Friction = 0;
+            }
         }
 
         #endregion

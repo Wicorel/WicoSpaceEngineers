@@ -210,9 +210,17 @@ namespace IngameScript
 
         void nameCameras(List<IMyTerminalBlock> cameraList, string sDirection)
         {
+            string sName;
             for (int i = 0; i < cameraList.Count; i++)
             {
-                cameraList[i].CustomName = "Camera " + (i + 1).ToString() + " " + sDirection;
+                if (!cameraList[i].CustomName.Contains(sDirection))
+                {
+                    sName = "Camera ";
+                    if (cameraList.Count > 1)
+                        sName += (i + 1).ToString() + " ";
+                    sName += sDirection;
+                    cameraList[i].CustomName = sName;
+                }
             }
         }
 
@@ -248,7 +256,10 @@ namespace IngameScript
         #endregion
 
         //stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
-        /* Random Point on a sphere
+        /*
+         *REFERENCE ONLY.  This is not what this code does
+         * 
+         * Random Point on a sphere
          var z = Rand(-radius, radius)
         var long = Rand(0, 2*pi)
         var xyr = sqrt(1-z*z)

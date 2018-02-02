@@ -37,7 +37,6 @@ namespace IngameScript
             CargoInitCustomData(iniCustomData);
         }
 
-        #region maininit
 
         string sInitResults = "";
         int currentInit = 0;
@@ -80,7 +79,7 @@ namespace IngameScript
                 initPower();
                 sInitResults += thrustersInit(shipOrientationBlock);
                 sInitResults += gyrosetup();
-                if (gtsAllBlocks.Count < 300) currentInit = 2; // go ahead and do next step.
+//                if (gtsAllBlocks.Count < 300) currentInit = 2; // go ahead and do next step.
                 if (shipOrientationBlock is IMyRemoteControl)
                 {
                     Vector3D playerPosition;
@@ -102,10 +101,11 @@ namespace IngameScript
                 sInitResults += connectorsInit();
                 sInitResults += tanksInit();
                 sInitResults += drillInit();
-                if (gtsAllBlocks.Count < 100) currentInit = 3; // go ahead and do next step.
+//                if (gtsAllBlocks.Count < 100) currentInit = 3; // go ahead and do next step.
             }
             if (currentInit == 3)
             {
+                sInitResults += camerasensorsInit(shipOrientationBlock);
                 sInitResults += ejectorsInit();
 
                 sInitResults += antennaInit();
@@ -142,16 +142,10 @@ namespace IngameScript
             return sInitResults;
         }
 
-
-
         string modeOnInit()
         {
             return ">";
         }
-
-
-        #endregion
-
 
     }
 }

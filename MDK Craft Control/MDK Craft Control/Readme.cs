@@ -140,6 +140,11 @@
 * 3.3 Handle multiple output panels.
 * Only write to panels at end
 * 
-* 3.3A
+* 3.3A Redo Serlialize.
+* Module Serlialize
+* 
+* 3.4 
+* add namecameras
+* 
 * 
 */

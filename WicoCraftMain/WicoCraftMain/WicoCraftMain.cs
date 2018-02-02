@@ -259,12 +259,18 @@ namespace IngameScript
             }
             if(bSubModules) Serialize();
 
-//            if ((anchorPosition == null || SaveFile == null ))
-            if ((SaveFile == null ))
+            //            if ((anchorPosition == null || SaveFile == null ))
+            if ((SaveFile == null))
             {
-                if(bSubModules) Echo("Cannot use sub-modules; missing controller and/or SaveFile");
+                if (bSubModules) Echo("Cannot use sub-modules; missing controller and/or SaveFile");
             }
-            else doSubModuleTimerTriggers();
+            else
+            {
+                if (init)
+                {
+                    doSubModuleTimerTriggers();
+                }
+            }
 
             if (bWantFast)
             {

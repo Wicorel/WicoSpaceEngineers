@@ -29,10 +29,12 @@ namespace IngameScript
             ThrustersInitCustomData(iniCustomData);
             GyroInitCustomData(iniCustomData);
             CamerasInitCustomData(iniCustomData);
+
+            NavInitCustomData(iniCustomData);
+
 //            GearsInitCustomData(iniCustomData);
         }
 
-        #region maininit
 
         string sInitResults = "";
         string sArgResults = "";
@@ -51,19 +53,13 @@ namespace IngameScript
             minAngleRad = 0.09f;
             CTRL_COEFF = 0.75;
 
-/*
-            Log("Init:" + currentInit.ToString());
-            double progress = currentInit * 100 / 3;
-            string sProgress = progressBar(progress);
-            StatusLog(sProgress, getTextBlock(sTextPanelReport));
-*/
             Echo("Init:"+currentInit);
             if (currentInit == 0)
             {
                 //StatusLog("clear",textLongStatus,true);
                 StatusLog(DateTime.Now.ToString() + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
 
-//                if (!modeCommands.ContainsKey("launch")) modeCommands.Add("launch", MODE_LAUNCH);
+                //                if (!modeCommands.ContainsKey("launch")) modeCommands.Add("launch", MODE_LAUNCH);
                 //	if(!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
 
                 sInitResults += SerializeInit();
@@ -72,28 +68,28 @@ namespace IngameScript
                 sInitResults += gridsInit();
                 sInitResults += DefaultOrientationBlockInit();
                 initLogging();
-//            Echo("AInit:"+currentInit);
+            }
+            else if (currentInit == 1)
+            {
                 sInitResults += thrustersInit(shipOrientationBlock);
                 sInitResults += rotorsNavInit();
                 sInitResults += wheelsInit(shipOrientationBlock);
 
                 sInitResults += sensorInit();
-                //        sInitResults += camerasensorsInit(gpsCenter);
+                sInitResults += camerasensorsInit(shipOrientationBlock);
                 sInitResults += connectorsInit();
-//            Echo("BInit:"+currentInit);
-
+            }
+            else if(currentInit==2)
+            { 
                 sInitResults += gyrosetup(); 
-//            Echo("CInit:"+currentInit);
                 GyroControl.UpdateGyroList(gyros);
-//            Echo("DInit:"+currentInit);
                 GyroControl.SetRefBlock(shipOrientationBlock);
-//            Echo("EInit:"+currentInit);
 
                 sInitResults += lightsInit();
                 sInitResults += camerasensorsInit(shipOrientationBlock);
 
-                initShipDim();
-
+                calculateGridBBPosition(shipOrientationBlock);
+                initShipDim(shipOrientationBlock);
                 sInitResults += modeOnInit(); // handle mode initializting from load/recompile..
                 init = true;
 
@@ -111,10 +107,6 @@ namespace IngameScript
 
             return sInitResults;
         }
-
- 
-
-        #endregion
 
         string modeOnInit()
         {

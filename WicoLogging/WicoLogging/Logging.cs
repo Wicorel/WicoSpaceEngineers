@@ -31,6 +31,8 @@ namespace IngameScript
             iNIHolder.GetValue(sLoggingSection, "StatusName", ref sStatusName, true);
             iNIHolder.GetValue(sLoggingSection, "LongStatus", ref sLongStatus, true);
             iNIHolder.GetValue(sLoggingSection, "RangeReport", ref sRangeReport, true);
+            iNIHolder.GetValue(sLoggingSection, "SledReport", ref ssledReport, true);
+            iNIHolder.GetValue(sLoggingSection, "GPSTag", ref sGPSTextpanel, true);
         }
 
         // from Techniker
@@ -50,6 +52,10 @@ namespace IngameScript
 
         WicoLogger gpsPanel = null;
         string sGPSTextpanel = "[GPS]";
+
+        WicoLogger sledReport = null;
+        string ssledReport = "[SMREPORT]";
+
 
         bool bLoggingInit = false;
 
@@ -143,6 +149,7 @@ namespace IngameScript
             */
             textRangeReport = getTextBlock(sRangeReport);
             gpsPanel = getTextBlock(sGPSTextpanel,bSubModule);
+            sledReport = getTextBlock(ssledReport);
             bLoggingInit = true;
         }
 
@@ -153,6 +160,7 @@ namespace IngameScript
             if (textPanelReport != null) textPanelReport.WritePanels();
             if (textRangeReport != null) textRangeReport.WritePanels();
             if (gpsPanel != null) gpsPanel.WritePanels();
+            if (sledReport != null) sledReport.WritePanels();
         }
 
         WicoLogger getTextBlock(string stheName, bool bRefresh=false)

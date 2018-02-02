@@ -64,7 +64,9 @@
     3.3 Lists of text panels
     Only output to textpanels and end of run
 
-    3.3A
+    3.3A Redo Serialize
+
+    3.4 Sled testing
 
 	* TODO: 
 	*/

@@ -19,11 +19,21 @@ namespace IngameScript
         //        bool bValidNavLaunch = false;
         //        Vector3D vNavHome;
         //        bool bValidNavHome = false;
+        bool dTMDebug = false;
+        bool dTMUseCameraCollision = true;
+        bool dTMUseSensorCollision = true;
+        bool NAVEmulateOld = true;
+        float NAVGravityMinElevation = -1;
 
         string sNavSection = "NAV";
 
         void NavInitCustomData(INIHolder iNIHolder)
         {
+            iNIHolder.GetValue(sNavSection, "DTMDebug", ref dTMDebug, true);
+            iNIHolder.GetValue(sNavSection, "CameraCollision", ref dTMUseCameraCollision, true);
+            iNIHolder.GetValue(sNavSection, "SensorCollision", ref dTMUseSensorCollision, true);
+            iNIHolder.GetValue(sNavSection, "NAVEmulateOld", ref NAVEmulateOld, true);
+            iNIHolder.GetValue(sNavSection, "NAVGravityMinElevation", ref NAVGravityMinElevation, true);
         }
 
         void NavSerialize(INIHolder iNIHolder)

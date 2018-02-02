@@ -20,7 +20,7 @@ namespace IngameScript
     {
 
 
-        OrientedBoundingBoxFaces _obbf;// = OrientedBoundingBoxFaces(Me);
+        public OrientedBoundingBoxFaces _obbf;// = OrientedBoundingBoxFaces(Me);
 
         void calculateGridBBPosition(IMyTerminalBlock sourceBlock = null)
         {
@@ -54,6 +54,12 @@ namespace IngameScript
         PointsLookupTop, PointsLookupBottom,
         PointsLookupBack, PointsLookupFront
     };
+            public const int LookupRight = 0;
+            public const int LookupLeft = 1;
+            public const int LookupTop = 2;
+            public const int LookupBottom = 3;
+            public const int LookupBack = 4;
+            public const int LookupFront = 5;
 
             public OrientedBoundingBoxFaces(IMyTerminalBlock block)
             {

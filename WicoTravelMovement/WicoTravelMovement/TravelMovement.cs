@@ -31,7 +31,6 @@ namespace IngameScript
             /// </summary>
         double shipSpeedMax = 100;
 
-        bool dTMDebug = false;
 
         double tmCameraElapsedMs = -1;
         double tmCameraWaitMs = 0.50;
@@ -98,7 +97,8 @@ namespace IngameScript
             if ((craft_operation & CRAFT_MODE_SLED) > 0)
             {
                 btmSled = true;
-//                if (shipSpeedMax > 45) shipSpeedMax = 45;
+                //                if (shipSpeedMax > 45) shipSpeedMax = 45;
+                PrepareSledTravel();
             }
             else btmSled = false;
 
@@ -108,6 +108,7 @@ namespace IngameScript
 //                if (shipSpeedMax > 15) shipSpeedMax = 15;
             }
             else btmRotor = false;
+
 
             tmShipController =  myShipController as IMyShipController;
             Vector3D vVec = vTargetLocation - tmShipController.CenterOfMass;
@@ -139,10 +140,11 @@ namespace IngameScript
             btmPrecision = false; // we have reached precision range
             btmClose = false; // we have reached close range
 
-            double optimalV = CalculateOptimalSpeed( thrustTmBackwardList, distance);
+            double optimalV = tmMaxSpeed;
+            if(!btmSled && !btmRotor) optimalV=CalculateOptimalSpeed( thrustTmBackwardList, distance);
             if (optimalV < tmMaxSpeed)
                 tmMaxSpeed = optimalV;
-//            sInitResults += "\nDistance="+niceDoubleMeters(distance)+" OptimalV=" + optimalV;
+            sInitResults += "\nDistance="+niceDoubleMeters(distance)+" OptimalV=" + optimalV;
 
             dtmFarSpeed = tmMaxSpeed;
             dtmApproachSpeed = tmMaxSpeed * 0.50;
@@ -196,13 +198,12 @@ namespace IngameScript
 
             double distance = vVec.Length();
 
-            if(dTMDebug)
+            if (dTMDebug)
+            {
                 Echo("dTM:distance=" + niceDoubleMeters(distance));
-            if(dTMDebug)
                 Echo("dTM:velocity=" + velocityShip.ToString("0.00"));
-            if(dTMDebug)
                 Echo("dTM:tmMaxSpeed=" + tmMaxSpeed.ToString("0.00"));
-
+            }
             if (distance < arrivalDistance)
             {
                 ResetMotion(); // start the stopping
@@ -224,6 +225,7 @@ namespace IngameScript
                 float fScanDist = Math.Min(50f, (float)stoppingDistance * 1.5f);
                 setSensorShip(tmSB, 0, 0, 0, 0, fScanDist, 0);
             }
+            else Echo("No Sensors for Travel movement");
             bool bAimed = false;
 
             if (btmSled || btmRotor)
@@ -265,35 +267,69 @@ namespace IngameScript
                 Echo("Aimed");
                 gyrosOff();
 
-                if (tmScanElapsedMs > dSensorSettleWaitMS || tmScanElapsedMs < 0 ) //&& !bAsteroidTarget)
+                if (
+                    dTMUseSensorCollision
+                    && (tmScanElapsedMs > dSensorSettleWaitMS  || tmScanElapsedMs < 0 )
+                    )
                 {
                     tmScanElapsedMs = 0;
                     aSensors = activeSensors();
                     if (aSensors.Count > 0)
                     {
-                        int i = 0;
 
-                        //                    for (int i = 0; i < aSensors.Count; i++)
+                        var entities = new List<MyDetectedEntityInfo>();
+                        string s = "";
+                        for (int i1 = 0; i1 < aSensors.Count; i1++) // we only use one sensor
                         {
-                            string s = "";
-                            s += "\nSensor TRIGGER!";
-                            s += "\nName: " + aSensors[i].LastDetectedEntity.Name;
-                            s += "\nType: " + aSensors[i].LastDetectedEntity.Type;
-                            s += "\nRelationship: " + aSensors[i].LastDetectedEntity.Relationship;
-                            s += "\n";
-                            if (dTMDebug)
+                            aSensors[i1].DetectedEntities(entities);
+                            int j1 = 0;
+                            bool bValidCollision = false;
+                            if (entities.Count > 0) bValidCollision = true;
+
+                            for (; j1 < entities.Count; j1++)
                             {
-                                Echo(s);
-                                StatusLog(s, textLongStatus);
+                                
+                                s = "\nSensor TRIGGER!";
+                                s += "\nName: " + entities[j1].Name;
+                                s += "\nType: " + entities[j1].Type;
+                                s += "\nRelationship: " + entities[j1].Relationship;
+                                s += "\n";
+                                if (dTMDebug)
+                                {
+                                    Echo(s);
+                                    StatusLog(s, textLongStatus);
+                                }
+                                if (entities[j1].Type == MyDetectedEntityType.Planet)
+                                {
+                                    bValidCollision = false;
+                                }
+                                if(entities[j1].Type==MyDetectedEntityType.LargeGrid
+                                    || entities[j1].Type==MyDetectedEntityType.SmallGrid
+                                    )
+                                {
+                                    if (entities[j1].BoundingBox.Contains(vTargetLocation) != ContainmentType.Disjoint)
+                                    {
+                                        if (dTMDebug)
+                                            Echo("Ignoring collision because we want to be INSIDE");
+                                        // if the target is inside the BB of the target, ignore the collision
+                                        bValidCollision = false;
+                                    }
+                                }
+                                if (bValidCollision) break;
+
                             }
-                            // save what we detected
-                            lastDetectedInfo = aSensors[i].LastDetectedEntity;
-                            // something in way.
-                            ResetTravelMovement();
-                            current_state = colDetectState; // set the collision detetected state
-                            bWantFast = true; // process next state quickly
-                            ResetMotion(); // start stopping
-                            return;
+
+                            if (bValidCollision)
+                            {
+                                // something in way.
+                                // save what we detected
+                                lastDetectedInfo = entities[j1];
+                                ResetTravelMovement();
+                                current_state = colDetectState; // set the collision detetected state
+                                bWantFast = true; // process next state quickly
+                                ResetMotion(); // start stopping
+                                return;
+                            }
                         }
                     }
                     else lastDetectedInfo = new MyDetectedEntityInfo(); // since we found nothing, clear it.
@@ -315,7 +351,8 @@ namespace IngameScript
                     Echo("Scanning distance=" + scanDistance);
                 }
                 if (
-                    (tmCameraElapsedMs > tmCameraWaitMs || tmCameraElapsedMs < 0) // it is time to scan..
+                    dTMUseCameraCollision
+                    && (tmCameraElapsedMs > tmCameraWaitMs || tmCameraElapsedMs < 0) // it is time to scan..
                     && distance > tmMaxSensorM // if we are in sensor range, we don't need to scan with cameras
 //                    && !bAsteroidTarget
                     )
@@ -328,7 +365,7 @@ namespace IngameScript
                         if (!lastDetectedInfo.IsEmpty())
                         {
                             bool bValidCollision = true;
-                            if(bAsteroidTarget)
+                            if (bAsteroidTarget)
                             {
                                 if(lastDetectedInfo.Type==MyDetectedEntityType.Asteroid)
                                 {
@@ -347,10 +384,20 @@ namespace IngameScript
                                         }
                                     }
                                 }
+                                else if (lastDetectedInfo.Type == MyDetectedEntityType.Planet)
+                                {
+                                    // ignore
+                                    bValidCollision = false;
+                                }
+
+                                else
+                                {
+                                }
                             }
                             if (dTMDebug)
                             {
                                 //                            Echo(s);
+                                Echo("raycast hit:" + lastDetectedInfo.Type.ToString());
                                 StatusLog("Camera Trigger collision", textLongStatus);
                             }
                             if (bValidCollision)
@@ -449,30 +496,36 @@ namespace IngameScript
         /// <summary>
         /// returns the optimal max speed based on available braking thrust and ship mass
         /// </summary>
-        /// <param name="thrustUpList">Thrusters to use</param>
+        /// <param name="thrustList">Thrusters to use</param>
         /// <param name="distance">current distance to target location</param>
         /// <returns>optimal max speed (may be game max speed)</returns>
-        double CalculateOptimalSpeed(List<IMyTerminalBlock> thrustUpList, double distance)
+        double CalculateOptimalSpeed(List<IMyTerminalBlock> thrustList, double distance)
         {
-            // 
+            //
+            Echo("#thrusters=" + thrustList.Count.ToString());
+            if (thrustList.Count < 1) return fMaxWorldMps;
+
             MyShipMass myMass;
             myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
-            double maxThrust = calculateMaxThrust(thrustUpList);
+            double maxThrust = calculateMaxThrust(thrustList);
             double maxDeltaV = maxThrust / myMass.PhysicalMass;
             // Magic..
             double optimalV, secondstozero, stoppingM;
             optimalV = ((distance * .75) / 2) / (maxDeltaV); // determined by experimentation and black magic
-
+            Echo("COS");
             do
             {
+                Echo("COS:DO");
                 secondstozero = optimalV / maxDeltaV;
                 stoppingM = optimalV / 2 * secondstozero;
                 if (stoppingM > distance)
                 {
                     optimalV *=0.85;
                 }
+                Echo("stoppingM=" + stoppingM.ToString("F1") + " distance=" + distance.ToString("N1"));
             }
             while (stoppingM > distance);
+            Echo("COS:X");
             return optimalV;
         }
 

@@ -101,6 +101,15 @@ namespace IngameScript
                     else Echo("No Ship Controller found");
 
                 }
+                else if (args[0] == "namecameras")
+                {
+                    nameCameras(cameraForwardList, "Front");
+                    nameCameras(cameraBackwardList, "Back");
+                    nameCameras(cameraDownList, "Down");
+                    nameCameras(cameraUpList, "Up");
+                    nameCameras(cameraLeftList, "Left");
+                    nameCameras(cameraRightList, "Right");
+                }
                 else if (args[0] == "wcct" || args[0] == "")
                 {
                     // do nothing special

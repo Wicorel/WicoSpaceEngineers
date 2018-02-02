@@ -108,12 +108,40 @@ namespace IngameScript
                 else bRotor = false;
 
                 GyroControl.SetRefBlock(shipOrientationBlock);
+                double elevation = 0;
+
+                ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+
                 if (bValidNavTarget)
                 {
-                    current_state = 160;
+                    if (elevation> shipDim.HeightInMeters())
+                    {
+                        current_state = 150;
+                    }
+                    else current_state = 160;
                 }
                 else setMode(MODE_ATTENTION);
                 bWantFast = true;
+            }
+            else if(current_state==150)
+            {
+                //if (!bSled && !bRotor && dGravity > 0)
+                if (dGravity > 0)
+                {
+
+                    float fSaveAngle = minAngleRad;
+                    minAngleRad = 0.1f;
+                    bool bAligned= GyroMain("");
+                    Echo("bAligned=" + bAligned.ToString());
+                    minAngleRad = fSaveAngle;
+                    if (bAligned)
+                    {
+                        current_state = 160;
+                    }
+                    bWantFast = true;
+                }
+                else current_state = 160;
+
             }
             else if (current_state == 160)
             { //	160 move to Target
@@ -124,6 +152,10 @@ namespace IngameScript
                 double distance = vVec.Length();
                 Echo("distance=" + niceDoubleMeters(distance));
                 Echo("velocity=" + velocityShip.ToString("0.00"));
+
+                StatusLog("clear",sledReport);
+                StatusLog("Moving to Target\nD:" + niceDoubleMeters(distance) + " V:" + velocityShip.ToString(velocityFormat),sledReport);
+
                 //      Echo("TL:" + vTargetLocation.X.ToString("0.00") + ":" + vTargetLocation.Y.ToString("0.00") + ":" + vTargetLocation.Z.ToString("0.00"));
                 //		if(distance<17)
 //                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
@@ -132,8 +164,21 @@ namespace IngameScript
                 if (bGoOption && (distance < arrivalDistanceMin))
                 {
                     Echo("we have arrived");
+                    if (NAVEmulateOld)
+                    {
+                        var tList = GetBlocksContains<IMyTerminalBlock>("NAV:");
+                        for (int i1 = 0; i1 < tList.Count(); i1++)
+                        {
+                            // don't want to get blocks that have "NAV:" in customdata..
+                            if (tList[i1].CustomName.StartsWith("NAV:"))
+                            {
+                                Echo("Found NAV: command:");
+                                tList[i1].CustomName = "NAV: C Arrived Target";
+                            }
+                        }
+                    }
                     //				bValidTargetLocation = false;
-//                    gyrosOff();
+                    //                    gyrosOff();
                     ResetMotion();
                     bValidNavTarget = false; // we used this one up.
                     setMode(MODE_ARRIVEDTARGET);
@@ -142,227 +187,33 @@ namespace IngameScript
 //                bool bYawOnly = false;
 //                if (bSled || bRotor) bYawOnly = true;
 
-                debugGPSOutput("TargetLocation", vTargetLocation);
+//                debugGPSOutput("TargetLocation", vTargetLocation);
+                bool bDoTravel = true;
+                double elevation = 0;
 
- //               bool bAimed = false;
+                ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+                Echo("Elevation=" + elevation.ToString("0.0"));
+                Echo("MinEle=" + NAVGravityMinElevation.ToString("0.0"));
+                if (!bSled && !bRotor && NAVGravityMinElevation>0 && elevation< NAVGravityMinElevation)
+                {
+                    powerUpThrusters(thrustUpList, 100);
+//                    bDoTravel = false;
+                }
                 /*
-                double yawangle = -999;
-                if (bYawOnly)
+                if(!bSled && !bRotor && dGravity>0)
                 {
-                    yawangle = CalculateYaw(vTargetLocation, shipOrientationBlock);
-                    Echo("yawangle=" + yawangle.ToString());
-                    bAimed = Math.Abs(yawangle) < .05;
-                    if (!bAimed) bWantFast = true;
-                    else bWantMedium = true;
-
-                    if (bSled)
-                    {
-                        DoRotate(yawangle, "Yaw");
-                    }
-                    else if (bRotor)
-                    {
-                        DoRotorRotate(yawangle);
-                    }
-                    // else:  WE DON"T KNOW WHAT WE ARE
-                    if (bAimed)
-                    {
-                        Echo("Aimed");
-                        gyrosOff();
-                        if (!bGoOption)
-                        {
-                            powerDownRotors(rotorNavLeftList);
-                            powerDownRotors(rotorNavRightList);
-
-                            powerDownThrusters(thrustAllList);
-                            setMode(MODE_ARRIVEDTARGET);
-                            return;
-                        }
-                        double stoppingDistance = calculateStoppingDistance(thrustBackwardList, velocityShip, 0);
-                        double dFar = 100;
-                        double dApproach = 50;
-                        double dPrecision = 15;
-                        if (velocityShip > 5) dFar = stoppingDistance * 5;
-                        if (velocityShip > 5) dApproach = stoppingDistance * 2;
-                        Echo("distance=" + niceDoubleMeters(distance));
-                                           Echo("DFar=" + dFar);
-                                           Echo("dApproach=" + dApproach);
-                                           Echo("dPrecision=" + dPrecision);
-                        Echo("shipSpeedMax=" + shipSpeedMax);
-                        Echo("velocityShip=" + velocityShip);
-                        if (distance > dFar)
-                        {
-                                                   Echo("DFAR");
-                            if (velocityShip < 1)
-                            {
-                                Echo("DFAR*1");
-                                powerForward(100);
-                            }
-                            else if (velocityShip < (shipSpeedMax * 0.85))
-                            //                        else if (velocityShip < shipSpeedMax / 2)
-                            {
-                                Echo("DFAR**2");
-                                powerForward(55);
-                            }
-                            else if (velocityShip < (shipSpeedMax * 1.05))
-                            {
-                                Echo("DFAR***3");
-                                powerForward(1);
-                            }
-                            else
-                            {
-                                Echo("DFAR****4");
-                                powerDown();
-                            }
-                        }
-                        else if (distance > dApproach)
-                        {
-                            Echo("Approach");
-
-                            if (velocityShip < 1)
-                                powerForward(100);
-                            else if (velocityShip < shipSpeedMax / 2)
-                                powerForward(25);
-                            else if (velocityShip < shipSpeedMax)
-                                powerForward(1);
-                            else
-                                powerDown();
-                        }
-                        else if (distance > dPrecision)
-                        {
-                            Echo("Precision");
-                            // almost  to target.  should take stoppingdistance into account.
-                            if (velocityShip < 1)
-                                powerForward(100);
-                            else if (velocityShip < shipSpeedMax / 2)
-                                powerForward(25);
-                            else if (velocityShip < shipSpeedMax)
-                                powerForward(1);
-                            else
-                                powerDown();
-                        }
-                        else
-                        {
-                            Echo("Close");
-                            if (velocityShip < 1)
-                                powerForward(25);
-                            else if (velocityShip < 5)
-                                powerForward(5);
-                            else
-                                powerDown();
-                        }
-
-                    }
-
+                    float fSaveAngle = minAngleRad;
+                    minAngleRad = 0.1f;
+                    bDoTravel = GyroMain("");
+                    Echo("Travel=" + bDoTravel.ToString());
+                    minAngleRad = fSaveAngle;
+                    if (!bDoTravel)
+                        bWantFast = true;
                 }
-                else if (bRotor)
-                {
-                    bAimed = GyroMain("forward", vVec, shipOrientationBlock);
-                    if (!bAimed) bWantFast = true;
-                    else bWantMedium = true;
-                    if (bAimed)
-                    {
-                        // we are aimed at location
-                        Echo("Aimed");
-                        gyrosOff();
-                        if (!bGoOption)
-                        {
-                            powerDownRotors(rotorNavLeftList);
-                            powerDownRotors(rotorNavRightList);
-
-                            powerDownThrusters(thrustAllList);
-                            setMode(MODE_ARRIVEDTARGET);
-                            return;
-                        }
-
-                        double stoppingDistance = calculateStoppingDistance(thrustBackwardList, velocityShip, 0);
-                        double dFar = 100;
-                        double dApproach = 50;
-                        double dPrecision = 15;
-                        if (velocityShip > 5) dFar = stoppingDistance * 5;
-                        if (velocityShip > 5) dApproach = stoppingDistance * 2;
-                        Echo("distance=" + niceDoubleMeters(distance));
-                        //                   Echo("DFar=" + dFar);
-                        //                   Echo("dApproach=" + dApproach);
-                        //                   Echo("dPrecision=" + dPrecision);
-                        Echo("shipSpeedMax=" + shipSpeedMax);
-                        Echo("velocityShip=" + velocityShip);
-                        if (distance > dFar)
-                        {
-                            //                       Echo("DFAR");
-                            if (velocityShip < 1)
-                            {
-                                Echo("DFAR*1");
-                                powerForward(100);
-                            }
-                            else if (velocityShip < (shipSpeedMax * 0.85))
-                            //                        else if (velocityShip < shipSpeedMax / 2)
-                            {
-                                Echo("DFAR**2");
-                                powerForward(55);
-                            }
-                            else if (velocityShip < (shipSpeedMax * 1.05))
-                            {
-                                Echo("DFAR***3");
-                                powerForward(1);
-                            }
-                            else
-                            {
-                                Echo("DFAR****4");
-                                powerDown();
-                            }
-                        }
-                        else if (distance > dApproach)
-                        {
-                            Echo("Approach");
-
-                            if (velocityShip < 1)
-                                powerForward(100);
-                            else if (velocityShip < shipSpeedMax / 2)
-                                powerForward(25);
-                            else if (velocityShip < shipSpeedMax)
-                                powerForward(1);
-                            else
-                                powerDown();
-                        }
-                        else if (distance > dPrecision)
-                        {
-                            Echo("Precision");
-                            // almost  to target.  should take stoppingdistance into account.
-                            if (velocityShip < 1)
-                                powerForward(100);
-                            else if (velocityShip < shipSpeedMax / 2)
-                                powerForward(25);
-                            else if (velocityShip < shipSpeedMax)
-                                powerForward(1);
-                            else
-                                powerDown();
-                        }
-                        else
-                        {
-                            Echo("Close");
-                            if (velocityShip < 1)
-                                powerForward(25);
-                            else if (velocityShip < 5)
-                                powerForward(5);
-                            else
-                                powerDown();
-                        }
-
-                    }
-                    else
-                    {
-                        // we are aiming at location
-                        Echo("Aiming");
-                        //			DoRotate(yawangle, "Yaw");
-
-                        // DO NOT turn off rotors..
-                        powerDownThrusters(thrustAllList);
-
-                    }
-                }
-                else
                 */
+                if(bDoTravel)
                 {
+                    Echo("Do Travel");
                     doTravelMovement(vTargetLocation, 3.0f, 200, 170);
                 }
             }
@@ -392,7 +243,9 @@ namespace IngameScript
             {
                 //                 Vector3D vVec = vAvoid - shipOrientationBlock.GetPosition();
                 //                double distanceSQ = vVec.LengthSquared();
-                Echo("Collision Avoid"); 
+                Echo("Collision Avoid");
+                StatusLog("clear", sledReport);
+                StatusLog("Collision Avoid", sledReport);
                 doTravelMovement(vAvoid, 5.0f, 160, 173);
             }
             else if (current_state == 173)
@@ -439,12 +292,27 @@ namespace IngameScript
             }
             else if(current_state==200)
             { // we have arrived at target
+                StatusLog("clear", sledReport);
+                StatusLog("Arrived at Target", sledReport);
                 ResetMotion();
                 bValidNavTarget = false; // we used this one up.
 //                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
                 antennaMaxPower(false);
                 sleepAllSensors();
                 setMode(MODE_ARRIVEDTARGET);
+                if(NAVEmulateOld)
+                {
+                    var tList = GetBlocksContains<IMyTerminalBlock>("NAV:");
+                    for (int i1 = 0; i1 < tList.Count(); i1++)
+                    {
+                        // don't want to get blocks that have "NAV:" in customdata..
+                        if (tList[i1].CustomName.StartsWith("NAV:"))
+                        {
+                            Echo("Found NAV: command:");
+                            tList[i1].CustomName = "NAV: C Arrived Target";
+                        }
+                    }
+                }
                 bWantFast = true;
                 doTriggerMain();
             }
