@@ -25,11 +25,6 @@ namespace IngameScript
          * 
          */
 
-            /// <summary>
-            /// Set maximum speed of ship. 
-            /// Set this using S command for NAV
-            /// </summary>
-        double shipSpeedMax = 100;
 
 
         double tmCameraElapsedMs = -1;

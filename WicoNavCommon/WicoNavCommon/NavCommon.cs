@@ -15,6 +15,17 @@ namespace IngameScript
         bool bValidNavTarget = false;
         DateTime dtNavStartShip;
 
+        /// <summary>
+        /// Set maximum speed of ship. 
+        /// Set this using S command for NAV
+        /// </summary>
+        double shipSpeedMax = 100;
+
+        /// <summary>
+        /// the minimum distance to be from the target to be considered 'arrived'
+        /// </summary>
+        double arrivalDistanceMin = 50;
+
         //        Vector3D vNavLaunch;
         //        bool bValidNavLaunch = false;
         //        Vector3D vNavHome;
@@ -44,6 +55,8 @@ namespace IngameScript
             iNIHolder.SetValue(sNavSection, "ValidNavTarget", bValidNavTarget);
 
             iNIHolder.SetValue(sNavSection, "dStartShip", dtNavStartShip);
+            iNIHolder.SetValue(sNavSection, "shipSpeedMax", shipSpeedMax);
+            iNIHolder.SetValue(sNavSection, "arrivalDistanceMin", arrivalDistanceMin);
         }
 
         void NavDeserialize(INIHolder iNIHolder)
@@ -53,7 +66,9 @@ namespace IngameScript
             iNIHolder.GetValue(sNavSection, "vTarget", ref vNavTarget, true);
             iNIHolder.GetValue(sNavSection, "ValidNavTarget", ref bValidNavTarget, true);
 
-            iNIHolder.GetValue(sNavSection, "dStartShip", ref dtNavStartShip,true);
+            iNIHolder.GetValue(sNavSection, "dStartShip", ref dtNavStartShip, true);
+            iNIHolder.GetValue(sNavSection, "shipSpeedMax", ref shipSpeedMax, true);
+            iNIHolder.GetValue(sNavSection, "arrivalDistanceMin", ref arrivalDistanceMin, true);
 
         }
 

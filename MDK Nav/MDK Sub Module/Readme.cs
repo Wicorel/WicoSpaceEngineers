@@ -67,6 +67,10 @@
     3.3A Redo Serialize
 
     3.4 Sled testing
+    (EFM Update 8 Drones)
+
+    3.4a Save NAV settings so nav can properly resume
+    (EFM Update 9 Drones)
 
 	* TODO: 
 	*/

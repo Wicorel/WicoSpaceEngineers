@@ -22,10 +22,6 @@ namespace IngameScript
         //TODO: Add loading and saving NAV specific settings to its own section
 
         // NAV
-        /// <summary>
-        /// the minimum distance to be from the target to be considered 'arrived'
-        /// </summary>
-        double arrivalDistanceMin = 50;
         //        double arrivalDistanceMax = 100;
 
         /// <summary>
