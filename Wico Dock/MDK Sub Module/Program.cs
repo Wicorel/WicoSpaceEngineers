@@ -22,26 +22,15 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "Dock";
-        string sVersion = "3.3a";
+        string sVersion = "3.4A";
 
         const string velocityFormat = "0.00";
 
 
         void moduleDoPreModes()
         {
-            string output = "";
-            /*
-            if (AnyConnectorIsConnected()) output += "Connected";
-            else
-            {
-                output += "Not Connected";
-                if (AnyConnectorIsLocked())
-                    output += " : Locked";
-                else
-                    output += " : Not Locked";
-            }
-            */
-            Echo(output);
+//            string output = "";
+//            Echo(output);
         }
 
         void modulePostProcessing()

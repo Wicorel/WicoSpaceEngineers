@@ -23,19 +23,12 @@ namespace IngameScript
         {
             Echo("mode=" + iMode.ToString());
             doModeAlways();
-            /*            
-                        if (AnyConnectorIsConnected() && !((craft_operation & CRAFT_MODE_ORBITAL) > 0))
-                        {
-                            Echo("DM:docked");
-                            setMode(MODE_DOCKED);
-                        }
-            */
 
-//            if (iMode == MODE_DOSCAN) doModeScans();
-
+ //           if (iMode == MODE_DOSCAN) doModeScans();
             if (iMode == MODE_FINDORE) doModeFindOre();
             if (iMode == MODE_GOTOORE) doModeGotoOre();
-//            if (iMode == MODE_BORINGMINE) doModeBoringMine();
+            if (iMode == MODE_MINE) doModeMine();
+            //            if (iMode == MODE_BORINGMINE) doModeBoringMine();
             if (iMode == MODE_EXITINGASTEROID) doModeExitingAsteroid();
 
             if (iMode == MODE_SEARCHORIENT) doModeSearchOrient();
@@ -176,9 +169,9 @@ namespace IngameScript
 
         void modulePostProcessing()
         {
-            if (init)
+            if (init) // only if init is done
             {
-            // only need to do these like once per second. or if something major changes.
+                // only need to do these like once per second. or if something major changes.
                 OreDoCargoCheck();
                 OreDumpFound();
 
@@ -187,14 +180,16 @@ namespace IngameScript
                 double maxThrust = calculateMaxThrust(thrustForwardList);
                 Echo("maxThrust=" + maxThrust.ToString("N0"));
 
-                MyShipMass myMass;
-                myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
-                double effectiveMass = myMass.PhysicalMass;
-                Echo("effectiveMass=" + effectiveMass.ToString("N0"));
+                if (shipOrientationBlock is IMyShipController)
+                {
+                    MyShipMass myMass;
+                    myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
+                    double effectiveMass = myMass.PhysicalMass;
+                    Echo("effectiveMass=" + effectiveMass.ToString("N0"));
 
-                double maxDeltaV = (maxThrust) / effectiveMass;
-                Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
-
+                    double maxDeltaV = (maxThrust) / effectiveMass;
+                    Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+                }
                 Echo("Cargo=" + cargopcent.ToString() + "%");
             }
 

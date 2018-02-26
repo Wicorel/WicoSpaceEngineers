@@ -71,8 +71,9 @@ namespace IngameScript
 
             for (int i = 0; i < localDockConnectors.Count; i++)
             {
-                var sc = localDockConnectors[i] as IMyShipConnector;
-                if (sc.Status == MyShipConnectorStatus.Connectable)
+                var sc1 = localDockConnectors[i] as IMyShipConnector;
+                if (sc1 == null) continue;
+                if (sc1.Status == MyShipConnectorStatus.Connectable)
                     //		if (sc.IsLocked)
                     return true;
             }
@@ -82,14 +83,14 @@ namespace IngameScript
         bool AnyConnectorIsConnected()
         {
             getLocalConnectors();
-
             for (int i = 0; i < localDockConnectors.Count; i++)
             {
-                var sc = localDockConnectors[i] as IMyShipConnector;
-                if (sc.Status == MyShipConnectorStatus.Connected)
+                var sc1 = localDockConnectors[i] as IMyShipConnector;
+                if (sc1 == null) continue;
+                if (sc1.Status == MyShipConnectorStatus.Connected)
                 {
-                    var sco = sc.OtherConnector;
-                    if (sco.CubeGrid == sc.CubeGrid)
+                    var sco = sc1.OtherConnector;
+                    if (sco.CubeGrid == sc1.CubeGrid)
                     {
                         //Echo("Locked-but connected to 'us'");
                         continue;
@@ -120,11 +121,12 @@ namespace IngameScript
 
             for (int i = 0; i < localDockConnectors.Count; i++)
             {
-                var sc = localDockConnectors[i] as IMyShipConnector;
-                if (sc.Status == MyShipConnectorStatus.Connected)
+                var sc1 = localDockConnectors[i] as IMyShipConnector;
+                if (sc1 == null) continue;
+                if (sc1.Status == MyShipConnectorStatus.Connected)
                 {
-                    var sco = sc.OtherConnector;
-                    if (sco.CubeGrid == sc.CubeGrid)
+                    var sco = sc1.OtherConnector;
+                    if (sco.CubeGrid == sc1.CubeGrid)
                     {
                         continue;
                     }
@@ -132,7 +134,7 @@ namespace IngameScript
                     {
                         if (!bMe)
                         {
-                            return sc.OtherConnector;
+                            return sc1.OtherConnector;
                         }
                         else
                         {
@@ -151,11 +153,12 @@ namespace IngameScript
                 //	Echo("CCA:"+ localDockConnectors.Count);
                 for (int i = 0; i < localDockConnectors.Count; i++)
                 {
-                    var sc = localDockConnectors[i] as IMyShipConnector;
-                    if (sc.Status == MyShipConnectorStatus.Connected)
+                    var sc1 = localDockConnectors[i] as IMyShipConnector;
+                    if (sc1 == null) continue;
+                    if (sc1.Status == MyShipConnectorStatus.Connected)
                     {
-                        var sco = sc.OtherConnector;
-                        if (sco.CubeGrid == sc.CubeGrid)
+                        var sco = sc1.OtherConnector;
+                        if (sco.CubeGrid == sc1.CubeGrid)
                         {
                             //Echo("Locked-but connected to 'us'");
                             continue; // skip it.
@@ -163,13 +166,13 @@ namespace IngameScript
                     }
                     if (bConnect)
                     {
-                        if (sc.Status == MyShipConnectorStatus.Connectable) sc.ApplyAction("SwitchLock");
+                        if (sc1.Status == MyShipConnectorStatus.Connectable) sc1.ApplyAction("SwitchLock");
                     }
                     else
                     {
-                        if (sc.Status == MyShipConnectorStatus.Connected) sc.ApplyAction("SwitchLock");
+                        if (sc1.Status == MyShipConnectorStatus.Connected) sc1.ApplyAction("SwitchLock");
                     }
-                sc.Enabled = bOn;
+                sc1.Enabled = bOn;
                 /*
                     if (sAction != "")
                     {

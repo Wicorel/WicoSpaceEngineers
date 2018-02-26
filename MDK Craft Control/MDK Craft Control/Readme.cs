@@ -146,5 +146,7 @@
 * 3.4 
 * add namecameras
 * 
+* 3.4a
+* init optimizations for text panels
 * 
 */

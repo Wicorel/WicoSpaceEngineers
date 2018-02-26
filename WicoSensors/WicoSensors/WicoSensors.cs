@@ -89,8 +89,10 @@ namespace IngameScript
             float fXOffset = sb1.Position.X * 0.5f; // small grid only?
             float fYOffset = sb1.Position.Y * 0.5f;
             float fZOffset = sb1.Position.Z * 0.5f;
+            Echo("SB.x.y.z=" + fXOffset.ToString("0.0") + ":" + fYOffset.ToString("0.0") + ":" + fZOffset.ToString("0.0"));
 
-            // need to use grid orientation to main orientation block
+            Echo("MIN=" + Me.CubeGrid.Min.ToString() + "\nMAX:" + Me.CubeGrid.Max.ToString());
+            // TODO: need to use grid orientation to main orientation block
             float fSet;
             fSet = (float)(shipDim.WidthInMeters() / 2 - fXOffset + fLeft);
             sb1.LeftExtend = Math.Max(fSet, 1.0f);

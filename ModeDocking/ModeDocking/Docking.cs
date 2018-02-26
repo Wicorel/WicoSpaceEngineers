@@ -228,6 +228,7 @@ namespace IngameScript
 
                         string sMessage = "WICO:CON?:";
                         sMessage += lTargetBase.ToString() + ":";
+                        //$"{height:N1},{width:N1},{length:N1}:";
                         sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
                         //                    sMessage += shipDim.HeightInMeters() + "," + shipDim.WidthInMeters() + "," + shipDim.LengthInMeters() + ":";
                         sMessage += shipOrientationBlock.CubeGrid.CustomName + ":";

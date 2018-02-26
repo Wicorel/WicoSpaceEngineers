@@ -91,10 +91,10 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="MDKUtilities">
-      <HintPath>C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\2jgibfoa.tni\MDKUtilities.dll</HintPath>
+      <HintPath>C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\xu3vqp2v.igh\MDKUtilities.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Analyzer Include="C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\2jgibfoa.tni\Analyzers\MDKAnalyzer.dll" />
+    <Analyzer Include="C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\xu3vqp2v.igh\Analyzers\MDKAnalyzer.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DoModes.cs" />
@@ -137,6 +137,8 @@
   <Import Project="..\..\WicoINI\WicoINI\WicoINI.projitems" Label="Shared" />
   <Import Project="..\..\WicoLogging\WicoLogging\WicoLogging.projitems" Label="Shared" />
   <Import Project="..\..\WicoMiningCommon\WicoMiningCommon\WicoMiningCommon.projitems" Label="Shared" />
+  <Import Project="..\..\WicoNavCommon\WicoNavCommon\WicoNavCommon.projitems" Label="Shared" />
+  <Import Project="..\..\WicoWheels\WicoWheels\WicoWheels.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="mdk\mdk.options" DestinationFolder="$(TargetDir)\mdk" />

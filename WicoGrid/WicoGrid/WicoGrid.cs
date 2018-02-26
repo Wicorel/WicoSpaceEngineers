@@ -27,7 +27,6 @@ namespace IngameScript
         // add allBlocksCount
         // cross-grid 12/19
         // split grids/blocks
-        #region getgrids
 
         string sNoFollow = "NOFOLLOW";
         string sBlockIgnore = "!WCC";
@@ -45,13 +44,20 @@ namespace IngameScript
         }
         // --End removable code
 
+        #region getgrids
 
         List<IMyTerminalBlock> gtsAllBlocks = new List<IMyTerminalBlock>();
+
+        List<IMyTextPanel> localTextPanels = new List<IMyTextPanel>();
+        List<IMyTextPanel> meTextPanels = new List<IMyTextPanel>();
+
+        List<IMyTerminalBlock> localBlocks = new List<IMyTerminalBlock>();
 
         List<IMyCubeGrid> localGrids = new List<IMyCubeGrid>();
         List<IMyCubeGrid> remoteGrids = new List<IMyCubeGrid>();
         List<IMyCubeGrid> dockedGrids = new List<IMyCubeGrid>();
         List<IMyCubeGrid> allGrids = new List<IMyCubeGrid>();
+
 
         bool calcGridSystemChanged()
         {
@@ -70,9 +76,12 @@ namespace IngameScript
             localGrids.Clear();
             remoteGrids.Clear();
             dockedGrids.Clear();
+            localTextPanels.Clear();
+            meTextPanels.Clear();
 
             GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsAllBlocks);
             allBlocksCount = gtsAllBlocks.Count;
+//            Echo("Found " + gtsAllBlocks.Count.ToString() + " Blocks");
 
             foreach (var block in gtsAllBlocks)
             {
@@ -127,8 +136,8 @@ namespace IngameScript
             s += "L" + localGrids.Count.ToString();
             s += "D" + dockedGrids.Count.ToString();
             s += "R" + remoteGrids.Count.ToString();
-/*
-            Echo("Found " + gtsAllBlocks.Count.ToString() + " Blocks");
+
+            /*
             Echo("Found " + allGrids.Count.ToString() + " Grids");
             Echo("Found " + localGrids.Count.ToString() + " Local Grids");
             for (int i = 0; i < localGrids.Count; i++) Echo("|" + localGrids[i].CustomName);
@@ -257,9 +266,9 @@ namespace IngameScript
         bool IsGridLocal(long myCubeGrid)
         {
  //           bool bFound = false;
-            for(int i=0;i<localGrids.Count;i++)
+            for(int i1=0;i1<localGrids.Count;i1++)
             {
-                if ((long)localGrids[i].EntityId == myCubeGrid)
+                if ((long)localGrids[i1].EntityId == myCubeGrid)
                     return true;
             }
             return false;
@@ -272,18 +281,35 @@ namespace IngameScript
 
         bool dockedGridFilter(IMyTerminalBlock block)
         {
-            List<IMyCubeGrid> g = calculateDockedGrids();
-            if (g == null) return false;
-            return g.Contains(block.CubeGrid);
+            var g1 = calculateDockedGrids();
+            if (g1 == null) return false;
+            return g1.Contains(block.CubeGrid);
         }
 
         #endregion
 
+        // 02162018 Cache Text panels.
         // 05/12: Fix bug in GetBlocksContains()
         // 03/09: Init grids on get if needed
         // 02/25: use cached block list from grids
         // split code into grids and blocks
         #region getblocks
+
+        void LocalBlocksInit()
+        {
+            if (gtsAllBlocks.Count < 1) gridsInit();
+
+            localBlocks.Clear();
+            foreach (var b1 in gtsAllBlocks)
+            {
+                if (
+                    localGridFilter(b1) &&
+                    !(b1.CustomName.Contains(sBlockIgnore) || b1.CustomData.Contains(sBlockIgnore))
+                    )
+                    localBlocks.Add(b1);
+            }
+        }
+
         IMyTerminalBlock get_block(string name)
         {
             IMyTerminalBlock block;
@@ -294,14 +320,18 @@ namespace IngameScript
 
         public List<T> GetTargetBlocks<T>(ref List<T> Output, string Keyword = null) where T : class
         {
-            if (gtsAllBlocks.Count < 1) gridsInit();
             if (Output == null) Output = new List<T>();
             else   Output.Clear();
-            for (int e = 0; e < gtsAllBlocks.Count; e++)
+            if (localBlocks.Count < 1) LocalBlocksInit();
+
+            for (int e1 = 0; e1 < localBlocks.Count; e1++)
             {
-                if (localGridFilter(gtsAllBlocks[e]) && gtsAllBlocks[e] is T && ((Keyword == null) || (Keyword != null && gtsAllBlocks[e].CustomName.StartsWith(Keyword))))
+                if (
+                    //                    localGridFilter(gtsAllBlocks[e1]) && 
+                    localBlocks[e1] is T && 
+                    ((Keyword == null) || (Keyword != null && localBlocks[e1].CustomName.StartsWith(Keyword))))
                 {
-                    Output.Add((T)gtsAllBlocks[e]);
+                    Output.Add((T)localBlocks[e1]);
                 }
             }
             return Output;
@@ -311,11 +341,16 @@ namespace IngameScript
             if (gtsAllBlocks.Count < 1) gridsInit();
             if (Output == null) Output = new List<IMyTerminalBlock>();
             else Output.Clear();
-            for (int e = 0; e < gtsAllBlocks.Count; e++)
+            if (localBlocks.Count < 1) LocalBlocksInit();
+
+            for (int e1 = 0; e1 < localBlocks.Count; e1++)
             {
-                if (localGridFilter(gtsAllBlocks[e]) && gtsAllBlocks[e] is T && ((Keyword == null) || (Keyword != null && gtsAllBlocks[e].CustomName.StartsWith(Keyword))))
+                if (
+                    //                    localGridFilter(gtsAllBlocks[e1]) && 
+                    localBlocks[e1] is T && 
+                    ((Keyword == null) || (Keyword != null && localBlocks[e1].CustomName.StartsWith(Keyword))))
                 {
-                    Output.Add(gtsAllBlocks[e]);
+                    Output.Add(localBlocks[e1]);
                 }
             }
             return Output;
@@ -326,53 +361,121 @@ namespace IngameScript
             GetTargetBlocks<T>(ref Output, Keyword);
             return Output;
         }
+
+
         public List<IMyTerminalBlock> GetBlocksContains<T>(string Keyword = null) where T : class
         {
-            if (gtsAllBlocks.Count < 1) gridsInit();
             var Output = new List<IMyTerminalBlock>();
-            for (int e = 0; e < gtsAllBlocks.Count; e++)
+            if (localBlocks.Count < 1) LocalBlocksInit();
+
+            for (int e1 = 0; e1 < localBlocks.Count; e1++)
+//                for (int e1 = 0; e1 < gtsAllBlocks.Count; e1++)
             {
-                if (gtsAllBlocks[e] is T
-                    && localGridFilter(gtsAllBlocks[e])
-                    && Keyword != null && (gtsAllBlocks[e].CustomName.Contains(Keyword) || gtsAllBlocks[e].CustomData.Contains(Keyword))
-                    && !(gtsAllBlocks[e].CustomName.Contains(sBlockIgnore) || gtsAllBlocks[e].CustomData.Contains(sBlockIgnore))
+                if (localBlocks[e1] is T
+//                    && localGridFilter(gtsAllBlocks[e1])
+                    && Keyword != null && (localBlocks[e1].CustomName.Contains(Keyword) || localBlocks[e1].CustomData.Contains(Keyword))
+//                    && !(localBlocks[e1].CustomName.Contains(sBlockIgnore) || gtsAllocalBlockslBlocks[e1].CustomData.Contains(sBlockIgnore))
                     )
                 {
-                    Output.Add(gtsAllBlocks[e]);
+                    Output.Add(localBlocks[e1]);
+                }
+            }
+            return Output;
+        }
+        public List<IMyTextPanel> GetTextBlocksContains(string Keyword = null)// where T : class
+        {
+            if (gtsAllBlocks.Count < 1) gridsInit();
+            var Output = new List<IMyTextPanel>();
+
+            if (localTextPanels.Count > 1)
+            {
+                foreach (var t1 in localTextPanels)
+                {
+                    if (Keyword != null && (t1.CustomName.Contains(Keyword) || t1.CustomData.Contains(Keyword)))
+                        Output.Add(t1);
+                }
+            }
+            else
+            {
+                foreach (var t1 in gtsAllBlocks)
+                {
+                    if (t1 is IMyTextPanel
+                        && localGridFilter(t1)
+                        && !(t1.CustomName.Contains(sBlockIgnore) || t1.CustomData.Contains(sBlockIgnore))
+                        )
+                    {
+                        if (Keyword != null && (t1.CustomName.Contains(Keyword) || t1.CustomData.Contains(Keyword)))
+                            Output.Add(t1 as IMyTextPanel);
+                        localTextPanels.Add(t1 as IMyTextPanel);
+                    }
+                }
+            }
+            return Output;
+        }
+        public List<IMyTextPanel> GetMeTextBlocksContains(string Keyword = null)
+        {
+            if (localBlocks.Count < 1) LocalBlocksInit();
+            var Output = new List<IMyTextPanel>();
+
+            if (meTextPanels.Count > 1)
+            {
+                foreach (var t1 in meTextPanels)
+                {
+                    if (Keyword != null && (t1.CustomName.Contains(Keyword) || t1.CustomData.Contains(Keyword)))
+                        Output.Add(t1);
+                }
+            }
+            else
+            {
+                foreach (var t1 in localBlocks)
+                {
+                    if (
+                        t1 is IMyTextPanel
+                    && Me.CubeGrid == t1.CubeGrid
+//                        && !(t1.CustomName.Contains(sBlockIgnore) || t1.CustomData.Contains(sBlockIgnore))
+
+                    )
+                    {
+                        if (Keyword != null && (t1.CustomName.Contains(Keyword) || t1.CustomData.Contains(Keyword)))
+                            Output.Add(t1 as IMyTextPanel);
+                        meTextPanels.Add(t1 as IMyTextPanel);
+                    }
                 }
             }
             return Output;
         }
         public List<IMyTerminalBlock> GetMeBlocksContains<T>(string Keyword = null) where T : class
         {
-            if (gtsAllBlocks.Count < 1) gridsInit();
+            if (localBlocks.Count < 1) LocalBlocksInit();
             var Output = new List<IMyTerminalBlock>();
-            for (int e = 0; e < gtsAllBlocks.Count; e++)
+            for (int e1 = 0; e1 < localBlocks.Count; e1++)
             {
-                if (gtsAllBlocks[e] is T
-                    && Me.CubeGrid==gtsAllBlocks[e].CubeGrid 
-                    && Keyword != null && (gtsAllBlocks[e].CustomName.Contains(Keyword) || gtsAllBlocks[e].CustomData.Contains(Keyword))
-                    && !(gtsAllBlocks[e].CustomName.Contains(sBlockIgnore) || gtsAllBlocks[e].CustomData.Contains(sBlockIgnore))
+                if (
+                    localBlocks[e1] is T
+                    && Me.CubeGrid == localBlocks[e1].CubeGrid
+                    && Keyword != null && (localBlocks[e1].CustomName.Contains(Keyword) || localBlocks[e1].CustomData.Contains(Keyword))
+//                    && !(gtsAllBlocks[e1].CustomName.Contains(sBlockIgnore) || gtsAllBlocks[e1].CustomData.Contains(sBlockIgnore))
 
                     )
                 {
-                    Output.Add(gtsAllBlocks[e]);
+                    Output.Add(gtsAllBlocks[e1]);
                 }
             }
             return Output;
         }
         public List<IMyTerminalBlock> GetBlocksNamed<T>(string Keyword = null) where T : class
         {
-            if (gtsAllBlocks.Count < 1) gridsInit();
+            if (localBlocks.Count < 1) LocalBlocksInit();
             var Output = new List<IMyTerminalBlock>();
-            for (int e = 0; e < gtsAllBlocks.Count; e++)
+            for (int e1 = 0; e1 < localBlocks.Count; e1++)
             {
-                if (gtsAllBlocks[e] is T 
-                    && localGridFilter(gtsAllBlocks[e])
+                if (
+                    localBlocks[e1] is T 
+//                    && localGridFilter(gtsAllBlocks[e1])
                     && Keyword != null 
-                    && gtsAllBlocks[e].CustomName == Keyword)
+                    && localBlocks[e1].CustomName == Keyword)
                 {
-                    Output.Add(gtsAllBlocks[e]);
+                    Output.Add(gtsAllBlocks[e1]);
                 }
             }
             return Output;

@@ -298,19 +298,23 @@ namespace IngameScript
         // uses lContainers from WicoCargo
         void OreDoCargoCheck()
         {
-            if (lContainers.Count < 1)
+
+            if (lContainers==null || lContainers.Count < 1)
                 initCargoCheck();
 
-            if (lContainers.Count < 1)
+            if (lContainers==null || lContainers.Count < 1)
             {
                 // No cargo containers found.
                 return;
             }
+
             OreClearAmounts();
-//            Echo(lContainers.Count + " Containers");
+
+            //            Echo(lContainers.Count + " Containers");
             for (int i = 0; i < lContainers.Count; i++)
             {
-                IMyInventory inv = lContainers[i].GetInventory(0);
+                var inv = lContainers[i].GetInventory(0);
+                if (inv == null) continue;
                 var items = inv.GetItems();
                 // go through all items
                 for (int i2 = 0; i2 < items.Count; i2++)

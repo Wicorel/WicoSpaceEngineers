@@ -20,9 +20,7 @@ namespace IngameScript
     {
 
 
-
         // multi-arg
-        #region arguments
 
         bool processArguments(string sArgument)
         {
@@ -126,8 +124,6 @@ namespace IngameScript
             }
             return false; // keep processing in main
         }
-        #endregion
-
 
     }
 }

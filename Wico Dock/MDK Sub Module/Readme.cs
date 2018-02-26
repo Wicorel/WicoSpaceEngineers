@@ -104,5 +104,7 @@ Only write to panels at the end of script.
 
 3.3a defaultorientationblock code moved
 
+3.4A init optimization.  check instructions on each sub-init
+
 
 */

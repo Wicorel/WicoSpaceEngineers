@@ -44,10 +44,14 @@
  * 3.2B INI setting lots of things
  * 
  * 3.3 Lists of Text panels
- * Only output to panels and end of script.
+ * Only output to panels at end of script.
  * 
  * 3.3A Redo serialize
  * Module Serialize
+ * 
+ * 3.4 01272018
+ * 
+ * 3.4a 02112018
  * 
  * NEED:  
  *  

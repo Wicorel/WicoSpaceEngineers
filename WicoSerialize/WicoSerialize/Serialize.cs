@@ -21,6 +21,8 @@ namespace IngameScript
 
         void Serialize()
         {
+            if (iniWicoCraftSave == null) return;
+
             ModuleSerialize(iniWicoCraftSave);
 
             iniWicoCraftSave.SetValue(sSerializeSection, "Mode", iMode.ToString());
@@ -30,7 +32,9 @@ namespace IngameScript
             iniWicoCraftSave.SetValue(sSerializeSection, "craft_operation", craft_operation.ToString());
             iniWicoCraftSave.SetValue(sSerializeSection, "PassedArgument", sPassedArgument);
             iniWicoCraftSave.SetValue(sSerializeSection, "ReceivedMessage", sReceivedMessage);
-            iniWicoCraftSave.SetValue(sSerializeSection, "SaveID", (long)SaveFile.EntityId);
+            long SaveID = 0;
+            if (SaveFile != null) SaveID = SaveFile.EntityId;
+            iniWicoCraftSave.SetValue(sSerializeSection, "SaveID", (long)SaveID);
 
             //            Echo("Writing ReceivedMessage='" + sReceivedMessage + "'");
 

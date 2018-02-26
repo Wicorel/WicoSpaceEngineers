@@ -59,6 +59,8 @@
 * 
 * 3.3a redo blockinit
 * 
+* 3.4a optimizations for text panel init.
+* 
 * 
 * TODO: Process size info to select connectors
 * TODO: drones may take up more than one connector depending on height, width.

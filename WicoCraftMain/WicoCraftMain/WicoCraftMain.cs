@@ -28,11 +28,11 @@ namespace IngameScript
         bool bCraftOperation = true;
 
 
-        float fMaxWorldMps = 100;
-        string sWorldSection = "WORLD";
 
         bool bSubModule = false;
 
+        float fMaxWorldMps = 100;
+        string sWorldSection = "WORLD";
         void WorldInitCustomData(INIHolder iNIHolder)
         {
             iNIHolder.GetValue(sWorldSection, "MaxWorldMps", ref fMaxWorldMps, true);
@@ -266,7 +266,7 @@ namespace IngameScript
             }
             else
             {
-                if (init)
+                if (init || bWasInit)
                 {
                     doSubModuleTimerTriggers();
                 }

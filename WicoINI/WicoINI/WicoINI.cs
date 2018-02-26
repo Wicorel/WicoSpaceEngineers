@@ -397,7 +397,7 @@ namespace IngameScript
                 // we are no longer caching direct text
                 if (_Sections.ContainsKey(section))
                 {
- //                   _pg.Echo("ContainsKey(" + section + ")");
+//                   _pg.Echo("ContainsKey(" + section + ")");
                     _Sections[section] = "";
                 }
                 else
@@ -409,7 +409,7 @@ namespace IngameScript
                 // if there is a set of keys for the section
                 if (_Keys.ContainsKey(section))
                 {
-                    //                    _pg.Echo("keysContain");
+//                                        _pg.Echo("keysContain");
                     var dKeyValue = new Dictionary<string, string>();
 
                     var dValue = _Keys[section];
@@ -429,7 +429,7 @@ namespace IngameScript
                 }
                 else
                 { // no keys for the section
-                  //                    _pg.Echo("keysNoContain");
+//               _pg.Echo("keysNoContain");
                   // add the key value dictionary and the new section
                     var dKeyValue = new Dictionary<string, string>();
                     dKeyValue.Add(key, sVal);
@@ -440,6 +440,7 @@ namespace IngameScript
 
                     IsDirty = true;
                 }
+//                _pg.Echo("SetValue:X");
                 return true;
             }
 

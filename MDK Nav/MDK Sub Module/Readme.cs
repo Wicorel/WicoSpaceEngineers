@@ -72,5 +72,8 @@
     3.4a Save NAV settings so nav can properly resume
     (EFM Update 9 Drones)
 
+    3.4B
+
+
 	* TODO: 
 	*/

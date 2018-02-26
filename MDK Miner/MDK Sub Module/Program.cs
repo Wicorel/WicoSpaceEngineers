@@ -22,7 +22,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "MINER";
-        string sVersion = "3.3A";
+        string sVersion = "3.4A";
 
         const string velocityFormat = "0.00";
 
@@ -34,7 +34,17 @@ namespace IngameScript
 	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
             if(!bNoDrills) turnDrillsOff();
 
-        } 
+        }
+        void MasterReset()
+        {
+            ResetMotion();
+
+            MinerMasterReset();
+
+            iniWicoCraftSave.ParseINI("");
+            Serialize();
+            bWantFast = true;
+        }
 
         void ModuleSerialize(INIHolder iNIHolder)
         {

@@ -19,7 +19,6 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         //20170107 Added sled and rear/front
-        #region wheels
 
         List<IMyTerminalBlock> wheelList = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> wheelSledList = new List<IMyTerminalBlock>();
@@ -74,13 +73,13 @@ namespace IngameScript
             for(int i1=0;i1<wheelSledList.Count;i1++)
             {
                 var w1 = wheelSledList[i1] as IMyMotorSuspension;
-                w1.SetValueFloat("Friction", 0);
+                w1.Friction = 0; // 1.186.201 02152018
+//                w1.SetValueFloat("Friction", 0);
 //                w1.SetValueFloat("Strength", 20);
 //                w1.Friction = 0;
             }
         }
 
-        #endregion
 
     }
 }

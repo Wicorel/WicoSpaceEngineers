@@ -50,23 +50,79 @@ namespace IngameScript
 
         string doInit()
         {
-
-            if (currentInit == 0)
+            do
             {
-                initLogging(); //also does gridsInit()
-            }
+                Echo("Init:" + currentInit.ToString());
+                switch (currentInit)
+                {
+                    case 0:
+                        sInitResults += gridsInit();
+                        break;
+                    case 1:
+                        if (!modeCommands.ContainsKey("launch")) modeCommands.Add("launch", MODE_LAUNCH);
+                        if (!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
 
-            // set autogyro defaults.
-            LIMIT_GYROS = 1;
-            minAngleRad = 0.09f;
-            CTRL_COEFF = 0.75;
+                        break;
+                    case 2:
+                        initLogging();
+                        StatusLog(DateTime.Now.ToString() + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
+                        break;
+                    case 3:
+                        sInitResults += SerializeInit();
+                        break;
+                    case 4:
+                        sInitResults += DefaultOrientationBlockInit();
+                        break;
+                    case 5:
+                        sInitResults += thrustersInit(shipOrientationBlock);
+                        break;
+                    case 6:
+                        sInitResults += rotorsNavInit();
+                        break;
+                    case 7:
+                        sInitResults += sensorInit();
+                        break;
+                    case 8:
+                        sInitResults += camerasensorsInit(shipOrientationBlock);
+                        break;
+                    case 9:
+                        sInitResults += connectorsInit();
+                        break;
+                    case 10:
+                        sInitResults += gyrosetup();
+                        // set autogyro defaults.
+                        LIMIT_GYROS = 1;
+                        minAngleRad = 0.09f;
+                        CTRL_COEFF = 0.75;
+                        break;
+                    case 11:
+                        sInitResults += lightsInit();
+                        break;
+                    case 12:
+                        initShipDim(shipOrientationBlock);
+                        break;
+                    case 13:
+                        BaseInitInfo();
+                        break;
+                    case 14:
+                        sInitResults += modeOnInit();
+                        break;
+                    case 15:
+                        init = true;
+                        break;
+                    case 16:
+                        break;
+                    case 17:
+                        break;
+                    case 18:
+                        break;
+                    case 19:
+                        break;
+                }
+                currentInit++;
+            }
+            while (!init && (((float)Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount) < 0.5f)) ;
 /*
-            Log("Init:" + currentInit.ToString());
-            double progress = currentInit * 100 / 3;
-            string sProgress = progressBar(progress);
-            StatusLog(sProgress, getTextBlock(sTextPanelReport));
-            */
-            Echo("Init:" + currentInit.ToString());
             if (currentInit == 0)
             {
                 //StatusLog("clear",textLongStatus,true);
@@ -94,7 +150,7 @@ namespace IngameScript
                 sInitResults += gyrosetup();
 
                 sInitResults += lightsInit();
-                initShipDim();
+                initShipDim(shipOrientationBlock);
 
                 BaseInitInfo();
 
@@ -104,6 +160,7 @@ namespace IngameScript
             }
 
             currentInit++;
+            */
             if (init) currentInit = 0;
 
             Log(sInitResults);

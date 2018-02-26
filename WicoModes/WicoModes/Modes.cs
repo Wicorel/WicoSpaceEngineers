@@ -18,7 +18,6 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        #region modes
 
         int iMode = 0;
 
@@ -65,6 +64,8 @@ namespace IngameScript
 
         const int MODE_LAUNCHED = 50; // we have completed launch
 
+        const int MODE_AIRDROP = 60; // we are doing a drop in gravity
+
         const int MODE_PET = 111; // pet that follows the player
 
         // new mining modes
@@ -75,7 +76,7 @@ namespace IngameScript
 
         // Scaning
         const int MODE_DOSCAN = 400; // do a full scan of the area and report found entities
-        
+        const int MODE_SCANCOMPLETED = 410;       
 
         // attack/coodrination modes
         const int MODE_WAITINGCOHORT = 500;
@@ -89,9 +90,6 @@ namespace IngameScript
             current_state = 0;
             doTriggerMain();
         }
-
-        #endregion
-
 
     }
 }

@@ -41,23 +41,83 @@ namespace IngameScript
 
         double totalCurrentVolume= 0.0; // volume
 
-        void initCargoCheck()
+        void CargoCheckInit()
         {
-            var grid = new List<IMyTerminalBlock>();
+            var blocks = new List<IMyTerminalBlock>();
 
             if (lContainers == null) lContainers = new List<IMyTerminalBlock>();
             else lContainers.Clear();
 
-//            GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(grid, localGridFilter);
-            GetTargetBlocks<IMyCargoContainer>(ref grid);
+            //            GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(grid, localGridFilter);
+            GetTargetBlocks<IMyCargoContainer>(ref blocks);
 
-            lContainers.AddRange(grid);
+            lContainers.AddRange(blocks);
+            cargopcent = -1;
+            cargoMult = -1;
 
-            grid.Clear();
+        }
 
-//            GridTerminalSystem.GetBlocksOfType<IMyShipConnector>(grid, localGridFilter);
-            GetTargetBlocks<IMyShipConnector>(ref grid);
-            foreach (var c in grid)
+        void CargoCheckAddConnectors()
+        {
+            var blocks = new List<IMyTerminalBlock>();
+            //            GridTerminalSystem.GetBlocksOfType<IMyShipConnector>(grid, localGridFilter);
+            GetTargetBlocks<IMyShipConnector>(ref blocks);
+            foreach (var c in blocks)
+            { // don't count ejectors
+                if (c.CustomName.Contains("Ejector") || c.CustomData.Contains("Ejector"))
+                    continue;
+                else
+                    lContainers.Add(c);
+            }
+
+        }
+
+        void CargoCheckAddDrills()
+        {
+            var blocks = new List<IMyTerminalBlock>();
+            //            GridTerminalSystem.GetBlocksOfType<IMyShipDrill>(grid, localGridFilter);
+            GetTargetBlocks<IMyShipDrill>(ref blocks);
+            lContainers.AddRange(blocks);
+        }
+        void CargoCheckAddWelders()
+        {
+            var blocks = new List<IMyTerminalBlock>();
+            //            GridTerminalSystem.GetBlocksOfType<IMyShipWelder>(grid, localGridFilter);
+            GetTargetBlocks<IMyShipWelder>(ref blocks);
+            lContainers.AddRange(blocks);
+        }
+        void CargoCheckAddGrinders()
+        {
+            var blocks = new List<IMyTerminalBlock>();
+            //            GridTerminalSystem.GetBlocksOfType<IMyShipGrinder>(grid, localGridFilter);
+            GetTargetBlocks<IMyShipGrinder>(ref blocks);
+            lContainers.AddRange(blocks);
+        }
+
+        bool bCargoCheckCached = true;
+
+        void initCargoCheck()
+        {
+            var blocks = new List<IMyTerminalBlock>();
+
+            if (lContainers == null) lContainers = new List<IMyTerminalBlock>();
+            else lContainers.Clear();
+
+            if(!bCargoCheckCached)
+                GridTerminalSystem.GetBlocksOfType<IMyCargoContainer>(blocks, localGridFilter);
+            else
+               GetTargetBlocks<IMyCargoContainer>(ref blocks);
+
+            lContainers.AddRange(blocks);
+
+            blocks.Clear();
+
+            if (!bCargoCheckCached)
+                GridTerminalSystem.GetBlocksOfType<IMyShipConnector>(blocks, localGridFilter);
+            else
+                GetTargetBlocks<IMyShipConnector>(ref blocks);
+
+            foreach (var c in blocks)
             { // don't count ejectors
                 if (c.CustomName.Contains("Ejector") || c.CustomData.Contains("Ejector"))
                     continue;
@@ -66,20 +126,27 @@ namespace IngameScript
             }
 //            lContainers.AddRange(grid);
 
-            grid.Clear();
-//            GridTerminalSystem.GetBlocksOfType<IMyShipDrill>(grid, localGridFilter);
-            GetTargetBlocks<IMyShipDrill>(ref grid);
-            lContainers.AddRange(grid);
+            blocks.Clear();
+            if (!bCargoCheckCached)
+                GridTerminalSystem.GetBlocksOfType<IMyShipDrill>(blocks, localGridFilter);
+            else
+                GetTargetBlocks<IMyShipDrill>(ref blocks);
+            lContainers.AddRange(blocks);
 
-            grid.Clear();
-//            GridTerminalSystem.GetBlocksOfType<IMyShipWelder>(grid, localGridFilter);
-            GetTargetBlocks<IMyShipWelder>(ref grid);
-            lContainers.AddRange(grid);
+            blocks.Clear();
+            if (!bCargoCheckCached)
+                GridTerminalSystem.GetBlocksOfType<IMyShipWelder>(blocks, localGridFilter);
+            else
+            GetTargetBlocks<IMyShipWelder>(ref blocks);
 
-            grid.Clear();
-//            GridTerminalSystem.GetBlocksOfType<IMyShipGrinder>(grid, localGridFilter);
-            GetTargetBlocks<IMyShipGrinder>(ref grid);
-            lContainers.AddRange(grid);
+            lContainers.AddRange(blocks);
+
+            blocks.Clear();
+            if (!bCargoCheckCached)
+                GridTerminalSystem.GetBlocksOfType<IMyShipGrinder>(blocks, localGridFilter);
+            else
+                GetTargetBlocks<IMyShipGrinder>(ref blocks);
+            lContainers.AddRange(blocks);
 
             cargopcent = -1;
             cargoMult = -1;
@@ -203,14 +270,12 @@ namespace IngameScript
             else if (subtype.Contains("SmallShipGrinder")) capacity = 3.375;
             else
             {
-                Echo("Not cargo:" + theContainer.DefinitionDisplayNameText + ":" + theContainer.BlockDefinition.SubtypeId);
-                capacity = 0.125;
+                Echo("Unknown cargo for default Capacity:" + theContainer.DefinitionDisplayNameText + ":" + theContainer.BlockDefinition.SubtypeId);
+                capacity = 12;
             }
             return capacity;
 
         }
-
-
 
     }
 }

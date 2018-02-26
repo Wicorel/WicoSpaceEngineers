@@ -24,14 +24,10 @@ namespace IngameScript
         float fMaxSearchMins = 1.0f;
         float fMaxShipClearMins = 5.5f;
 
-
         float fTargetMiningmps = 1.5f;
         float fAbortmps = 3.0f;
 
-
-
         bool bWaitingCargo = false;
-
 
         /*
          * 0 Master Init

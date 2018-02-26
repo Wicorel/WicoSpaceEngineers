@@ -18,6 +18,23 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+
+        int MiningCargopcthighwater = 95;
+        int MiningCargopctlowwater = 60;
+
+        float fTargetMiningMps = 0.85f;
+        float fMiningAbortMps = 2.0f;
+        float fMiningMinThrust = 1.2f;
+
+        float fAsteroidApproachMps = 5.0f;
+        float fAsteroidApproachAbortMps = 7.0f;
+
+        bool bMiningWaitingCargo = false;
+
+
+
+
+
         Vector3D vInitialAsteroidContact;
         Vector3D vInitialAsteroidExit;
         Vector3D vLastAsteroidContact;
@@ -37,20 +54,21 @@ namespace IngameScript
         string sMiningSection = "MINING";
         void MiningInitCustomData(INIHolder iNIHolder)
         {
-            //           iNIHolder.GetValue(sMiningSection, "cargopcthighwater", ref cargopcthighwater, true);
-            //            iNIHolder.GetValue(sMiningSection, "cargopctlowwater", ref cargopctlowwater, true);
             iNIHolder.GetValue(sMiningSection, "TargetMiningMps", ref fTargetMiningMps, true);
             iNIHolder.GetValue(sMiningSection, "MiningAbortMps", ref fMiningAbortMps, true);
             iNIHolder.GetValue(sMiningSection, "MiningMinThrust", ref fMiningMinThrust, true);
             iNIHolder.GetValue(sMiningSection, "AsteroidApproachMps", ref fAsteroidApproachMps, true);
             iNIHolder.GetValue(sMiningSection, "AsteroidApproachAbortMps", ref fAsteroidApproachAbortMps, true);
 
-
+            iNIHolder.GetValue(sMiningSection, "Cargopcthighwater", ref MiningCargopcthighwater, true);
+            iNIHolder.GetValue(sMiningSection, "Cargopctlowater", ref MiningCargopctlowwater, true);
 
         }
 
         void MiningSerialize(INIHolder iNIHolder)
         {
+            if (iNIHolder == null) return;
+
             iNIHolder.SetValue(sMiningSection, "vLastContact", vLastAsteroidContact);
             iNIHolder.SetValue(sMiningSection, "vTargetAsteroid", vTargetAsteroid);
             iNIHolder.SetValue(sMiningSection, "vLastExit", vLastAsteroidExit);
@@ -67,6 +85,8 @@ namespace IngameScript
 
         void MiningDeserialize(INIHolder iNIHolder)
         {
+            if (iNIHolder == null) return;
+
             iNIHolder.GetValue(sMiningSection, "vLastContact", ref vLastAsteroidContact, true);
             iNIHolder.GetValue(sMiningSection, "vTargetAsteroid", ref vTargetAsteroid, true);
             iNIHolder.GetValue(sMiningSection, "vLastExit", ref vLastAsteroidExit, true);
@@ -79,6 +99,14 @@ namespace IngameScript
             iNIHolder.GetValue(sMiningSection, "ValidInitialExit", ref bValidInitialAsteroidExit, true);
 
             iNIHolder.GetValue(sMiningSection, "miningAsteroidID", ref miningAsteroidID, true);
+        }
+
+        void MinerMasterReset()
+        {
+            bValidInitialAsteroidContact = false;
+            bValidInitialAsteroidExit = false;
+            bValidAsteroid = false;
+            miningAsteroidID = -1;
         }
 
     }

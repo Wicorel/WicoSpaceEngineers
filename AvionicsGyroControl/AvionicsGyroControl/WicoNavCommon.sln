@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoNavCommon", "WicoNavCommon\WicoNavCommon.shproj", "{ACA5E80D-385D-4789-8F75-0C96A5FD8571}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		WicoNavCommon\WicoNavCommon.projitems*{aca5e80d-385d-4789-8f75-0c96a5fd8571}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4CE25DF6-05E8-448A-B550-398ACC7AF41B}
+	EndGlobalSection
+EndGlobal

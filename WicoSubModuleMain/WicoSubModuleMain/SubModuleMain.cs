@@ -22,11 +22,10 @@ namespace IngameScript
         Dictionary<string, int> modeCommands = new Dictionary<string, int>();
         string sBanner = "";
         UpdateFrequency ufFast = UpdateFrequency.Once; // default value for "Fast" for this module
+        bool bSubModule = true;
 
         float fMaxWorldMps = 100;
         string sWorldSection = "WORLD";
-
-        bool bSubModule=true;
 
         void WorldInitCustomData(INIHolder iNIHolder)
         {
@@ -36,6 +35,9 @@ namespace IngameScript
         void ProcessInitCustomData()
         {
             INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
+
+            iniCustomData.GetValue(OurName, "EchoOn", ref bEchoOn, true);
+
             WorldInitCustomData(iniCustomData);
             GridsInitCustomData(iniCustomData);
             LoggingInitCustomData(iniCustomData);
@@ -47,10 +49,23 @@ namespace IngameScript
             }
         }
 
+        bool bEchoOn = true;
+
+        Action<string> _oldEcho;
+        void MyEcho(string output)
+        {
+            // Do whatever you'd want with the output here
+            if(bEchoOn) _oldEcho(output);
+        }
+
+
         public Program()
         {
             doModuleConstructor();
             ProcessInitCustomData();
+
+            //           _oldEcho = Echo;
+            //           Echo = MyEcho;
 
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
             Echo(sBanner + "Creator");
@@ -67,7 +82,6 @@ namespace IngameScript
 
         // added UpdateType and UpdateFrequency
         // sub-module common main
-#region MODULEMAIN
 
         bool init = false;
         bool bWasInit = false;
@@ -194,7 +208,6 @@ namespace IngameScript
 
                 doModes();
             }
-
             Serialize();
 
             if (bWantFast)
@@ -208,6 +221,7 @@ namespace IngameScript
             }
             if (bWantMedium)
             {
+                Echo("MEDIUM");
                 Runtime.UpdateFrequency |= UpdateFrequency.Update10;
             }
             else
@@ -219,8 +233,8 @@ namespace IngameScript
 
             bWasInit = false;
             UpdateAllPanels();
+
         }
-        #endregion
 
         void echoInstructions(string sBanner = null)
         {

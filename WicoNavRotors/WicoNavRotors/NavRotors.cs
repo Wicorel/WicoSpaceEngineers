@@ -49,9 +49,12 @@ namespace IngameScript
         bool powerUpRotors(float targetPower) // move forward
         {
             if (rotorNavLeftList.Count < 1) return false;
-                // need to ramp up/down rotor power or they will flip small vehicles and spin a lot
+            // need to ramp up/down rotor power or they will flip small vehicles and spin a lot
             float maxVelocity = rotorNavLeftList[0].GetMaximum<float>("Velocity");
-            float currentVelocity = rotorNavLeftList[0].GetValueFloat("Velocity");
+//            float currentVelocity = rotorNavLeftList[0].GetValueFloat("Velocity");
+            var rotor = rotorNavLeftList[0] as IMyMotorStator;
+            float currentVelocity = rotor.TargetVelocityRPM;
+
             float cPower = (currentVelocity / maxVelocity * 100);
             cPower = Math.Abs(cPower);
             if (targetPower > (cPower + 5f))
@@ -74,12 +77,11 @@ namespace IngameScript
         {
             for (int i = 0; i < rotorList.Count; i++)
             {
-                IMyMotorStator rotor = rotorList[i] as IMyMotorStator;
-
+                var rotor = rotorList[i] as IMyMotorStator;
                 float maxVelocity = rotor.GetMaximum<float>("Velocity");
                 if (!rotor.Enabled) rotor.Enabled = true;
                 float targetVelocity = maxVelocity * (targetPower / 100.0f);
-                Echo(rotor.CustomName + ":MV=" + maxVelocity.ToString("0.00") + ":V=" + targetVelocity.ToString("0.00"));
+//                Echo(rotor.CustomName + ":MV=" + maxVelocity.ToString("0.00") + ":V=" + targetVelocity.ToString("0.00"));
                 /*
                         float rv = rotor.TargetVelocity;
                         if (rv > maxVelocity) rv = maxVelocity;
@@ -122,7 +124,7 @@ namespace IngameScript
 
         bool DoRotorRotate(double yawAngle)
         {
-            Echo("DRR:" + yawAngle.ToString());
+//            Echo("DRR:" + yawAngle.ToString());
             float targetPower;
             if (Math.Abs(yawAngle) > 1.0)
             {
@@ -156,12 +158,12 @@ namespace IngameScript
 
             if (Math.Abs(targetPower) > 0)
             {
-                Echo("PUPLEFT:" + targetPower.ToString());
+//                Echo("PUPLEFT:" + targetPower.ToString());
                 powerUpRotors(rotorNavLeftList, targetPower);
             }
             if (Math.Abs(targetPower) > 0)
             {
-                Echo("PUPRIGHT:" + targetPower.ToString());
+//                Echo("PUPRIGHT:" + targetPower.ToString());
                 powerUpRotors(rotorNavRightList, targetPower);
             }
             if (Math.Abs(targetPower) > 0)

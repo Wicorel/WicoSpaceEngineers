@@ -50,12 +50,9 @@ namespace IngameScript
 
         string doInit()
         {
-
             // initialization of each module goes here:
 
             // when all initialization is done, set init to true.
-            initLogging();
-
             Echo(moduleName+ " Init:" + currentInit);
             if (currentInit == 0)
             {
@@ -65,11 +62,10 @@ namespace IngameScript
                 //	if(!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
 
                 sInitResults += gridsInit();
-
+                initLogging();
                 initTimers();
-
                 sInitResults += SerializeInit();
-
+ 
                 Deserialize();
                 sInitResults += antennaInit();
                 SetAntennaMe();

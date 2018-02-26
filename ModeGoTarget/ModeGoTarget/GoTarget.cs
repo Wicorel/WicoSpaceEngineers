@@ -125,12 +125,16 @@ namespace IngameScript
                 if (dGravity > 0)
                 {
 
+                    double elevation = 0;
+
+                    ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+
                     float fSaveAngle = minAngleRad;
                     minAngleRad = 0.1f;
                     bool bAligned= GyroMain("");
                     Echo("bAligned=" + bAligned.ToString());
                     minAngleRad = fSaveAngle;
-                    if (bAligned)
+                    if (bAligned || elevation < shipDim.HeightInMeters())
                     {
                         current_state = 160;
                     }

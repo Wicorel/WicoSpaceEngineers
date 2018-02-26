@@ -72,8 +72,6 @@ namespace IngameScript
 
             bool _bNotCached = true;// we do NOT have the current contents.
 
-//            double UpdateElapsedMs = -1;
-//            double UpdateWaitMs = 0.16;
             public WicoLogger(Program pg,string sName, bool bRefresh=false)
             {
                 _pg = pg;
@@ -84,11 +82,9 @@ namespace IngameScript
                 _sCurrentText = "";
                 _sOldtext = "";
                 _textPanels.Clear();
-                List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-                blocks = _pg.GetMeBlocksContains<IMyTextPanel>(_sSearchName);
-                if (blocks.Count < 1)
-                    blocks = _pg.GetBlocksContains<IMyTextPanel>(_sSearchName);
-                _textPanels = blocks.ConvertAll(x1 => (IMyTextPanel)x1);
+                _textPanels= _pg.GetMeTextBlocksContains(_sSearchName);
+                if (_textPanels.Count < 1)
+                    _textPanels = _pg.GetTextBlocksContains(_sSearchName);
             }
 
             public void StatusLog(string text, bool bReverse=false)

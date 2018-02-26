@@ -34,13 +34,13 @@ namespace IngameScript
 
             GetTargetBlocks<IMyRadioAntenna>(ref antennaList);
             GetTargetBlocks<IMyLaserAntenna>(ref antennaLList);
-            for (int i = 0; i < antennaList.Count; ++i)
+            for (int i1 = 0; i1 < antennaList.Count; ++i1)
             {
-                if (antennaList[i].CustomName.Contains("unused") || antennaList[i].CustomData.Contains("unused"))
+                if (antennaList[i1].CustomName.Contains("unused") || antennaList[i1].CustomData.Contains("unused"))
                     continue;
                 if (!bGotAntennaName)
                 {
-                    OurName = "Wico " + antennaList[i].CustomName.Split('!')[0].Trim();
+                    OurName = "Wico " + antennaList[i1].CustomName.Split('!')[0].Trim();
                     bGotAntennaName = true;
                 }
             }
@@ -154,12 +154,12 @@ namespace IngameScript
         void antennaSetRadius(float fRadius=200, bool bAll=false)
         {
             if (antennaList.Count < 1) antennaInit();
-            foreach (var a in antennaList)
+            foreach (var a1 in antennaList)
             {
-                if (a.AttachedProgrammableBlock > 0 || bAll)
+                if (a1.AttachedProgrammableBlock > 0 || bAll)
                 {
-                    a.Radius = fRadius;
-                    a.Enabled = true;
+                    a1.Radius = fRadius;
+                    a1.Enabled = true;
                 }
             }
         }
@@ -171,18 +171,18 @@ namespace IngameScript
         Vector3D antennaPosition()
         {
             if (antennaList.Count < 1) antennaInit();
-            foreach (var a in antennaList)
+            foreach (var a1 in antennaList)
             {
-                if (a.AttachedProgrammableBlock == Me.EntityId )
+                if (a1.AttachedProgrammableBlock == Me.EntityId )
                 {
                     // return the position of one we are listening to
-                    return a.GetPosition();
+                    return a1.GetPosition();
                 }
             }
-            foreach (var a in antennaList)
+            foreach (var a1 in antennaList)
             {
                 // else any one will do
-                return a.GetPosition();
+                return a1.GetPosition();
             }
             Vector3D vNone = new Vector3D();
             return vNone;
@@ -195,7 +195,7 @@ namespace IngameScript
         /// <param name="desiredRange">Range. Default is max</param>
         void antennaMaxPower(bool bAll=false, float desiredRange=float.MaxValue)
         {
-            if (antennaList.Count < 1) antennaInit();
+            if (antennaList==null || antennaList.Count < 1) antennaInit();
             if (desiredRange < 200) desiredRange = 200;
 
             foreach (var a in antennaList)
