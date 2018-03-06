@@ -149,4 +149,6 @@
 * 3.4a
 * init optimizations for text panels
 * 
+* 3.4B turn off auto-pirate mode.
+* 
 */
