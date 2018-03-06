@@ -107,6 +107,7 @@ namespace IngameScript
                             myR.Direction = Base6Directions.Direction.Forward;
                             myR.FlightMode = FlightMode.OneWay;
                             myR.ClearWaypoints();
+                            /*
                             if (bGotPlayer)
                             {
                                 // we are a pirate faction.  chase the player.
@@ -114,6 +115,7 @@ namespace IngameScript
                                 myR.SetAutoPilotEnabled(true);
                                 setMode(MODE_ATTACK);
                             }
+                            */
                         }
                         break;
                     case 12:
@@ -174,101 +176,6 @@ namespace IngameScript
  //               Echo("%=" + (float)Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount);
             }
             while (!init && (((float)Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount) < 0.5f));
-            /*
-            if (currentInit == 0)
-            {
-                //        StatusLog("clear", textLongStatus, true); // only MAIN module should clear long status on init.
-                StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
-
-                if (!modeCommands.ContainsKey("doscans")) modeCommands.Add("doscans", MODE_DOSCAN);
-                sInitResults += gridsInit();
-                initLogging();
-                initTimers();
-                sInitResults += SerializeInit();
-
-                Deserialize(); // get info from savefile to avoid blind-rewrite of (our) defaults
-            }
-            else if (currentInit == 1)
-            {
-                echoInstructions("A");
-                Deserialize();// get info from savefile to avoid blind-rewrite of (our) defaults
-                echoInstructions("B");
-
-                //                sInitResults += BlockInit();
-                sInitResults += DefaultOrientationBlockInit();
-                echoInstructions("C");
-                initCargoCheck();
-                echoInstructions("D");
-                initPower();
-                echoInstructions("E");
-                sInitResults += thrustersInit(shipOrientationBlock);
-                echoInstructions("F");
-                sInitResults += gyrosetup();
-                //                if (gtsAllBlocks.Count < 300) currentInit = 2; // go ahead and do next step.
-                echoInstructions("G");
-                if (shipOrientationBlock is IMyRemoteControl)
-                {
-                    Vector3D playerPosition;
-                    bool bGotPlayer = ((IMyRemoteControl)shipOrientationBlock).GetNearestPlayer(out playerPosition);
-                    IMyRemoteControl myR= (IMyRemoteControl)shipOrientationBlock;
-                    myR.SetCollisionAvoidance(false);
-                    myR.SetDockingMode(false);
-                    myR.Direction = Base6Directions.Direction.Forward;
-                    myR.FlightMode = FlightMode.OneWay;
-                    myR.ClearWaypoints();
-                    if (bGotPlayer)
-                    {
-                        // we are a pirate faction.  chase the player.
-                        myR.AddWaypoint(playerPosition, "Name");
-                        myR.SetAutoPilotEnabled(true);
-                        setMode(MODE_ATTACK);
-                    }
-                }
-                echoInstructions("H");
-            }
-            if (currentInit == 2)
-            {
-                sInitResults += wheelsInit(shipOrientationBlock);
-                sInitResults += rotorsNavInit();
-
-                sInitResults += connectorsInit();
-                sInitResults += tanksInit();
-                sInitResults += drillInit();
-//                if (gtsAllBlocks.Count < 100) currentInit = 3; // go ahead and do next step.
-            }
-            if (currentInit == 3)
-            {
-                sInitResults += camerasensorsInit(shipOrientationBlock);
-                sInitResults += ejectorsInit();
-
-                sInitResults += antennaInit();
-                sInitResults += gasgenInit();
-
-                autoConfig();
-                bWantFast = false;
-
-                if (bGotAntennaName)
-                   sBanner = "*" + OurName + ":" + moduleName + " V" + sVersion + " ";
-
-                if(sBanner.Length>34)
-                {
-                    sBanner = OurName + ":" + moduleName + "\nV" + sVersion + " ";
-                }
-                if (shipOrientationBlock is IMyShipController)
-                {
-                    MyShipMass myMass;
-                    myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
-
-                    gridBaseMass = myMass.BaseMass;
-                }
-
-                sInitResults += modeOnInit(); // handle mode initializing from load/recompile..
-
-                init = true; // we are done
-            }
-
-            currentInit++;
-    */
             if (init) currentInit = 0;
 
             Log(sInitResults);
