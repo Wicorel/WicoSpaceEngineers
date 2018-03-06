@@ -99,7 +99,7 @@ namespace IngameScript
             if (init)
             {
                 currentInit = 0;
-                bWantFast = false;
+ //               bWantFast = false;
             }
 
             Log(sInitResults);
