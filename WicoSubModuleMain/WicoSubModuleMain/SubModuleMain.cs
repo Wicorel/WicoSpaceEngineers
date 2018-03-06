@@ -64,11 +64,13 @@ namespace IngameScript
             doModuleConstructor();
             ProcessInitCustomData();
 
-            //           _oldEcho = Echo;
-            //           Echo = MyEcho;
+            _oldEcho = Echo;
+            Echo = MyEcho;
 
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
-            Echo(sBanner + "Creator");
+            _oldEcho(sBanner + "Creator");
+
+
             //            gridsInit(); //GridTerminalSystem cannot be relied on at initial compile
             //            initLogging();
             // Only needed for 'main' module           Runtime.UpdateFrequency |= UpdateFrequency.Once;
