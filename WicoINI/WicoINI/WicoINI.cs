@@ -92,13 +92,14 @@ namespace IngameScript
 
                 string[] aLines = sINI.Split('\n');
 
-                //               _pg.Echo("INI: " + aLines.Count() + " Lines to process");
+//                               _pg.Echo("INI: " + aLines.Count() + " Lines to process");
                 for (int iLine = 0; iLine < aLines.Count(); iLine++)
                 {
                     string sSection = "";
                     aLines[iLine].Trim();
                     if (aLines[iLine].StartsWith(_sectionStart.ToString()))
                     {
+//                        _pg.Echo(iLine + ":" + aLines[iLine]);
                         string sName = "";
                         for (int iChar = 1; iChar < aLines[iLine].Length; iChar++)
                             if (aLines[iLine][iChar] == _sectionEnd)
@@ -120,6 +121,9 @@ namespace IngameScript
                         for (; iLine < aLines.Count(); iLine++)
                         {
                             aLines[iLine].Trim();
+
+ //                       _pg.Echo(iLine+":"+aLines[iLine]);
+
                             if (aLines[iLine].StartsWith(_sectionStart.ToString()))
                             {
                                 iLine--;
@@ -147,9 +151,9 @@ namespace IngameScript
                                 }
                             }
                         }
-                        _Keys.Add(sSection, dKeyValue);
-                        _Lines.Add(sSection, asLines);
-                        _Sections.Add(sSection, sText);
+                        if(!_Keys.ContainsKey(sSection)) _Keys.Add(sSection, dKeyValue);
+                        if (!_Lines.ContainsKey(sSection)) _Lines.Add(sSection, asLines);
+                        if (!_Sections.ContainsKey(sSection)) _Sections.Add(sSection, sText);
                     }
                     else
                     {
@@ -197,8 +201,9 @@ namespace IngameScript
             /// <returns>true if the key was found. The value is unmodified if unfound</returns>
             public bool GetValue(string section, string key, ref string sValue, bool bSetDefault = false)
             {
-//                sValue = null;
+                //                sValue = null;
                 //                _pg.Echo(".GetValue(" + section+", " + key + ")");
+                section=section.ToUpper();
                 if (_Keys.ContainsKey(section)) // case sensitive
                 {
                     var dValue = _Keys[section];
