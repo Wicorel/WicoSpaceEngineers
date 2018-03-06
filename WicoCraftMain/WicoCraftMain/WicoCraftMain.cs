@@ -43,6 +43,12 @@ namespace IngameScript
             doModuleConstructor();
 
             INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
+
+            iniCustomData.GetValue(OurName, "EchoOn", ref bEchoOn, true);
+
+            _oldEcho = Echo;
+            Echo = MyEcho;
+
             WorldInitCustomData(iniCustomData);
             GridsInitCustomData(iniCustomData);
             LoggingInitCustomData(iniCustomData);
@@ -54,7 +60,7 @@ namespace IngameScript
             }
 
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
-            Echo(sBanner + "Creator");
+            _oldEcho(sBanner + "Creator");
 
             initLogging();
             StatusLog("clear", textLongStatus, true); // only MAIN module should clear long status on init.
@@ -70,6 +76,16 @@ namespace IngameScript
                 Echo("I am turned OFF!");
             }
         }
+
+        bool bEchoOn = true;
+
+        Action<string> _oldEcho;
+        void MyEcho(string output)
+        {
+            // Do whatever you'd want with the output here
+            if (bEchoOn) _oldEcho(output);
+        }
+
 
         #region MAIN
 
@@ -194,8 +210,8 @@ namespace IngameScript
                 }
                 else
                 {
-                    bWantFast = true;
                 }
+                bWantFast = true;
                 doInit();
                 bWasInit = true;
             }
