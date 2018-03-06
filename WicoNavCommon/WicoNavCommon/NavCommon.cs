@@ -36,6 +36,8 @@ namespace IngameScript
         bool NAVEmulateOld = true;
         float NAVGravityMinElevation = -1;
 
+        bool bNavBeaconDebug = false;
+
         string sNavSection = "NAV";
 
         void NavInitCustomData(INIHolder iNIHolder)
@@ -45,6 +47,7 @@ namespace IngameScript
             iNIHolder.GetValue(sNavSection, "SensorCollision", ref dTMUseSensorCollision, true);
             iNIHolder.GetValue(sNavSection, "NAVEmulateOld", ref NAVEmulateOld, true);
             iNIHolder.GetValue(sNavSection, "NAVGravityMinElevation", ref NAVGravityMinElevation, true);
+            iNIHolder.GetValue(sNavSection, "NavBeaconDebug", ref bNavBeaconDebug, true);
         }
 
         void NavSerialize(INIHolder iNIHolder)
@@ -69,7 +72,20 @@ namespace IngameScript
             iNIHolder.GetValue(sNavSection, "dStartShip", ref dtNavStartShip, true);
             iNIHolder.GetValue(sNavSection, "shipSpeedMax", ref shipSpeedMax, true);
             iNIHolder.GetValue(sNavSection, "arrivalDistanceMin", ref arrivalDistanceMin, true);
+        }
 
+        List<IMyBeacon> navDebugBeacons = new List<IMyBeacon>();
+        void NavDebug(string str)
+        {
+            if(bNavBeaconDebug)
+            {
+                if (navDebugBeacons.Count < 1)
+                    GridTerminalSystem.GetBlocksOfType(navDebugBeacons);
+                foreach(var beacon in navDebugBeacons)
+                {
+                    beacon.CustomName = str;
+                }
+            }
         }
 
 
