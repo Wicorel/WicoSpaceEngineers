@@ -73,10 +73,14 @@ namespace IngameScript
             for(int i1=0;i1<wheelSledList.Count;i1++)
             {
                 var w1 = wheelSledList[i1] as IMyMotorSuspension;
-                w1.Friction = 0; // 1.186.201 02152018
-//                w1.SetValueFloat("Friction", 0);
-//                w1.SetValueFloat("Strength", 20);
-//                w1.Friction = 0;
+
+                // BUG in 1.186.200.  using setter sets to MAX and not set value
+                w1.SetValueFloat("Friction", 0);
+                //w1.Friction = 0; // 1.186.201 02152018
+
+                //                w1.SetValueFloat("Friction", 0);
+                //                w1.SetValueFloat("Strength", 20);
+                //                w1.Friction = 0;
             }
         }
 
