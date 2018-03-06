@@ -458,7 +458,7 @@ namespace IngameScript
 
                     )
                 {
-                    Output.Add(gtsAllBlocks[e1]);
+                    Output.Add(localBlocks[e1]);
                 }
             }
             return Output;
@@ -475,7 +475,7 @@ namespace IngameScript
                     && Keyword != null 
                     && localBlocks[e1].CustomName == Keyword)
                 {
-                    Output.Add(gtsAllBlocks[e1]);
+                    Output.Add(localBlocks[e1]);
                 }
             }
             return Output;
