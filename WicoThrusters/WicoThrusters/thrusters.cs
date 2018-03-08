@@ -364,6 +364,14 @@ namespace IngameScript
             }
             return lthrusters;
         }
+
+        /// <summary>
+        /// Turns on thrusters and sets the override.
+        /// </summary>
+        /// <param name="thrusters">list of thrusters to use</param>
+        /// <param name="fPower">power setting 0->100</param>
+        /// <param name="iTypes">Type of thrusters to control. Default is all</param>
+        /// <returns>number of thrusters changed</returns>
         int powerUpThrusters(List<IMyTerminalBlock> thrusters, float fPower, int iTypes = thrustAll)
         {
             int iCount = 0;
