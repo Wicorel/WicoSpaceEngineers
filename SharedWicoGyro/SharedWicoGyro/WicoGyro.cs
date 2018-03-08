@@ -18,11 +18,15 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        // read INI defaults from CustomData.  If you don't want to use my INI, remove or modify the following routine
         string sGyroIgnore = "!NAV";
 
         void GyroInitCustomData(INIHolder iNIHolder)
         {
             iNIHolder.GetValue(sGridSection, "GyroIgnore", ref sGyroIgnore, true);
+            iNIHolder.GetValue(sGridSection, "LIMIT_GYROS", ref LIMIT_GYROS, true);
+            iNIHolder.GetValue(sGridSection, "LEAVE_GYROS", ref LEAVE_GYROS, true);
+            iNIHolder.GetValue(sGridSection, "CTRL_COEFF", ref CTRL_COEFF, true);
         }
         // 12/09 Add Summaries to members and functions
         // 09/11 Turn on gyros we are going to use
@@ -212,15 +216,20 @@ namespace IngameScript
             }
             gyros = l2.ConvertAll(x => (IMyGyro)x);
             if (LIMIT_GYROS > 0)
+            {
                 if (gyros.Count > LIMIT_GYROS)
-                    gyros.RemoveRange(LIMIT_GYROS, gyros.Count - LIMIT_GYROS);
-                else
-                if ((LEAVE_GYROS - skipped) > 0)
                 {
-                    int index = gyros.Count - (LEAVE_GYROS - skipped);
-                    gyros.RemoveRange(index, (LEAVE_GYROS - skipped));
+                    gyros.RemoveRange(LIMIT_GYROS, gyros.Count - LIMIT_GYROS);
                 }
-
+                else
+                {
+                    if ((LEAVE_GYROS - skipped) > 0)
+                    {
+                        int index = gyros.Count - (LEAVE_GYROS - skipped);
+                        gyros.RemoveRange(index, (LEAVE_GYROS - skipped));
+                    }
+                }
+            }
             gyrosOff(); // turn off all overrides
 
             s += "GYRO#" + gyros.Count.ToString("00") + "#";
