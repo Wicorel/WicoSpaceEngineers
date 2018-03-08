@@ -74,6 +74,16 @@
 
     3.4B
 
+    3.4C AvionicsGyro fixes (terminal properties changed units)
+    Fix for bug in SE wheel setter for friction
+    Add Gyro limits to CustomData
+    (EFM Update 11 wheeled Drones)
+
+    3.4D Air unit NAV changes
+    terrain auto-follow
+    alignment in gravity
+    (EFM Update 11 Air unit drones)
 
 	* TODO: 
 	*/
+    

@@ -44,6 +44,8 @@ namespace IngameScript
         0 -- Master Init
 
 
+            150. (spawn) initialize command in gravity. first align to gravity
+
         160 Main Travel to target
 
 
@@ -86,9 +88,16 @@ namespace IngameScript
             StatusLog(moduleName + ":GT: current_state=" + current_state.ToString(), textPanelReport);
 //            bWantFast = true;
             Echo("Going Target: state=" + current_state.ToString());
+
+            string sNavDebug = "";
+                        sNavDebug+="GT:S=" + current_state;
+            //            sNavDebug += " MinE=" + NAVGravityMinElevation;
+//            ResetMotion();
+
             if (current_state == 0)
             {
                 ResetTravelMovement();
+
                 if ((craft_operation & CRAFT_MODE_SLED) > 0)
                 {
                     bSled = true;
@@ -104,9 +113,18 @@ namespace IngameScript
                 else bRotor = false;
 
                 GyroControl.SetRefBlock(shipOrientationBlock);
-                double elevation = 0;
 
+                double elevation = 0;
                 ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+
+                if(!bSled && !bRotor)
+                { // if flying ship
+                    // make sure set to default
+                    if (NAVGravityMinElevation < 0)
+                        NAVGravityMinElevation = 75; // for EFM getting to target 'arrived' radius
+
+//                    NAVGravityMinElevation = (float)shipSpeedMax*2.5f;
+                }
 
                 if (bValidNavTarget)
                 {
@@ -119,29 +137,133 @@ namespace IngameScript
                 else setMode(MODE_ATTENTION);
                 bWantFast = true;
             }
-            else if(current_state==150)
+            else if (current_state == 150)
             {
-                //if (!bSled && !bRotor && dGravity > 0)
+                bWantFast = true;
                 if (dGravity > 0)
                 {
 
                     double elevation = 0;
 
                     ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+                    sNavDebug += " E=" + elevation.ToString("0.0");
 
                     float fSaveAngle = minAngleRad;
                     minAngleRad = 0.1f;
-                    bool bAligned= GyroMain("");
+                    Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();
+
+                    bool bAligned = GyroMain("", grav, shipOrientationBlock);
+                    sNavDebug += " Aligned=" + bAligned.ToString();
+
                     Echo("bAligned=" + bAligned.ToString());
                     minAngleRad = fSaveAngle;
-                    if (bAligned || elevation < shipDim.HeightInMeters())
+                    if (bAligned || elevation < shipDim.HeightInMeters() * 2)
                     {
-                        current_state = 160;
+                        gyrosOff();
+                        if (NAVGravityMinElevation > 0)
+                            current_state = 155;
+                        else current_state = 160;
                     }
-                    bWantFast = true;
                 }
                 else current_state = 160;
 
+            }
+            else if (current_state == 151)
+            {
+                bWantFast = true;
+                if (dGravity > 0)
+                {
+
+                    double elevation = 0;
+
+                    ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+                    sNavDebug += " E=" + elevation.ToString("0.0");
+
+                    float fSaveAngle = minAngleRad;
+                    minAngleRad = 0.1f;
+                    Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();
+
+                    bool bAligned = GyroMain("", grav, shipOrientationBlock);
+                    sNavDebug += " Aligned=" + bAligned.ToString();
+
+                    Echo("bAligned=" + bAligned.ToString());
+                    minAngleRad = fSaveAngle;
+                    if (bAligned || elevation < shipDim.HeightInMeters() * 2)
+                    {
+                        gyrosOff();
+                        if (NAVGravityMinElevation > 0)
+                            current_state = 155;
+                        else current_state = 160;
+                    }
+                    else current_state = 150;// try again to be aligned.
+                }
+                else current_state = 160;
+
+            }
+            else if (current_state == 155)
+            { // for use in gravity: aim at location using yaw only
+                bWantFast = true;
+                if (dGravity > 0)
+                {
+                    Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();
+                    bool bAligned=GyroMain("", grav, shipOrientationBlock);
+                    sNavDebug += " Aligned=" + bAligned.ToString();
+
+                    double yawangle = -999;
+                    yawangle = CalculateYaw(vNavTarget, shipOrientationBlock);
+                    bool bAimed = Math.Abs(yawangle) < 0.1; // NOTE: 2x allowance
+                    Echo("yawangle=" + yawangle.ToString());
+                    sNavDebug+=" Yaw=" + yawangle.ToString("0.00");
+
+                    if (!bAimed)
+                    {
+                        if (btmRotor)
+                        {
+                            Echo("Rotor");
+                            DoRotorRotate(yawangle);
+                        }
+                        else // use for both sled and flight
+                        {
+                            DoRotate(yawangle, "Yaw");
+                        }
+                    }
+                    if (bAligned && bAimed)
+                    {
+                        gyrosOff();
+                        current_state = 160;
+                    }
+                    else if (bAligned && Math.Abs(yawangle) < 0.5)
+                    {
+                        float atmo;
+                        float hydro;
+                        float ion;
+
+                        calculateHoverThrust(thrustForwardList, out atmo, out hydro, out ion);
+                        atmo += 1;
+                        hydro += 1;
+                        ion += 1;
+
+                        powerUpThrusters(thrustForwardList, atmo, thrustatmo);
+                        powerUpThrusters(thrustForwardList, hydro, thrusthydro);
+                        powerUpThrusters(thrustForwardList, ion, thrustion);
+
+                    }
+                    else
+                        powerDownThrusters(thrustForwardList);
+                }
+                else current_state = 160;
+            }
+            else if(current_state == 156)
+            {
+                // realign gravity
+                bWantFast = true;
+                Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();
+                bool bAimed = GyroMain("", grav, shipOrientationBlock);
+                if(bAimed)
+                {
+                    gyrosOff();
+                    current_state = 160;
+                }
             }
             else if (current_state == 160)
             { //	160 move to Target
@@ -156,14 +278,14 @@ namespace IngameScript
                 StatusLog("clear",sledReport);
                 StatusLog("Moving to Target\nD:" + niceDoubleMeters(distance) + " V:" + velocityShip.ToString(velocityFormat),sledReport);
 
-                //      Echo("TL:" + vTargetLocation.X.ToString("0.00") + ":" + vTargetLocation.Y.ToString("0.00") + ":" + vTargetLocation.Z.ToString("0.00"));
-                //		if(distance<17)
-//                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
-//                range = Math.Max(range, distance);
-//                antennaMaxPower(false,range);
+
                 if (bGoOption && (distance < arrivalDistanceMin))
                 {
+                    current_state = 200;
+
                     Echo("we have arrived");
+                    bWantFast = true;
+                    /*
                     if (NAVEmulateOld)
                     {
                         var tList = GetBlocksContains<IMyTerminalBlock>("NAV:");
@@ -177,59 +299,187 @@ namespace IngameScript
                             }
                         }
                     }
-                    //				bValidTargetLocation = false;
-                    //                    gyrosOff();
                     ResetMotion();
                     bValidNavTarget = false; // we used this one up.
                     setMode(MODE_ARRIVEDTARGET);
+                    */
                     return;
                 }
-//                bool bYawOnly = false;
-//                if (bSled || bRotor) bYawOnly = true;
 
 //                debugGPSOutput("TargetLocation", vTargetLocation);
                 bool bDoTravel = true;
-                double elevation = 0;
 
-                ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
-                Echo("Elevation=" + elevation.ToString("0.0"));
-                Echo("MinEle=" + NAVGravityMinElevation.ToString("0.0"));
-                if (!bSled && !bRotor && NAVGravityMinElevation>0 && elevation< NAVGravityMinElevation)
+                if (NAVGravityMinElevation > 0 && dGravity>0)
                 {
-                    powerUpThrusters(thrustUpList, 100);
-//                    bDoTravel = false;
+                    double elevation = 0;
+
+                    MyShipVelocities mysSV = ((IMyShipController)shipOrientationBlock).GetShipVelocities();
+                    Vector3D lv = mysSV.LinearVelocity;
+
+                    double vertVel = lv.X;
+
+                    Echo("LV=" + Vector3DToString(lv));
+                    //                    sNavDebug += " LV=" + Vector3DToString(lv);
+//                    sNavDebug += " vertVel=" + vertVel.ToString("0.0");
+//                    sNavDebug += " Hvel=" + lv.Y.ToString("0.0");
+
+                    // NOTE: Elevation is only updated by game every 30? ticks. so it can be WAY out of date based on movement
+                    ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+                    sNavDebug += " E=" + elevation.ToString("0.0");
+                    sNavDebug += " V=" + velocityShip.ToString("0.00");
+
+                    Echo("Elevation=" + elevation.ToString("0.0"));
+                    Echo("MinEle=" + NAVGravityMinElevation.ToString("0.0"));
+
+                    //                    double stopD = calculateStoppingDistance(thrustUpList, velocityShip, dGravity);
+                    double stopD = 0;
+                    if(vertVel < 0)
+                    {
+                        stopD = calculateStoppingDistance(thrustUpList, Math.Abs(vertVel), dGravity);
+                    }
+                    double maxStopD= calculateStoppingDistance(thrustUpList, fMaxWorldMps, dGravity);
+
+                    float atmo;
+                    float hydro;
+                    float ion;
+                    calculateHoverThrust(thrustUpList, out atmo, out hydro, out ion);
+
+//                    sNavDebug += " SD=" + stopD.ToString("0");
+
+                    if (
+                        //                        !bSled && !bRotor && 
+                        NAVGravityMinElevation > 0)
+                    {
+                        if (
+                            vertVel < -0.5  // we are going downwards
+                            && (elevation - stopD*2) < NAVGravityMinElevation)
+                        { // too low. go higher
+                            // Emergency thrust
+                            sNavDebug += " EM UP!";
+
+                            Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();
+                            bool bAligned = GyroMain("", grav, shipOrientationBlock);
+
+                            powerUpThrusters(thrustUpList, 100);
+                            bDoTravel = false;
+                            bWantFast = true;
+                        }
+                        else if (elevation < NAVGravityMinElevation)
+                        {
+                            // push upwards
+                            atmo += Math.Min(5f, (float)shipSpeedMax);
+                            hydro += Math.Min(5f, (float)shipSpeedMax);
+                            ion += Math.Min(5f, (float)shipSpeedMax);
+                            sNavDebug += " UP! A" + atmo.ToString("0.00");// + " H"+hydro.ToString("0.00") + " I"+ion.ToString("0.00");
+                                                                          //powerUpThrusters(thrustUpList, 100);
+                            powerUpThrusters(thrustUpList, atmo, thrustatmo);
+                            powerUpThrusters(thrustUpList, hydro, thrusthydro);
+                            powerUpThrusters(thrustUpList, ion, thrustion);
+
+                        }
+                        else if(elevation>(maxStopD+NAVGravityMinElevation*1.25))
+                        {
+                            // if we are higher than maximum possible stopping distance, go down fast.
+                            sNavDebug += " SUPERHIGH";
+
+ //                           Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();
+//                            bool bAligned = GyroMain("", grav, shipOrientationBlock);
+
+                            powerDownThrusters(thrustUpList, thrustAll, true);
+                            Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();
+                            bool bAligned = GyroMain("", grav, shipOrientationBlock);
+                            if(!bAligned)
+                            {
+                                bWantFast = true;
+                                bDoTravel = false;
+                            }
+                            //                            powerUpThrusters(thrustUpList, 1f);
+                        }
+                        else if (
+                            elevation > NAVGravityMinElevation * 2  // too high
+//                            && ((elevation-stopD)>NAVGravityMinElevation) // we can stop in time.
+//                        && velocityShip < shipSpeedMax * 1.1 // to fast in any direction
+//                           && Math.Abs(lv.X) < Math.Min(25, shipSpeedMax) // not too fast 
+//                            && Math.Abs(lv.Y) < Math.Min(25, shipSpeedMax) // not too fast downwards (or upwards)
+                            )
+                        { // too high 
+                            sNavDebug += " HIGH";
+                            //DOWN! A" + atmo.ToString("0.00");// + " H" + hydro.ToString("0.00") + " I" + ion.ToString("0.00");
+
+                            if (vertVel > 2) // going up
+                            { // turn off thrusters.
+                                sNavDebug += " ^";
+                                powerDownThrusters(thrustUpList, thrustAll, true);
+                            }
+                            else if (vertVel < -0.5) // going down
+                            {
+                                sNavDebug += " v";
+                                if(vertVel > (-Math.Min(15,shipSpeedMax)))
+                                {
+                                    // currently descending at less than desired
+                                    atmo -= Math.Max(25f, Math.Min(5f, (float)velocityShip / 2));
+                                    hydro -= Math.Max(25f, Math.Min(5f, (float)velocityShip / 2));
+                                    ion -= Math.Max(25f, Math.Min(5f, (float)velocityShip / 2));
+                                    sNavDebug += " DOWN! A" + atmo.ToString("0.00");// + " H" + hydro.ToString("0.00") + " I" + ion.ToString("0.00");
+ //                                   bDoTravel = false;
+                                }
+                                else
+                                {
+                                    // we are descending too fast.
+                                    atmo += Math.Max(100f, Math.Min(5f, (float)velocityShip / 2));
+                                    hydro += Math.Max(100f, Math.Min(5f, (float)velocityShip / 2));
+                                    ion += Math.Max(100f, Math.Min(5f, (float)velocityShip / 2));
+                                    sNavDebug += " 2FAST! A" + atmo.ToString("0.00");// + " H" + hydro.ToString("0.00") + " I" + ion.ToString("0.00");
+                                    Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();
+                                    bool bAligned = GyroMain("", grav, shipOrientationBlock);
+                                    if (!bAligned)
+                                    {
+                                        bWantFast = true;
+                                        bDoTravel = false;
+                                    }
+//                                    bDoTravel = false;
+                                }
+
+                            }
+                            else
+                            {
+                                sNavDebug += " -";
+                                atmo -= 5;
+                                hydro -= 5;
+                                ion -= 5;
+                            }
+
+                            powerUpThrusters(thrustUpList, atmo, thrustatmo);
+                            powerUpThrusters(thrustUpList, hydro, thrusthydro);
+                            powerUpThrusters(thrustUpList, ion, thrustion);
+
+                        }
+                        else
+                        {
+                            // normal hover
+                            powerDownThrusters(thrustUpList);
+                        }
+                    }
                 }
-                /*
-                if(!bSled && !bRotor && dGravity>0)
-                {
-                    float fSaveAngle = minAngleRad;
-                    minAngleRad = 0.1f;
-                    bDoTravel = GyroMain("");
-                    Echo("Travel=" + bDoTravel.ToString());
-                    minAngleRad = fSaveAngle;
-                    if (!bDoTravel)
-                        bWantFast = true;
-                }
-                */
-                if(bDoTravel)
+                if (bDoTravel)
                 {
                     Echo("Do Travel");
-                    doTravelMovement(vTargetLocation, 3.0f, 200, 170);
+                    doTravelMovement(vTargetLocation, (float)arrivalDistanceMin, 200, 170);
+                }
+                else
+                {
+                    powerDownThrusters(thrustForwardList);
                 }
             }
 
             else if(current_state==170)
             { // collision detection
-              //                IMyTextPanel tx = gpsPanel;
-              //                gpsPanel = textLongStatus;
-              //           StatusLog("clear", gpsPanel);
 
                 bWantFast = true;
                 Vector3D vTargetLocation = vNavTarget;
                 ResetTravelMovement();
                 calcCollisionAvoid(vTargetLocation);
 
-//                gpsPanel = tx;
 //                current_state = 171; // testing
                 current_state = 172;
             }
@@ -294,6 +544,8 @@ namespace IngameScript
             { // we have arrived at target
                 StatusLog("clear", sledReport);
                 StatusLog("Arrived at Target", sledReport);
+                sNavDebug += " ARRIVED!";
+
                 ResetMotion();
                 bValidNavTarget = false; // we used this one up.
 //                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
@@ -316,6 +568,7 @@ namespace IngameScript
                 bWantFast = true;
                 doTriggerMain();
             }
+            NavDebug(sNavDebug);
         }
 
         void powerForward(float fPower)
