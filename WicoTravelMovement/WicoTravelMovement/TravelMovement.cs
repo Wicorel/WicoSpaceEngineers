@@ -177,7 +177,7 @@ namespace IngameScript
         /// <param name="bAsteroidTarget">if True, target location is in/near an asteroid.  don't collision detect with it</param>
         void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState, bool bAsteroidTarget=false)
         {
-            if(dTMDebug) Echo("dTM:" + arrivalState);
+            if(dTMDebug) Echo("dTM:" + current_state + "->" + arrivalState +"-C>"+ colDetectState);
             //		Vector3D vTargetLocation = vHome;// shipOrientationBlock.GetPosition();
             //    shipOrientationBlock.CubeGrid.
             if (tmShipController == null)
@@ -223,8 +223,10 @@ namespace IngameScript
             else Echo("No Sensors for Travel movement");
             bool bAimed = false;
 
+            Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();
             if (btmSled || btmRotor)
             {
+
                 double yawangle = -999;
                 yawangle = CalculateYaw(vTargetLocation, shipOrientationBlock);
                 Echo("yawangle=" + yawangle.ToString());
@@ -242,7 +244,20 @@ namespace IngameScript
             }
             else
             {
-                bAimed = GyroMain("forward", vVec, shipOrientationBlock);
+                if (grav.Length() > 0)
+                { // in gravity. try to stay aligned to gravity, but change yaw to aim at location.
+                    bool bGravAligned = GyroMain("", grav, shipOrientationBlock);
+//                    if (bGravAligned)
+                    {
+                        double yawangle = CalculateYaw(vTargetLocation, shipOrientationBlock);
+                        DoRotate(yawangle, "Yaw");
+                        bAimed = Math.Abs(yawangle) < .05;
+                    }
+                }
+                else
+                {
+                    bAimed = GyroMain("forward", vVec, shipOrientationBlock);
+                }
             }
 
             tmShipController.DampenersOverride = true;
@@ -342,6 +357,7 @@ namespace IngameScript
                 }
 
                 //               if (dTMDebug)
+                if(dTMUseCameraCollision)
                 {
                     Echo("Scanning distance=" + scanDistance);
                 }
