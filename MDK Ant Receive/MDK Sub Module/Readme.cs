@@ -61,6 +61,7 @@
 * 
 * 3.4a optimizations for text panel init.
 * 
+* 3.4B Current Code Compile. Mar 08 2018
 * 
 * TODO: Process size info to select connectors
 * TODO: drones may take up more than one connector depending on height, width.

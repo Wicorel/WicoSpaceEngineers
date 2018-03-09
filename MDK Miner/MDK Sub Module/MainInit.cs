@@ -64,7 +64,7 @@ namespace IngameScript
                         sInitResults += gridsInit();
                         break;
                     case 1:
-
+                        
                         /*
                          * add commands to set modes
                         if(!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);

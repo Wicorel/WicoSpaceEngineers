@@ -75,7 +75,7 @@ namespace IngameScript
                 sInitResults += connectorsInit();
                 sInitResults += gyrosetup();
                 sInitResults += lightsInit();
-                initShipDim();
+                initShipDim(shipOrientationBlock);
 
                 Deserialize();
                 //                bWantFast = false;

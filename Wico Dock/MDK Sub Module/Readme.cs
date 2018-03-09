@@ -1,4 +1,8 @@
 ﻿/* Wico Craft DOCKING Control sub-module
+ * 
+ * Workshop: http://steamcommunity.com/sharedfiles/filedetails/?id=883865519
+ * 
+ * Uncompressed Source: https://github.com/Wicorel/WicoSpaceEngineers/tree/master/Wico%20Dock
 * 
 * Handles MODES:
 * MODE_DOCKED
@@ -106,5 +110,7 @@ Only write to panels at the end of script.
 
 3.4A init optimization.  check instructions on each sub-init
 
+3.4B
+Current Code Compile Mar 08 2018
 
 */

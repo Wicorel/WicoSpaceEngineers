@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "AntReceive";
-        string sVersion = "3.4A";
+        string sVersion = "3.4B";
 
         void ModuleDeserialize(INIHolder iNIHolder)
         {

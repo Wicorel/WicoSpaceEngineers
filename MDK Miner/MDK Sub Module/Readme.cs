@@ -6,6 +6,8 @@
  * Commands:
  * 
  * findore : starts searching for asteroid, then chooses one, then searches for ore
+ * doscan: starts a scan for nearby asteroids
+ * mine: start mining the location in front of ship
  * 
  * 
  * WorkShop: http://steamcommunity.com/sharedfiles/filedetails/?id=883866371
@@ -52,6 +54,9 @@
  * 3.4 01272018
  * 
  * 3.4a 02112018
+ * 
+ * 3.4B Build with current Code base Mar 08 2018
+ * 
  * 
  * NEED:  
  *  

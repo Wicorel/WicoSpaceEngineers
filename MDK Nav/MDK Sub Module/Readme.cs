@@ -1,17 +1,28 @@
 ﻿/* Wico Craft NAV Control sub-module
+ * 
+ * Workshop Link: http://steamcommunity.com/sharedfiles/filedetails/?id=797020890
+ * 
+ * Uncompressed Source: https://github.com/Wicorel/WicoSpaceEngineers/tree/master/MDK%20Nav
 	* 
     * Commands:
-    * XXX
-    * 
+    * W <waypoint>
+    *   Go to waypoint
+    *   
+    * S <max speed>
+    *   Set max travel speed
+    *   
+    * D <min arrive distance
+    *  set min expected arrival distance in meters
+    *  
+    * C <comment>
+    *   Any text except ;
+    *   
+    * O <waypoint> (untestd)
+    *   Orient to waypoint
     * 
     * 
 	* Handles MODES:
-	* MODE_DOCKED
-	* MODE_LAUNCH
-	* MODE_RELAUNCH
-    * MODE_SLEDMOVE
-    * MODE_ARRIVEDTARGET
-    * 
+    * MODE_GOTARGET
     * 
 	* 
 	* 2.0.4 Upate to new save format
@@ -84,6 +95,9 @@
     alignment in gravity
     (EFM Update 11 Air unit drones)
 
+    3.4E testing with space craft again.
+    Mar 08 2018
+    Fix gyro terminal properties
+
 	* TODO: 
 	*/
-    
