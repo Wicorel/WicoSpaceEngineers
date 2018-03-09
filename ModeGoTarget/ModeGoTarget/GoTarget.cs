@@ -90,7 +90,7 @@ namespace IngameScript
             Echo("Going Target: state=" + current_state.ToString());
 
             string sNavDebug = "";
-                        sNavDebug+="GT:S=" + current_state;
+            sNavDebug+="GT:S=" + current_state;
             //            sNavDebug += " MinE=" + NAVGravityMinElevation;
 //            ResetMotion();
 
