@@ -28,6 +28,8 @@ namespace IngameScript
             iNIHolder.GetValue(sGridSection, "LEAVE_GYROS", ref LEAVE_GYROS, true);
             iNIHolder.GetValue(sGridSection, "CTRL_COEFF", ref CTRL_COEFF, true);
         }
+
+        // 03/08/2018: Fix for change in Terminal Properties. Was using MaxValue of "Yaw" to determine range...  now that's WRONG!
         // 12/09 Add Summaries to members and functions
         // 09/11 Turn on gyros we are going to use
         // 04/30 only .ToLower ONCE
@@ -99,7 +101,7 @@ namespace IngameScript
         /// <param name="argument">The direction to point. "rocket" (backward),  "backward", "up","forward"</param>
         /// <param name="vDirection">the vector for the aim.</param>
         /// <param name="gyroControlPoint">the terminal block to use for orientation</param>
-        /// <returns></returns>
+        /// <returns>true if aligned. Meaning the angle of error is less than minAngleRad</returns>
         bool GyroMain(string argument, Vector3D vDirection, IMyTerminalBlock gyroControlPoint)
         {
             bool bAligned = true;
@@ -129,15 +131,13 @@ namespace IngameScript
                 var g = gyros[i];
                 g.Orientation.GetMatrix(out or);
 
-                // not really 'down'.. just the direciton we are currently pointing
-                var localDown = Vector3D.Transform(down, MatrixD.Transpose(or));
-                // not really gravity. just the direction we want to point
-                var localGrav = Vector3D.Transform(vDirection, MatrixD.Transpose(g.WorldMatrix.GetOrientation())); 
+                var localCurrent = Vector3D.Transform(down, MatrixD.Transpose(or));
+                var localTarget = Vector3D.Transform(vDirection, MatrixD.Transpose(g.WorldMatrix.GetOrientation())); 
 
                 //Since the gyro ui lies, we are not trying to control yaw,pitch,roll but rather we 
                 //need a rotation vector (axis around which to rotate) 
-                var rot = Vector3D.Cross(localDown, localGrav);
-                double dot2 = Vector3D.Dot(localDown, localGrav);
+                var rot = Vector3D.Cross(localCurrent, localTarget);
+                double dot2 = Vector3D.Dot(localCurrent, localTarget);
                 double ang = rot.Length();
                 ang = Math.Atan2(ang, Math.Sqrt(Math.Max(0.0, 1.0 - ang * ang)));
                 if (dot2 < 0) ang = Math.PI - ang; // compensate for >+/-90
@@ -150,29 +150,28 @@ namespace IngameScript
                 }
                 //		Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
 
-                float yawMax = g.GetMaximum<float>("Yaw"); // we assume all three are the same max
+                /// !KEEN  Change in 1.185 or .186..  gah...
+                //                float yawMax = g.GetMaximum<float>("Yaw"); // we assume all three are the same max
+
+                float yawMax = (float)(2 * Math.PI);
+
                 double ctrl_vel = yawMax * (ang / Math.PI) * CTRL_COEFF;
+
                 ctrl_vel = Math.Min(yawMax, ctrl_vel);
                 ctrl_vel = Math.Max(0.01, ctrl_vel);
                 rot.Normalize();
                 rot *= ctrl_vel;
-//                float pitch = -(float)rot.GetDim(0);
+
                 float pitch = -(float)rot.X;
-               //g.SetValueFloat("Pitch", -pitch);
                 g.Pitch = pitch;
 
-//                float yaw = -(float)rot.GetDim(1);
                 float yaw = -(float)rot.Y;
-                //g.SetValueFloat("Yaw", yaw);
                 g.Yaw = yaw;
 
-//                float roll = -(float)rot.GetDim(2);
                 float roll = -(float)rot.Z;
-                //                g.SetValueFloat("Roll", roll);
                 g.Roll = roll;
 
                 //		g.SetValueFloat("Power", 1.0f); 
-                //g.SetValueBool("Override", true);
                 g.GyroOverride = true;
 
                 bAligned = false;
