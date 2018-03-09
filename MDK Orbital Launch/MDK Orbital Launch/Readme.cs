@@ -42,6 +42,8 @@
 * 
 * 3.3a Rewrite of serlization
 * 
+* 3.4A Current Code Mar 03 2018
+* 
 * Need:
 *  circumnavigate planet to target spot
 *  'ask' for docking position after arriving at 'spot'

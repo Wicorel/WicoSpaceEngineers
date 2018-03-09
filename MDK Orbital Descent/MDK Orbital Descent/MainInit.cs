@@ -69,18 +69,18 @@ namespace IngameScript
             }
             else if (currentInit == 1)
             {
-                sInitResults += BlockInit();
-                anchorPosition = gpsCenter;
+                sInitResults += DefaultOrientationBlockInit();
+                anchorPosition = shipOrientationBlock;
                 currentPosition = anchorPosition.GetPosition();
                 sInitResults += connectorsInit();
-                sInitResults += thrustersInit(gpsCenter);
-                sInitResults += camerasensorsInit(gpsCenter);
-                sInitResults += landingsInit(gpsCenter);
+                sInitResults += thrustersInit(shipOrientationBlock);
+                sInitResults += camerasensorsInit(shipOrientationBlock);
+                sInitResults += landingsInit(shipOrientationBlock);
 
                 sInitResults += gearsInit();
                 sInitResults += tanksInit();
                 sInitResults += gyrosetup();
-                initShipDim();
+                initShipDim(shipOrientationBlock);
 
                 Deserialize();
                 bWantFast = false;
@@ -98,13 +98,13 @@ namespace IngameScript
         }
 
   //      IMyTextPanel gpsPanel = null;
-
+/*
         string BlockInit()
         {
             string sInitResults = "";
 
             List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
-            GridTerminalSystem.SearchBlocksOfName(sGPSCenter, centerSearch, localGridFilter);
+            GridTerminalSystem.SearchBlocksOfName(sGPSCentershipOrientationBlock, centerSearch, localGridFilter);
             if (centerSearch.Count == 0)
             {
                 centerSearch = GetBlocksContains<IMyRemoteControl>("[NAV]");
@@ -147,15 +147,16 @@ namespace IngameScript
                 Echo("Using Named: " + centerSearch[0].CustomName);
             }
             if (centerSearch.Count > 0)
-                gpsCenter = centerSearch[0];
+                shipOrientationBlock = centerSearch[0];
             /*
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
             if (blocks.Count > 0)
                 gpsPanel = blocks[0] as IMyTextPanel;
-                */
             return sInitResults;
         }
+
+    */
         string modeOnInit()
         {
 

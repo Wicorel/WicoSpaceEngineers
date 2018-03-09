@@ -41,6 +41,8 @@
  * 
  * 3.3 Multiple Textpanels
  * Only write to textpanels at end of script run
+ * 
+ * 3.4A Current Source build Mar 03 2018 (Gyro Property)
 
  * NEED:  
  *  

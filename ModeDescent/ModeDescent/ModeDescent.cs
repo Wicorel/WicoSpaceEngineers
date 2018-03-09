@@ -86,19 +86,19 @@ namespace IngameScript
             if (bValidTarget)
             {
 
-                alt = (gpsCenter.GetPosition() - vTarget).Length();
+                alt = (shipOrientationBlock.GetPosition() - vTarget).Length();
 
                 StatusLog("Distance: " + alt.ToString("N0") + " Meters", textPanelReport);
 
                 if (dGravity > 0)
                 {
-                    if (gpsCenter is IMyRemoteControl)
+                    if (shipOrientationBlock is IMyRemoteControl)
                     {
-                        Vector3D vNG = ((IMyRemoteControl)gpsCenter).GetNaturalGravity();
+                        Vector3D vNG = ((IMyRemoteControl)shipOrientationBlock).GetNaturalGravity();
 
                         //double Pitch,Yaw; 
                         Vector3D groundPosition;
-                        groundPosition = gpsCenter.GetPosition();
+                        groundPosition = shipOrientationBlock.GetPosition();
                         vNG.Normalize();
                         groundPosition += vNG * alt;
 
@@ -115,7 +115,7 @@ namespace IngameScript
                 Echo("Blind Landing");
                 StatusLog("Blind Landing", textPanelReport);
 
-                ((IMyRemoteControl)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Surface, out alt);
+                ((IMyRemoteControl)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out alt);
                 halt = 0;
                 minAltRotate = 39000;
             }
@@ -123,7 +123,7 @@ namespace IngameScript
             {
                 double elevation = 0;
 
-                ((IMyRemoteControl)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+                ((IMyRemoteControl)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
                 StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textPanelReport);
                 Echo("Elevation: " + elevation.ToString("N0") + " Meters");
             }
@@ -150,7 +150,7 @@ namespace IngameScript
             if ((craft_operation & CRAFT_MODE_ROCKET) > 0)
                 sOrientation = "rocket";
 
-            IMyShipController imsc = gpsCenter as IMyShipController;
+            IMyShipController imsc = shipOrientationBlock as IMyShipController;
             if (imsc != null && imsc.DampenersOverride)
             {
                 StatusLog("DampenersOverride ON", textPanelReport);
@@ -229,8 +229,8 @@ namespace IngameScript
                 else
                 {
                     if (imsc != null && imsc.DampenersOverride)
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = false;
-//                        blockApplyAction(gpsCenter, "DampenersOverride"); //DampenersOverride 
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = false;
+//                        blockApplyAction(shipOrientationBlock, "DampenersOverride"); //DampenersOverride 
 //                    ConnectAnyConnectors(false, "OnOff_On");
                     ConnectAnyConnectors(false, true);
                     if (!bValidTarget)
@@ -252,7 +252,7 @@ namespace IngameScript
                 bWantFast = true;
                 if (bValidTarget)
                 {
-                    GyroMain(sOrientation, vTarget, gpsCenter);
+                    GyroMain(sOrientation, vTarget, shipOrientationBlock);
                         //			startNavWaypoint(vTarget, true);
                     current_state = 11;
                 }
@@ -261,7 +261,7 @@ namespace IngameScript
             if (current_state == 11)
             {
                 bWantFast = true;
-                if (GyroMain(sOrientation, vTarget, gpsCenter))
+                if (GyroMain(sOrientation, vTarget, shipOrientationBlock))
                     current_state = 20;
                 /*
                 string sStatus = "Shutdown";// navStatus.CustomName; 
@@ -287,8 +287,8 @@ namespace IngameScript
                     StatusLog("Move towards surface for landing", textPanelReport);
 
                 if (imsc != null && !imsc.DampenersOverride)
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
-//                    blockApplyAction(gpsCenter, "DampenersOverride");
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
+//                    blockApplyAction(shipOrientationBlock, "DampenersOverride");
                 //		current_state=30; 
                 if (dGravity <= 0 || velocityShip < (fMaxMps * .8))
                     powerUpThrusters(thrustForwardList, 5);
@@ -321,8 +321,8 @@ namespace IngameScript
                 powerDownThrusters(thrustBackwardList, thrustAll, true);
 
                 if (imsc != null && imsc.DampenersOverride)
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = false;
-//                    blockApplyAction(gpsCenter, "DampenersOverride");
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = false;
+//                    blockApplyAction(shipOrientationBlock, "DampenersOverride");
                 current_state = 40;
             }
             if (current_state == 40)
@@ -330,8 +330,8 @@ namespace IngameScript
                 StatusLog("Free Fall", textPanelReport);
                 Echo("Free Fall");
                 if (imsc != null && imsc.DampenersOverride)
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = false;
-//                    blockApplyAction(gpsCenter, "DampenersOverride");
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = false;
+//                    blockApplyAction(shipOrientationBlock, "DampenersOverride");
 
                 if (alt < startReverseAlt)
                 {
@@ -364,8 +364,8 @@ namespace IngameScript
                 StatusLog("Waiting for alignment with gravity", textPanelReport);
 
                 if (imsc != null && imsc.DampenersOverride)
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = false;
-//                    blockApplyAction(gpsCenter, "DampenersOverride");
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = false;
+//                    blockApplyAction(shipOrientationBlock, "DampenersOverride");
 
                 GyroMain(sOrientation);
                 bWantFast = true;
@@ -402,7 +402,7 @@ namespace IngameScript
                     // we are able to do a scan
                     if (!lastDetectedInfo.IsEmpty())
                     { // we got something
-                        double distance = Vector3D.Distance(gpsCenter.GetPosition(), lastDetectedInfo.HitPosition.Value);
+                        double distance = Vector3D.Distance(shipOrientationBlock.GetPosition(), lastDetectedInfo.HitPosition.Value);
                         if (distance < alt)
                         { // try to land on found thing below us.
                             Echo("Scan found:" + lastDetectedInfo.Name + " " + distance.ToString("N0") + "m below");
@@ -433,8 +433,8 @@ namespace IngameScript
                 if ((alt) < retroStartAlt)
                 {
                     if (imsc != null && !imsc.DampenersOverride)
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
-//                        blockApplyAction(gpsCenter, "DampenersOverride");
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
+//                        blockApplyAction(shipOrientationBlock, "DampenersOverride");
                     current_state = 90;
                 }
             }
@@ -442,7 +442,7 @@ namespace IngameScript
             string s;
             if (bValidTarget)
             {
-                roll = CalculateRoll(vTarget, gpsCenter);
+                roll = CalculateRoll(vTarget, shipOrientationBlock);
                 s = "Roll=" + roll.ToString("0.00");
                 Echo(s);
                 StatusLog(s, textPanelReport);
@@ -593,7 +593,7 @@ namespace IngameScript
                     // we are able to try a scan
                     if (!lastDetectedInfo.IsEmpty())
                     { // we got something
-                        double distance = Vector3D.Distance(gpsCenter.GetPosition(), lastDetectedInfo.HitPosition.Value);
+                        double distance = Vector3D.Distance(shipOrientationBlock.GetPosition(), lastDetectedInfo.HitPosition.Value);
                         if (distance < alt)
                         { // try to land on found thing below us.
                             Echo("Scan found:" + lastDetectedInfo.Name + " " + distance.ToString("N0") + "m below");
@@ -700,7 +700,7 @@ namespace IngameScript
                         gyrosOff();
                         if (bValidTarget)
                         {
-                            GyroMain(sOrientation, vTarget - gpsCenter.GetPosition(), gpsCenter);
+                            GyroMain(sOrientation, vTarget - shipOrientationBlock.GetPosition(), shipOrientationBlock);
                         }
                         else
                             GyroMain(sOrientation);
@@ -731,7 +731,7 @@ namespace IngameScript
                         gyrosOff();
                         if (bValidTarget)
                         {
-                            GyroMain(sOrientation, vTarget - gpsCenter.GetPosition(), gpsCenter);
+                            GyroMain(sOrientation, vTarget - shipOrientationBlock.GetPosition(), shipOrientationBlock);
                         }
                         else
                             GyroMain(sOrientation);
@@ -764,7 +764,7 @@ namespace IngameScript
                         gyrosOff();
                         if (bValidTarget)
                         {
-                            GyroMain(sOrientation, vTarget - gpsCenter.GetPosition(), gpsCenter);
+                            GyroMain(sOrientation, vTarget - shipOrientationBlock.GetPosition(), shipOrientationBlock);
                         }
                         else
                             GyroMain(sOrientation);

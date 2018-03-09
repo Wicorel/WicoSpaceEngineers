@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Orbital Descent";
-        string sVersion = "3.3";
+        string sVersion = "3.4A";
 
 
         int minAltRotate = 2000; // minimum altitude to start rotation into retro position
@@ -37,7 +37,7 @@ namespace IngameScript
         const string velocityFormat = "0.00";
 
         IMyTerminalBlock anchorPosition;
-        IMyTerminalBlock gpsCenter = null;
+//        IMyTerminalBlock gpsCenter = null;
 //        Vector3D vCurrentPos;
         //IMyTerminalBlock gpsCenter = null;
         class OurException : Exception
@@ -197,8 +197,8 @@ namespace IngameScript
             gyrosOff();
  //           powerDownRotors(rotorNavLeftList);
  //           powerDownRotors(rotorNavRightList);
-	        if (gpsCenter is IMyRemoteControl) ((IMyRemoteControl)gpsCenter).SetAutoPilotEnabled(false);
-	        if (gpsCenter is IMyShipController) ((IMyShipController)gpsCenter).DampenersOverride = true;
+	        if (shipOrientationBlock is IMyRemoteControl) ((IMyRemoteControl)shipOrientationBlock).SetAutoPilotEnabled(false);
+	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
 //            if(!bNoDrills) turnDrillsOff();
         } 
 
