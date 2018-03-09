@@ -94,12 +94,12 @@ namespace IngameScript
 
         bool bValidExit = false;
 
-        QuadrantCameraScanner miningfrontScanner;
-        QuadrantCameraScanner miningbackScanner;
-        QuadrantCameraScanner miningleftScanner;
-        QuadrantCameraScanner miningrightScanner;
-        QuadrantCameraScanner miningtopScanner;
-        QuadrantCameraScanner miningbottomScanner;
+//        QuadrantCameraScanner miningfrontScanner;
+//        QuadrantCameraScanner miningbackScanner;
+//        QuadrantCameraScanner miningleftScanner;
+//        QuadrantCameraScanner miningrightScanner;
+//        QuadrantCameraScanner miningtopScanner;
+//        QuadrantCameraScanner miningbottomScanner;
 
         void doModeFindOre()
         {
