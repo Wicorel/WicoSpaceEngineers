@@ -338,7 +338,7 @@ namespace IngameScript
             facingTarget = centerTargetDistance < backTargetDistance;
 
             yawAngle = (leftTargetDistance - rightTargetDistance) / yawLocalDistance;
-            Echo("calc Angle=" + Math.Round(yawAngle, 5));
+//            Echo("calc Angle=" + Math.Round(yawAngle, 5));
 
             if (!facingTarget)
             {
@@ -365,9 +365,17 @@ namespace IngameScript
         bool DoRotate(double rollAngle, string sPlane = "Roll", float maxYPR=-1, float facingFactor=1f)
         {
 //            Echo("DR:angle=" + rollAngle.ToString("0.00"));
-            float targetYaw = 0;
-            IMyGyro gyro = gyros[0] as IMyGyro;
-            float maxRoll = gyro.GetMaximum<float>(sPlane);
+            float targetNewSetting = 0;
+
+
+            //            float maxRoll = (float)(2 * Math.PI);  this SHOULD be the new constant.. but code must use old constant
+            // TODO: this constant is no longer reasonable..  The adjustments are just magic calculations and should be redone.
+            float maxRoll = 60f;
+
+ //                       IMyGyro gyro = gyros[0] as IMyGyro;
+ //           float maxRoll = gyro.GetMaximum<float>(sPlane);
+//            Echo("MAXROLL=" + maxRoll);
+
             if (maxYPR > 0) maxRoll = maxYPR;
 
             //           float minRoll = gyro.GetMinimum<float>(sPlane);
@@ -375,37 +383,37 @@ namespace IngameScript
             if (Math.Abs(rollAngle) > 1.0)
             {
 //                Echo("MAx gyro");
-                targetYaw = maxRoll * (float)(rollAngle) * facingFactor;
+                targetNewSetting = maxRoll * (float)(rollAngle) * facingFactor;
             }
             else if (Math.Abs(rollAngle) > .7)
             {
                 // need to dampen 
 //                 Echo(".7 gyro");
-               targetYaw = maxRoll * (float)(rollAngle) / 4;
+               targetNewSetting = maxRoll * (float)(rollAngle) / 4;
             }
             else if (Math.Abs(rollAngle) > 0.5)
             {
 //                 Echo(".5 gyro");
-                targetYaw = 0.11f * Math.Sign(rollAngle);
+                targetNewSetting = 0.11f * Math.Sign(rollAngle);
             }
             else if (Math.Abs(rollAngle) > 0.1)
             {
 //                 Echo(".1 gyro");
-                targetYaw = 0.11f * Math.Sign(rollAngle);
+                targetNewSetting = 0.11f * Math.Sign(rollAngle);
             }
             else if (Math.Abs(rollAngle) > 0.01)
             {
 //                 Echo(".01 gyro");
-                targetYaw = 0.11f * Math.Sign(rollAngle);
+                targetNewSetting = 0.11f * Math.Sign(rollAngle);
             }
             else if (Math.Abs(rollAngle) > 0.001)
             {
 //                 Echo(".001 gyro");
-                targetYaw = 0.09f * Math.Sign(rollAngle);
+                targetNewSetting = 0.09f * Math.Sign(rollAngle);
             }
-            else targetYaw = 0;
+            else targetNewSetting = 0;
 
-            GyroControl.SetYaw(targetYaw);
+            GyroControl.SetYaw(targetNewSetting);
             if (Math.Abs(rollAngle) < minAngleRad)
             {
                 GyroControl.SetOverride(false);
