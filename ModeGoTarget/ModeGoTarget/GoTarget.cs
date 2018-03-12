@@ -316,9 +316,10 @@ namespace IngameScript
                     MyShipVelocities mysSV = ((IMyShipController)shipOrientationBlock).GetShipVelocities();
                     Vector3D lv = mysSV.LinearVelocity;
 
-                    double vertVel = lv.X;
+                    var upVec = ((IMyShipController)shipOrientationBlock).WorldMatrix.Up;
+                    var vertVel = Vector3D.Dot(lv, upVec);
 
-                    Echo("LV=" + Vector3DToString(lv));
+//                    Echo("LV=" + Vector3DToString(lv));
                     //                    sNavDebug += " LV=" + Vector3DToString(lv);
 //                    sNavDebug += " vertVel=" + vertVel.ToString("0.0");
 //                    sNavDebug += " Hvel=" + lv.Y.ToString("0.0");

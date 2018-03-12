@@ -99,5 +99,8 @@
     Mar 08 2018
     Fix gyro terminal properties
 
+    3.4F Fix vertical velocity calculation
+
+
 	* TODO: 
 	*/

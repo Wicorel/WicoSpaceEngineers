@@ -21,7 +21,7 @@ namespace IngameScript
         string OurName = "Wico Craft";
 
         string moduleName = "NAV";
-        string sVersion = "3.4E";
+        string sVersion = "3.4F";
 
         const string velocityFormat = "0.00";
 
