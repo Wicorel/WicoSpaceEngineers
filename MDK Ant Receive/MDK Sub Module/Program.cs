@@ -20,16 +20,21 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "AntReceive";
-        string sVersion = "3.4B";
+        string sVersion = "3.4C";
 
         void ModuleDeserialize(INIHolder iNIHolder)
         {
+            ScansDeserialize(iNIHolder);
+            AsteroidsDeserialize();
+            OreDeserialize();
 
         }
 
         void ModuleSerialize(INIHolder iNIHolder)
         {
-
+            ScansDeserialize(iNIHolder);
+            AsteroidSerialize();
+            OreSerialize();
         }
 
         void moduleDoPreModes()
@@ -40,7 +45,9 @@ namespace IngameScript
         void modulePostProcessing()
         {
             AntDisplayPendingMessages();
-
+            Echo(asteroidsInfo.Count.ToString() + " Known Asteroids");
+            Echo(oreLocs.Count.ToString() + " Known Ores");
+            OreDumpLocs();
             Echo(sInitResults);
             echoInstructions();
         }

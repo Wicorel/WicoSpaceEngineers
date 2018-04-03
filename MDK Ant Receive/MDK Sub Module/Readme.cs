@@ -63,6 +63,10 @@
 * 
 * 3.4B Current Code Compile. Mar 08 2018
 * 
+* 3.4C Current Code Compile Mar 29 2018
+* Added MODE_DOSCANS
+* Add asteroids and ore message processing.
+* 
 * TODO: Process size info to select connectors
 * TODO: drones may take up more than one connector depending on height, width.
 * 

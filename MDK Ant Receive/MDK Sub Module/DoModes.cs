@@ -23,12 +23,13 @@ namespace IngameScript
         {
             Echo("mode=" + iMode.ToString());
         	doModeAlways();
-/*            if (AnyConnectorIsConnected() && !((craft_operation & CRAFT_MODE_ORBITAL) > 0))
-            {
-                Echo("DM:docked");
-                setMode(MODE_DOCKED);
-            }
-            */
+            /*            if (AnyConnectorIsConnected() && !((craft_operation & CRAFT_MODE_ORBITAL) > 0))
+                        {
+                            Echo("DM:docked");
+                            setMode(MODE_DOCKED);
+                        }
+                        */
+            if (iMode == MODE_DOSCAN) doModeScans();
             /*
             if (iMode == MODE_IDLE) doModeIdle();
             else if (iMode == MODE_DESCENT) doModeDescent();

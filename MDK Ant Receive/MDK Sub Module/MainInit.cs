@@ -30,6 +30,7 @@ namespace IngameScript
             //            string sValue = "";
             ConnectorInitCustomData(iniCustomData);
             BaseInitCustomData(iniCustomData);
+            CamerasInitCustomData(iniCustomData);
 
             //            ThrustersInitCustomData(iniCustomData);
 
@@ -58,6 +59,7 @@ namespace IngameScript
             {
                 StatusLog(DateTime.Now.ToString() + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
 
+                	if(!modeCommands.ContainsKey("doscan")) modeCommands.Add("doscan", MODE_DOSCAN);
                 //	if(!modeCommands.ContainsKey("launch")) modeCommands.Add("launch", MODE_LAUNCH);
                 //	if(!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
 
@@ -67,6 +69,7 @@ namespace IngameScript
                 sInitResults += SerializeInit();
  
                 Deserialize();
+                sInitResults += DefaultOrientationBlockInit();
                 sInitResults += antennaInit();
                 SetAntennaMe();
 
@@ -75,6 +78,9 @@ namespace IngameScript
             }
             else if (currentInit == 1)
             {
+                initAsteroidsInfo();
+                initOreLocInfo();
+                sInitResults += camerasensorsInit(shipOrientationBlock);
                 sInitResults += connectorsInit();
                 sInitResults += initDockingInfo();
                 sInitResults += DefaultOrientationBlockInit();

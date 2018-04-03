@@ -26,23 +26,57 @@ namespace IngameScript
 
             if (sArgument == "" || sArgument == "timer" || sArgument == "wccs" || sArgument == "wcct")
             {
-                Echo("Arg=" + sArgument);
+                //		Echo("Arg=" + sArgument);
+                //		Echo("PassedArg=" + sPassedArgument);
+                if (sPassedArgument != "" && sPassedArgument != "timer")
+                {
+                    Echo("Using Passed Arg=" + sPassedArgument);
+                    sArgument = sPassedArgument;
+                }
             }
-            // try to process the message ourselves
 
-            else if(processDockMessage(sArgument))
+            if (sArgument == "init")
+            {
+                sInitResults = "";
+                init = false;
+                currentInit = 0;
+                doInit(); // do first pass.
+                return false;
+            }
+
+            string[] args = sArgument.Trim().Split(' ');
+
+            if(DockProcessMessage(sArgument))
             {
                 Echo("Processed");
             }
-            // we don't know this message.  Pass it on to other modules
-    //        else antReceive(sArgument);
+            else
+            {
+                int iDMode;
+                if (modeCommands.TryGetValue(args[0].ToLower(), out iDMode))
+                {
+//                    sArgResults = "mode set to " + iDMode;
+                    setMode(iDMode);
+                    // return true;
+                }
+                else
+                {
+//                    sArgResults = "Unknown argument:" + args[0];
+                }
+            }
 
-	        return false; // keep processing in main
+            return false; // keep processing in main
         }
         bool moduleProcessAntennaMessage(string sArgument)
         {
             // process an antenna message locally.  If processed, return true
-            return (processDockMessage(sArgument));
+            if (DockProcessMessage(sArgument))
+                return true;
+            if (AsteroidProcessMessage(sArgument))
+                return true;
+            if (OreProcessMessage(sArgument))
+                return true;
+            return false;
         }
 
     }

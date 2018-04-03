@@ -89,8 +89,19 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoINI", "..\WicoINI\WicoI
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoLogging", "..\WicoLogging\WicoLogging\WicoLogging.shproj", "{32D852B8-42D6-4830-B17C-E738EAFF2158}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeScan", "..\ModeScan\ModeScan\ModeScan.shproj", "{D0FCF4FF-3D8E-4B79-A643-1D9F0325FF5E}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoMiningCommon", "..\WicoMiningCommon\WicoMiningCommon\WicoMiningCommon.shproj", "{C60E04CE-4055-4D86-92DF-F98E99DE1CF2}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoAsteroids", "..\WicoAsteroids\WicoAsteroids\WicoAsteroids.shproj", "{7E915614-B8A3-4570-8D08-9252FB786139}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoScansCommon", "..\WicoScansCommon\WicoScansCommon\WicoScansCommon.shproj", "{67CD9BBE-7308-464E-9A7B-CCF880818515}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoOre", "..\WicoOre\WicoOre\WicoOre.shproj", "{00C60F2D-4AC4-4A0C-8FC5-F610A7FDDF5C}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\WicoOre\WicoOre\WicoOre.projitems*{00c60f2d-4ac4-4a0c-8fc5-f610a7fddf5c}*SharedItemsImports = 13
 		..\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep.projitems*{012b8a6f-b626-488d-994a-f9cd3143aa5b}*SharedItemsImports = 13
 		..\ModeDocked\ModeDocked\ModeDocked.projitems*{06776b42-2575-4e49-8c91-9f4ed9961873}*SharedItemsImports = 13
 		..\WicoThrusters\WicoThrusters\WicoThrusters.projitems*{16d5d301-e8ca-45e6-b9d9-968f6d1aa766}*SharedItemsImports = 13
@@ -109,22 +120,31 @@ Global
 		..\WicoTravelMovement\WicoTravelMovement\WicoTravelMovement.projitems*{4a5a1957-600d-44c6-be65-9ec80fca41cd}*SharedItemsImports = 13
 		..\WicoDoors\WicoDoors\WicoDoors.projitems*{4cd3ff7d-0e20-4026-9823-79c99173309c}*SharedItemsImports = 13
 		..\WicoDrills\WicoDrills\WicoDrills.projitems*{4da7bc66-5b0e-436c-bd2a-cd063083f8d1}*SharedItemsImports = 13
+		..\ModeScan\ModeScan\ModeScan.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoAntenna\WicoAntenna\WicoAntenna.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoAsteroids\WicoAsteroids\WicoAsteroids.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoBaseManager\WicoBaseManager\WicoBaseManager.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoBases\WicoBases\WicoBases.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoCameras\WicoCameras\WicoCameras.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoCargoCheck\WicoCargoCheck\WicoCargoCheck.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoConnectors\WicoConnectors\WicoConnectors.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoDetectedEntities\WicoDetectedEntities\WicoDetectedEntities.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoDockManager\WicoDockManager\WicoDockManager.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoGrid\WicoGrid\WicoGrid.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoINI\WicoINI\WicoINI.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoLogging\WicoLogging\WicoLogging.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoModes\WicoModes\WicoModes.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoOre\WicoOre\WicoOre.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoScansCommon\WicoScansCommon\WicoScansCommon.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSerialize\WicoSerialize\WicoSerialize.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.projitems*{5731b863-8478-4f96-99fe-914deffb6b79}*SharedItemsImports = 13
 		..\BatteryCheck\BatteryCheck\BatteryCheck.projitems*{6322f24c-7106-4b4a-b569-af880f4efd5e}*SharedItemsImports = 13
+		..\WicoScansCommon\WicoScansCommon\WicoScansCommon.projitems*{67cd9bbe-7308-464e-9a7b-ccf880818515}*SharedItemsImports = 13
 		..\ModeLaunch\ModeLaunch\ModeLaunch.projitems*{6aa698bf-ea52-4e7a-9631-240b448d5685}*SharedItemsImports = 13
 		..\WicoAirVents\WicoAirVents\WicoAirVents.projitems*{774de04d-ecf6-4033-9a00-7c04ec3a2934}*SharedItemsImports = 13
 		..\WicoLandingGears\WicoLandingGears\WicoLandingGears.projitems*{784351ff-951d-468a-8548-89fbd6129569}*SharedItemsImports = 13
+		..\WicoAsteroids\WicoAsteroids\WicoAsteroids.projitems*{7e915614-b8a3-4570-8d08-9252fb786139}*SharedItemsImports = 13
 		..\WicoGasGens\WicoGasGens\WicoGasGens.projitems*{85a26d0e-61e6-4e70-b394-7216bdf0b2a5}*SharedItemsImports = 13
 		..\WicoLights\WicoLights\WicoLights.projitems*{85dc7d02-b126-4c3c-9640-d2257f2dd37a}*SharedItemsImports = 13
 		..\WicoBases\WicoBases\WicoBases.projitems*{8ded091e-df6f-490c-8644-d4affa6ff7ed}*SharedItemsImports = 13
@@ -136,7 +156,9 @@ Global
 		..\ModeRelaunch\ModeRelaunch\ModeRelaunch.projitems*{b1319409-5ca7-49af-970e-87e5a36448f1}*SharedItemsImports = 13
 		..\WicoCameras\WicoCameras\WicoCameras.projitems*{b867062b-ebc6-479b-847c-7b7b95836a9b}*SharedItemsImports = 13
 		..\WicoSerialize\WicoSerialize\WicoSerialize.projitems*{bf4282f6-a87f-4b4e-9c3b-8d6543623371}*SharedItemsImports = 13
+		..\WicoMiningCommon\WicoMiningCommon\WicoMiningCommon.projitems*{c60e04ce-4055-4d86-92df-f98e99de1cf2}*SharedItemsImports = 13
 		..\WicoGrid\WicoGrid\WicoGrid.projitems*{cd5d65c2-f2c3-4a71-9c46-ade848dff34b}*SharedItemsImports = 13
+		..\ModeScan\ModeScan\ModeScan.projitems*{d0fcf4ff-3d8e-4b79-a643-1d9f0325ff5e}*SharedItemsImports = 13
 		..\ShipRoll\ShipRoll\ShipRoll.projitems*{dafad80c-e6ba-4f09-b4c8-ec000242f3e6}*SharedItemsImports = 13
 		..\WicoOrientedBB\WicoOrientedBB\WicoOrientedBB.projitems*{db7cd1df-ba22-47a3-af57-5ee4b084dd18}*SharedItemsImports = 13
 		..\WicoRemoteDockableConnectors\WicoRemoteDockableConnectors\WicoRemoteDockableConnectors.projitems*{e84578e4-4f77-4f37-8962-fa0a1ba051db}*SharedItemsImports = 13
