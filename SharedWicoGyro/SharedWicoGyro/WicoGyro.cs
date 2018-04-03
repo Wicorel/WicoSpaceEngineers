@@ -108,31 +108,31 @@ namespace IngameScript
             if (gyroControl == null)
                 gyrosetup();
 //            Echo("GyroMain(" + argument + ",VECTOR3D) #Gyros=" + gyros.Count);
-            Matrix or;
-            gyroControlPoint.Orientation.GetMatrix(out or);
+            Matrix or1;
+            gyroControlPoint.Orientation.GetMatrix(out or1);
 
             Vector3D down;
             argument = argument.ToLower();
             if (argument.Contains("rocket"))
-                down = or.Backward;
+                down = or1.Backward;
             else if (argument.Contains("up"))
-                down = or.Up;
+                down = or1.Up;
             else if (argument.Contains("backward"))
-                down = or.Backward;
+                down = or1.Backward;
             else if (argument.Contains("forward"))
-                down = or.Forward;
+                down = or1.Forward;
             else
-                down = or.Down;
+                down = or1.Down;
 
             vDirection.Normalize();
 
-            for (int i = 0; i < gyros.Count; ++i)
+            for (int i1 = 0; i1 < gyros.Count; ++i1)
             {
-                var g = gyros[i];
-                g.Orientation.GetMatrix(out or);
+                var g1 = gyros[i1];
+                g1.Orientation.GetMatrix(out or1);
 
-                var localCurrent = Vector3D.Transform(down, MatrixD.Transpose(or));
-                var localTarget = Vector3D.Transform(vDirection, MatrixD.Transpose(g.WorldMatrix.GetOrientation())); 
+                var localCurrent = Vector3D.Transform(down, MatrixD.Transpose(or1));
+                var localTarget = Vector3D.Transform(vDirection, MatrixD.Transpose(g1.WorldMatrix.GetOrientation())); 
 
                 //Since the gyro ui lies, we are not trying to control yaw,pitch,roll but rather we 
                 //need a rotation vector (axis around which to rotate) 
@@ -145,7 +145,7 @@ namespace IngameScript
                 { // close enough 
 
                     //g.SetValueBool("Override", false);
-                    g.GyroOverride = false;
+                    g1.GyroOverride = false;
                     continue;
                 }
                 //		Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
@@ -163,16 +163,16 @@ namespace IngameScript
                 rot *= ctrl_vel;
 
                 float pitch = -(float)rot.X;
-                g.Pitch = pitch;
+                g1.Pitch = pitch;
 
                 float yaw = -(float)rot.Y;
-                g.Yaw = yaw;
+                g1.Yaw = yaw;
 
                 float roll = -(float)rot.Z;
-                g.Roll = roll;
+                g1.Roll = roll;
 
                 //		g.SetValueFloat("Power", 1.0f); 
-                g.GyroOverride = true;
+                g1.GyroOverride = true;
 
                 bAligned = false;
             }
@@ -187,31 +187,31 @@ namespace IngameScript
         string gyrosetup()
         {
             string s = "";
-            var l = new List<IMyTerminalBlock>();
+            var l1 = new List<IMyTerminalBlock>();
             gyroControl = shipOrientationBlock as IMyShipController;
 
             if (gyroControl == null)
             {
                 // purposefully dont search on our own for a controller
-                if (l.Count < 1) return "No RC!";
+                if (l1.Count < 1) return "No RC!";
 //                gyroControl = (IMyRemoteControl)l[0];
             }
             gyrosOff(); // turn off any working gyros from previous runs
                         // NOTE: Uses grid of controller, not ME, nor localgridfilter
-            GridTerminalSystem.GetBlocksOfType<IMyGyro>(l, x => x.CubeGrid == shipOrientationBlock.CubeGrid);
+            GridTerminalSystem.GetBlocksOfType<IMyGyro>(l1, x => x.CubeGrid == shipOrientationBlock.CubeGrid);
             //    s += "ALLGYRO#=" + l.Count + "#";
             var l2 = new List<IMyTerminalBlock>();
             int skipped = 0;
-            for (int i = 0; i < l.Count; i++)
+            for (int i1 = 0; i1 < l1.Count; i1++)
             {
                 //       s += "\n" + l[i].CustomName;
-                if (l[i].CustomName.Contains(sGyroIgnore) || l[i].CustomData.Contains(sGyroIgnore))
+                if (l1[i1].CustomName.Contains(sGyroIgnore) || l1[i1].CustomData.Contains(sGyroIgnore))
                 {
                     skipped++;
                     continue;
                 }
                 //        s += " ADDED";
-                l2.Add(l[i]);
+                l2.Add(l1[i1]);
             }
             gyros = l2.ConvertAll(x => (IMyGyro)x);
             if (LIMIT_GYROS > 0)
@@ -241,11 +241,11 @@ namespace IngameScript
         {
             if (gyros != null)
             {
-                for (int i = 0; i < gyros.Count; ++i)
+                for (int i1 = 0; i1 < gyros.Count; ++i1)
                 {
                     //gyros[i].SetValueBool("Override", false);
-                    gyros[i].GyroOverride = false;
-                    gyros[i].Enabled = true;
+                    gyros[i1].GyroOverride = false;
+                    gyros[i1].Enabled = true;
                 }
             }
         }
