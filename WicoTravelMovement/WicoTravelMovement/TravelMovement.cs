@@ -139,7 +139,7 @@ namespace IngameScript
             if(!btmSled && !btmRotor) optimalV=CalculateOptimalSpeed( thrustTmBackwardList, distance);
             if (optimalV < tmMaxSpeed)
                 tmMaxSpeed = optimalV;
-            sInitResults += "\nDistance="+niceDoubleMeters(distance)+" OptimalV=" + optimalV;
+            if (dTMDebug) sInitResults += "\nDistance="+niceDoubleMeters(distance)+" OptimalV=" + niceDoubleMeters(optimalV);
 
             dtmFarSpeed = tmMaxSpeed;
             dtmApproachSpeed = tmMaxSpeed * 0.50;
@@ -157,9 +157,9 @@ namespace IngameScript
 
             dtmFar = calculateStoppingDistance(thrustTmBackwardList, dtmFarSpeed, 0); // calculate maximum stopping distance at full speed
 
-//  sInitResults += "\nFarSpeed=="+niceDoubleMeters(dtmFarSpeed)+" ASpeed=" + niceDoubleMeters(dtmApproachSpeed);
+            if (dTMDebug) sInitResults += "\nFarSpeed=="+niceDoubleMeters(dtmFarSpeed)+" ASpeed=" + niceDoubleMeters(dtmApproachSpeed);
 
-//            sInitResults += "\nFar=="+niceDoubleMeters(dtmFar)+" A=" + niceDoubleMeters(dtmApproach) + " P="+niceDoubleMeters(dtmPrecision);
+            if (dTMDebug) sInitResults += "\nFar=="+niceDoubleMeters(dtmFar)+" A=" + niceDoubleMeters(dtmApproach) + " P="+niceDoubleMeters(dtmPrecision);
 
             tmCameraElapsedMs = -1; // no delay for next check  
             tmScanElapsedMs = 0;// do delay until check 
@@ -359,7 +359,7 @@ namespace IngameScript
                 //               if (dTMDebug)
                 if(dTMUseCameraCollision)
                 {
-                    Echo("Scanning distance=" + scanDistance);
+                    Echo("Scanning distance=" + niceDoubleMeters(scanDistance));
                 }
                 if (
                     dTMUseCameraCollision
@@ -376,7 +376,8 @@ namespace IngameScript
                         if (!lastDetectedInfo.IsEmpty())
                         {
                             bool bValidCollision = true;
-                            if (bAsteroidTarget)
+                            // assume it MIGHT be asteroid and check
+//                            if (bAsteroidTarget)
                             {
                                 if(lastDetectedInfo.Type==MyDetectedEntityType.Asteroid)
                                 {
@@ -906,7 +907,10 @@ namespace IngameScript
                 if (velocityShip < 1)
                     powerUpThrusters(thrustTmForwardList, maxThrust);
                 else if (velocityShip < maxSpeed * .75)
-                    powerUpThrusters(thrustTmForwardList, 25f);
+                {
+                    float delta = (float)maxSpeed / fMaxWorldMps*maxThrust;
+                    powerUpThrusters(thrustTmForwardList, delta);
+                }
                 else if (velocityShip < maxSpeed * .85)
                     powerUpThrusters(thrustTmForwardList, 15f);
                 else if (velocityShip <= maxSpeed * .98)
