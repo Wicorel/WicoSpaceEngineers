@@ -19,7 +19,7 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
 
-        int iMode = 0;
+        int iMode = -1;
 
         const int MODE_IDLE = 0;
         const int MODE_SEARCH = 1; // old search method..
