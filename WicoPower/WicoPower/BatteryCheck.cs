@@ -91,6 +91,7 @@ namespace IngameScript
             float totalCharge = 0;
             bool bFoundRecharging = false;
             float f1;
+//            Echo("BC():" + batteryList.Count + " batteries");
 
             if (batteryList.Count < 1) initBatteries();
             if (batteryList.Count < 1) return false;
