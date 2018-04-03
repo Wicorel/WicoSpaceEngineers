@@ -1,4 +1,10 @@
-﻿void Main(string sArgument)
+﻿//V 2.3 Mar 14 2018
+
+
+MyDefinitionId oxygenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Oxygen");
+MyDefinitionId hydrogenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
+
+void Main(string sArgument)
 {
     List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
     IMyTextPanel screen = (IMyTextPanel)GridTerminalSystem.GetBlockWithName("LCD Test IMyTerminalBlock");
@@ -67,15 +73,18 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
     values.Append("DisplayNameText =" + unit.DisplayNameText.ToString() + "\n");
     values.Append("\nActions:\n");
 
+    Echo(resultList.Count.ToString());
     for (int i = 0; i < resultList.Count; i++)
     {
         StringBuilder temp = new StringBuilder();
+        Echo(resultList[i].Id.ToString());
+        Echo(resultList[i].Name.ToString());
         values.Append(resultList[i].Id + ":" + resultList[i].Name + "(");
         if (resultList[i].Id.Length == 0)
             resultList[i].WriteValue(unit, temp);
         else
             unit.GetActionWithName(resultList[i].Id.ToString()).WriteValue(unit, temp);
-
+        Echo("Temp=" + temp.ToString());
         values.Append(temp.ToString());
         values.Append(")\n");
     }
@@ -129,7 +138,6 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
                 }
             }
         }
-
 
         values.AppendLine();
     }
@@ -202,6 +210,28 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
 
         values.Append("\n");
     }
+    if (unit is IMyGasTank)
+    {
+        IMyGasTank imgt = unit as IMyGasTank;
+        values.Append("\nIMyGasTank");
+        values.Append("\n AutoRefillBottles=" + imgt.AutoRefillBottles.ToString());
+        values.Append("\n Capacity=" + imgt.Capacity.ToString());
+        values.Append("\n FilledRatio=" + imgt.FilledRatio.ToString());
+        values.Append("\n Stockpile=" + imgt.Stockpile.ToString());
+        values.Append("\n");
+    }
+    if (unit is IMyThrust)
+    {
+        IMyThrust mythruster = unit as IMyThrust;
+        values.Append("\nIMyThrust");
+        values.Append("\n ThrustOverride=" + mythruster.ThrustOverride.ToString() + " newtons");
+        values.Append("\n CurrentThrust=" + mythruster.CurrentThrust.ToString() + " newtons");
+        values.Append("\n GridThrustDirection=" + mythruster.GridThrustDirection.ToString());
+        values.Append("\n MaxEffectiveThrust=" + mythruster.MaxEffectiveThrust.ToString() + " newtons");
+        values.Append("\n MaxThrust=" + mythruster.MaxThrust.ToString() + " newtons");
+        values.Append("\n ThrustOverridePercentage=" + mythruster.ThrustOverridePercentage.ToString() + " 0->1 %");
+        values.Append("\n");
+    }
     if (unit is IMyReactor)
     {
         IMyReactor ipp = unit as IMyReactor;
@@ -237,7 +267,7 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         IMyMotorSuspension ipp = unit as IMyMotorSuspension;
         values.Append("\nIMyMotorSuspension");
         values.Append("\n Brake=" + ipp.Brake.ToString());
-        values.Append("\n Damping=" + ipp.Damping.ToString());
+//        values.Append("\n Damping=" + ipp.Damping.ToString()); Removed 1.186
         values.Append("\n Friction=" + ipp.Friction.ToString());
         values.Append("\n Height=" + ipp.Height.ToString());
         values.Append("\n InvertSteer=" + ipp.InvertSteer.ToString());
@@ -249,10 +279,10 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n Propulsion=" + ipp.Propulsion.ToString());
         values.Append("\n SteerAngle=" + ipp.SteerAngle.ToString());
         values.Append("\n Steering=" + ipp.Steering.ToString());
-        values.Append("\n SteerReturnSpeed=" + ipp.SteerReturnSpeed.ToString());
-        values.Append("\n SteerSpeed=" + ipp.SteerSpeed.ToString());
+        //        values.Append("\n SteerReturnSpeed=" + ipp.SteerReturnSpeed.ToString()); Removed 1.186
+        //        values.Append("\n SteerSpeed=" + ipp.SteerSpeed.ToString()); Removed 1.186
         values.Append("\n Strength=" + ipp.Strength.ToString());
-        values.Append("\n SuspensionTravel=" + ipp.SuspensionTravel.ToString());
+        //        values.Append("\n SuspensionTravel=" + ipp.SuspensionTravel.ToString()); Removed 1.186
         values.Append("\n");
     }
     if (unit is IMyMotorStator)
@@ -374,16 +404,6 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n RemainingBlocks=" + io.RemainingBlocks.ToString());
          values.Append("\n");
    }
-    if (unit is IMyThrust)
-    {
-        values.Append("\nIMyThrust");
-
-        IMyThrust io = unit as IMyThrust;
-        values.Append("\n ThrustOverride=" + io.ThrustOverride.ToString());
-        float maxThrust = io.GetMaximum<float>("Override");
-        values.Append("\n MaxThrustOverride=" + maxThrust.ToString());
-         values.Append("\n");
-   }
     if (unit is IMyGyro)
     {
         values.Append("\nIMyGyro");
@@ -409,8 +429,6 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
          values.Append("\n");
    }
 
-
-
     Echo("Accepted resources:");
     values.Append("\nAccepted resources:");
     MyResourceSinkComponent sink;
@@ -431,7 +449,7 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
             isPoweredBy=sink.IsPoweredByType(list[j]);
             maxRequiredInput=sink.MaxRequiredInputByType(list[j]);
 
-            values.Append("\n Current=" + currentInput.ToString() + " Max=" + maxRequiredInput.ToString() + " Is=" + isPoweredBy.ToString());
+            values.Append("\n Current=" + currentInput.ToString() + " Max=" + maxRequiredInput.ToString() + " PoweredBy=" + isPoweredBy.ToString());
 
         }
     }
@@ -455,13 +473,18 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n Current=" + currentOutput.ToString() + " Max=" + maxOutput.ToString() );
 
         /*
-        var list = source.ResourceTypes;
+        var list = source.ResourceTypes; // PROHIBITED
         for (int j = 0; j < list.Count; ++j)
         {
             values.Append("\n " + list[j].SubtypeId.ToString());
             Echo(list[j].SubtypeId.ToString());
         }
         */
+        float o2 = source.DefinedOutputByType(oxygenDefId);
+        float h2 = source.DefinedOutputByType(hydrogenDefId);
+        values.Append("\n O2=" + o2.ToString() + " H2=" + h2.ToString());
+//        values.Append("\n Source:"+source.Group.ToString()); Prohibited
+        
     }
     else
     {
