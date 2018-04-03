@@ -63,91 +63,50 @@ namespace IngameScript
             BaseDeserialize();
         }
 
-        string sLastBaseLoad = "";
-
         void BaseSerialize()
         {
             if (iniWicoCraftSave == null) return;
 
-            string sb="";
-            sb += baseList.Count + "\n";
-            for (int i = 0; i < baseList.Count; i++)
-            {
-                sb += baseList[i].baseId.ToString() + "\n";
-                sb += baseList[i].baseName + "\n";
-                sb += Vector3DToString(baseList[i].position) + "\n";
-                sb += baseList[i].bJumpCapable.ToString() + "\n";
-            }
-            iniWicoCraftSave.WriteSection(sBaseSavedListSection, sb);
+            iniWicoCraftSave.SetValue(sBaseSavedListSection, "count", baseList.Count);
 
+            for (int i1 = 0; i1 < baseList.Count; i1++)
+            {
+                iniWicoCraftSave.SetValue(sBaseSavedListSection, "ID" + i1.ToString(), baseList[i1].baseId);
+                iniWicoCraftSave.SetValue(sBaseSavedListSection, "name" + i1.ToString(), baseList[i1].baseName);
+                iniWicoCraftSave.SetValue(sBaseSavedListSection, "position" + i1.ToString(), baseList[i1].position);
+                iniWicoCraftSave.SetValue(sBaseSavedListSection, "Jumpable" + i1.ToString(), baseList[i1].bJumpCapable);
+            }
         }
 
         int BaseDeserialize()
         {
-//            Echo("BD()");
             if (iniWicoCraftSave == null)
             {
                 return -2;
             }
 
- //           string sSection = iniWicoCraftSave.GetSection(sBaseSection);
-
-//            Echo("BD():A");
-            //            string[] atheStorage = sSection.Split('\n');
-            string sBaseSave= iniWicoCraftSave.GetSection(sBaseSavedListSection);
-            string[] atheStorage = iniWicoCraftSave.GetLines(sBaseSavedListSection);
-            //            Echo("BD():B");
-            if (sBaseSave == sLastBaseLoad)
-            {
-                return -3; // no changes in saved info.
-            }
-
-            sLastBaseLoad = sBaseSave;
-
-            double x1, y1, z1;
-            int iLine = 0;
-            /*
-            // Trick using a "local method", to get the next line from the array `atheStorage`.
-            Func<string> getLine = () =>
-            {
-                return (iLine >= 0 && atheStorage.Length > iLine ? atheStorage[iLine++] : null);
-            };
-            */
             int iCount = -1;
-            if (atheStorage.Length < 2)
-                return -1; // nothing to parse
-//            Echo("BD():C");
-//            Echo(atheStorage.Count() + " Lines");
+            long eId = 0;
+            string sBaseName = "";
+            Vector3D position = new Vector3D();
+            bool bJumpCapable = false;
 
-            for (int j0 = 0; j0 < atheStorage.Count(); j0++)
-                Echo(atheStorage[j0]);
+            iniWicoCraftSave.GetValue(sBaseSavedListSection, "count", ref iCount);
 
-//            Echo(atheStorage[iLine]);
-//            Echo("total bases=" + iCount);
-
-            iCount = Convert.ToInt32(atheStorage[iLine++]);
-
-            for (int j1 = 0; j1 < iCount && j1<atheStorage.Count(); j1++)
+            for (int j1 = 0; j1 < iCount; j1++)
             {
-                                Echo("#="+j1);
+                iniWicoCraftSave.GetValue(sBaseSavedListSection, "ID" + j1.ToString(), ref eId);
+                iniWicoCraftSave.GetValue(sBaseSavedListSection, "name" + j1.ToString(), ref sBaseName);
+                iniWicoCraftSave.GetValue(sBaseSavedListSection, "position" + j1.ToString(), ref position);
+                iniWicoCraftSave.GetValue(sBaseSavedListSection, "Jumpable" + j1.ToString(), ref bJumpCapable);
 
-                long eId;
-                                Echo(atheStorage[iLine]);
-                eId = Convert.ToInt64(atheStorage[iLine++]);
-
-                string sBaseName=atheStorage[iLine++];
-
-                Vector3D position;
-                ParseVector3d(atheStorage[iLine++], out x1, out y1, out z1);
-                position = new Vector3D(x1, y1, z1);
-
-                bool bJumpCapable = atheStorage[iLine++].ToLower().Contains("true") ? true : false;
-
-                BaseInfo b1 = new BaseInfo();
-                b1.baseId = eId;
-                b1.baseName = sBaseName;
-                b1.position = position;
-                b1.bJumpCapable = bJumpCapable;
+                BaseInfo b1 = new BaseInfo
+                {
+                    baseId = eId,
+                    baseName = sBaseName,
+                    position = position,
+                    bJumpCapable = bJumpCapable
+                };
 
                 baseList.Add(b1);
             }
