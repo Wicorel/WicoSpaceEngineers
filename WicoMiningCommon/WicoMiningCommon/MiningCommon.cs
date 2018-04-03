@@ -31,10 +31,6 @@ namespace IngameScript
 
         bool bMiningWaitingCargo = false;
 
-
-
-
-
         Vector3D vInitialAsteroidContact;
         Vector3D vInitialAsteroidExit;
         Vector3D vLastAsteroidContact;
@@ -108,6 +104,31 @@ namespace IngameScript
             bValidAsteroid = false;
             miningAsteroidID = -1;
         }
+
+        void MinerProcessScan(MyDetectedEntityInfo mydei)
+        {
+            if (mydei.IsEmpty())
+            {
+                return;
+            }
+            addDetectedEntity(mydei);
+            if (mydei.Type == MyDetectedEntityType.Asteroid)
+            {
+                AsteroidAdd(mydei);
+                if (!bValidAsteroid)
+                {
+                    bValidAsteroid = true;
+                    vTargetAsteroid = mydei.Position;
+                    //                currentAst.EntityId = mydei.EntityId;
+                    //                currentAst.BoundingBox = mydei.BoundingBox;
+                    if (mydei.HitPosition != null) vExpectedAsteroidExit = (Vector3D)mydei.HitPosition - shipOrientationBlock.GetPosition();
+                    else vExpectedAsteroidExit = vTargetAsteroid - shipOrientationBlock.GetPosition();
+                    vExpectedAsteroidExit.Normalize();
+                    bValidExit = true;
+                }
+            }
+        }
+
 
     }
 }
