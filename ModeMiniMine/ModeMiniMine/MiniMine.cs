@@ -18,16 +18,6 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        /*
-        Vector3D vDockAlign;
-        bool bDoDockAlign = false;
-        Vector3D vDock;
-        Vector3D vLaunch1;
-        Vector3D vHome;
-        bool bValidDock = false;
-        bool bValidLaunch1 = false;
-        bool bValidHome = false;
-        */
 
         /*
          * 0 Master Init
@@ -66,16 +56,17 @@ namespace IngameScript
          *     move forward until close.  then ->31
          *     
          *     130 far travel to asteroid.
+         *     Use NAV
          *     Arrive->135
-         *     Collision ->140
+         *     [OBS] Collision ->140
          *     135 We have arrived from far travel. Await slower movement ->120
          *     
-         *     140 Collision during far travel ->150
-         *     150 avoid collision during far travel. 
+         *     [OBS]140 Collision during far travel ->150
+         *     [OBS]150 avoid collision during far travel. 
          *      Arrive ->130 
                 Collision ->160
 
-            160 2nd collision. 
+            [OBS]160 2nd collision. 
                 Stop, ->MODE_ATTENTION
          *     
          *     
@@ -93,6 +84,8 @@ namespace IngameScript
 //        long miningAsteroidID = -1;
 
         bool bValidExit = false;
+
+        bool bBoringOnly = false;
 
 //        QuadrantCameraScanner miningfrontScanner;
 //        QuadrantCameraScanner miningbackScanner;
@@ -132,12 +125,17 @@ namespace IngameScript
             if (bValidAsteroid)
                 debugGPSOutput("Pre-Valid Ast", vTargetAsteroid);
 //            if (miningAsteroidID > 0)
-                Echo("Our Asteroid=" + miningAsteroidID.ToString());
+//                Echo("Our Asteroid=" + miningAsteroidID.ToString());
 
             //            if(vExpectedExit.AbsMax()>.5)
             {
 //                Vector3D vT = shipOrientationBlock.GetPosition() + vExpectedExit * 150;
 //                debugGPSOutput("ExpectedExit", vT);
+            }
+            if (current_state > 0)
+            {
+                // only need to do these like once per second. or if something major changes.
+                OreDoCargoCheck();
             }
             switch (current_state)
             {
@@ -151,8 +149,9 @@ namespace IngameScript
                     ResetMotion();
                     //                    turnDrillsOff();
                     turnEjectorsOff();
+                    OreDoCargoCheck(true); // init ores to what's currently in inventory
 
-                    current_state = 10;
+ //                   current_state = 10;
                     bWantFast = true;
 
 /*                    if (!HasDrills())
@@ -165,10 +164,21 @@ namespace IngameScript
                     {
                         StatusLog(OurName + ":" + moduleName + " Find Ore: Not Enough Sensors!", textLongStatus, true);
                         setMode(MODE_ATTENTION);
+                        return;
                     }
                     sensorsList[0].DetectAsteroids = true;
                     sensorsList[1].DetectAsteroids = true;
 
+                    // Can we turn in our own tunnel?
+                    if (shipDim.LengthInMeters() > shipDim.WidthInMeters() && shipDim.LengthInMeters() > shipDim.HeightInMeters())
+                        bBoringOnly = true;
+                    else bBoringOnly = false;
+
+                    if (miningAsteroidID <= 0) // no known asteroid
+                    {
+                        // check if we know one
+                        miningAsteroidID = AsteroidFindNearest();
+                    }
                     if (miningAsteroidID > 0) // return to a known asteroid
                     {
                         vTargetAsteroid = AsteroidGetPosition(miningAsteroidID);
@@ -179,7 +189,36 @@ namespace IngameScript
 
                         current_state = 120;
                     }
-                    else setMode(MODE_ATTENTION); // no asteroid to mine.
+                    else
+                    {
+                        StartScans(iMode,5); // try again after a scan
+                    }
+
+                    break;
+                case 5:
+                    // we have done a scan.  check for found asteroids
+
+                    // TODO: pretty much duplicate code from just above.
+                    if (miningAsteroidID <= 0) // no known asteroid
+                    {
+                        // check if we know one
+                        miningAsteroidID = AsteroidFindNearest();
+                    }
+                    if(miningAsteroidID > 0)
+                    {
+                        // we have a valid asteroid.
+                        vTargetAsteroid = AsteroidGetPosition(miningAsteroidID);
+
+                        bValidAsteroid = true;
+                        vExpectedAsteroidExit = vTargetAsteroid - shipOrientationBlock.GetPosition();
+                        vExpectedAsteroidExit.Normalize();
+
+                        current_state = 120;
+                    }
+                    else
+                    {
+                        setMode(MODE_ATTENTION); // no asteroid to mine.
+                    }
 
                     break;
                 case 10:
@@ -279,6 +318,8 @@ namespace IngameScript
                     { // active mining
                       // TODO: check just the front sensor and we are 'exiting' if no asteroid active.
                       //
+                        Echo("Actively Mining forward");
+                        if (bBoringOnly) Echo("Boring Miner");
                         sb = sensorsList[0];
                         sb2 = sensorsList[1];
                         bool bLocalAsteroid = false;
@@ -290,7 +331,7 @@ namespace IngameScript
                         SensorActive(sb2, ref bSourroundAsteroid, ref bLarge, ref bSmall);
 
                         aSensors = activeSensors();
-                        Echo(aSensors.Count + " Active Sensors");
+ //                       Echo(aSensors.Count + " Active Sensors");
                         for (int i = 0; i < aSensors.Count; i++)
                         {
                             IMySensorBlock s = aSensors[i] as IMySensorBlock;
@@ -429,10 +470,13 @@ namespace IngameScript
                     break;
                 case 110:
                     { // asteroid NOT in front. big sensor search for asteroids in area
+                        Echo("set big sensors");
+
                         sleepAllSensors();
                         setSensorShip(sensorsList[0], 50, 50, 50, 50, 50, 50);
                         miningElapsedMs = 0;
                         current_state = 111;
+                        Echo("current_State now=" + current_state.ToString());
                     }
                     break;
                 case 111:
@@ -599,12 +643,24 @@ namespace IngameScript
                     }
                     break;
                 case 130:
+                    {
+                        // start NAV travel
+                        NavGoTarget(vTargetAsteroid, iMode, 135);
+                    }
+                    break;
+                    /*
+                case 130:
                     { // far travel to asteroid. use doTravelMovement
+
+                        // to reduce code size, we should require NAV module and then resume on MODE_ARRIVEDTARGET
+                        // need some kind of contract for that system...
+
                         Echo("Far travel to asteroid");
 
                         doTravelMovement(vTargetAsteroid, 45, 135, 140, true);
                         break;
                     }
+                    */
                 case 135:
                     {// we have 'arrived' from far travel
                         // wait for motion to slow
@@ -613,6 +669,7 @@ namespace IngameScript
                         ResetMotion();
                         break;
                     }
+                    /*
                 case 140:
                     {
                         ResetTravelMovement();
@@ -633,6 +690,7 @@ namespace IngameScript
                         setMode(MODE_ATTENTION);
                         break;
                     }
+                    */
                 case 300:
                     {
                         // we have exitted the asteroid.  Prepare for another run or to go dock
@@ -776,7 +834,7 @@ namespace IngameScript
             double maxThrust = calculateMaxThrust(thrustForwardList);
 
             Echo("effectiveMass=" + effectiveMass.ToString("N0"));
-            Echo("maxThrust=" + maxThrust.ToString("N0"));
+//            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
             double maxDeltaV = (maxThrust) / effectiveMass;
 
@@ -784,10 +842,11 @@ namespace IngameScript
             Echo("Cargo=" + cargopcent.ToString() + "%");
 
             Echo("velocity=" + velocityShip.ToString("0.00"));
-            Echo("#Sensors=" + sensorsList.Count);
-            Echo("width=" + shipDim.WidthInMeters().ToString("0.0"));
-            Echo("height=" + shipDim.HeightInMeters().ToString("0.0"));
-            Echo("length=" + shipDim.LengthInMeters().ToString("0.0"));
+            Echo("Boring=" + bBoringOnly.ToString());
+//            Echo("#Sensors=" + sensorsList.Count);
+//            Echo("width=" + shipDim.WidthInMeters().ToString("0.0"));
+//            Echo("height=" + shipDim.HeightInMeters().ToString("0.0"));
+//            Echo("length=" + shipDim.LengthInMeters().ToString("0.0"));
 
 //            IMyTextPanel txtPanel = getTextBlock("Sensor Report");
 //            StatusLog("clear", txtPanel);
@@ -807,13 +866,17 @@ namespace IngameScript
             switch (current_state)
             {
                 case 0: //0 - Master Init
+                    if (shipDim.LengthInMeters() > shipDim.WidthInMeters() && shipDim.LengthInMeters() > shipDim.HeightInMeters())
+                        bBoringOnly = true;
+                    else bBoringOnly = false;
+
                     current_state = 10;
                     ResetMotion();
                     //                    turnDrillsOff();
                     turnEjectorsOn();
                     if (sensorsList.Count < 2)
                     {
-                        StatusLog(OurName + ":" + moduleName + " Find Ore: Not Enough Sensors!", textLongStatus, true);
+                        StatusLog(OurName + ":" + moduleName + " Exit Asteroid: Not Enough Sensors!", textLongStatus, true);
                         setMode(MODE_ATTENTION);
                     }
                     break;
@@ -869,7 +932,12 @@ namespace IngameScript
                 case 30:
                     {
                         bool bAimed = false;
-                        bAimed = GyroMain("backward", vExpectedAsteroidExit, shipOrientationBlock);
+                        string sOrientation = "backward";
+                        if (bBoringOnly)
+                        {
+                            sOrientation = "forward";
+                        }
+                        bAimed = GyroMain(sOrientation, vExpectedAsteroidExit, shipOrientationBlock);
                         if (bAimed)
                         {
                             bWantMedium = true;
@@ -917,7 +985,7 @@ namespace IngameScript
         int iMMFWiggle = 0;
         void mineMoveForward(float fTarget, float fAbort)
         {
-            Echo("mMF " + iMMFWiggle.ToString());
+//            Echo("mMF " + iMMFWiggle.ToString());
             double maxThrust = calculateMaxThrust(thrustForwardList);
             //            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
@@ -926,14 +994,14 @@ namespace IngameScript
             double effectiveMass = myMass.PhysicalMass;
             //            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
             double maxDeltaV = (maxThrust) / effectiveMass;
-            Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+ //           Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
 
             float thrustPercent = (float)(fTarget / maxDeltaV);
-            Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
+//            Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
 
             if (velocityShip > fAbort)
             {
-                Echo("ABORT");
+ //               Echo("ABORT");
                 powerDownThrusters(thrustAllList);
                 iMMFWiggle = 0;
             }
@@ -941,14 +1009,14 @@ namespace IngameScript
             {
                 if (velocityShip < 0.5f)
                     iMMFWiggle++;
-                Echo("Push ");
+//                Echo("Push ");
                 powerUpThrusters(thrustForwardList, thrustPercent + iMMFWiggle);
 //                powerUpThrusters(thrustForwardList, 15f + iMMFWiggle);
             }
             else if(velocityShip<(fTarget*1.2))
             {
                 // we are around target. 90%<-current->120%
-                 Echo("Coast");
+//                 Echo("Coast");
                 iMMFWiggle /= 2;
                // turn off reverse thrusters and 'coast'.
                 powerDownThrusters(thrustBackwardList, thrustAll, true);
@@ -956,36 +1024,13 @@ namespace IngameScript
             }
             else
             { // above 120% target, but below abort
-                Echo("Coast2");
+//                Echo("Coast2");
                 iMMFWiggle /= 2;
                 powerUpThrusters(thrustForwardList, 1f); // coast
             }
 
         }
 
-        void MinerProcessScan(MyDetectedEntityInfo mydei)
-        {
-            if (mydei.IsEmpty())
-            {
-                return;
-            }
-            addDetectedEntity(mydei);
-            if (mydei.Type == MyDetectedEntityType.Asteroid)
-            {
-                AsteroidAdd(mydei);
-                if (!bValidAsteroid)
-                {
-                    bValidAsteroid = true;
-                    vTargetAsteroid = mydei.Position;
-                    //                currentAst.EntityId = mydei.EntityId;
-                    //                currentAst.BoundingBox = mydei.BoundingBox;
-                    if (mydei.HitPosition != null) vExpectedAsteroidExit = (Vector3D)mydei.HitPosition - shipOrientationBlock.GetPosition();
-                    else vExpectedAsteroidExit = vTargetAsteroid - shipOrientationBlock.GetPosition();
-                    vExpectedAsteroidExit.Normalize();
-                    bValidExit = true;
-                }
-            }
-        }
 
     }
 }
