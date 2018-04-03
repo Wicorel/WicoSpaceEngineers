@@ -24,12 +24,27 @@ namespace IngameScript
         string sBanner = "";
         UpdateFrequency ufFast = UpdateFrequency.Once; // default value for "Fast" for this module
 
+        /// <summary>
+        /// Do we support submodules?
+        /// </summary>
         bool bSubModules = true;
+
+        /// <summary>
+        /// Display the init text as craft Operation
+        /// </summary>
         bool bCraftOperation = true;
+        /// <summary>
+        /// Dump the UpdateType. Settable in CustomData.  This is default.
+        /// </summary>
+        bool bDebugUpdate = false;
 
-
-
+        /// <summary>
+        /// We are a MAIN module, not sub-module
+        /// </summary>
         bool bSubModule = false;
+
+        double dSubmoduleTriggerWait = 1; //seconds between triggers
+        double dSubmoduleTriggerLast = -1;
 
         float fMaxWorldMps = 100;
         string sWorldSection = "WORLD";
@@ -38,13 +53,17 @@ namespace IngameScript
             iNIHolder.GetValue(sWorldSection, "MaxWorldMps", ref fMaxWorldMps, true);
         }
 
+        string sMainSection = "WICOCRAFT";
         public Program()
         {
             doModuleConstructor();
 
             INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
 
-            iniCustomData.GetValue(OurName, "EchoOn", ref bEchoOn, true);
+            iniCustomData.GetValue(sMainSection, "EchoOn", ref bEchoOn, true);
+            iniCustomData.GetValue(sMainSection, "DebugUpdate", ref bDebugUpdate, true);
+            iniCustomData.GetValue(sMainSection, "SubModules", ref bSubModules, true);
+            iniCustomData.GetValue(sMainSection, "SubmoduleTriggerWait", ref dSubmoduleTriggerWait, true);
 
             _oldEcho = Echo;
             Echo = MyEcho;
@@ -52,6 +71,7 @@ namespace IngameScript
             WorldInitCustomData(iniCustomData);
             GridsInitCustomData(iniCustomData);
             LoggingInitCustomData(iniCustomData);
+            TimersInitCustomData(iniCustomData);
 
             ModuleInitCustomData(iniCustomData);
             if (iniCustomData.IsDirty)
@@ -110,7 +130,8 @@ namespace IngameScript
         void Main(string sArgument, UpdateType ut)
         {
            Echo(sBanner + tick());
- //           Echo(ut.ToString());
+            if(bDebugUpdate)  Echo(ut.ToString());
+
             bWantFast = false;
             bWantMedium = false;
             //ProfilerGraph();
@@ -238,37 +259,54 @@ namespace IngameScript
                     velocityShip = ((IMyShipController)shipOrientationBlock).GetShipSpeed();
 
                     Vector3D vNG = ((IMyShipController)shipOrientationBlock).GetNaturalGravity();
-                    //			Vector3D vNG = ((IMyRemoteControl)shipOrientationBlock).GetNaturalGravity();
                     double dLength = vNG.Length();
                     dGravity = dLength / 9.81;
-
-                    /*
-                    if (dGravity > 0)
-                    {
-                        double elevation = 0;
-
-                        ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
-                        Echo("Elevation=" + elevation.ToString("0.00"));
-
-                        double altitude = 0;
-                        ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Sealevel, out altitude);
-                        Echo("Sea Level=" + altitude.ToString("0.00"));
-
-                    }
-                    */
-
                 }
                 else
                 {
                     dGravity = -1.0;
                 }
+                if (
+                    (ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0
+                    || (ut & (UpdateType.Mod)) > 0 // script run by a mod
+                    || (ut & (UpdateType.Script)) > 0 // this pb run by another script (PB)
+                    )
+                {
+                    // pay attention to argument
+                    if (moduleProcessArguments(sArgument))
+                    {
+                        Serialize();
+                        UpdateAllPanels();
+                        return;
+                    }
 
+                }
+                else if ((ut & (UpdateType.Antenna)) > 0)
+                {
+                    // antenna message
+                    if (!moduleProcessAntennaMessage(sArgument))
+                    {
+                        antReceive(sArgument);
+                    }
+                    Serialize();
+                    doTriggerMain(); // run ourselves again
+                    UpdateAllPanels();
+                    return;
+                }
+                else
+                {
+                    // it should be one of the update types...
+                    //            if ((ut & (UpdateType.Once | UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100)) > 0)
+                    sArgument = ""; // else ignore argument
+                }
+
+                /*
                 if (processArguments(sArgument))
                 {
                     UpdateAllPanels();
                     return;
                 }
-
+                */
                moduleDoPreModes();
 
                 doModes();
@@ -276,17 +314,35 @@ namespace IngameScript
             if(bSubModules) Serialize();
 
             //            if ((anchorPosition == null || SaveFile == null ))
-            if ((SaveFile == null))
+            if (bSubModules)
             {
-                if (bSubModules) Echo("Cannot use sub-modules; missing controller and/or SaveFile");
-            }
-            else
-            {
-                if (init || bWasInit)
+                if ((SaveFile == null))
                 {
-                    doSubModuleTimerTriggers();
+                    Echo("Cannot use sub-modules; missing controller and/or SaveFile");
+                }
+                else
+                {
+                    if (
+                    (ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0
+                    || (ut & (UpdateType.Mod)) > 0 // script run by a mod
+                    || (ut & (UpdateType.Script)) > 0 // this pb run by another script (PB)
+                      ||  dSubmoduleTriggerLast > dSubmoduleTriggerWait
+                        // || init // always run after init done
+                        || bWasInit // run first time after init
+                        )
+                    {
+                        Echo("Trigger sub-module!");
+                        dSubmoduleTriggerLast = 0;
+                        doSubModuleTimerTriggers();
+                    }
+                    else
+                    {
+                        Echo("Delay for sub-module trigger");
+                        dSubmoduleTriggerLast+= Runtime.TimeSinceLastRun.TotalSeconds;
+                    }
                 }
             }
+            else Echo("Submodules turned off");
 
             if (bWantFast)
             {
@@ -299,6 +355,7 @@ namespace IngameScript
             }
             if (bWantMedium)
             {
+                Echo("MEDIUM");
                 Runtime.UpdateFrequency |= UpdateFrequency.Update10;
             }
             else
