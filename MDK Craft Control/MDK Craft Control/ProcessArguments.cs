@@ -22,7 +22,7 @@ namespace IngameScript
 
         // multi-arg
 
-        bool processArguments(string sArgument)
+        bool moduleProcessArguments(string sArgument)
         {
             string[] varArgs = sArgument.Trim().Split(';');
 
@@ -99,6 +99,7 @@ namespace IngameScript
                     else Echo("No Ship Controller found");
 
                 }
+                /*
                 else if (args[0] == "namecameras")
                 {
                     nameCameras(cameraForwardList, "Front");
@@ -108,6 +109,7 @@ namespace IngameScript
                     nameCameras(cameraLeftList, "Left");
                     nameCameras(cameraRightList, "Right");
                 }
+                */
                 else if (args[0] == "wcct" || args[0] == "")
                 {
                     // do nothing special
@@ -123,6 +125,10 @@ namespace IngameScript
                 }
             }
             return false; // keep processing in main
+        }
+        bool moduleProcessAntennaMessage(string sArgument)
+        {
+            return false;
         }
 
     }

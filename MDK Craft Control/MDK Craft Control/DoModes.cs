@@ -34,7 +34,7 @@ namespace IngameScript
             //           Echo("Grid Mass=" + gridBaseMass);
 
             if (iMode == MODE_IDLE) doModeIdle();
-            if (iMode == MODE_DOSCAN) doModeScans();
+//            if (iMode == MODE_DOSCAN) doModeScans();
             else if (iMode == MODE_ATTENTION)
             {
                 StatusLog("clear", textPanelReport);

@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Master";
-        string sVersion = "3.4B";
+        string sVersion = "3.4D";
 
         const string velocityFormat = "0.00";
 
@@ -35,6 +35,9 @@ namespace IngameScript
 
         void moduleDoPreModes()
         {
+
+
+
             StatusLog("clear", textPanelReport);
             StatusLog("clear", gpsPanel);
 

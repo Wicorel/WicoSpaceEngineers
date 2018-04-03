@@ -151,4 +151,10 @@
 * 
 * 3.4B turn off auto-pirate mode.
 * 
+* 3.4C options for timer names
+* options for debugupdate
+* options for submodule trigger rate
+* 
+* 3.4D Mar 29 2018 Current Source
+* removed ModeScans/MODE_DOSCAN
 */

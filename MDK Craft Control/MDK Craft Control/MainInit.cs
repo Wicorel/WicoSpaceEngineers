@@ -31,7 +31,7 @@ namespace IngameScript
             ConnectorInitCustomData(iniCustomData);
             ThrustersInitCustomData(iniCustomData);
             GyroInitCustomData(iniCustomData);
-            CamerasInitCustomData(iniCustomData);
+//            CamerasInitCustomData(iniCustomData);
             GearsInitCustomData(iniCustomData);
             PowerInitCustomData(iniCustomData);
             CargoInitCustomData(iniCustomData);
@@ -134,7 +134,7 @@ namespace IngameScript
                         sInitResults += drillInit();
                         break;
                     case 17:
-                        sInitResults += camerasensorsInit(shipOrientationBlock);
+//                        sInitResults += camerasensorsInit(shipOrientationBlock);
                         break;
                     case 18:
                         sInitResults += ejectorsInit();

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mdk version="1.0.12">
+<mdk version="1.1.1">
   <gamebinpath enabled="no">c:\program files (x86)\steam\SteamApps\common\SpaceEngineers\Bin64</gamebinpath>
   <installpath>C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\xtb2ibgp.rb3</installpath>
   <outputpath>C:\Users\saett\AppData\Roaming\SpaceEngineers\IngameScripts\local</outputpath>
