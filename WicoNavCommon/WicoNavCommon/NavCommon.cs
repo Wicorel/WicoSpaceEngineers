@@ -26,6 +26,9 @@ namespace IngameScript
         /// </summary>
         double arrivalDistanceMin = 50;
 
+        int NAVArrivalMode = MODE_ARRIVEDTARGET;
+        int NAVArrivalState = 0;
+
         //        Vector3D vNavLaunch;
         //        bool bValidNavLaunch = false;
         //        Vector3D vNavHome;
@@ -60,6 +63,8 @@ namespace IngameScript
             iNIHolder.SetValue(sNavSection, "dStartShip", dtNavStartShip);
             iNIHolder.SetValue(sNavSection, "shipSpeedMax", shipSpeedMax);
             iNIHolder.SetValue(sNavSection, "arrivalDistanceMin", arrivalDistanceMin);
+            iNIHolder.SetValue(sNavSection, "NAVArrivalMode", NAVArrivalMode);
+            iNIHolder.SetValue(sNavSection, "NAVArrivalState", NAVArrivalState);
         }
 
         void NavDeserialize(INIHolder iNIHolder)
@@ -72,6 +77,8 @@ namespace IngameScript
             iNIHolder.GetValue(sNavSection, "dStartShip", ref dtNavStartShip, true);
             iNIHolder.GetValue(sNavSection, "shipSpeedMax", ref shipSpeedMax, true);
             iNIHolder.GetValue(sNavSection, "arrivalDistanceMin", ref arrivalDistanceMin, true);
+            iNIHolder.GetValue(sNavSection, "NAVArrivalMode", ref NAVArrivalMode, true);
+            iNIHolder.GetValue(sNavSection, "NAVArrivalState", ref NAVArrivalState, true);
         }
 
         List<IMyBeacon> navDebugBeacons = new List<IMyBeacon>();
@@ -88,6 +95,17 @@ namespace IngameScript
             }
         }
 
+        //TODO: Add istarget asteroid?
+        void NavGoTarget(Vector3D vTarget, int modeArrival=MODE_ARRIVEDTARGET, int stateArrival=0, double DistanceMin=50)
+        {
+            vNavTarget = vTarget;
+            bValidNavTarget = true;
+            NAVArrivalMode = modeArrival;
+            NAVArrivalState = stateArrival;
+            arrivalDistanceMin = DistanceMin;
+            current_state = 0;
+            setMode(MODE_GOINGTARGET);
+        }
 
     }
 }
