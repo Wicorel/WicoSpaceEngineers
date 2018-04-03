@@ -403,7 +403,7 @@ namespace IngameScript
 
 
         // return true if message processed, else false.
-        bool processDockMessage(string sReceivedMessage)
+        bool DockProcessMessage(string sReceivedMessage)
         {
             string[] aMessage = sReceivedMessage.Trim().Split(':');
             if (aMessage.Length > 1)
