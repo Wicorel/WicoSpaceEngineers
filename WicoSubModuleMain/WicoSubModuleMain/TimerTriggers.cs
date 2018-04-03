@@ -18,15 +18,24 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        const string sFastTimer="[WCCT]";
-        const string sSubModuleTimer = "[WCCS]";
-        const string sMainTimer = "[WCCM]";
+        string sFastTimer="[WCCT]";
+        string sSubModuleTimer = "[WCCS]";
+        string sMainTimer = "[WCCM]";
 
+        // 03182018 Added check for enabled. Added CustomData
         // added doTriggerMain() for sub-module.
         // 11/06 return true if timer was found and triggered
         //03/27: Added caching for performance
-        #region triggers
 
+        string sTimersSection = "WICOTIMERS";
+        void TimersInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sTimersSection, "FastTimer", ref sFastTimer, true);
+            iNIHolder.GetValue(sTimersSection, "SubModuleTimer", ref sSubModuleTimer, true);
+            iNIHolder.GetValue(sTimersSection, "MainTimer", ref sMainTimer, true);
+        }
+
+        // cache the timer blocks
         Dictionary<string, List<IMyTerminalBlock>> dTimers = new Dictionary<string, List<IMyTerminalBlock>>();
 
         void initTimers()
@@ -63,14 +72,19 @@ namespace IngameScript
                 if (theTriggerTimer != null)
                 {
                     //            Echo("dSMT:" + blocks[i].CustomName);
-                    theTriggerTimer.ApplyAction("TriggerNow");
-                    bTriggered = true;
+                    if (theTriggerTimer.Enabled)
+                    {
+                        theTriggerTimer.Trigger();
+                        //                    theTriggerTimer.ApplyAction("TriggerNow");
+                        bTriggered = true;
+                    }
+                    else
+                    {
+                        Echo("Timer:" + theTriggerTimer.CustomName + " is OFF");
+                    }
                 }
             }
             return bTriggered;
         }
-
-        #endregion
-
     }
 }
