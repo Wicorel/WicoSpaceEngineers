@@ -552,7 +552,17 @@ namespace IngameScript
 //                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
                 antennaMaxPower(false);
                 sleepAllSensors();
-                setMode(MODE_ARRIVEDTARGET);
+
+                // set to desired mode and state
+                setMode(NAVArrivalMode);
+                current_state = NAVArrivalState;
+
+                // set up defaults for next run (in case they had been changed)
+                NAVArrivalMode = MODE_ARRIVEDTARGET;
+                NAVArrivalState = 0;
+                bGoOption = true; 
+
+//                setMode(MODE_ARRIVEDTARGET);
                 if(NAVEmulateOld)
                 {
                     var tList = GetBlocksContains<IMyTerminalBlock>("NAV:");
