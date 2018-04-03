@@ -113,4 +113,8 @@ Only write to panels at the end of script.
 3.4B
 Current Code Compile Mar 08 2018
 
+3.4C Current Code Compile Mar 28 2018
+Redo BASE serilization to be key=value
+Use NAV module for long-range travel
+
 */

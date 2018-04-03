@@ -88,10 +88,13 @@ namespace IngameScript
             if (sReceivedMessage != "")
             {
                 Echo("Received Message=\n" + sReceivedMessage);
-//                sInitResults += "Received Message=\n" + sReceivedMessage;
+                //                sInitResults += "Received Message=\n" + sReceivedMessage;
 
                 if (BaseProcessMessages(sReceivedMessage))
+                {
+                    sReceivedMessage = ""; // we processed it.
                     return;
+                }
 
                 string[] aMessage = sReceivedMessage.Trim().Split(':');
 

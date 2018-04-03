@@ -32,7 +32,8 @@ namespace IngameScript
             CamerasInitCustomData(iniCustomData);
             SensorInitCustomData(iniCustomData);
             PowerInitCustomData(iniCustomData);
-//            CargoInitCustomData(iniCustomData);
+            //            CargoInitCustomData(iniCustomData);
+            NavInitCustomData(iniCustomData);
 
             DockingInitCustomData(iniCustomData);
             RelaunchInitCustomData(iniCustomData);
@@ -69,6 +70,7 @@ namespace IngameScript
                         break;
                     case 3:
                         sInitResults += SerializeInit();
+                        Deserialize();
                         break;
                     case 4:
                         sInitResults += DefaultOrientationBlockInit();
