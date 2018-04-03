@@ -37,7 +37,7 @@ namespace IngameScript
                 case 400:
                     { // init camera scan for asteroids
                         ResetMotion();
-                        turnEjectorsOn();
+ //                       turnEjectorsOn();
                         sleepAllSensors();
                         scaningElapsedMs = 0;
 
