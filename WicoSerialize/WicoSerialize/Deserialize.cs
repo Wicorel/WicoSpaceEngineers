@@ -47,7 +47,10 @@ namespace IngameScript
             iniWicoCraftSave.GetValue(sSerializeSection, "SaveID", ref SavedTextPanelID);
 
             if (DifferentSaveFile()) // if the cached ID does not match, we are a new ship. Do not load old saved info; re-init
+            {
                 iniWicoCraftSave.ParseINI("");
+
+            }
 
             ModuleDeserialize(iniWicoCraftSave);
 
@@ -64,9 +67,12 @@ namespace IngameScript
 
         bool DifferentSaveFile()
         {
-            if (SaveFile == null) return false;
-
-            if (SavedTextPanelID == (long)SaveFile.EntityId)
+            if (SaveFile == null || bSubModule) return false;
+            
+            if (
+                SavedTextPanelID <= 0 // we have loaded one from info
+                || SavedTextPanelID == (long)SaveFile.EntityId
+                )
                 return false;
             else
                 return true;
