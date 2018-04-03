@@ -21,7 +21,6 @@ namespace IngameScript
 
         List<AsteroidInfo> asteroidsInfo = new List<AsteroidInfo>();
 
-        string sLastAsteroidLoad = "";
         const string sAsteroidSection = "ASTEROIDS";
 
         public class AsteroidInfo
@@ -36,23 +35,14 @@ namespace IngameScript
             //            Echo("AS()");
             if (iniWicoCraftSave == null) return;
 
-            string S1 = ""; 
-            S1 += asteroidsInfo.Count + "\n";
-            for(int i=0;i<asteroidsInfo.Count;i++)
+            var count = asteroidsInfo.Count;
+            iniWicoCraftSave.SetValue(sAsteroidSection, "count", count);
+
+            for(int i1=0;i1<asteroidsInfo.Count;i1++)
             {
-                S1 += asteroidsInfo[i].EntityId.ToString() + "\n";
-                S1 += Vector3DToString(asteroidsInfo[i].BoundingBox.Min)+"\n";
-                S1 += Vector3DToString(asteroidsInfo[i].BoundingBox.Max) + "\n";
-            }
-//            Echo(sb);
-            if (sLastAsteroidLoad != S1)
-            {
-                iniWicoCraftSave.WriteSection(sAsteroidSection, S1);
-//                AsteroidSaveFile.WritePublicText(sb);
-            }
-            else
-            {
-//                if (bVerboseSerialize) Echo("Not saving AST: Same");
+                iniWicoCraftSave.SetValue(sAsteroidSection, "EntityId"+i1.ToString(), asteroidsInfo[i1].EntityId.ToString());
+                iniWicoCraftSave.SetValue(sAsteroidSection, "BBMin" + i1.ToString(), Vector3DToString(asteroidsInfo[i1].BoundingBox.Min));
+                iniWicoCraftSave.SetValue(sAsteroidSection, "BBMax" + i1.ToString(), Vector3DToString(asteroidsInfo[i1].BoundingBox.Max));
             }
         }
 
@@ -60,66 +50,27 @@ namespace IngameScript
         {
             if (iniWicoCraftSave == null) return;
 
-            string sAsteroidSave;
-            /*
-            if (AsteroidSaveFile == null)
-                sAsteroidSave = Storage;
-            else
-            */
-            //                sAsteroidSave = AsteroidSaveFile.GetPublicText();
-            sAsteroidSave = iniWicoCraftSave.GetSection(sAsteroidSection);
-//            sAsteroidSave = iniMiner.GetSection(sAsteroidSection);
-
-            if (sAsteroidSave.Length < 1)
-            {
-//                Echo("Saved information not available");
-                return;
-            }
-
-            if (sAsteroidSave == sLastAsteroidLoad)
-            {
-                return; // no changes in saved info.
-            }
+            int iCount = 0;
+            iniWicoCraftSave.GetValue(sAsteroidSection, "count", ref iCount);
 
             asteroidsInfo.Clear();
-            double x1, y1, z1;
 
-            sLastAsteroidLoad = sAsteroidSave;
-            string[] atheStorage = sAsteroidSave.Split('\n');
-
-            int iLine=0;
-            int iCount = -1;
-            if (atheStorage.Length < 2)
-                return; // nothing to parse
-
-//            Echo(atheStorage[iLine]);
-            iCount = Convert.ToInt32(atheStorage[iLine++]);
-//            Echo("total="+iCount);
-
-            for (int j=0;j<iCount;j++)
+            for (int j1=0;j1<iCount;j1++)
             {
-//                Echo("#="+j);
 
-                long eId;
-//                Echo(atheStorage[iLine]);
-                eId = Convert.ToInt64(atheStorage[iLine++]);
+                long eId=0;
+                iniWicoCraftSave.GetValue(sAsteroidSection, "EntityId" + j1.ToString(), ref eId);
 
-                BoundingBoxD box;
-//                Echo(atheStorage[iLine]);
-                ParseVector3d(atheStorage[iLine++], out x1, out y1, out z1);
-                box.Min = new Vector3D(x1, y1, z1);
+                BoundingBoxD box=new BoundingBoxD();
+                iniWicoCraftSave.GetValue(sAsteroidSection, "BBMin" + j1.ToString(), ref box.Min);
 
-//                Echo(atheStorage[iLine]);
-                ParseVector3d(atheStorage[iLine++], out x1, out y1, out z1);
-                box.Max = new Vector3D(x1, y1, z1);
+                iniWicoCraftSave.GetValue(sAsteroidSection, "BBMax" + j1.ToString(), ref box.Max);
 
                 AsteroidInfo ast = new AsteroidInfo();
                 ast.EntityId = eId;
                 ast.BoundingBox = box;
                 asteroidsInfo.Add(ast);
-//                Echo("----");
             }
-//            Echo("EOL");
         }
 
         void initAsteroidsInfo()
@@ -157,7 +108,6 @@ namespace IngameScript
                     antSend("WICO:AST:" + SaveFile.EntityId.ToString() + ":" + entityid.ToString() + ":" + Vector3DToString(box.Min) + ":" + Vector3DToString(box.Max));
                 }
             }
-
         }
 
         void AsteroidAdd(MyDetectedEntityInfo thisDetectedInfo, bool bTransmitAsteroid = true)
@@ -306,8 +256,6 @@ namespace IngameScript
             }
             return false;
         }
-
-
 
     }
 
