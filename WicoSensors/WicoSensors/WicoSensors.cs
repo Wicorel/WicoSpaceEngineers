@@ -78,10 +78,10 @@ namespace IngameScript
             }
         }
 
-        void setSensorShip(IMyTerminalBlock tb, float fLeft, float fRight, float fUp, float fDown, float fFront, float fBack)
+        void setSensorShip(IMyTerminalBlock tb1, float fLeft, float fRight, float fUp, float fDown, float fFront, float fBack)
         {
             // need to use world matrix to get orientation correctly
-            IMySensorBlock sb1 = tb as IMySensorBlock;
+            IMySensorBlock sb1 = tb1 as IMySensorBlock;
             if (sb1 == null) return;
             //		Echo(sb.CustomName);
             //	Echo(sb.Position.ToString());
