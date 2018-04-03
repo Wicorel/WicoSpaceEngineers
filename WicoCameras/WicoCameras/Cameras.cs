@@ -41,7 +41,6 @@ namespace IngameScript
         void CamerasInitCustomData(INIHolder iNIHolder)
         {
             iNIHolder.GetValue(sCameraSection, "CameraViewOnly", ref sCameraViewOnly, true);
-
         }
 
         bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
@@ -390,7 +389,7 @@ namespace IngameScript
                             }
                             if (bValidScan)
                             {
-                                _pg.sInitResults += "\nDoScan HIT!";
+//                                _pg.sInitResults += "\nDoScan HIT!";
                                 AddLocalEntity(lastDetectedInfo);
 //                                if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid)
 //                                    _pg.addAsteroid(lastDetectedInfo);
