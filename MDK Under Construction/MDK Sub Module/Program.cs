@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "UnderConstruction";
-        string sVersion = "3.4B";
+        string sVersion = "3.4C";
 
         const string velocityFormat = "0.00";
 
