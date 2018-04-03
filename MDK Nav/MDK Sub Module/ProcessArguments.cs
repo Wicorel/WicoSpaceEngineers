@@ -150,13 +150,16 @@ namespace IngameScript
                         //			shutdown(gyroList);
                         continue;
                     }
-                    vNavTarget = new Vector3D(x, y, z);
-                    bValidNavTarget = true;
+
+
+                    NavGoTarget(new Vector3D(x, y, z));
+                    //                    vNavTarget = new Vector3D(x, y, z);
+                    //                    bValidNavTarget = true;
                     if (args[0] == "W")
                         bGoOption = true;
                     else bGoOption = false;
 
-                    setMode(MODE_GOINGTARGET);
+                    //                   setMode(MODE_GOINGTARGET);
 
                 }
                 else if (args[0] == "S")

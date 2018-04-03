@@ -100,7 +100,14 @@
     Fix gyro terminal properties
 
     3.4F Fix vertical velocity calculation
+    Add HoverEngine detection support to thrusters
 
+    3.4G Timer Processing updates
+    More CustomData options for timer names, etc.
+
+    3.4H 03282018
+    Add desired arrivalmode and state to navcommon
+    'arrived' now sets desired mode and state
 
 	* TODO: 
 	*/
