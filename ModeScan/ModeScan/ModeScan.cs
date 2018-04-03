@@ -92,6 +92,7 @@ namespace IngameScript
                         // TODO: do all search and then choose 'best' (closest?)
                         // TODO: Aim at the hit position and not 'CENTER' for more randomized start on asteroid
                         // TODO: once we find asteroid(s) choose how to find ore intelligently and not just randomly
+                        // TODO: if missing cameras on a side(s), rotate ship to point cameras at that side
                         /*
                         if (bValidAsteroid)
                             current_state = 120;
@@ -173,32 +174,12 @@ namespace IngameScript
                             scanbottomScanner.DoneScanning()
                             )
                         {
-                            setMode(MODE_SCANCOMPLETED);
-                            /*
-                            //                            long asteroidID = -1;
-                            if (HasDrills())
-                            {
-                                scanAsteroidID = AsteroidFindNearest();
-                                if (scanAsteroidID < 0)
-                                {
-                                    // all scans have run and didn't find asteroid..
-                                    setMode(MODE_ATTENTION);
-                                }
-                                else
-                                {
-                                    bValidAsteroid = true;
-                                    vTargetAsteroid = AsteroidGetPosition(scanAsteroidID);
-                                    vExpectedAsteroidExit = vTargetAsteroid - shipOrientationBlock.GetPosition();
-                                    vExpectedAsteroidExit.Normalize();
+                            setMode(ScansDoneMode);
+                            current_state = ScansDoneState;
 
-                                    current_state = 120;
-                                }
-                            }
-                            else
-                            { // if no drills, we are done.
-                                setMode(MODE_IDLE);
-                            }
-                            */
+                            // reset to default for possible next run
+                            ScansDoneMode = MODE_SCANCOMPLETED;
+                            ScansDoneState = 0;
                         }
                         break;
                     }
