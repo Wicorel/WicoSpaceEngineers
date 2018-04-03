@@ -319,8 +319,10 @@ namespace IngameScript
                     setMode(MODE_ATTENTION);
                     return;
                 }
-                doTravelMovement(BasePositionOf(lTargetBase), 4000, 101, 106);
+                NavGoTarget(BasePositionOf(lTargetBase), iMode, 101, 4000);
+//                doTravelMovement(BasePositionOf(lTargetBase), 4000, 101, 106);
             }
+            // OBS
             else if (current_state == 106)
             {
                 ResetTravelMovement();
@@ -328,6 +330,7 @@ namespace IngameScript
                 current_state = 107;
                 bWantFast = false;
             }
+            //OBS
             else if (current_state == 107)
             {
                 doTravelMovement(vAvoid, 5.0f, 101, 106);
@@ -360,6 +363,7 @@ namespace IngameScript
                 }
                 else current_state = 120;
             }
+            // OBS
             else if (current_state == 111)
             { // collision detected
                 ResetTravelMovement();
@@ -367,13 +371,16 @@ namespace IngameScript
                 current_state = 112;
                 bWantFast = false;
             }
+            // OBS
             else if (current_state == 112)
             { // avoid collision
                 doTravelMovement(vAvoid, 5.0f, 110, 111);
             }
             else if (current_state == 115)
             { // get closer to approach location
-                doTravelMovement(vHome, 5.0f, 120, 111);
+                NavGoTarget(vHome, iMode, 120, 5);
+
+//                doTravelMovement(vHome, 5.0f, 120, 111);
             }
             else if (current_state == 120)
             {//120	request available docking connector
@@ -532,8 +539,11 @@ namespace IngameScript
                 Echo("Moving to Home");
                 //		if(iPushCount<60) iPushCount++;
                 //		else
-                doTravelMovement(vHome, 3.0f, 169, 161);
+
+                NavGoTarget(vHome, iMode, 169, 3);
+ //               doTravelMovement(vHome, 3.0f, 169, 161);
             }
+            // OBS
             else if (current_state == 161)
             { //161 Collision detected
                 ResetTravelMovement();
@@ -542,6 +552,7 @@ namespace IngameScript
                 iPushCount = 0;
                 bWantFast = true;
             }
+            //OBS
             else if (current_state == 162)
             {
                 //		if(iPushCount<60) iPushCount++;
@@ -549,6 +560,7 @@ namespace IngameScript
                 doTravelMovement(vAvoid, 5.0f, 160, 163);
                 //		doTravelMovement(vAvoid, 5.0f, 160, 165);
             }
+            //OBS
             else if (current_state == 163)
             {       // secondary collision
 
@@ -563,6 +575,7 @@ namespace IngameScript
                 else current_state = 161;// setMode(MODE_ATTENTION);
                 bWantFast = true;
             }
+            // OBS
             else if (current_state == 164)
             {
                 initEscapeScan();
@@ -570,6 +583,7 @@ namespace IngameScript
                 current_state = 165;
                 bWantFast = true;
             }
+            // OBS
             else if (current_state == 165)
             {
                 DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
@@ -707,7 +721,6 @@ namespace IngameScript
                         }
                         else
                             powerDownThrusters(thrustAllList);
-
                     }
                 }
                 else
