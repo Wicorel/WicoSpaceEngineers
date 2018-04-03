@@ -23,16 +23,49 @@ namespace IngameScript
         /// </summary>
         public class INIHolder
         {
-            Dictionary<string, string> _Sections;
-            Dictionary<string, string[]> _Lines;
-            Dictionary<string, Dictionary<string, string>> _Keys;
 
+            /// <summary>
+            /// section names start with this character
+            /// </summary>
             char _sectionStart = '[';
+            /// <summary>
+            /// section names end with this character
+            /// </summary>
             char _sectionEnd = ']';
-            string _sHeaderText = ""; // the text BEFORE any sections.  Will be saved as-is and regenerated
-            MyGridProgram _pg;
+            /// <summary>
+            /// comment lines start with this char
+            /// </summary>
+            string _CommentStart = ";";
 
-            string _sLastINI = "";
+            /// <summary>
+            /// the text BEFORE any sections.  Will be saved as-is and regenerated
+            /// </summary>
+            string BeginningContent = "";
+
+            /// <summary>
+            /// flag to support content before any sections <see cref="BeginningContent"/>
+            /// </summary>
+            public bool bSupportBeginning = false;
+
+            /// <summary>
+            /// The text after the end of parsing designator
+            /// </summary>
+            public string EndContent = "";
+
+            /// <summary>
+            ///  line containing just this designates end of INI parsing.  All other text goes into <see cref="EndContent"/>
+            /// </summary>
+            string EndDesignator = "---";
+
+            char MultLineStart = '|';
+
+            private MyGridProgram _pg;
+
+            private Dictionary<string, string> _Sections;
+            private Dictionary<string, string[]> _Lines;
+            private Dictionary<string, Dictionary<string, string>> _Keys;
+
+            private string _sLastINI = "";
 
             // From Malware:
             static readonly string[] TrueValues = { "true", "yes", "on", "1" };
@@ -45,9 +78,6 @@ namespace IngameScript
             /// </summary>
             public bool IsDirty { get; private set; } = false;
 
-            //            bool _IsTextInvalid = false;
-            //            bool _IsLinesInvalid = false;
-            //            bool _IsKeysInvalid = false;
 
             /// <summary>
             /// Constructor,  Pass MyGridProgram so it can access things like Echo()
@@ -77,29 +107,33 @@ namespace IngameScript
 
                 if (_sLastINI == sINI)
                 {
-                    //                    _pg.Echo("INI:Same");
+                    //                    _pg.Echo("INI:Same"); // DEBUG
                     return _Sections.Count;
                 }
-                //                else _pg.Echo("INI: NOT SAME");
+                //                else _pg.Echo("INI: NOT SAME"); // DEBUG
 
 
                 _Sections.Clear();
                 _Lines.Clear();
                 _Keys.Clear();
-                _sHeaderText = "";
+                BeginningContent = "";
+                EndContent = "";
                 IsDirty = false;
                 _sLastINI = sINI;
 
+                // get an array of the all of lines
                 string[] aLines = sINI.Split('\n');
 
-//                               _pg.Echo("INI: " + aLines.Count() + " Lines to process");
+//                               _pg.Echo("INI: " + aLines.Count() + " Lines to process"); // DEBUG
+
+                // walk through all of the lines
                 for (int iLine = 0; iLine < aLines.Count(); iLine++)
                 {
                     string sSection = "";
                     aLines[iLine].Trim();
                     if (aLines[iLine].StartsWith(_sectionStart.ToString()))
                     {
-//                        _pg.Echo(iLine + ":" + aLines[iLine]);
+                        //                        _pg.Echo(iLine + ":" + aLines[iLine]); // DEBUG
                         string sName = "";
                         for (int iChar = 1; iChar < aLines[iLine].Length; iChar++)
                             if (aLines[iLine][iChar] == _sectionEnd)
@@ -122,13 +156,17 @@ namespace IngameScript
                         {
                             aLines[iLine].Trim();
 
- //                       _pg.Echo(iLine+":"+aLines[iLine]);
+                            //                       _pg.Echo(iLine+":"+aLines[iLine]); // DEBUG
 
-                            if (aLines[iLine].StartsWith(_sectionStart.ToString()))
+                            if (
+                                aLines[iLine].StartsWith(_sectionStart.ToString()) 
+                                || aLines[iLine].StartsWith(EndDesignator)
+                                )
                             {
                                 iLine--;
                                 break;
                             }
+
                             // TODO: Support Mult-line strings?
                             // TODO: Support comments
 
@@ -147,18 +185,71 @@ namespace IngameScript
                                         value += aKeyValue[i1];
                                         if (i1 + 1 < aKeyValue.Count()) value += SeparatorChar; // untested: add back together values with multiple seperatorChar
                                     }
+                                    if(value=="") // blank line
+                                    {
+                                        // support malware style multi-line (needs testing)
+                                        /*
+                                        *
+                                        ;The following line is a special format which allows for multiline text in a single key:
+                                        MultiLine=
+                                        |The first line of the value
+                                        |The second line of the value
+                                        |And so on
+                                        */
+                                        int iMulti = iLine + 1;
+                                        for(;iMulti<aKeyValue.Count(); iMulti++)
+                                        {
+                                            aLines[iMulti].Trim();
+                                            
+                                            if(aLines[iMulti].Length>1 && aLines[iMulti][0]== MultLineStart)
+                                            {
+                                                value += aLines[iMulti].Substring(1).Trim()+"\n";
+                                                break;
+                                            }
+                                        }
+                                        iLine = iMulti;
+                                    }
                                     dKeyValue.Add(key, value);
                                 }
                             }
+                            else if(aLines[iLine].StartsWith(_CommentStart))
+                            {
+                                // comment line... ignore for now
+                            }
                         }
-                        if(!_Keys.ContainsKey(sSection)) _Keys.Add(sSection, dKeyValue);
-                        if (!_Lines.ContainsKey(sSection)) _Lines.Add(sSection, asLines);
-                        if (!_Sections.ContainsKey(sSection)) _Sections.Add(sSection, sText);
+                        if (!_Keys.ContainsKey(sSection))
+                        {
+                            _Keys.Add(sSection, dKeyValue);
+                            if (!_Lines.ContainsKey(sSection)) _Lines.Add(sSection, asLines);
+                        }
+                        else
+                        {
+                            // duplicate section..  Add each keyvalue to existing
+
+                        }
+                        if (!_Sections.ContainsKey(sSection))
+                        {
+                            _Sections.Add(sSection, sText);
+                        }
+                        else
+                        {
+                            IsDirty = true; // we have combined two sections from the source.
+                        }
+                    }
+                    else if(aLines[iLine].StartsWith(EndDesignator))
+                    {
+                        iLine++;
+                        
+                        // end of INI section.  Save rest of text into EndContent
+                        for(; iLine<aLines.Count();iLine++)
+                        {
+                            EndContent += aLines[iLine];
+                        }
                     }
                     else
                     {
                         // we are before any sections. Save the text as-is
-                        _sHeaderText += aLines[iLine] + "\n";
+                        BeginningContent += aLines[iLine] + "\n";
                     }
                 }
                 return _Sections.Count;
@@ -520,8 +611,8 @@ namespace IngameScript
             public string GenerateINI(bool bClearDirty = true)
             {
                 string sIni = "";
-                string s1 = _sHeaderText.Trim();
-                if (s1 != "") sIni = s1 + "\n";
+                string s1 = BeginningContent.Trim();
+                if (bSupportBeginning && s1 != "") sIni = s1 + "\n";
 
 //_pg.Echo("INI Generate: " + _Sections.Count() + "sections");
                 foreach (var kv in _Sections)
@@ -552,6 +643,11 @@ namespace IngameScript
                     {
                         sIni += kv.Value.Trim() + "\n\n"; // close last line + add empty line at end
                     }
+                }
+                if(EndContent!="")
+                {
+                    sIni += "\n" + EndDesignator + "\n";
+                    sIni += EndContent + "\n";
                 }
                 if (bClearDirty)
                 {
