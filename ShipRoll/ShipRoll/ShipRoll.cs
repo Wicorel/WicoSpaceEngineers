@@ -59,8 +59,8 @@ namespace IngameScript
             //Echo("rollAngle=" + Math.Round(rollAngle,5)); 
             float targetRoll = 0;
             IMyGyro gyro = gyros[0] as IMyGyro;
-            float maxRoll = gyro.GetMaximum<float>(sPlane);
-            float minRoll = gyro.GetMinimum<float>(sPlane);
+            float maxRoll = 60; // gyro.GetMaximum<float>(sPlane);
+//            float minRoll = gyro.GetMinimum<float>(sPlane);
 
             if (Math.Abs(rollAngle) > 1.0)
             {
