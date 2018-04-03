@@ -22,7 +22,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "MINER";
-        string sVersion = "3.4B";
+        string sVersion = "3.4C";
 
         const string velocityFormat = "0.00";
 
@@ -49,10 +49,18 @@ namespace IngameScript
         void ModuleSerialize(INIHolder iNIHolder)
         {
             MiningSerialize(iNIHolder);
+            AsteroidSerialize();
+            OreSerialize();
+            ScansSerialize(iNIHolder);
+            NavSerialize(iNIHolder);
         }
         void ModuleDeserialize(INIHolder iNIHolder)
         {
             MiningDeserialize(iNIHolder);
+            AsteroidsDeserialize();
+            OreDeserialize();
+            ScansDeserialize(iNIHolder);
+            NavDeserialize(iNIHolder);
         }
     }
 }

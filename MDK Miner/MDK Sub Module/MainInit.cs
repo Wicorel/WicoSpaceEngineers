@@ -57,7 +57,7 @@ namespace IngameScript
             */
             do
             {
-                echoInstructions("Init:" + currentInit + " | ");
+//                echoInstructions("Init:" + currentInit + " | ");
                 switch (currentInit)
                 {
                     case 0:
@@ -129,12 +129,13 @@ namespace IngameScript
                         Deserialize();
                         break;
                     case 20:
-                        sInitResults += modeOnInit();
+                        initPower();
                         break;
                     case 21:
-                        init = true;
+                        sInitResults += modeOnInit();
                         break;
                     case 22:
+                        init = true;
                         break;
 
                 }

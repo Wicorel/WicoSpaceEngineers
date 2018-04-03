@@ -21,7 +21,7 @@ namespace IngameScript
         #region domodes 
         void doModes()
         {
-            Echo("mode=" + iMode.ToString());
+            Echo("mode=" + iMode.ToString() + " state="+current_state.ToString());
             doModeAlways();
 
  //           if (iMode == MODE_DOSCAN) doModeScans();
@@ -71,12 +71,9 @@ namespace IngameScript
         }
          void moduleDoPreModes()
         {
-            string output = "";
             if (dCargoCheckLast > dCargoCheckWait)
             {
                 dCargoCheckLast = 0;
-
-
                 doCargoCheck();
             }
             else
@@ -84,14 +81,12 @@ namespace IngameScript
                 if (dCargoCheckLast < 0)
                 {
                     // first-time init
-                    //                    dProjectorCheckLast = Me.EntityId % dProjectorCheckWait; // randomize initial check
                     dCargoCheckLast = dCargoCheckWait + 5; // force check
                 }
                 dCargoCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
             }
 
-            Echo("Cargo=" + cargopcent.ToString() + "%");
-            //            Echo("Cargo Mult=" + cargoMult.ToString());
+//            Echo("Cargo=" + cargopcent.ToString() + "%");
 
             if (dBatteryCheckLast > dBatteryCheckWait)
             {
@@ -106,6 +101,35 @@ namespace IngameScript
                     dBatteryCheckLast = dBatteryCheckWait + 5; // force check
                 }
                 dBatteryCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
+            }
+
+
+            TanksCalculate();
+        }
+
+        void modulePostProcessing()
+        {
+            string output = "";
+            if (init) // only if init is done
+            {
+                OreDumpFound();
+
+                //dumpOreLocs();
+
+                double maxThrust = calculateMaxThrust(thrustForwardList);
+//                Echo("maxThrust=" + maxThrust.ToString("N0"));
+
+                if (shipOrientationBlock is IMyShipController)
+                {
+                    MyShipMass myMass;
+                    myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
+                    double effectiveMass = myMass.PhysicalMass;
+//                    Echo("effectiveMass=" + effectiveMass.ToString("N0"));
+
+                    double maxDeltaV = (maxThrust) / effectiveMass;
+                    Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+                }
+                Echo("Cargo=" + cargopcent.ToString() + "%");
             }
 
             output += "Batteries: #=" + batteryList.Count.ToString();
@@ -137,7 +161,8 @@ namespace IngameScript
             Echo(output);
             output = "";
 
-            Echo("Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW"));
+            if (solarList.Count > 0)
+                Echo("Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW"));
 
             float fCurrentReactorOutput = 0;
             reactorCheck(out fCurrentReactorOutput);
@@ -164,34 +189,13 @@ namespace IngameScript
 
             Echo("TotalMaxPower=" + totalMaxPowerOutput.ToString("0.00" + "MW"));
 
-            TanksCalculate();
-        }
+            Echo(asteroidsInfo.Count.ToString() + " Known Asteroids");
+            Echo(oreLocs.Count.ToString() + " Known Ores");
+            OreDumpLocs();
 
-        void modulePostProcessing()
-        {
-            if (init) // only if init is done
-            {
-                // only need to do these like once per second. or if something major changes.
-                OreDoCargoCheck();
-                OreDumpFound();
-
-                //dumpOreLocs();
-
-                double maxThrust = calculateMaxThrust(thrustForwardList);
-                Echo("maxThrust=" + maxThrust.ToString("N0"));
-
-                if (shipOrientationBlock is IMyShipController)
-                {
-                    MyShipMass myMass;
-                    myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
-                    double effectiveMass = myMass.PhysicalMass;
-                    Echo("effectiveMass=" + effectiveMass.ToString("N0"));
-
-                    double maxDeltaV = (maxThrust) / effectiveMass;
-                    Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
-                }
-                Echo("Cargo=" + cargopcent.ToString() + "%");
-            }
+            //            Echo("width=" + shipDim.WidthInMeters().ToString("0.0"));
+            //            Echo("height=" + shipDim.HeightInMeters().ToString("0.0"));
+            //            Echo("length=" + shipDim.LengthInMeters().ToString("0.0"));
 
             Echo(sInitResults);
             echoInstructions();
