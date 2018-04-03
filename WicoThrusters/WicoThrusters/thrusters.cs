@@ -37,10 +37,14 @@ namespace IngameScript
         int ionThrustCount = 0;
         int hydroThrustCount = 0;
         int atmoThrustCount = 0;
+        int hoverThrustCount = 0;
+
         const int thrustatmo = 1;
         const int thrusthydro = 2;
         const int thrustion = 4;
+        const int thrusthover = 8;
         const int thrustAll = 0xff;
+
         readonly Matrix thrustIdentityMatrix = new Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
 
@@ -106,6 +110,8 @@ namespace IngameScript
                     hydroThrustCount++;
                 else if (iThrustType == thrustion)
                     ionThrustCount++;
+                else if (iThrustType == thrusthover)
+                    hoverThrustCount++;
                 if (accelerationDirection == thrustIdentityMatrix.Left)
                 {
                     thrustLeft += maxThrust((IMyThrust)thrustAllList[i]);
@@ -190,6 +196,8 @@ namespace IngameScript
                     hydroThrustCount++;
                 else if (iThrustType == thrustion)
                     ionThrustCount++;
+                else if (iThrustType == thrusthover)
+                    hoverThrustCount++;
                 if (accelerationDirection == thrustIdentityMatrix.Left)
                 {
                     thrustLeft += maxThrust((IMyThrust)thrustAllList[i]);
@@ -237,10 +245,17 @@ namespace IngameScript
         {
             if (theBlock is IMyThrust)
             {
-                if (theBlock.BlockDefinition.SubtypeId.Contains("Atmo"))
+                // HoverEngines  http://steamcommunity.com/sharedfiles/filedetails/?id=1225107070
+                if (theBlock.BlockDefinition.SubtypeId.Contains("AtmosphericHover")) 
+                    return thrusthover;
+                else if (theBlock.BlockDefinition.SubtypeId.Contains("Atmo"))
                     return thrustatmo;
                 else if (theBlock.BlockDefinition.SubtypeId.Contains("Hydro"))
                     return thrusthydro;
+                // Hover Engines. SmallBlock_HoverEngine http://steamcommunity.com/sharedfiles/filedetails/?id=560731791 (last updated Dec 29, 2015)
+                else if (theBlock.BlockDefinition.SubtypeId.Contains("SmallBlock_HoverEngine"))
+                    return thrusthover;
+                // assume ion since its name is generic
                 else return thrustion;
             }
             // else
@@ -273,6 +288,27 @@ namespace IngameScript
 
             return thrust;
         }
+
+        double calculateTotalEffectiveThrust(List<IMyTerminalBlock> thrusters, float atmoMult = 5f, float ionMult = 2f, float hydroMult=1f)
+        {
+            double totalThrust = 0;
+
+            foreach(var block in thrusters)
+            {
+                var thruster = block as IMyThrust;
+                if (thruster == null) continue;
+                if(thrusterType(thruster)==thrustatmo)
+                    totalThrust += thruster.MaxEffectiveThrust* atmoMult;
+                else if (thrusterType(thruster) == thrustion)
+                    totalThrust += thruster.MaxEffectiveThrust* ionMult;
+                else if (thrusterType(thruster) == thrusthydro)
+                    totalThrust += thruster.MaxEffectiveThrust* hydroMult;
+                else
+                    totalThrust += thruster.MaxEffectiveThrust;
+            }
+            return totalThrust;
+        }
+
 
         bool calculateHoverThrust(List<IMyTerminalBlock> thrusters, out float atmoPercent, out float hydroPercent, out float ionPercent)
         {
@@ -386,7 +422,8 @@ namespace IngameScript
                     //                    float maxThrust = thruster.GetMaximum<float>("Override");
                     if (!thruster.IsWorking)
                     {
-                        thruster.Enabled = true;// ApplyAction("OnOff_On");
+                        if(!thruster.Enabled) // yes, this is worth the cost to check.
+                            thruster.Enabled = true;// ApplyAction("OnOff_On");
                     }
                     iCount += 1;
                     thruster.ThrustOverridePercentage = fPower / 100f;
@@ -428,9 +465,9 @@ namespace IngameScript
                     IMyThrust thruster = thrusters[thrusterIndex] as IMyThrust;
                     thruster.ThrustOverride = 0;
                     //                    thruster.SetValueFloat("Override", 0);
-                    if (thruster.IsWorking && bForceOff)
+                    if (thruster.IsWorking && bForceOff && thruster.Enabled==true)  // Yes, the check is worth it
                         thruster.Enabled = false;// ApplyAction("OnOff_Off");
-                    else if (!thruster.IsWorking && !bForceOff)
+                    else if (!thruster.IsWorking && !bForceOff && thruster.Enabled==false)
                         thruster.Enabled = true;// ApplyAction("OnOff_On");
                 }
             }
@@ -540,7 +577,7 @@ namespace IngameScript
             double hoverthrust = 0;
             hoverthrust = myMass.PhysicalMass * dGrav * 9.810;
             double maxThrust = calculateMaxThrust(thrustUpList);
-            double maxDeltaV = (maxThrust - hoverthrust) / myMass.TotalMass;
+            double maxDeltaV = (maxThrust - hoverthrust) / myMass.PhysicalMass;
             double secondstozero = currentV / maxDeltaV;
 //            Echo("secondstozero=" + secondstozero.ToString("0.00"));
             double stoppingM = currentV / 2 * secondstozero;
