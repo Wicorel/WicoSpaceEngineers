@@ -36,7 +36,7 @@ namespace IngameScript
 //        float savefileversion = 3.00f;
         IMyTextPanel SaveFile = null;
 
-        INIHolder iniWicoCraftSave;
+        INIHolder iniWicoCraftSave=null;
 
         // Saved info:
         int current_state = 0;
