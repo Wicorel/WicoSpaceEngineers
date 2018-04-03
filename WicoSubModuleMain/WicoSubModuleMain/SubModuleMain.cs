@@ -22,7 +22,16 @@ namespace IngameScript
         Dictionary<string, int> modeCommands = new Dictionary<string, int>();
         string sBanner = "";
         UpdateFrequency ufFast = UpdateFrequency.Once; // default value for "Fast" for this module
+
+        /// <summary>
+        /// We are a submodule
+        /// </summary>
         bool bSubModule = true;
+
+        /// <summary>
+        /// should we debug Dump the UpdateType? Settable in CustomData. 
+        /// </summary>
+        bool bDebugUpdate = false;
 
         float fMaxWorldMps = 100;
         string sWorldSection = "WORLD";
@@ -32,15 +41,18 @@ namespace IngameScript
             iNIHolder.GetValue(sWorldSection, "MaxWorldMps", ref fMaxWorldMps, true);
         }
 
+        string sMainSection = "WICOCRAFT";
         void ProcessInitCustomData()
         {
             INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
 
-            iniCustomData.GetValue(OurName, "EchoOn", ref bEchoOn, true);
+            iniCustomData.GetValue(sMainSection, "EchoOn", ref bEchoOn, true);
+            iniCustomData.GetValue(sMainSection, "DebugUpdate", ref bDebugUpdate, true);
 
             WorldInitCustomData(iniCustomData);
             GridsInitCustomData(iniCustomData);
             LoggingInitCustomData(iniCustomData);
+            TimersInitCustomData(iniCustomData);
 
             ModuleInitCustomData(iniCustomData);
             if (iniCustomData.IsDirty)
@@ -58,10 +70,10 @@ namespace IngameScript
             if(bEchoOn) _oldEcho(output);
         }
 
-
         public Program()
         {
             doModuleConstructor();
+
             ProcessInitCustomData();
 
             _oldEcho = Echo;
@@ -69,7 +81,6 @@ namespace IngameScript
 
             sBanner = OurName + ":" + moduleName + " V" + sVersion + " ";
             _oldEcho(sBanner + "Creator");
-
 
             //            gridsInit(); //GridTerminalSystem cannot be relied on at initial compile
             //            initLogging();
@@ -99,7 +110,8 @@ namespace IngameScript
         void Main(string sArgument, UpdateType ut)
         {
             Echo(sBanner + tick());
-//            Echo(ut.ToString());
+            if (bDebugUpdate) Echo(ut.ToString());
+
             bWantFast = false;
             bWantMedium = false;
 
@@ -151,31 +163,13 @@ namespace IngameScript
                     double dLength = vNG.Length();
                     dGravity = dLength / 9.81;
                 }
-                if ((ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0)
+                if (
+                    (ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0
+                    || (ut & (UpdateType.Mod)) > 0 // script run by a mod
+                    || (ut & (UpdateType.Script)) > 0 // this pb run by another script (PB)
+                    )
                 {
                     // pay attention to argument
-                    if (moduleProcessArguments(sArgument))
-                    {
-                        Serialize();
-                        UpdateAllPanels();
-                        return;
-                    }
-
-                }
-                else if ((ut & (UpdateType.Mod)) > 0)
-                {
-                    // script run by a mod
-                    if (moduleProcessArguments(sArgument))
-                    {
-                        Serialize();
-                        UpdateAllPanels();
-                        return;
-                    }
-
-                }
-                else if ((ut & (UpdateType.Script)) > 0)
-                {
-                    // script run by another PB
                     if (moduleProcessArguments(sArgument))
                     {
                         Serialize();
@@ -190,14 +184,15 @@ namespace IngameScript
                     if (!moduleProcessAntennaMessage(sArgument))
                     {
                         antReceive(sArgument);
+// Already done in antReceive()                        doTriggerMain(); // Run everybody
                     }
                     Serialize();
-                    doTriggerMain();
                     UpdateAllPanels();
                     return;
                 }
                 else
                 {
+                    // it should be one of the update types...
                     //            if ((ut & (UpdateType.Once | UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100)) > 0)
                     sArgument = ""; // else ignore argument
                 }
@@ -205,12 +200,10 @@ namespace IngameScript
                 processPendingReceives();
                 processPendingSends();
 
-
                 moduleDoPreModes();
 
                 doModes();
             }
-            Serialize();
 
             if (bWantFast)
             {
@@ -232,10 +225,10 @@ namespace IngameScript
             }
 
             modulePostProcessing();
+            Serialize();
 
             bWasInit = false;
             UpdateAllPanels();
-
         }
 
         void echoInstructions(string sBanner = null)
@@ -244,7 +237,6 @@ namespace IngameScript
             fper = Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount;
             if (sBanner == null) sBanner = "Instructions=";
             Echo(sBanner + " " + (fper * 100).ToString("0.00") + "%");
-
         }
 
 
