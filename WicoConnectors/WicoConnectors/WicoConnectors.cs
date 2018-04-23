@@ -65,6 +65,11 @@ namespace IngameScript
             bConnectorsInit = true;
             return;
         }
+
+        bool ConnectorsLocalExist()
+        {
+            return localDockConnectors.Count > 1;
+        }
         bool AnyConnectorIsLocked()
         {
             getLocalConnectors();
@@ -166,11 +171,15 @@ namespace IngameScript
                     }
                     if (bConnect)
                     {
-                        if (sc1.Status == MyShipConnectorStatus.Connectable) sc1.ApplyAction("SwitchLock");
+                    if (sc1.Status == MyShipConnectorStatus.Connectable)
+                        //sc1.ApplyAction("SwitchLock");
+                        sc1.Connect();
                     }
                     else
                     {
-                        if (sc1.Status == MyShipConnectorStatus.Connected) sc1.ApplyAction("SwitchLock");
+                          if (sc1.Status == MyShipConnectorStatus.Connected)
+                        //sc1.ApplyAction("SwitchLock");
+                        sc1.Disconnect();
                     }
                 sc1.Enabled = bOn;
                 /*
