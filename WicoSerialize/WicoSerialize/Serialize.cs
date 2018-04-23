@@ -59,7 +59,7 @@ namespace IngameScript
             else
             {
 //                if (bVerboseSerialize)
-                    Echo("Not saving: Same");
+//                    Echo("Not saving: Same");
             }
 
         }
