@@ -25,6 +25,7 @@ namespace IngameScript
         void calculateGridBBPosition(IMyTerminalBlock sourceBlock = null)
         {
             if (sourceBlock == null) sourceBlock = shipOrientationBlock;
+            if (sourceBlock == null) return;
             _obbf = new OrientedBoundingBoxFaces(sourceBlock);
         }
 
@@ -63,8 +64,14 @@ namespace IngameScript
 
             public OrientedBoundingBoxFaces(IMyTerminalBlock block)
             {
-                //		points = new Vector3D[8];
                 Corners = new Vector3D[8];
+                if (block == null)
+                {
+                    Position = new Vector3D();
+                    localMin = new Vector3D();
+                    localMax = new Vector3D();
+                    return;
+                }
 
                 // Reconstruct bounding box vectors in world dimensions
                 // For a 1x1x1 cube where Min = Max we still have the 1x1x1 cube as bounding box,
