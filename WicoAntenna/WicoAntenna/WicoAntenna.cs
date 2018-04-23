@@ -18,6 +18,15 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        bool CommunicationsStealth = false;
+
+        string sAntennaSection = "COMMUNICATIONS";
+
+        void CommunicationsInitCustomData(INIHolder iNIHolder)
+        {
+            iNIHolder.GetValue(sAntennaSection, "CommunicationsStealth", ref CommunicationsStealth, true);
+        }
+
         bool bGotAntennaName = false;
 
         List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
@@ -98,8 +107,9 @@ namespace IngameScript
         /// <summary>
         /// Set the antenna with the highest radius to call this script.
         /// </summary>
-        void SetAntennaMe()
+        bool SetAntennaMe()
         {
+            bool bGood = false;
             float maxRadius = 0;
             int iMax = -1;
             for(int i=0;i<antennaList.Count;i++)
@@ -107,6 +117,7 @@ namespace IngameScript
                 if(antennaList[i].AttachedProgrammableBlock == Me.EntityId)
                 {
                     // we are already set as a target, so stop looking
+                    bGood = true;
                     iMax = i;
                     break;
                 }
@@ -121,11 +132,13 @@ namespace IngameScript
                 if (antennaList[iMax].AttachedProgrammableBlock != Me.EntityId)
                     sInitResults += "\nSetting Antenna PB";
                 antennaList[iMax].AttachedProgrammableBlock = Me.EntityId;
+                bGood = true;
             }
             else
             {
                 // no available antenna
             }
+            return bGood;
         }
 
         /// <summary>
@@ -189,21 +202,36 @@ namespace IngameScript
         }
 
         /// <summary>
-        /// Sets the max power of the antenna(s)
+        /// Internal: desired range of antennas when transmitting.
+        /// </summary>
+        float fAntennaDesiredRange = float.MaxValue;
+
+        /// <summary>
+        /// Sets the desired max power of the antenna(s)
         /// </summary>
         /// <param name="bAll">Sets all the antennas.  Default to set only the ones that have script attached</param>
         /// <param name="desiredRange">Range. Default is max</param>
         void antennaMaxPower(bool bAll=false, float desiredRange=float.MaxValue)
         {
-            if (antennaList==null || antennaList.Count < 1) antennaInit();
+//            if (antennaList==null || antennaList.Count < 1) antennaInit();
             if (desiredRange < 200) desiredRange = 200;
+            fAntennaDesiredRange = desiredRange;
 
+            // if silent mode
+            // return;
+            // else set range now
+            AntennaSetDesiredPower(bAll);
+        }
+
+        void AntennaSetDesiredPower(bool bAll = false)
+        {
+            if (antennaList == null || antennaList.Count < 1) antennaInit();
             foreach (var a in antennaList)
             {
                 if (a.AttachedProgrammableBlock > 0 || bAll)
                 {
                     float maxPower = a.GetMaximum<float>("Radius");
-                    if (desiredRange < maxPower) maxPower = desiredRange;
+                    if (fAntennaDesiredRange < maxPower) maxPower = fAntennaDesiredRange;
                     a.Radius = maxPower;
                     a.Enabled = true;
                 }
@@ -231,27 +259,49 @@ namespace IngameScript
         {
             if (lPendingMessages.Count > 0)
             {
-                antSend(lPendingMessages[0]);
+                AntennaSetDesiredPower(); // another sub-module may have turned it down.
+                antSend(lPendingMessages[0],false);
                 lPendingMessages.RemoveAt(0);
             }
-            if (lPendingMessages.Count > 0) bWantFast = true; // if there are more, process quickly
+            if (lPendingMessages.Count > 0)
+            {
+                bWantFast = true; // if there are more, process quickly
+            }
+            else
+            { // we have no messages to send.  check for 'silent' mode
+                if(CommunicationsStealth)
+                {
+                    antennaLowPower(true);
+                }
+            }
         }
 
         /// <summary>
         /// Send a message. Queues messages if it cannot be sent immediately
         /// </summary>
         /// <param name="message">The message to send</param>
-        void antSend(string message)
+        /// <param name="bQueue">Should the message be queued (true)</param>
+        void antSend(string message, bool bQueue = true)
         {
 //            Echo("Sending:\n" + message);
             bool bSent = false;
             if (antennaList.Count < 1) antennaInit();
             for (int i = 0; i < antennaList.Count; i++)
             { // try all available antennas
-              // try immediate send:
-                bSent = antennaList[i].TransmitMessage(message);
-                if (bSent)
-                    break;
+
+                // queue if we are in silent mode or this is not immediate send
+                if(!bQueue || CommunicationsStealth)
+                {
+                    // request antenna powerup
+                    AntennaSetDesiredPower();
+                }
+                else
+                {
+                    // try immediate send:
+                    bSent = antennaList[i].TransmitMessage(message);
+                    if (bSent)
+                        break;
+                }
             }
             if (!bSent)
             {
