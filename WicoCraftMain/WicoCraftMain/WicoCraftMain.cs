@@ -46,6 +46,9 @@ namespace IngameScript
         double dSubmoduleTriggerWait = 1; //seconds between triggers
         double dSubmoduleTriggerLast = -1;
 
+        double dErrorGridReInitWait = 5; //seconds between trying to re-init between errors
+        double dErrorGridReInitLast = -1;
+
         float fMaxWorldMps = 100;
         string sWorldSection = "WORLD";
         void WorldInitCustomData(INIHolder iNIHolder)
@@ -107,23 +110,26 @@ namespace IngameScript
         }
 
 
-        #region MAIN
 
         bool init = false;
         bool bWasInit = false;
+        string sInitResults = "";
+        int currentInit = 0;
+
+        string sStartupError = "";
+        bool bStartupError = false;
+
         bool bWantFast = false;
         bool bWantMedium = false;
 
         bool bWorkingProjector = false;
-
-        double velocityShip;//, velocityForward, velocityUp, velocityLeft;
-
         double dProjectorCheckWait = 5; //seconds between checks
         double dProjectorCheckLast = -1;
 
         double dGridCheckWait = 3; //seconds between checks
         double dGridCheckLast = -1;
 
+        double velocityShip = -1;
         double dGravity = -2;
 
         //        void Main(string sArgument)
@@ -174,20 +180,28 @@ namespace IngameScript
             {
                 if (dGridCheckLast > dGridCheckWait || !init)
                 {
-                   Echo("DO Grid Check");
+ //                  Echo("DO Grid Check");
                     dGridCheckLast = 0;
 
                     MyShipMass myMass;
                     myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
 
                     newgridBaseMass = myMass.BaseMass;
-                    Echo("New=" + newgridBaseMass + " CurrentM=" + gridBaseMass);
-                    if (myMass.BaseMass == 0)
-                        Echo("No Mass--Station?");
+//                    Echo("New=" + newgridBaseMass + " CurrentM=" + gridBaseMass);
+//                    if (myMass.BaseMass == 0)  Echo("No Mass--Station?");
                     if (newgridBaseMass != gridBaseMass && gridBaseMass > 0)
                     {
                         Echo("MASS CHANGE");
                         StatusLog(OurName + ":" + moduleName + ":MASS CHANGE", textLongStatus, true);
+                        // check for an error and retry
+//                        if (bStartupError && !bWasInit)
+                        {
+                            // keep trying
+                            init = false;
+                            sInitResults = "";
+                           dErrorGridReInitLast = 0;
+                        }
+
                     }
                 }
                 else
@@ -206,17 +220,49 @@ namespace IngameScript
             else
             {
 //                Echo("No anchorPosition to check");
-                gridBaseMass = newgridBaseMass = 0;
+                gridBaseMass = newgridBaseMass = -1;
+                // check for an error and retry
+                if (bStartupError && !bWasInit)
+                {
+                    // keep trying
+                    init = false;
+                    sInitResults = "";
+                    dErrorGridReInitLast = 0;
+                }
+            }
+            if (dErrorGridReInitLast > dErrorGridReInitWait)
+            {
+                dErrorGridReInitLast = 0;
+                if (bStartupError)
+                {
+                    sArgument = "init";
+                    Echo("RESCAN!");
+                    dErrorGridReInitLast = 0;
+                }
+            }
+            else
+            {
+                if (bStartupError)
+                {
+                    Echo("Waiting for Rescan:" + dErrorGridReInitLast.ToString("0.0") + "(" + dErrorGridReInitWait.ToString("0.0") + ")");
+                    dErrorGridReInitLast += Runtime.TimeSinceLastRun.TotalSeconds;
+                }
             }
 
-            if (sArgument == "init" || (Math.Abs(newgridBaseMass - gridBaseMass) > 1 && gridBaseMass > 0 && currentInit==0) || (currentInit == 0 && calcGridSystemChanged()))
+            if (
+                (sArgument == "init" && currentInit==0)
+                || (Math.Abs(newgridBaseMass - gridBaseMass) > 1 && gridBaseMass > 0 && currentInit==0) 
+   //             || (currentInit == 0 && calcGridSystemChanged())
+                )
             {
                 Log("INIT or GRID/MASS CHANGE!");
 
                 Echo("Arg init or grid/mass change!");
                 sInitResults = "";
+                dErrorGridReInitLast = dErrorGridReInitWait + 5;
                 init = false;
                 currentInit = 0;
+                sStartupError = "";
                 sPassedArgument = "init";
             }
             Log("clear");
@@ -233,8 +279,19 @@ namespace IngameScript
                 {
                 }
                 bWantFast = true;
+                if(currentInit==0)
+                {
+                    bStartupError = false;
+                    sStartupError = "";
+                }
                 doInit();
+                if (bStartupError) bWantFast = false;
                 bWasInit = true;
+                if (init)
+                {
+                    sArgument = "";
+                    dErrorGridReInitLast = 0;
+                }
             }
             else
             {
@@ -246,7 +303,7 @@ namespace IngameScript
                     StatusLog(DateTime.Now.ToString() + " " + sInitResults, textLongStatus, true);
                 }
 
-                IMyTerminalBlock anchorOrientation = shipOrientationBlock;
+ //               IMyTerminalBlock anchorOrientation = shipOrientationBlock;
                 if (shipOrientationBlock != null)
                 {
 //                    vCurrentPos = shipOrientationBlock.GetPosition();
@@ -254,7 +311,6 @@ namespace IngameScript
 
                 // calculate(get) ship velocity and natural gravity
                 if (shipOrientationBlock is IMyShipController)
-                //		if (shipOrientationBlock is IMyRemoteControl)
                 {
                     velocityShip = ((IMyShipController)shipOrientationBlock).GetShipSpeed();
 
@@ -298,6 +354,15 @@ namespace IngameScript
                     // it should be one of the update types...
                     //            if ((ut & (UpdateType.Once | UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100)) > 0)
                     sArgument = ""; // else ignore argument
+                    /*
+                    // check for an error and retry
+                    if(bStartupError && !bWasInit)
+                    {
+                        // keep trying
+                        init = false;
+                        sInitResults = "";
+                    }
+                    */
                 }
 
                 /*
@@ -307,7 +372,7 @@ namespace IngameScript
                     return;
                 }
                 */
-               moduleDoPreModes();
+                moduleDoPreModes();
 
                 doModes();
             }
@@ -318,12 +383,12 @@ namespace IngameScript
             {
                 if ((SaveFile == null))
                 {
-                    Echo("Cannot use sub-modules; missing controller and/or SaveFile");
+//                    Echo("Cannot use sub-modules; missing controller and/or SaveFile");
                 }
                 else
                 {
                     if (
-                    (ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0
+                    (ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0 // Timer or toolbar or 'run'
                     || (ut & (UpdateType.Mod)) > 0 // script run by a mod
                     || (ut & (UpdateType.Script)) > 0 // this pb run by another script (PB)
                       ||  dSubmoduleTriggerLast > dSubmoduleTriggerWait
@@ -331,13 +396,13 @@ namespace IngameScript
                         || bWasInit // run first time after init
                         )
                     {
-                        Echo("Trigger sub-module!");
+//                        Echo("Trigger sub-module!");
                         dSubmoduleTriggerLast = 0;
-                        doSubModuleTimerTriggers();
+                        doSubModuleTimerTriggers(sSubModuleTimer);
                     }
                     else
                     {
-                        Echo("Delay for sub-module trigger");
+//                        Echo("Delay for sub-module trigger");
                         dSubmoduleTriggerLast+= Runtime.TimeSinceLastRun.TotalSeconds;
                     }
                 }
@@ -371,7 +436,6 @@ namespace IngameScript
             UpdateAllPanels();
         }
 
-        #endregion
         void echoInstructions(string sBanner = null)
         {
             float fper = 0;
