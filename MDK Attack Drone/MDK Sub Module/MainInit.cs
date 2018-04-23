@@ -24,6 +24,10 @@ namespace IngameScript
 
         }
 
+        void ModuleInitCustomData(INIHolder iniCustomData)
+        {
+            CamerasInitCustomData(iniCustomData);
+        }
 
         #region maininit
 
@@ -39,14 +43,13 @@ namespace IngameScript
 
             // when all initialization is done, set init to true.
 
-        	if(currentInit==0) initLogging();
 
-            Log("Init:" + currentInit.ToString());
+            Echo("Init:" + currentInit.ToString());
+            /*
             double progress = currentInit * 100 / 3;
             string sProgress = progressBar(progress);
             StatusLog(moduleName + sProgress, textPanelReport);
-
-            Echo("Init");
+            */
             if (currentInit == 0)
             {
                 //StatusLog("clear",textLongStatus,true);
@@ -55,17 +58,17 @@ namespace IngameScript
             	if(!modeCommands.ContainsKey("attack")) modeCommands.Add("attack", MODE_ATTACK);
 
                 gridsInit();
-                sInitResults += initSerializeCommon();
+                sInitResults += DefaultOrientationBlockInit();
+                sInitResults += SerializeInit();
                 Deserialize();
-	        	initShipDim();
+                initLogging();
+                sInitResults += BlockInit();
+                initShipDim(shipOrientationBlock);
             }
             else if (currentInit == 1)
             {
-                sInitResults += BlockInit();
-                anchorPosition = gpsCenter;
-                currentPosition = anchorPosition.GetPosition();
-                sInitResults += thrustersInit(gpsCenter);
-                sInitResults += camerasensorsInit(gpsCenter);
+                sInitResults += thrustersInit(shipOrientationBlock);
+                sInitResults += camerasensorsInit(shipOrientationBlock);
                 sInitResults += gyrosetup();
                 sInitResults += antennaInit();
                 sInitResults += gatlingsInit();
@@ -89,7 +92,7 @@ namespace IngameScript
 
         }
 
-        IMyTextPanel gpsPanel = null;
+//        IMyTextPanel gpsPanel = null;
 
         string BlockInit()
         {
@@ -138,12 +141,6 @@ namespace IngameScript
                 sInitResults += "N";
                 Echo("Using Named: " + centerSearch[0].CustomName);
             }
-            gpsCenter = centerSearch[0];
-
-            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-            blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
-            if (blocks.Count > 0)
-                gpsPanel = blocks[0] as IMyTextPanel;
 
             return sInitResults;
         }

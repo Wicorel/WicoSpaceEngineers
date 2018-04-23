@@ -98,10 +98,17 @@ namespace IngameScript
 
         bool init = false;
         bool bWasInit = false;
+        string sInitResults = "";
+        int currentInit = 0;
+
+        string sStartupError = "";
+        bool bStartupError = false;
+
         bool bWantFast = false;
         bool bWantMedium = false;
 
         bool bWorkingProjector = false;
+
 
         double velocityShip = -1;
         double dGravity = -2;
@@ -147,12 +154,13 @@ namespace IngameScript
                 }
                 bWantFast = true;
                 doInit();
+                if (bStartupError) bWantFast = false;
                 bWasInit = true;
             }
             else
             {
                 if (bWasInit) StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + sInitResults, textLongStatus, true);
-
+                if (sStartupError != "") Echo(sStartupError);
                 Deserialize();
 
                 if (shipOrientationBlock is IMyShipController)
@@ -195,6 +203,13 @@ namespace IngameScript
                     // it should be one of the update types...
                     //            if ((ut & (UpdateType.Once | UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100)) > 0)
                     sArgument = ""; // else ignore argument
+                    // check for an error and retry
+                    if (bStartupError && !bWasInit)
+                    {
+                        // keep trying
+                        init = false;
+                        sInitResults = "";
+                    }
                 }
 
                 processPendingReceives();

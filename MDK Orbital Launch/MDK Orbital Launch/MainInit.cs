@@ -75,6 +75,7 @@ namespace IngameScript
                 else if(currentInit==2)
                 {
                 */
+                initReactors();
                 sInitResults += gearsInit();
                 sInitResults += tanksInit();
 
@@ -174,6 +175,8 @@ namespace IngameScript
             CamerasInitCustomData(iniCustomData);
             GearsInitCustomData(iniCustomData);
             CargoInitCustomData(iniCustomData);
+            PowerInitCustomData(iniCustomData);
+            OrbitalInitCustomData(iniCustomData);
 
             DoorInitCustomData(iniCustomData);
         }

@@ -18,6 +18,8 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        Vector3D vTargetAttack;
+
         #region GATLINGATTACK
         /*
          * 0 Masterinit
@@ -88,7 +90,7 @@ namespace IngameScript
             StatusLog(moduleName + ":Attack!", textPanelReport);
             Echo("current_state=" + current_state.ToString());
             MyShipMass myMass;
-            myMass = ((IMyShipController)gpsCenter).CalculateShipMass();
+            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double effectiveMass =  myMass.PhysicalMass;;
             double maxThrust = calculateMaxThrust(thrustForwardList);
 
@@ -106,10 +108,10 @@ namespace IngameScript
             //	Echo("height=" + shipDim.HeightInMeters().ToString("0.0"));
             //	Echo("length=" + shipDim.LengthInMeters().ToString("0.0"));
 
-            IMyTextPanel txtPanel = getTextBlock("Sensor Report");
-            StatusLog("clear", txtPanel);
+ //           IMyTextPanel txtPanel = getTextBlock("Sensor Report");
+ //           StatusLog("clear", txtPanel);
 
-            Vector3D currentpos = gpsCenter.GetPosition();
+            Vector3D currentpos = shipOrientationBlock.GetPosition();
             CTRL_COEFF = 0.99;
             bWantFast = true;
 
@@ -183,18 +185,18 @@ namespace IngameScript
                         ResetMotion();
                         Vector3D vVec;
 
-                        Vector3D targetPos = vTargetMine;
+                        Vector3D targetPos = vTargetAttack;
 
-                        vVec = vTargetMine - currentpos;
+                        vVec = vTargetAttack - currentpos;
                         double distance = vVec.Length();
                         Echo("Distance=" + distance);
 
                         bool bAimed = false;
-                        bAimed = GyroMain("forward", vVec, gpsCenter);
+                        bAimed = GyroMain("forward", vVec, shipOrientationBlock);
                         if (bAimed)
                         {
                             Echo("Aimed");
-                            if (doCameraScan(cameraForwardList, vTargetMine))
+                            if (doCameraScan(cameraForwardList, vTargetAttack))
                             {
                                 if (lastDetectedInfo.IsEmpty())
                                 { // it moved or is already dead.
@@ -234,10 +236,10 @@ namespace IngameScript
                         Echo("Distance=" + distance);
 
                         bool bAimed = false;
-                        bAimed = GyroMain("forward", vVec, gpsCenter);
+                        bAimed = GyroMain("forward", vVec, shipOrientationBlock);
                         if (bAimed) powerUpThrusters(thrustForwardList);
 
-                        ((IMyShipController)gpsCenter).DampenersOverride = true;
+                        ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
 
                         if (doCameraScan(cameraForwardList, distance + 200))
                         {
@@ -285,20 +287,20 @@ namespace IngameScript
                         ResetMotion();
 
                         bool bAimed = false;
-                        bAimed = GyroMain("forward", vVec, gpsCenter);
+                        bAimed = GyroMain("forward", vVec, shipOrientationBlock);
 
                         if (distance < 700)
                         {
                             Echo("In of range");
                             // start circle strafe
-                            ((IMyShipController)gpsCenter).DampenersOverride = false;
+                            ((IMyShipController)shipOrientationBlock).DampenersOverride = false;
                             if (bAimed || distance < 300 || velocityShip < 25) powerUpThrusters(thrustRightList, 45); // should be based on bounding box size of target.
                             if (distance > 200) powerUpThrusters(thrustForwardList, 25);
                         }
                         else
                         { // moving out of range.  move closer
                             Echo("out of range");
-                            ((IMyShipController)gpsCenter).DampenersOverride = true;
+                            ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
                             powerUpThrusters(thrustForwardList);
                         }
                         if (doCameraScan(cameraForwardList, distance + 100))
@@ -360,7 +362,7 @@ namespace IngameScript
                         if ((distance - stoppingM) > (sqStandoffDistance * 1.5))//|| distance >750)
                         {
                             Echo("Long Distance:  Closing");
-                            bAimed = GyroMain("forward", vVec, gpsCenter);
+                            bAimed = GyroMain("forward", vVec, shipOrientationBlock);
                             if (bAimed)
                             {
                                 if (distance > sqStandoffDistance * 3)
@@ -408,7 +410,7 @@ namespace IngameScript
                             debugGPSOutput("targetposPan", targetPos);
 
                             vVec = targetPos - currentpos;
-                            bAimed = GyroMain("forward", vVec, gpsCenter);
+                            bAimed = GyroMain("forward", vVec, shipOrientationBlock);
                             if (bBoxVerbose) Echo("dAimOffset:" + dAimOffset);
                             // pan back and forth..
                             if (bAimed)
@@ -533,11 +535,11 @@ namespace IngameScript
 
                         //				minAngleRad =0.005f;
                         bool bAimed = false;
-                        bAimed = GyroMain("forward", vVec, gpsCenter);
+                        bAimed = GyroMain("forward", vVec, shipOrientationBlock);
                         if (bAimed)
                         {
                             minAngleRad = 0.005f;
-                            GyroMain("forward", vVec, gpsCenter);
+                            GyroMain("forward", vVec, shipOrientationBlock);
 
                         }
 
@@ -705,12 +707,9 @@ namespace IngameScript
                 else
                 {
                     antSend("WICO:ATTACKM:" + deiInfo(targetDetectedInfo));
-
                 }
             }
         }
-
-
 
     }
 }

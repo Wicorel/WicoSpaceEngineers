@@ -73,6 +73,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoLogging", "..\WicoLoggi
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoNavCommon", "..\WicoNavCommon\WicoNavCommon\WicoNavCommon.shproj", "{ACA5E80D-385D-4789-8F75-0C96A5FD8571}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoOrientedBB", "..\WicoOrientedBB\WicoOrientedBB\WicoOrientedBB.shproj", "{DB7CD1DF-BA22-47A3-AF57-5EE4B084DD18}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\WicoControllers\WicoControllers\WicoControllers.projitems*{05de1441-fd05-4413-a8ae-3586f15d1b96}*SharedItemsImports = 13
@@ -91,7 +93,6 @@ Global
 		..\WicoDoors\WicoDoors\WicoDoors.projitems*{4cd3ff7d-0e20-4026-9823-79c99173309c}*SharedItemsImports = 13
 		..\WicoDrills\WicoDrills\WicoDrills.projitems*{4da7bc66-5b0e-436c-bd2a-cd063083f8d1}*SharedItemsImports = 13
 		..\AvionicsGyroControl\AvionicsGyroControl\AvionicsGyroControl.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
-		..\ModeGoTarget\ModeGoTarget\ModeGoTarget.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\SharedWicoGyro\SharedWicoGyro\SharedWicoGyro.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\ShipDim\ShipDim\ShipDim.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoAirVents\WicoAirVents\WicoAirVents.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
@@ -113,6 +114,7 @@ Global
 		..\WicoModes\WicoModes\WicoModes.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoNavCommon\WicoNavCommon\WicoNavCommon.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoNavRotors\WicoNavRotors\WicoNavRotors.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoOrientedBB\WicoOrientedBB\WicoOrientedBB.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoPower\WicoPower\WicoPower.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSensors\WicoSensors\WicoSensors.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSerialize\WicoSerialize\WicoSerialize.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
@@ -135,6 +137,7 @@ Global
 		..\WicoSerialize\WicoSerialize\WicoSerialize.projitems*{bf4282f6-a87f-4b4e-9c3b-8d6543623371}*SharedItemsImports = 13
 		..\WicoGrid\WicoGrid\WicoGrid.projitems*{cd5d65c2-f2c3-4a71-9c46-ade848dff34b}*SharedItemsImports = 13
 		..\ShipRoll\ShipRoll\ShipRoll.projitems*{dafad80c-e6ba-4f09-b4c8-ec000242f3e6}*SharedItemsImports = 13
+		..\WicoOrientedBB\WicoOrientedBB\WicoOrientedBB.projitems*{db7cd1df-ba22-47a3-af57-5ee4b084dd18}*SharedItemsImports = 13
 		..\WicoConnectors\WicoConnectors\WicoConnectors.projitems*{ebdc9b7f-652a-45bc-90c3-d16b2e3a6914}*SharedItemsImports = 13
 		..\WicoDetectedEntities\WicoDetectedEntities\WicoDetectedEntities.projitems*{f4a99ae8-36f6-4801-a032-8a03e3d52220}*SharedItemsImports = 13
 		..\WicoCraftMain\WicoCraftMain\WicoCraftMain.projitems*{fa8f37cd-be12-4622-86bb-64cdd4e1b8f9}*SharedItemsImports = 13

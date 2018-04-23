@@ -22,9 +22,8 @@ namespace IngameScript
 
 
         // multi-arg
-        #region arguments
 
-        bool processArguments(string sArgument)
+        bool moduleProcessArguments(string sArgument)
         {
             string[] varArgs = sArgument.Trim().Split(';');
 
@@ -35,7 +34,6 @@ namespace IngameScript
                 if (args[0] == "timer")
                 {
                     processTimerCommand();
-
                 }
                 else if (args[0] == "idle")
                     ResetToIdle();
@@ -47,7 +45,7 @@ namespace IngameScript
                     { // we have hydro thrusters to check
                         if (areThrustersOn(thrustForwardList, thrusthydro))
                         {
-                            Echo("FTO");
+ //                           Echo("FTO");
                             if (countThrusters(thrustBackwardList, thrustion) > 0)
                             {
                                 if (areThrustersOn(thrustBackwardList, thrustion))
@@ -78,7 +76,7 @@ namespace IngameScript
                         }
                         else
                         { // back hydro are NOT on.  don't touch front hydro
-                            Echo("BNO");
+//                            Echo("BNO");
                             if (areThrustersOn(thrustBackwardList, thrustion))
                             {
                                 // hydro back is off and ion front is on.
@@ -153,7 +151,7 @@ namespace IngameScript
                         Echo("invalid float value:" + cargs[2]);
                         continue;
                     }
-                    Echo("SetValueFloat:" + cargs[0] + " " + cargs[1] + " to:" + fValue.ToString());
+ //                   Echo("SetValueFloat:" + cargs[0] + " " + cargs[1] + " to:" + fValue.ToString());
                     block.SetValueFloat(cargs[1], fValue);
                 }
                 else if (args[0] == "brake")
@@ -169,6 +167,7 @@ namespace IngameScript
                     else Echo("No Ship Controller found");
 
                 }
+                /*
 		        else if (args[0] == "namecameras")
 		        {
 			        nameCameras(cameraForwardList, "FRONT");
@@ -179,6 +178,7 @@ namespace IngameScript
 			        nameCameras(cameraRightList, "RIGHT");
 
 		        }
+                */
 		        else if (args[0] == "togglerange")
 		        {
 			        bLongRange = !bLongRange;
@@ -213,6 +213,9 @@ namespace IngameScript
                 {
                     // do nothing special
                 }
+
+                /*
+                // NAV Commands:
                 else if (args[0] == "W" || args[0] == "O")
                 { // [W|O] <x>:<y>:<z>  || W <x>,<y>,<z>
                   // W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
@@ -347,6 +350,7 @@ namespace IngameScript
                         Echo(varArgs[iArg]);
                     }
                 }
+                */
                 else
                 {
                     int iDMode;
@@ -359,7 +363,11 @@ namespace IngameScript
             }
             return false; // keep processing in main
         }
-        #endregion
+
+        bool moduleProcessAntennaMessage(string sArgument)
+        {
+            return false;
+        }
 
 
     }

@@ -73,10 +73,10 @@ namespace IngameScript
             if (orientationBlock == null) return;
             //            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustAllList, localGridFilter);
             var thrustLocal = new List<IMyTerminalBlock>();
+            GetTargetBlocks<IMyThrust>(ref thrustLocal);
+            //            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
 
             // Add 'cutter' exclusion from thrusters.
-            GetTargetBlocks<IMyThrust>(ref thrustLocal);
-//            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
             for (int i = 0; i < thrustLocal.Count; i++)
             {
                 if (thrustLocal[i].CustomName.ToLower().Contains(sCutterThruster) || thrustLocal[i].CustomData.ToLower().Contains(sCutterThruster))
@@ -157,78 +157,11 @@ namespace IngameScript
             thrustAllList.Clear();
 
             if (orientationBlock == null) return "No Orientation Block";
-            //            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustAllList, localGridFilter);
-            var thrustLocal = new List<IMyTerminalBlock>();
 
-            // Add 'cutter' exclusion from thrusters.
-            GetTargetBlocks<IMyThrust>(ref thrustLocal);
-//            GridTerminalSystem.GetBlocksOfType<IMyThrust>(thrustLocal, localGridFilter);
-            for (int i = 0; i < thrustLocal.Count; i++)
-            {
-                if (thrustLocal[i].CustomName.ToLower().Contains(sCutterThruster) || thrustLocal[i].CustomData.ToLower().Contains(sCutterThruster))
-                    continue;
-                if (thrustLocal[i].CustomName.ToLower().Contains(sIgnoreThruster) || thrustLocal[i].CustomData.ToLower().Contains(sIgnoreThruster))
-                    continue;
-                thrustAllList.Add(thrustLocal[i]);
-            }
-
-            Matrix fromGridToReference;
-            orientationBlock.Orientation.GetMatrix(out fromGridToReference);
-            Matrix.Transpose(ref fromGridToReference, out fromGridToReference);
-
-            thrustForward = 0;
-            thrustBackward = 0;
-            thrustDown = 0;
-            thrustUp = 0;
-            thrustLeft = 0;
-            thrustRight = 0;
-
-            for (int i = 0; i < thrustAllList.Count; ++i)
-            {
-                var thruster = thrustAllList[i] as IMyThrust;
-                Matrix fromThrusterToGrid;
-                thruster.Orientation.GetMatrix(out fromThrusterToGrid);
-                Vector3 accelerationDirection = Vector3.Transform(fromThrusterToGrid.Backward, fromGridToReference);
-                int iThrustType = thrusterType(thrustAllList[i]);
-                if (iThrustType == thrustatmo)
-                    atmoThrustCount++;
-                else if (iThrustType == thrusthydro)
-                    hydroThrustCount++;
-                else if (iThrustType == thrustion)
-                    ionThrustCount++;
-                else if (iThrustType == thrusthover)
-                    hoverThrustCount++;
-                if (accelerationDirection == thrustIdentityMatrix.Left)
-                {
-                    thrustLeft += maxThrust((IMyThrust)thrustAllList[i]);
-                    thrustLeftList.Add(thrustAllList[i]);
-                }
-                else if (accelerationDirection == thrustIdentityMatrix.Right)
-                {
-                    thrustRight += maxThrust((IMyThrust)thrustAllList[i]);
-                    thrustRightList.Add(thrustAllList[i]);
-                }
-                else if (accelerationDirection == thrustIdentityMatrix.Backward)
-                {
-                    thrustBackward += maxThrust((IMyThrust)thrustAllList[i]);
-                    thrustBackwardList.Add(thrustAllList[i]);
-                }
-                else if (accelerationDirection == thrustIdentityMatrix.Forward)
-                {
-                    thrustForward += maxThrust((IMyThrust)thrustAllList[i]);
-                    thrustForwardList.Add(thrustAllList[i]);
-                }
-                else if (accelerationDirection == thrustIdentityMatrix.Up)
-                {
-                    thrustUp += maxThrust((IMyThrust)thrustAllList[i]);
-                    thrustUpList.Add(thrustAllList[i]);
-                }
-                else if (accelerationDirection == thrustIdentityMatrix.Down)
-                {
-                    thrustDown += maxThrust((IMyThrust)thrustAllList[i]);
-                    thrustDownList.Add(thrustAllList[i]);
-                }
-            }
+            thrustersInit(orientationBlock, ref thrustForwardList, ref thrustBackwardList, 
+                ref thrustDownList, ref thrustUpList, 
+                ref thrustLeftList, ref thrustRightList
+                );
 
             string s;
             s = ">";

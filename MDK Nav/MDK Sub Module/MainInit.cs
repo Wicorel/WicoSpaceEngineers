@@ -29,6 +29,7 @@ namespace IngameScript
             ThrustersInitCustomData(iniCustomData);
             GyroInitCustomData(iniCustomData);
             CamerasInitCustomData(iniCustomData);
+            CommunicationsInitCustomData(iniCustomData);
 
             NavInitCustomData(iniCustomData);
 
@@ -36,10 +37,6 @@ namespace IngameScript
         }
 
 
-        string sInitResults = "";
-        string sArgResults = "";
-
-        int currentInit = 0;
 
         string doInit()
         {

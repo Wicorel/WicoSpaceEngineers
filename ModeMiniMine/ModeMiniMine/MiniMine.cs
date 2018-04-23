@@ -18,6 +18,18 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        private StringBuilder strbMining = new StringBuilder();
+
+        double miningElapsedMs = 0;
+
+        bool bValidExit = false;
+
+        // need to serialize
+        // should reverse meaning to bTunnelTurnable
+        bool bBoringOnly = false;
+
+        // are we finding ore by test bores, or full destructive mining?
+        // are we going to a specific ore?
 
         /*
          * 0 Master Init
@@ -77,22 +89,6 @@ namespace IngameScript
          * 
          * 
          */
-        private StringBuilder strbMining = new StringBuilder();
-
-        double miningElapsedMs = 0;
-
-//        long miningAsteroidID = -1;
-
-        bool bValidExit = false;
-
-        bool bBoringOnly = false;
-
-//        QuadrantCameraScanner miningfrontScanner;
-//        QuadrantCameraScanner miningbackScanner;
-//        QuadrantCameraScanner miningleftScanner;
-//        QuadrantCameraScanner miningrightScanner;
-//        QuadrantCameraScanner miningtopScanner;
-//        QuadrantCameraScanner miningbottomScanner;
 
         void doModeFindOre()
         {
@@ -142,7 +138,7 @@ namespace IngameScript
                 case 0:
                     if (fMiningMinThrust < fTargetMiningMps * 1.1f)
                         fMiningMinThrust = fTargetMiningMps * 1.1f;
-                    bValidAsteroid = false; /// really?  shouuldn't we be keepint this?
+                    bValidAsteroid = false; // really?  shouuldn't we be keepint this?
                     bValidExit = false;
                     bMiningWaitingCargo = false;
 
@@ -318,7 +314,7 @@ namespace IngameScript
                     { // active mining
                       // TODO: check just the front sensor and we are 'exiting' if no asteroid active.
                       //
-                        Echo("Actively Mining forward");
+                        Echo("Mining forward");
                         if (bBoringOnly) Echo("Boring Miner");
                         sb = sensorsList[0];
                         sb2 = sensorsList[1];
@@ -335,7 +331,7 @@ namespace IngameScript
                         for (int i = 0; i < aSensors.Count; i++)
                         {
                             IMySensorBlock s = aSensors[i] as IMySensorBlock;
-                            List<MyDetectedEntityInfo> lmyDEI = new List<MyDetectedEntityInfo>();
+                            var lmyDEI = new List<MyDetectedEntityInfo>();
                             s.DetectedEntities(lmyDEI);
                             if (AsteroidProcessLDEI(lmyDEI))
                                 bLocalAsteroid = true;
@@ -384,7 +380,7 @@ namespace IngameScript
                                 GyroMain("forward", vExpectedAsteroidExit, shipOrientationBlock);
                                 //                                GyroMain("forward", vExpectedExit, shipOrientationBlock);
                                 turnDrillsOn();
-                                mineMoveForward(fTargetMiningMps, fMiningAbortMps);
+                                mineMoveForward(fTargetMiningMps, fMiningAbortMps, thrustForwardList, thrustBackwardList);
                                 //                                bWantFast = true;
                                 bWantMedium = true;
                             }
@@ -393,7 +389,7 @@ namespace IngameScript
                         {
                             // we have nothing in front, but are still close
                             turnDrillsOff();
-                            mineMoveForward(fAsteroidApproachMps, fAsteroidApproachAbortMps);
+                            mineMoveForward(fAsteroidApproachMps, fAsteroidApproachAbortMps, thrustForwardList, thrustBackwardList);
                             bWantMedium = true;
                         }
                     }
@@ -586,7 +582,7 @@ namespace IngameScript
                                         }
                                         else
                                         {
-                                            mineMoveForward(fAsteroidApproachMps, fAsteroidApproachAbortMps);
+                                            mineMoveForward(fAsteroidApproachMps, fAsteroidApproachAbortMps, thrustForwardList, thrustBackwardList);
                                         }
                                     }
                                     //                                      bValidExit = true;
@@ -598,7 +594,7 @@ namespace IngameScript
                                     // we scanned, but didn't hit anything.  it's likely a donut
                                     double distance = (vTargetAsteroid - shipOrientationBlock.GetPosition()).Length();
                                     Echo("Distance=" + distance.ToString());
-                            mineMoveForward(fTargetMiningmps,fAbortmps);
+                            mineMoveForward(fTargetMiningmps,fAbortmps, thrustForwardList, thrustBackwardList);
                                     if (distance < 5)
                                     {
                                         vExpectedExit = vTargetAsteroid - shipOrientationBlock.GetPosition();
@@ -774,7 +770,7 @@ namespace IngameScript
                 case 0:
                     if (fMiningMinThrust < fTargetMiningMps * 1.1f)
                         fMiningMinThrust = fTargetMiningMps * 1.1f;
-                    bValidAsteroid = false; /// really?  shouuldn't we be keeping this?
+                    bValidAsteroid = false; // really?  shouuldn't we be keeping this?
                     bValidExit = false;
                     bMiningWaitingCargo = false;
 
@@ -890,7 +886,10 @@ namespace IngameScript
                 case 11://11 - await sensor set
                     miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
                     if (miningElapsedMs < dSensorSettleWaitMS) return;
-                    current_state = 20;
+                    if (bBoringOnly)
+                        current_state = 30;
+                    else
+                        current_state = 20;
                     break;
                 case 20: //20 - turn around until aimed ->30
                     {
@@ -924,9 +923,9 @@ namespace IngameScript
                         if (bAimed)
                         {
                             current_state = 30;
-                            //mineMoveForward(fTargetMiningmps,fAbortmps);
+                            //mineMoveForward(fTargetMiningmps,fAbortmps, thrustForwardList, thrustBackwardList);
                         }
-                        
+
                     }
                     break;
                 case 30:
@@ -941,7 +940,14 @@ namespace IngameScript
                         if (bAimed)
                         {
                             bWantMedium = true;
-                            mineMoveForward(fTargetMiningMps, fMiningAbortMps);
+                            if (bBoringOnly)
+                            {
+                                mineMoveForward(fTargetMiningMps, fMiningAbortMps, thrustBackwardList, thrustForwardList);
+                            }
+                            else
+                            {
+                                mineMoveForward(fTargetMiningMps, fMiningAbortMps, thrustForwardList, thrustBackwardList);
+                            }
                         }
                         else bWantFast = true;
 
@@ -961,7 +967,6 @@ namespace IngameScript
                         if (!bLocalAsteroid)
                         {
                             ResetMotion();
-                            //                            turnDrillsOff();
                             sleepAllSensors();
                             current_state = 40;
                         }
@@ -983,34 +988,39 @@ namespace IngameScript
         }
 
         int iMMFWiggle = 0;
-        void mineMoveForward(float fTarget, float fAbort)
+        void mineMoveForward(float fTarget, float fAbort, List<IMyTerminalBlock> mmfForwardThrust, List<IMyTerminalBlock> mmfBackwardThrust)
         {
+            if (iMMFWiggle < 0) iMMFWiggle = 0;
+
 //            Echo("mMF " + iMMFWiggle.ToString());
-            double maxThrust = calculateMaxThrust(thrustForwardList);
+            double maxThrust = calculateMaxThrust(mmfForwardThrust);
             //            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
             MyShipMass myMass;
             myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
+            float thrustPercent = 100f;
+            if (effectiveMass>0)
+            {
+                double maxDeltaV = (maxThrust) / effectiveMass;
+                //           Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+                if(maxDeltaV>0) thrustPercent = (float)(fTarget / maxDeltaV);
+                //            Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
+            }
             //            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
-            double maxDeltaV = (maxThrust) / effectiveMass;
- //           Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
-
-            float thrustPercent = (float)(fTarget / maxDeltaV);
-//            Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
 
             if (velocityShip > fAbort)
             {
  //               Echo("ABORT");
                 powerDownThrusters(thrustAllList);
-                iMMFWiggle = 0;
+                iMMFWiggle--;
             }
             else if (velocityShip < (fTarget*0.90))
             {
                 if (velocityShip < 0.5f)
                     iMMFWiggle++;
 //                Echo("Push ");
-                powerUpThrusters(thrustForwardList, thrustPercent + iMMFWiggle);
+                powerUpThrusters(mmfForwardThrust, thrustPercent + iMMFWiggle);
 //                powerUpThrusters(thrustForwardList, 15f + iMMFWiggle);
             }
             else if(velocityShip<(fTarget*1.2))
@@ -1019,14 +1029,14 @@ namespace IngameScript
 //                 Echo("Coast");
                 iMMFWiggle /= 2;
                // turn off reverse thrusters and 'coast'.
-                powerDownThrusters(thrustBackwardList, thrustAll, true);
-                powerDownThrusters(thrustForwardList);
+                powerDownThrusters(mmfBackwardThrust, thrustAll, true);
+                powerDownThrusters(mmfForwardThrust);
             }
             else
             { // above 120% target, but below abort
 //                Echo("Coast2");
                 iMMFWiggle /= 2;
-                powerUpThrusters(thrustForwardList, 1f); // coast
+                powerUpThrusters(mmfForwardThrust, 1f); // coast
             }
 
         }

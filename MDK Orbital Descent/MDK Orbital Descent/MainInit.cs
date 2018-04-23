@@ -97,69 +97,12 @@ namespace IngameScript
 
         }
 
-  //      IMyTextPanel gpsPanel = null;
-/*
-        string BlockInit()
-        {
-            string sInitResults = "";
-
-            List<IMyTerminalBlock> centerSearch = new List<IMyTerminalBlock>();
-            GridTerminalSystem.SearchBlocksOfName(sGPSCentershipOrientationBlock, centerSearch, localGridFilter);
-            if (centerSearch.Count == 0)
-            {
-                centerSearch = GetBlocksContains<IMyRemoteControl>("[NAV]");
-                if (centerSearch.Count == 0)
-                {
-                    GridTerminalSystem.GetBlocksOfType<IMyRemoteControl>(centerSearch, localGridFilter);
-                    if (centerSearch.Count == 0)
-                    {
-                        GridTerminalSystem.GetBlocksOfType<IMyCockpit>(centerSearch, localGridFilter);
-                        //                GridTerminalSystem.GetBlocksOfType<IMyShipController>(centerSearch, localGridFilter);
-                        int i = 0;
-                        for (; i < centerSearch.Count; i++)
-                        {
-                            Echo("Checking Controller:" + centerSearch[i].CustomName);
-                            if (centerSearch[i] is IMyCryoChamber)
-                                continue;
-                            break;
-                        }
-                        if (i >= centerSearch.Count)
-                        {
-                            sInitResults += "!!NO valid Controller";
-                            Echo("No Controller found");
-                        }
-                        else
-                        {
-                            sInitResults += "S";
-                            Echo("Using good ship Controller: " + centerSearch[i].CustomName);
-                        }
-                    }
-                    else
-                    {
-                        sInitResults += "R";
-                        Echo("Using First Remote control found: " + centerSearch[0].CustomName);
-                    }
-                }
-            }
-            else
-            {
-                sInitResults += "N";
-                Echo("Using Named: " + centerSearch[0].CustomName);
-            }
-            if (centerSearch.Count > 0)
-                shipOrientationBlock = centerSearch[0];
-            /*
-            List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-            blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
-            if (blocks.Count > 0)
-                gpsPanel = blocks[0] as IMyTextPanel;
-            return sInitResults;
-        }
-
-    */
         string modeOnInit()
         {
-
+            if(iMode== MODE_DESCENT)
+            {
+                current_state = 0;
+            }
             return ">";
         }
         #endregion

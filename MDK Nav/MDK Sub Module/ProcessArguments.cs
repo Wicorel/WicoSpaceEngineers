@@ -19,6 +19,7 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
 
+        string sArgResults = "";
 
 
         // mult-arg
@@ -152,7 +153,8 @@ namespace IngameScript
                     }
 
 
-                    NavGoTarget(new Vector3D(x, y, z));
+                    NavGoTarget(new Vector3D(x, y, z),30,0,arrivalDistanceMin);
+
                     //                    vNavTarget = new Vector3D(x, y, z);
                     //                    bValidNavTarget = true;
                     if (args[0] == "W")
@@ -174,7 +176,7 @@ namespace IngameScript
                     if (xOk)
                     {
                         shipSpeedMax = x;
-                        Echo("Set speed to:" + shipSpeedMax.ToString("0.00"));
+//                        Echo("Set speed to:" + shipSpeedMax.ToString("0.00"));
                         //             setMode(MODE_ARRIVEDTARGET);
                     }
                     else
@@ -196,7 +198,7 @@ namespace IngameScript
                     if (xOk)
                     {
                         arrivalDistanceMin = x;
-                        Echo("Set arrival distance to:" + arrivalDistanceMin.ToString("0.00"));
+//                        Echo("Set arrival distance to:" + arrivalDistanceMin.ToString("0.00"));
                     }
 
                     else

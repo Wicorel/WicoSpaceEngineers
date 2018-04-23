@@ -37,32 +37,17 @@ namespace IngameScript
             ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
             StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textPanelReport);
 
-            if (thrustStage1UpList.Count < 1)
-            {
-                if ((craft_operation & CRAFT_MODE_ROCKET) > 0)
-                {
-                    thrustStage1UpList = thrustForwardList;
-                    thrustStage1DownList = thrustBackwardList;
-
-                    cameraStage1LandingList = cameraBackwardList;
-                }
-                else
-                {
-                    //Echo("Setting thrustStage1UpList");
-                    thrustStage1UpList = thrustUpList;
-                    thrustStage1DownList = thrustDownList;
-                    cameraStage1LandingList = cameraDownList;
-                }
-            }
             if (current_state == 0)
             {
+                calculateBestGravityThrust();
+
                 float fAtmoPower, fHydroPower, fIonPower;
-                calculateHoverThrust(thrustStage1UpList, out fAtmoPower, out fHydroPower, out fIonPower);
+                calculateHoverThrust(thrustOrbitalUpList, out fAtmoPower, out fHydroPower, out fIonPower);
                 if (fAtmoPower > 0) powerDownThrusters(thrustAllList, thrustatmo);
                 if (fHydroPower > 0) powerDownThrusters(thrustAllList, thrusthydro);
                 if (fIonPower > 0) powerDownThrusters(thrustAllList, thrustion);
                 current_state = 10;
-//                powerDownThrusters(thrustAllList, thrustAll);
+//                powerDownThrusters(thrustAllList, thrustAll); // turns ON thrusters
             }
 
             bool bGearsLocked = anyGearIsLocked();
@@ -113,7 +98,7 @@ namespace IngameScript
                 }
                 landingDoMode(0);
             }
-            if (doCameraScan(cameraStage1LandingList, elevation * 2)) // scan down 2x current alt
+            if (doCameraScan(cameraOrbitalLandingList, elevation * 2)) // scan down 2x current alt
             {
                 // we are able to do a scan
                 if (!lastDetectedInfo.IsEmpty())
@@ -168,23 +153,30 @@ namespace IngameScript
             else
             {
                 if ((craft_operation & CRAFT_MODE_NOAUTOGYRO) > 0)
+                {
+                    gyrosOff();
                     StatusLog("Wico Gravity Alignment OFF", textPanelReport);
+                }
                 else
                 {
                     StatusLog("Gravity Alignment Operational", textPanelReport);
 
+                    /*
                     string sOrientation = "";
                     if ((craft_operation & CRAFT_MODE_ROCKET) > 0)
                         sOrientation = "rocket";
-
-                    GyroMain(sOrientation);
-                    bWantFast = true;
+                    */
+                    bool bAimed = GyroMain(sOrbitalUpDirection);
+                    if (bAimed)
+                        bWantMedium = true;
+                    else
+                        bWantFast = true;
                 }
             }
 
             //	StatusLog("Car:" + progressBar(cargopcent), textPanelReport);
 
-            //	batteryCheck(0, false);//,textPanelReport);
+// done in premodes	        batteryCheck(0, false);//,textPanelReport);
             //	if (bValidExtraInfo)
             {
                 if (batteryPercentage >= 0) StatusLog("Bat:" + progressBar(batteryPercentage), textPanelReport);
@@ -198,7 +190,7 @@ namespace IngameScript
                 if (hydroPercent >= 0)
                 {
                     StatusLog("Hyd:" + progressBar(hydroPercent * 100), textPanelReport);
-                    Echo("H:" + (hydroPercent*100).ToString("0.0") + "%");
+ //                   Echo("H:" + (hydroPercent*100).ToString("0.0") + "%");
                     if(hydroPercent<0.20f)
                       StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
                 }

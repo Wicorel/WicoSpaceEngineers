@@ -16,6 +16,9 @@ using VRageMath;
 
 namespace IngameScript
 {
+
+    OBSOLETE
+
     partial class Program : MyGridProgram
     {
         int cargopcthighwater = 95;
@@ -45,9 +48,7 @@ namespace IngameScript
          *  
          *  35 Mining
          *  
-         *  
-         *  100 Init sensor for forward search for asteroid
-         *      -> 101
+         *  100 Init sensor for forward search for asteroid -> 101
          *      
          *  101 Check sensors for asteroid in front
          *      check camera for asteroid in front
@@ -79,22 +80,20 @@ namespace IngameScript
         	MyShipMass myMass;
             myMass=((IMyShipController)gpsCenter).CalculateShipMass();
             double effectiveMass = myMass.PhysicalMass;
-
             double maxThrust = calculateMaxThrust(thrustForwardList);
-
-            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
-            Echo("maxThrust=" + maxThrust.ToString("N0"));
+//            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
+//            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
             double maxDeltaV = (maxThrust) / effectiveMass;
-
             Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+
             Echo("Cargo=" + cargopcent.ToString() + "%");
 
             Echo("velocity=" + velocityShip.ToString("0.00"));
-            Echo("#Sensors=" + sensorsList.Count);
-            Echo("width=" + shipDim.WidthInMeters().ToString("0.0"));
-            Echo("height=" + shipDim.HeightInMeters().ToString("0.0"));
-            Echo("length=" + shipDim.LengthInMeters().ToString("0.0"));
+//            Echo("#Sensors=" + sensorsList.Count);
+//            Echo("width=" + shipDim.WidthInMeters().ToString("0.0"));
+//            Echo("height=" + shipDim.HeightInMeters().ToString("0.0"));
+//            Echo("length=" + shipDim.LengthInMeters().ToString("0.0"));
 
             IMyTextPanel txtPanel = getTextBlock("Sensor Report");
             StatusLog("clear", txtPanel);
@@ -217,14 +216,12 @@ namespace IngameScript
                         else
                         { // we are inside asteroid
                             turnEjectorsOn();
-//                            blockApplyAction(ejectorList, "OnOff_On");
                             if (cargopcent > cargopcthighwater && !bWaitingCargo) //maxDeltaV<fTargetMiningmps ||
                             {
                                 // need to check how much stone we have.. if zero, then we're full.. go exit.
                                 // TODO:
                                 ResetMotion();
                                 turnDrillsOff();
-//                                blockApplyAction(drillList, "OnOff_Off");
                                 bWaitingCargo = true;
                             }
                             if (bWaitingCargo && cargopcent > cargopctlowwater)
@@ -367,7 +364,7 @@ namespace IngameScript
         int iMMFWiggle = 0;
         void mineMoveForward()
         {
-            Echo("mMF");
+            Echo("mMF:"+iMMFWiggle);
 
             if (velocityShip > fAbortmps)
             {

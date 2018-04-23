@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Orbital Descent";
-        string sVersion = "3.4A";
+        string sVersion = "3.4B";
 
 
         int minAltRotate = 2000; // minimum altitude to start rotation into retro position

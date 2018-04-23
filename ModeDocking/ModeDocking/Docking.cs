@@ -198,6 +198,7 @@ namespace IngameScript
             }
             if (current_state == 100)
             {
+                // TODO: allow for relay ships that are NOT bases..
                 float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
                 antennaMaxPower(false,range);
                 if (sensorsList.Count > 0)

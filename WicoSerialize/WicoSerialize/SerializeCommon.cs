@@ -112,16 +112,20 @@ namespace IngameScript
 
         string SerializeInit()
         {
-
             string sInitResults = "S";
 
             SaveFile = null;
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksNamed<IMyTextPanel>(SAVE_FILE_NAME);
 
-            if (blocks.Count > 1) Echo("Multiple blocks found: \"" + SAVE_FILE_NAME + "\"");
+            if (blocks.Count > 1)
+            {
+//                Echo("Multiple blocks found: \"" + SAVE_FILE_NAME + "\"");
+                bStartupError = true;
+                sStartupError+= "\nMultiple blocks found:\"" + SAVE_FILE_NAME + "\"";
+            }
             else if (blocks.Count == 0)
-            { 
+            {
                 blocks = GetBlocksContains<IMyTextPanel>(SAVE_FILE_NAME);
                 if (blocks.Count == 1)
                     SaveFile = blocks[0] as IMyTextPanel;
@@ -138,7 +142,7 @@ namespace IngameScript
             if (SaveFile == null)
             {
                 sInitResults = "-";
-                Echo(SAVE_FILE_NAME + " (TextPanel) is missing or Named incorrectly. ");
+//                Echo(SAVE_FILE_NAME + " (TextPanel) is missing or Named incorrectly. ");
             }
             return sInitResults;
         }

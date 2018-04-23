@@ -43,7 +43,7 @@ namespace IngameScript
                 StatusLog("\nCraft Needs attention", textPanelReport);
 
             }
-            if (iMode == MODE_GOINGTARGET) { doModeGoTarget(); }
+ //           if (iMode == MODE_GOINGTARGET) { doModeGoTarget(); }
 
             IMyShipController isc = GetActiveController();
             if (isc == null)

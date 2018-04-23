@@ -75,6 +75,7 @@ namespace IngameScript
                 TanksStockpile(false);
 //                vDock = shipOrientationBlock.GetPosition();
                 powerDownThrusters(thrustAllList); // turns ON all thrusters.
+                                                   // TODO: allow for relay ships that are NOT bases..
                 float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
                 antennaMaxPower(false,range);
                 current_state = 100;

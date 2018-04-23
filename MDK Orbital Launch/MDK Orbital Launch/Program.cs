@@ -21,7 +21,7 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "Orbital Launch";
-        string sVersion = "3.4A";
+        string sVersion = "3.4B";
 
         const string sshipOrientationBlock = "Craft Remote Control";
 
@@ -70,6 +70,7 @@ namespace IngameScript
             }
             else
             {
+                Echo("Battery Check Delay");
                 if (dBatteryCheckLast < 0)
                 {
                     // first-time init
@@ -102,16 +103,18 @@ namespace IngameScript
                 }
                 */
             }
-            Echo(output);
+            if (output != "") Echo(output);
             output = "";
 
-            Echo("Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW"));
+            output+="Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW");
+            if (output != "") Echo(output);
 
-            float fCurrentReactorOutput = 0;
+            output = "";
+                float fCurrentReactorOutput = 0;
             reactorCheck(out fCurrentReactorOutput);
             if (reactorList.Count > 0)
             {
-                output = "Reactors: #" + reactorList.Count.ToString();
+                output += "Reactors: #" + reactorList.Count.ToString();
                 output += " - " + maxReactorPower.ToString("0.00") + "MW\n";
                 float fPer = (float)(fCurrentReactorOutput / totalMaxPowerOutput * 100);
                 output += " Curr Output=" + fCurrentReactorOutput.ToString("0.00") + "MW" + " : " + fPer.ToString("0.00") + "%";
@@ -127,27 +130,33 @@ namespace IngameScript
                 */
 
             }
-            Echo(output);
+            if(output!="") Echo(output);
             output = "";
             Echo("TotalMaxPower=" + totalMaxPowerOutput.ToString("0.00" + "MW"));
 
             TanksCalculate();
+            output = "";
             if (oxyPercent >= 0)
             {
-                Echo("O:" + oxyPercent.ToString("000.0%"));
+                output+="O:" + oxyPercent.ToString("000.0%");
             }
-            else Echo("No Oxygen Tanks");
+            else output+="No Oxygen Tanks";
 
             if (hydroPercent >= 0)
             {
-                Echo("H:" + hydroPercent.ToString("000.0%"));
+                output+=" H:" + hydroPercent.ToString("000.0%");
             }
-            else Echo("No Hydrogen Tanks");
+            else output+=" No Hydrogen Tanks";
+
+            if (output != "") Echo(output);
+            output = "";
 
             if (gasgenList.Count > 0)
             {
                 Echo(gasgenList.Count + " Gas Gens");
             }
+
+            output = "";
             if (AnyConnectorIsConnected()) output += "Connected";
 
 	        else
@@ -174,9 +183,7 @@ namespace IngameScript
         void ModuleDeserialize(INIHolder iNIHolder)
         {
             OrbitalDeserialize(iNIHolder);
-
         }
-
 
     }
 }

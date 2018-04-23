@@ -18,6 +18,9 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        const float fMinValue = float.MinValue;
+        const float fMaxValue = float.MaxValue;
+
         /*
          * 
          * OLD:
@@ -95,12 +98,23 @@ namespace IngameScript
          }; 
          */
 
-            /* New
-             * 0 = master init
-             * 10 delay for sensors, then check for asteroid found
-             * if found ->20
-             * else ->100
-             */
+        /* New
+         * 0 = master init
+         * 10 delay for sensors, then check for asteroid found
+         * if found ->20
+         * else ->100
+         * 
+         * 20 start mining
+         * 100 setsensors for search down ->110
+         * 110 search down ->120 ->130
+         * 120 found asteroid below. start ->122
+         * 122 move down ->start mining
+         * 200 no asteroid below. set sensor
+         * 225 do shift left
+         * (need shift right)
+         * 300 
+         * 
+         */
 
         double shiftElapsedMs = 0;
 
@@ -138,6 +152,9 @@ namespace IngameScript
                 return;
             }
 
+            Vector3D currentPos = shipOrientationBlock.GetPosition();
+            double dist = (vLastAsteroidExit - currentPos).Length();
+
             sb = sensorsList[0];
             sb2 = sensorsList[1];
             switch (current_state)
@@ -147,14 +164,15 @@ namespace IngameScript
                     sleepAllSensors();
                     sb2.DetectAsteroids = true;
                     sb.DetectAsteroids = true;
-                    setSensorShip(sb, 0, 0, 0, 0, 45, 0);
+                    setSensorShip(sb, fMinValue, fMinValue, fMinValue, fMinValue, 45, fMinValue);
                     current_state = 10;
                     shiftElapsedMs = 0;
+                    vLastAsteroidExit = shipOrientationBlock.GetPosition();
                     break;
                 case 10:
                     Echo("Check for front");
                     shiftElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
-                    if (shiftElapsedMs < 1) return;// delay for sensors
+                    if (shiftElapsedMs < dSensorSettleWaitMS) return;// delay for sensors
                     if (velocityShip > 0.2f) return;
                     Echo("Checking");
                     aSensors = activeSensors();
@@ -174,16 +192,20 @@ namespace IngameScript
                         }
                         else Echo("Did NOT find asteroid");
                     }
-                    if (bLocalFoundAsteroid) current_state = 20;
+                    if (bLocalFoundAsteroid) current_state = 99;
                     else current_state = 100;
                     break;
-                case 20:
-                    setMode(MODE_FINDORE);
-                    break;
+                case 99:
+                    { // delay for motion, then start mining
+                        ResetMotion();
+                        if (velocityShip > 0.2f) return;
+                        setMode(MODE_FINDORE);
+                        break;
+                    }
                 case 100:
                     // asteroid not in sensor range
                     // check 'down' for asteroid.
-                    setSensorShip(sb, 0, 0, 0, 0, 45, 0);
+                    setSensorShip(sb, float.MinValue, float.MinValue, float.MinValue, float.MinValue, 45, float.MinValue);
                     setSensorShip(sb2, 0, 0, 0, 45, 45, 0);
                     current_state = 110;
                     shiftElapsedMs = 0;
@@ -192,7 +214,7 @@ namespace IngameScript
                     {
                         // search 'down'
                         shiftElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
-                        if (shiftElapsedMs < 1) return;
+                        if (shiftElapsedMs < dSensorSettleWaitMS) return;
                         if (velocityShip > 0.2f) return;
 
                         bool bDownAsteroid = false;
@@ -210,17 +232,21 @@ namespace IngameScript
                         // we found asteroid 'below'.  Move down
 
                         // check 'down' for asteroid.
- //                       setSensorShip(sb, 0, 0, 0, 0, 45, 0);
+                        //                       setSensorShip(sb, 0, 0, 0, 0, 45, 0);
                         // don't need to change sensors
+                        setSensorShip(sb, float.MinValue, float.MinValue, float.MinValue, float.MinValue, 45, float.MinValue);
+                        setSensorShip(sb2, 0, 0, 0, 45, 45, 0);
                         current_state = 122;
-//                        shiftElapsedMs = 0;
+                        shiftElapsedMs = 0;
                         break;
                     }
                 case 122:
-                    {
+                    { // we found asteorid below. move down until forward sensor sees it.
                         Echo("Move Down");
-//                        if (shiftElapsedMs < 1) return;
-//                        if (velocityShip > 0.2f) return;
+                        shiftElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
+                        if (shiftElapsedMs < dSensorSettleWaitMS) return;
+                        if (velocityShip > 0.2f) return;
+
                         // move down until sensor sees asteroid
                         bool bDownAsteroid = false;
                         bool bForwardAsteroid = false;
@@ -256,13 +282,58 @@ namespace IngameScript
 
                         break;
                     }
-                case 130:
+                case 200:
                     {
                         // No asteroid 'below'.
                         // need to shift (left) (old state 2)
                         Echo("Shift Left");
+                        setSensorShip(sb, float.MinValue, float.MinValue, float.MinValue, float.MinValue, 45, float.MinValue);
+                        setSensorShip(sb2, 0, 0, 0, 45, 45, 0);
+                        current_state = 225;
                         break;
                     }
+                case 225:
+                    {
+                        // move down until sensor sees asteroid
+                        bool bDownAsteroid = false;
+                        bool bForwardAsteroid = false;
+                        bool bLarge = false;
+                        bool bSmall = false;
+                        SensorActive(sb2, ref bDownAsteroid, ref bLarge, ref bSmall);
+                        SensorActive(sb, ref bForwardAsteroid, ref bLarge, ref bSmall);
+                        Echo(bForwardAsteroid + ":" + bDownAsteroid);
+                        if (bForwardAsteroid)
+                        {
+                            Echo("Forward");
+                            ResetMotion();
+                            // we have it right in front of us.
+                            setMode(MODE_FINDORE);
+                            //                            current_state = 120;
+                        }
+                        else if (bDownAsteroid)
+                        {
+                            Echo("Down");
+                            if (velocityShip < 0.5)
+                                powerUpThrusters(thrustLeftList, 100f);
+                            else if (velocityShip > fTargetMiningMps)
+                                powerDownThrusters();
+                            else powerUpThrusters(thrustLeftList, 1f);
+                        }
+                        else
+                        {
+                            Echo("Neither");
+                            // we ran out of asteroid.
+                            ResetMotion();
+                            current_state = 130;
+                        }
+
+                        break;
+                    }
+                case 300:
+                    {
+
+                    }
+                    break;
             }
         }
     }

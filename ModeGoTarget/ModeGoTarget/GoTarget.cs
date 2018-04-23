@@ -39,6 +39,8 @@ namespace IngameScript
         /// </summary>
         bool bRotor = false;
 
+        bool bWheels = false;
+
         /*
         States:
         0 -- Master Init
@@ -111,6 +113,12 @@ namespace IngameScript
                     if (shipSpeedMax > 15) shipSpeedMax = 15;
                 }
                 else bRotor = false;
+                if ((craft_operation & CRAFT_MODE_WHEEL) > 0)
+                {
+                    bWheels = true;
+ //                   if (shipSpeedMax > 15) shipSpeedMax = 15;
+                }
+                else bWheels = false;
 
                 GyroControl.SetRefBlock(shipOrientationBlock);
 
@@ -171,7 +179,7 @@ namespace IngameScript
             else if (current_state == 151)
             {
                 bWantFast = true;
-                if (dGravity > 0)
+                if (dGravity > 0 || btmWheels)
                 {
 
                     double elevation = 0;
@@ -203,6 +211,12 @@ namespace IngameScript
             else if (current_state == 155)
             { // for use in gravity: aim at location using yaw only
                 bWantFast = true;
+                if (bWheels)
+                {
+                    current_state = 160;
+                    return;
+                }
+
                 if (dGravity > 0)
                 {
                     Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();

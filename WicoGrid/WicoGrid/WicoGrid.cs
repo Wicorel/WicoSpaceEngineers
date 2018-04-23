@@ -78,10 +78,11 @@ namespace IngameScript
             dockedGrids.Clear();
             localTextPanels.Clear();
             meTextPanels.Clear();
+            localBlocks.Clear();
 
             GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsAllBlocks);
             allBlocksCount = gtsAllBlocks.Count;
-//            Echo("Found " + gtsAllBlocks.Count.ToString() + " Blocks");
+ //           Echo("Found " + gtsAllBlocks.Count.ToString() + " Blocks");
 
             foreach (var block in gtsAllBlocks)
             {
@@ -137,7 +138,7 @@ namespace IngameScript
             s += "D" + dockedGrids.Count.ToString();
             s += "R" + remoteGrids.Count.ToString();
 
-            /*
+//            /*
             Echo("Found " + allGrids.Count.ToString() + " Grids");
             Echo("Found " + localGrids.Count.ToString() + " Local Grids");
             for (int i = 0; i < localGrids.Count; i++) Echo("|" + localGrids[i].CustomName);
@@ -145,7 +146,7 @@ namespace IngameScript
             for (int i = 0; i < dockedGrids.Count; i++) Echo("|" + dockedGrids[i].CustomName);
             Echo("Found " + remoteGrids.Count.ToString() + " Remote Grids");
             for (int i = 0; i < remoteGrids.Count; i++) Echo("|" + remoteGrids[i].CustomName);
-            */
+//            */
             return s;
         }
 
@@ -300,14 +301,32 @@ namespace IngameScript
             if (gtsAllBlocks.Count < 1) gridsInit();
 
             localBlocks.Clear();
+ //           sInitResults += "\nLBI: Ignore=" + sBlockIgnore;
             foreach (var b1 in gtsAllBlocks)
             {
+                /*
+                sInitResults += "\nLBI:" + b1.CustomName;
                 if (
+                    localGridFilter(b1)
+                    )
+                    sInitResults += "\n LOCAL!";
+                else sInitResults += "\n NOT LOCAL";
+
+                if (!(b1.CustomName.Contains(sBlockIgnore)))// || b1.CustomData.Contains(sBlockIgnore)))
+                {
+                    sInitResults += "\n NOT ignored";
+                }
+                else sInitResults += "\n IGNORED";
+                */
+
+                    if (
                     localGridFilter(b1) &&
-                    !(b1.CustomName.Contains(sBlockIgnore) || b1.CustomData.Contains(sBlockIgnore))
+                    !(b1.CustomName.Contains(sBlockIgnore) )//|| b1.CustomData.Contains(sBlockIgnore))
                     )
                     localBlocks.Add(b1);
+ //               else sInitResults += "\n  SKIP";
             }
+   //         sInitResults+="\nLBI: Found " +localBlocks.Count + " Local\n"+gtsAllBlocks.Count +" 'global'";
         }
 
         IMyTerminalBlock get_block(string name)
@@ -342,6 +361,8 @@ namespace IngameScript
             if (Output == null) Output = new List<IMyTerminalBlock>();
             else Output.Clear();
             if (localBlocks.Count < 1) LocalBlocksInit();
+
+//            sInitResults += "\nFound " + localBlocks.Count + " total blocks";
 
             for (int e1 = 0; e1 < localBlocks.Count; e1++)
             {
@@ -514,7 +535,7 @@ namespace IngameScript
                         }
                         if (i >= centerSearch.Count)
                         {
-                            sInitResults += "!!NO valid Controller";
+                            sInitResults += "!!NO valid Controller:"+i+"\n";
                             Echo("No Controller found");
                         }
                         else

@@ -91,10 +91,10 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="MDKUtilities">
-      <HintPath>C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\2jgibfoa.tni\MDKUtilities.dll</HintPath>
+      <HintPath>C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\0l21jpib.zdc\MDKUtilities.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Analyzer Include="C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\2jgibfoa.tni\Analyzers\MDKAnalyzer.dll" />
+    <Analyzer Include="C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\0l21jpib.zdc\Analyzers\MDKAnalyzer.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DoModes.cs" />
@@ -123,6 +123,9 @@
   <Import Project="..\..\WicoSensors\WicoSensors\WicoSensors.projitems" Label="Shared" />
   <Import Project="..\..\ShipDim\ShipDim\ShipDim.projitems" Label="Shared" />
   <Import Project="..\..\WicoINI\WicoINI\WicoINI.projitems" Label="Shared" />
+  <Import Project="..\..\WicoLogging\WicoLogging\WicoLogging.projitems" Label="Shared" />
+  <Import Project="..\..\WicoOrientedBB\WicoOrientedBB\WicoOrientedBB.projitems" Label="Shared" />
+  <Import Project="..\..\WicoScansCommon\WicoScansCommon\WicoScansCommon.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="mdk\mdk.options" DestinationFolder="$(TargetDir)\mdk" />

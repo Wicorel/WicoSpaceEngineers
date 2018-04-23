@@ -20,9 +20,6 @@ namespace IngameScript
     {
 
 
-
-        #region arguments
-
         bool moduleProcessArguments(string sArgument)
         {
             sArgResults = "";
@@ -72,6 +69,13 @@ namespace IngameScript
                 sArgResults = "max speed set to " + fMaxWorldMps.ToString() + "mps";
 
             }
+            else if (args[0] == "autogyro")
+            {
+                if ((craft_operation & CRAFT_MODE_NOAUTOGYRO) > 0)
+                    craft_operation &= ~CRAFT_MODE_NOAUTOGYRO;
+                else
+                    craft_operation |= CRAFT_MODE_NOAUTOGYRO;
+            }
             else if (args[0] == "resetlaunch")
             {
                 bValidOrbitalHome = false;
@@ -101,7 +105,7 @@ namespace IngameScript
             }
             return false; // keep processing in main
         }
-        #endregion
+
         bool moduleProcessAntennaMessage(string sArgument)
         {
             // we directly received an antenna message

@@ -31,6 +31,10 @@
 * T3.3C NAV 
 * redo blockinit
 * 
+* T3.4A Removed NAV
+* Redo sub-module timer calls
+* More options in CustomData
+* 
 * Handles:
 * Master timer for sub-modules
 * Calculates ship speed and vectors
@@ -42,6 +46,13 @@
  * 
  * Detects grid changes and initiates re-init
  * 
+ * 3.4a Current Source
+ * 
+ * 3.4B Current Source 
+ * 
+ * 3.4C NAV?
+ * 
+ * 3.4D Apr 23 2018
 * * 
 * MODE_IDLE
 * MODE_ATTENTION

@@ -23,7 +23,11 @@ namespace IngameScript
         {
             Echo("mode=" + iMode.ToString());
 
-            if (AnyConnectorIsConnected() && !((craft_operation & CRAFT_MODE_ORBITAL) > 0))
+            if (
+                iMode != MODE_ORBITALLAUNCH 
+                && AnyConnectorIsConnected() 
+                && !((craft_operation & CRAFT_MODE_ORBITAL) > 0)
+                )
             {
                 Echo("DM:docked");
                 setMode(MODE_DOCKED);
@@ -61,33 +65,30 @@ namespace IngameScript
         }
         void doModeIdle()
         {
-            //StatusLog("clear",textPanelReport);
+//            StatusLog("clear",textPanelReport);
 
-            StatusLog(moduleName + " Manual Control", textPanelReport);
-            if ((craft_operation & CRAFT_MODE_ORBITAL) > 0)
+//            StatusLog(moduleName + " Manual Control", textPanelReport);
+//            if ((craft_operation & CRAFT_MODE_ORBITAL) > 0)
             {
                 if (dGravity <= 0)
                 {
+                    /*
+                     *   We only handle planet modes.
                     if (AnyConnectorIsConnected()) setMode(MODE_DOCKED);
                     else
                     {
                         setMode(MODE_INSPACE);
                         gyrosOff();
                     }
+                    */
                 }
-                else setMode(MODE_HOVER);
-                // else setMode(MODE_LAUNCHPREP);
+                else
+                {
+                    if (AnyConnectorIsConnected()) setMode(MODE_LAUNCHPREP);
+                    else
+                        setMode(MODE_HOVER);
+                }
             }
-            /*
-            * else
-            */
-            /*
-            {
-
-            if (bWantAutoGyro)
-            GyroMain("");
-            }
-            */
         }
         #endregion
         void ResetMotion(bool bNoDrills = false)

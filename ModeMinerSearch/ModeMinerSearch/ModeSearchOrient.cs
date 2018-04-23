@@ -22,8 +22,6 @@ namespace IngameScript
 
         double SOElapsedMs = 0;
 
-
-
         /*
          * States
          * 0 Master init

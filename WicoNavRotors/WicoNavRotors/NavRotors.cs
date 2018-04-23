@@ -30,6 +30,7 @@ namespace IngameScript
             rotorNavLeftList.Clear();
             rotorNavRightList.Clear();
 
+            // TODO: Get rotor direction by using orientation
             GridTerminalSystem.GetBlocksOfType<IMyMotorStator>(rotorNavList, localGridFilter);
 
             for (int i = 0; i < rotorNavList.Count; i++)

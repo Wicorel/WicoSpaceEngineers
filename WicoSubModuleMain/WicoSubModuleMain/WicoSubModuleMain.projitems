@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BlockActions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Deployment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubModuleMain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ticks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimerTriggers.cs" />

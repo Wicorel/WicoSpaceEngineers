@@ -35,11 +35,6 @@ namespace IngameScript
 
         #region maininit
 
-        string sInitResults = "";
-        string sArgResults = "";
-
-        int currentInit = 0;
-
         string doInit()
         {
 

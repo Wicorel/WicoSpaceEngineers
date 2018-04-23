@@ -44,8 +44,15 @@
 * 
 * 3.4A Current Code Mar 03 2018
 * 
+* 3.4B performance enhancements (medium instead of fast)
+*  new calculateBestGravityThrust() to choose best orbital launch side dynamically
+*  add autogyro command to toggle autogyro
+*  add timer names to CustomData
+*  optimize updatetype. Add debug update to show updatetype
+*  Apr 03 2018
+* 
 * Need:
 *  circumnavigate planet to target spot
 *  'ask' for docking position after arriving at 'spot'
-*
+
 */

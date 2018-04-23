@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "TechnikerMain";
-        string sVersion = "T3.3C NAV";
+        string sVersion = "T3.4D";
 
         const string velocityFormat = "0.00";
 
@@ -29,7 +29,6 @@ namespace IngameScript
 
         double dBatteryCheckWait = 5; //seconds between checks
         double dBatteryCheckLast = -1;
-
 
         void moduleDoPreModes()
         {
@@ -261,9 +260,11 @@ namespace IngameScript
 
         void ModuleSerialize(INIHolder iNIHolder)
         {
+            NavDeserialize(iNIHolder);
         }
         void ModuleDeserialize(INIHolder iNIHolder)
         {
+            NavSerialize(iNIHolder);
         }
 
     }

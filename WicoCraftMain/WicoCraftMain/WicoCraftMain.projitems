@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BlockActions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Constructor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Deployment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ticks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TimerTriggers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WicoCraftMain.cs" />

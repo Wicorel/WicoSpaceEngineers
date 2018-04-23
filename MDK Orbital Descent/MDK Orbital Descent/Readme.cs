@@ -43,6 +43,8 @@
  * Only write to textpanels at end of script run
  * 
  * 3.4A Current Source build Mar 03 2018 (Gyro Property)
+ * 
+ * 3.4B Current Source Apr 03 2018
 
  * NEED:  
  *  

@@ -1,4 +1,4 @@
-﻿/* Wico Craft EXAMPLE control sub-module 
+﻿/* Wico Craft ATTACK DRONE control sub-module 
  * 
  *  * Handles MODES:
  * MODE_XXX
@@ -10,6 +10,8 @@
  * 3.1 Updates for SE V1.185
  * 
  * 3.2 Current Source 01062018
+ * 
+ * 3.4A Current Source Apr 08 2018
  * 
  * NEED:  
  *  

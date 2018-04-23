@@ -59,6 +59,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoCargoCheck", "..\WicoCa
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoOrbitalCommon", "..\WicoOrbitalCommon\WicoOrbitalCommon\WicoOrbitalCommon.shproj", "{B04663CB-CCF9-4999-8E77-C84BA8DC1CD9}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoNavCommon", "..\WicoNavCommon\WicoNavCommon\WicoNavCommon.shproj", "{ACA5E80D-385D-4789-8F75-0C96A5FD8571}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep\ModeOrbitalLaunchPrep.projitems*{012b8a6f-b626-488d-994a-f9cd3143aa5b}*SharedItemsImports = 13
@@ -90,6 +92,7 @@ Global
 		..\WicoLandingGears\WicoLandingGears\WicoLandingGears.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoLogging\WicoLogging\WicoLogging.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoModes\WicoModes\WicoModes.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoNavCommon\WicoNavCommon\WicoNavCommon.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoOrbitalCommon\WicoOrbitalCommon\WicoOrbitalCommon.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoPower\WicoPower\WicoPower.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSerialize\WicoSerialize\WicoSerialize.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
@@ -101,6 +104,7 @@ Global
 		..\WicoLandingGears\WicoLandingGears\WicoLandingGears.projitems*{784351ff-951d-468a-8548-89fbd6129569}*SharedItemsImports = 13
 		..\WicoGasGens\WicoGasGens\WicoGasGens.projitems*{85a26d0e-61e6-4e70-b394-7216bdf0b2a5}*SharedItemsImports = 13
 		..\WicoAntenna\WicoAntenna\WicoAntenna.projitems*{90e13f91-d516-48ea-b357-a7816d5fceef}*SharedItemsImports = 13
+		..\WicoNavCommon\WicoNavCommon\WicoNavCommon.projitems*{aca5e80d-385d-4789-8f75-0c96a5fd8571}*SharedItemsImports = 13
 		..\WicoINI\WicoINI\WicoINI.projitems*{af4e1641-f4bb-4496-b66c-0f6388717061}*SharedItemsImports = 13
 		..\WicoOrbitalCommon\WicoOrbitalCommon\WicoOrbitalCommon.projitems*{b04663cb-ccf9-4999-8e77-c84ba8dc1cd9}*SharedItemsImports = 13
 		..\WicoCameras\WicoCameras\WicoCameras.projitems*{b867062b-ebc6-479b-847c-7b7b95836a9b}*SharedItemsImports = 13

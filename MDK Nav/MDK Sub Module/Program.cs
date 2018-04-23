@@ -18,10 +18,6 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        string OurName = "Wico Craft";
-
-        string moduleName = "NAV";
-        string sVersion = "3.4H";
 
         const string velocityFormat = "0.00";
 
@@ -43,6 +39,7 @@ namespace IngameScript
         {
 //            Echo(sInitResults);
             echoInstructions();
+            Echo(craftOperation());
         }
 
         void ResetMotion(bool bNoDrills = false)  
@@ -51,6 +48,7 @@ namespace IngameScript
             gyrosOff();
             powerDownRotors(rotorNavLeftList);
             powerDownRotors(rotorNavRightList);
+            WheelsPowerUp(0);
 
 	        if (shipOrientationBlock is IMyRemoteControl) ((IMyRemoteControl)shipOrientationBlock).SetAutoPilotEnabled(false);
 	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
