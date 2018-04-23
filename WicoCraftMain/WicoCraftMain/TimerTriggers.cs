@@ -41,6 +41,29 @@ namespace IngameScript
         void initTimers()
         {
             dTimers.Clear();
+            TimerTriggerFind(sFastTimer);
+            TimerTriggerFind(sSubModuleTimer);
+            TimerTriggerFind(sMainTimer);
+        }
+
+        bool TimerTriggerFind(string sKeyword)
+        {
+            var blocks = new List<IMyTerminalBlock>();
+            if (dTimers.ContainsKey(sKeyword))
+            {
+                blocks = dTimers[sKeyword];
+                if (blocks.Count > 0)
+                    return true;
+            }
+            else
+            {
+                blocks = GetBlocksContains<IMyTimerBlock>(sKeyword);
+                dTimers.Add(sKeyword, blocks);
+                if (blocks.Count > 0)
+                    return true;
+            }
+
+            return false;
         }
 
         bool doSubModuleTimerTriggers(string sKeyword = "[WCCS]")
@@ -56,7 +79,7 @@ namespace IngameScript
             }
             else
             {
-                blocks = GetBlocksContains<IMyTerminalBlock>(sKeyword);
+                blocks = GetBlocksContains<IMyTimerBlock>(sKeyword);
                 dTimers.Add(sKeyword, blocks);
             }
 
