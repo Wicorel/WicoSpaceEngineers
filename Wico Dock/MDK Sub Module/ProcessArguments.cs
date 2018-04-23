@@ -21,7 +21,7 @@ namespace IngameScript
 
         bool moduleProcessArguments(string sArgument)
         {
-            sArgResults = "";
+//            sArgResults = "";
             // string output="";
             if (sArgument == "" || sArgument == "timer" || sArgument == "wccs" || sArgument == "wcct")
             {
@@ -66,13 +66,13 @@ namespace IngameScript
                 int iDMode;
                 if (modeCommands.TryGetValue(args[0].ToLower(), out iDMode))
                 {
-                    sArgResults = "mode set to " + iDMode;
+//                    sArgResults = "mode set to " + iDMode;
                     setMode(iDMode);
                     // return true;
                 }
                 else
                 {
-                    sArgResults = "Unknown argument:" + args[0];
+//                    sArgResults = "Unknown argument:" + args[0];
                 }
             }
             return false; // keep processing in main

@@ -33,6 +33,8 @@ namespace IngameScript
             SensorInitCustomData(iniCustomData);
             PowerInitCustomData(iniCustomData);
             //            CargoInitCustomData(iniCustomData);
+            CommunicationsInitCustomData(iniCustomData);
+
             NavInitCustomData(iniCustomData);
 
             DockingInitCustomData(iniCustomData);
@@ -43,11 +45,6 @@ namespace IngameScript
 
 
         #region maininit
-
-        string sInitResults = "";
-        string sArgResults = "";
-
-        int currentInit = 0;
 
         string doInit()
         {

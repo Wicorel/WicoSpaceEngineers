@@ -117,4 +117,11 @@ Current Code Compile Mar 08 2018
 Redo BASE serilization to be key=value
 Use NAV module for long-range travel
 
+3.4D Current Code Apr 22, 2018
+
+
+TODO:
+option to Support 'memory' connectors; like MK3 did
+option to turn off 'wico' communication docking
+
 */

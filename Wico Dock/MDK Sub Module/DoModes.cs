@@ -59,6 +59,7 @@ namespace IngameScript
         {
             if (iMode != MODE_ATTENTION)
             {
+                // TODO: allow for relay ships that are NOT bases..
                 float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
                 antennaMaxPower(false, range);
             }
