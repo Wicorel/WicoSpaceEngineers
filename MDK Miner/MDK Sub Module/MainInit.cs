@@ -33,12 +33,9 @@ namespace IngameScript
 
             PowerInitCustomData(iniCustomData);
             CargoInitCustomData(iniCustomData);
+            CommunicationsInitCustomData(iniCustomData);
         }
 
-        string sInitResults = "";
-        string sArgResults = "";
-
-        int currentInit = 0;
 
         string doInit()
         {

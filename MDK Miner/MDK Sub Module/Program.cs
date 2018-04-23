@@ -14,16 +14,10 @@ using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Game;
 using VRageMath;
 
-//          <Editable>true</Editable>
-
 namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        string OurName = "Wico Craft";
-        string moduleName = "MINER";
-        string sVersion = "3.4C";
-
         const string velocityFormat = "0.00";
 
         void ResetMotion(bool bNoDrills = false)  
