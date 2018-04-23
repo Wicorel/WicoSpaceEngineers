@@ -18,28 +18,24 @@ namespace IngameScript
         // 20 initial thrust. trying to move
         // 30 initial lift-off achieved.  start landing config retraction
         // 31 continue to accelerate
-        // 
+        // 35 optimal alignment change.  wait  for new alignment
+
         // 40 have reached max; maintain
-        // 50 wait for release..
+        // 150 wait for release..
 
         double dLastVelocityShip = -1;
-
-        List<IMyTerminalBlock> thrustStage1UpList = new List<IMyTerminalBlock>();
-        List<IMyTerminalBlock> thrustStage1DownList = new List<IMyTerminalBlock>();
-
-        List<IMyTerminalBlock> cameraStage1LandingList = new List<IMyTerminalBlock>();
-
         //        double atmoEffectiveness = 1;
 
-        float fAtmoPower = 0;
-        float fHydroPower = 0;
-        float fIonPower = 0;
+        float fOrbitalAtmoPower = 0;
+        float fOrbitalHydroPower = 0;
+        float fOrbitalIonPower = 0;
 
         bool bOrbitalLaunchDebug = false;
 
         void doModeOrbitalLaunch()
         {
             int next_state = current_state;
+            bool bAligned = false;
 
  //          IMyTextPanel textPanelReport= textPanelReport;
 
@@ -52,26 +48,14 @@ namespace IngameScript
             StatusLog("Planet Gravity: " + dGravity.ToString(velocityFormat) + " g", textPanelReport);
             StatusLog(velocityShip.ToString(velocityFormat) + " m/s", textPanelReport);
             Echo("Orbital Launch. State=" + current_state.ToString());
-            if (thrustStage1UpList.Count < 1)
+            if (thrustOrbitalUpList.Count < 1)
             {
-                if ((craft_operation & CRAFT_MODE_ROCKET) > 0)
-                {
-                    thrustStage1UpList = thrustForwardList;
-                    thrustStage1DownList = thrustBackwardList;
-
-                    cameraStage1LandingList = cameraBackwardList;
-                }
-                else
-                {
-                    Echo("Setting thrustStage1UpList");
-                    thrustStage1UpList = thrustUpList;
-                    thrustStage1DownList = thrustDownList;
-                    cameraStage1LandingList = cameraDownList;
-                }
+                calculateBestGravityThrust();
             }
 
             if (current_state == 0)
             {
+                calculateBestGravityThrust();
                 //		dtStartShip = DateTime.Now;
                 bWantFast = true;
                 dLastVelocityShip = 0;
@@ -88,7 +72,7 @@ namespace IngameScript
                     ConnectAnyConnectors(false, false);// "OnOff_Off");
                     //			blockApplyAction(gearList, "OnOff_Off"); // in case autolock is set.
                     gearsLock(false);// blockApplyAction(gearList, "Unlock");
-                    current_state = 50;
+                    current_state = 150;
                     return;
                 }
                 else
@@ -99,32 +83,32 @@ namespace IngameScript
                     bValidOrbitalHome = true;
 
                     // assume we are hovering; do FULL POWER launch.
-                    fAtmoPower = 0;
-                    fHydroPower = 0;
-                    fIonPower = 0;
+                    fOrbitalAtmoPower = 0;
+                    fOrbitalHydroPower = 0;
+                    fOrbitalIonPower = 0;
 
-                    if (ionThrustCount > 0) fIonPower = 75;
+                    if (ionThrustCount > 0) fOrbitalIonPower = 75;
                     if (hydroThrustCount > 0)
-                    {
-                        for (int i = 0; i < thrustStage1UpList.Count; i++)
+                    { // only use Hydro power if they are already turned on
+                        for (int i = 0; i < thrustOrbitalUpList.Count; i++)
                         {
-                            if (thrusterType(thrustStage1UpList[i]) == thrusthydro)
-                                if (thrustStage1UpList[i].IsWorking)
+                            if (thrusterType(thrustOrbitalUpList[i]) == thrusthydro)
+                                if (thrustOrbitalUpList[i].IsWorking)
                                 {
-                                    fHydroPower = 100;
+                                    fOrbitalHydroPower = 100;
                                     break;
                                 }
                         }
                     }
-                    if (atmoThrustCount > 0) fAtmoPower = 100;
+                    if (atmoThrustCount > 0) fOrbitalAtmoPower = 100;
 
-                    powerDownThrusters(thrustStage1DownList, thrustAll, true);
+                    powerDownThrusters(thrustOrbitalDownList, thrustAll, true);
 
                     current_state = 30;
                     return;
                 }
             }
-            if (current_state == 50)
+            if (current_state == 150)
             {
                 StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + current_state.ToString(), textLongStatus, true);
                 if (AnyConnectorIsConnected() || AnyConnectorIsLocked() || anyGearIsLocked())
@@ -159,24 +143,24 @@ namespace IngameScript
                 vTarget = vOrbitalHome;
             }
 
-            double alt = 0;
+            double elevation = 0;
+
+            ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+            StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textPanelReport);
+            double alt = elevation;
+            Echo("Alt=" + alt.ToString("0.00"));
+
             if (bValidTarget)
             {
  //               alt = (vCurrentPos - vTarget).Length();
  //               StatusLog("Distance: " + alt.ToString("N0") + " Meters", textPanelReport);
-
-                double elevation = 0;
-
-                ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
-                StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textPanelReport);
-
-
             }
+
             if (current_state == 10)
             {
                 bWantFast = true;
-                calculateHoverThrust(thrustStage1UpList, out fAtmoPower, out fHydroPower, out fIonPower);
-                powerDownThrusters(thrustStage1DownList, thrustAll, true);
+                calculateHoverThrust(thrustOrbitalUpList, out fOrbitalAtmoPower, out fOrbitalHydroPower, out fOrbitalIonPower);
+                powerDownThrusters(thrustOrbitalDownList, thrustAll, true);
                 current_state = 20;
                 return;
             }
@@ -200,23 +184,39 @@ namespace IngameScript
                     next_state = 30; // we have started to lift off.
                     dLastVelocityShip = 0;
                 }
+                
+                string sOrientation = "up";
+                if ((craft_operation & CRAFT_MODE_ROCKET) > 0)
+                    sOrientation = "rocket";
+
+                bAligned = GyroMain(sOrientation);
+                if (!bAligned)
+                    bWantFast = true;
             }
             else
             {
                 bWantMedium = true;
                 if (alt > 5)
                 {
+                    /*
                     if ((craft_operation & CRAFT_MODE_NOAUTOGYRO) > 0)
                         StatusLog("Wico Gravity Alignment OFF", textPanelReport);
                     else
+                    */
                     {
 
                         StatusLog("Gravity Alignment Operational", textPanelReport);
+                        /*
                         string sOrientation = "";
                         if ((craft_operation & CRAFT_MODE_ROCKET) > 0)
                             sOrientation = "rocket";
 
                         if (!GyroMain(sOrientation))
+                            bWantFast = true;
+                            */
+                        Echo("Align=" + sOrbitalUpDirection);
+                        bAligned = GyroMain(sOrbitalUpDirection);
+                        if (!bAligned)
                             bWantFast = true;
                     }
                 }
@@ -230,8 +230,19 @@ namespace IngameScript
             }
             if (current_state == 31)
             { // accelerate to max speed
+                // turn on in case they change...
+                powerDownThrusters(thrustOrbitalDownList, thrustAll);
+                if(calculateBestGravityThrust())
+                {
+                    current_state = 35;
+                    bWantFast = true;
+                    return;
+                }
+                powerDownThrusters(thrustOrbitalDownList, thrustAll, true);
+
                 StatusLog("Accelerating to max speed (" + fMaxWorldMps.ToString("0") + ")", textPanelReport);
                 Log("Accelerating to max speed");
+                Echo("Accelerating to max speed");
                 if (dLastVelocityShip < velocityShip)
                 { // we are Accelerating
                     if (bOrbitalLaunchDebug) Echo("Accelerating");
@@ -253,29 +264,37 @@ namespace IngameScript
                     increasePower(dGravity, alt);// and add some more
                 }
             }
-
+            if(current_state==35)
+            {
+                // re-align and then resume
+                powerDownThrusters(thrustAllList, thrustAll);
+//                bAligned = GyroMain(sOrbitalUpDirection);
+                if (bAligned)
+                    next_state = 31;
+            }
             if (current_state == 40)
             { // maintain max speed
-                StatusLog("Maintain max speed", textPanelReport);
+                // turn on in case they change...
+                powerDownThrusters(thrustOrbitalDownList, thrustAll);
+                if (calculateBestGravityThrust())
+                {
+                    current_state = 45;
+                    bWantFast = true;
+                    return;
+                }
+                powerDownThrusters(thrustOrbitalDownList, thrustAll, true);
+
                 Log("Maintain max speed");
+                Echo("Maintain max speed");
                 if (bOrbitalLaunchDebug) StatusLog("Expectedv=" + expectedV.ToString("0.00") + " max=" + fMaxWorldMps.ToString("0.00"), textPanelReport);
                 if (bOrbitalLaunchDebug) Echo("Expectedv=" + expectedV.ToString("0.00") + " max=" + fMaxWorldMps.ToString("0.00"));
-                double dMin = (fMaxWorldMps - fMaxWorldMps * .05);
+                double dMin = (fMaxWorldMps - fMaxWorldMps * .01); // within n% of max mps
                 if (expectedV > dMin)
                 // if(velocityShip>(fMaxMps-5))
                 {
-                    calculateHoverThrust(thrustStage1UpList, out fAtmoPower, out fHydroPower, out fIonPower);
-                    if (bOrbitalLaunchDebug) Echo("hover thrust:" + fAtmoPower.ToString("0.00") + ":" + fHydroPower.ToString("0.00") + ":" + fIonPower.ToString("0.00"));
-                    if (bOrbitalLaunchDebug) StatusLog("hover thrust:" + fAtmoPower.ToString("0.00") + ":" + fHydroPower.ToString("0.00") + ":" + fIonPower.ToString("0.00"), textPanelReport);
-                    /*
-                     * Not needed as of 1.185
-                    if (fAtmoPower < 1.001)
-                        fAtmoPower = 0;
-                    if (fHydroPower < 1.001)
-                        fHydroPower = 0;
-                    if (fIonPower < 1.001)
-                        fIonPower = 0;
-                        */
+                    bool bThrustOK=calculateHoverThrust(thrustOrbitalUpList, out fOrbitalAtmoPower, out fOrbitalHydroPower, out fOrbitalIonPower);
+                    if (bOrbitalLaunchDebug) Echo("hover thrust:" + fOrbitalAtmoPower.ToString("0.00") + ":" + fOrbitalHydroPower.ToString("0.00") + ":" + fOrbitalIonPower.ToString("0.00"));
+                    if (bOrbitalLaunchDebug) StatusLog("hover thrust:" + fOrbitalAtmoPower.ToString("0.00") + ":" + fOrbitalHydroPower.ToString("0.00") + ":" + fOrbitalIonPower.ToString("0.00"), textPanelReport);
 
                 }
                 else if (expectedV < (fMaxWorldMps - 10))
@@ -291,6 +310,15 @@ namespace IngameScript
                 blocksOnOff(gearList, true);
                 //                blockApplyAction(gearList, "OnOff_On");
             }
+            if (current_state == 45)
+            {
+                // re-align and then resume
+                powerDownThrusters(thrustAllList, thrustAll);
+                bAligned = GyroMain(sOrbitalUpDirection);
+
+                if (bAligned)
+                    next_state = 40;
+            }
             dLastVelocityShip = velocityShip;
 
             StatusLog("", textPanelReport);
@@ -303,7 +331,7 @@ namespace IngameScript
             if (batteryList.Count > 0)
             {
                 StatusLog("Bat:" + progressBar(batteryPercentage), textPanelReport);
-                Echo("BatteryPercentage=" + batteryPercentage);
+//                Echo("BatteryPercentage=" + batteryPercentage);
             }
             else StatusLog("Bat: <NONE>", textPanelReport);
 
@@ -317,7 +345,7 @@ namespace IngameScript
             if (hydroPercent >= 0)
             {
                 StatusLog("Hyd:" + progressBar(hydroPercent * 100), textPanelReport);
-                Echo("H:" + (hydroPercent*100).ToString("0.0") + "%");
+//                Echo("H:" + (hydroPercent*100).ToString("0.0") + "%");
                 if (hydroPercent < 0.20f)
                 {
                     StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
@@ -345,32 +373,35 @@ namespace IngameScript
 
             int iPowered = 0;
 
-            if (fIonPower > 0)
+            Echo("IonPower=" + fOrbitalIonPower.ToString("0.00"));
+            if (fOrbitalIonPower > 0.01)
             {
                 powerDownThrusters(thrustAllList, thrustatmo, true);
                 powerDownThrusters(thrustAllList, thrustion);
-                iPowered = powerUpThrusters(thrustStage1UpList, fIonPower , thrustion);
+                iPowered = powerUpThrusters(thrustOrbitalUpList, fOrbitalIonPower , thrustion);
                 //Echo("Powered "+ iPowered.ToString()+ " Ion Thrusters");
             }
             else
             {
                 powerDownThrusters(thrustAllList, thrustion, true);
-                powerDownThrusters(thrustStage1UpList, thrustion);
+                powerDownThrusters(thrustOrbitalUpList, thrustion);
             }
 
-            if (fHydroPower > 0)
+            Echo("HydroPower=" + fOrbitalHydroPower.ToString("0.00"));
+            if (fOrbitalHydroPower > 0.01)
             {
 //                Echo("Powering Hydro to " + fHydroPower.ToString());
-                powerUpThrusters(thrustStage1UpList, fHydroPower , thrusthydro);
+                powerUpThrusters(thrustOrbitalUpList, fOrbitalHydroPower , thrusthydro);
             }
             else
             { // important not to let them provide dampener power..
-                powerDownThrusters(thrustStage1DownList, thrusthydro, true);
-                powerDownThrusters(thrustStage1UpList, thrusthydro, true);
+                powerDownThrusters(thrustOrbitalDownList, thrusthydro, true);
+                powerDownThrusters(thrustOrbitalUpList, thrusthydro, true);
             }
-            if (fAtmoPower > 0)
+            Echo("AtmoPower=" + fOrbitalAtmoPower.ToString("0.00"));
+            if (fOrbitalAtmoPower > 0.01)
             {
-                powerUpThrusters(thrustStage1UpList, fAtmoPower , thrustatmo);
+                powerUpThrusters(thrustOrbitalUpList, fOrbitalAtmoPower , thrustatmo);
             }
             else
             {
@@ -382,34 +413,35 @@ namespace IngameScript
             }
 
             {
-                powerDownThrusters(thrustStage1DownList, thrustAll, true);
+                powerDownThrusters(thrustOrbitalDownList, thrustAll, true);
             }
 
             StatusLog("Thrusters", textPanelReport);
             if (ionThrustCount > 0)
             {
-                if(fIonPower<10)
-                    StatusLog("ION:\n/10:" + progressBar(fIonPower*10), textPanelReport);
-                else
-                    StatusLog("ION:" + progressBar(fIonPower), textPanelReport);
+                if (fOrbitalIonPower < .01) StatusLog("ION: Off", textPanelReport);
+                else if (fOrbitalIonPower < 10) StatusLog("ION:\n/10:" + progressBar(fOrbitalIonPower * 10), textPanelReport);
+                else StatusLog("ION:" + progressBar(fOrbitalIonPower), textPanelReport);
             }
+            else StatusLog("ION: None", textPanelReport);
             if (hydroThrustCount > 0)
             {
-                if(fHydroPower<10)
-
-                    StatusLog("HYD\n/10:" + progressBar(fHydroPower*10), textPanelReport);
-                else
-                StatusLog("HYD:" + progressBar(fHydroPower), textPanelReport);
+                if (fOrbitalHydroPower < .01) StatusLog("HYD: Off", textPanelReport);
+                else if (fOrbitalHydroPower<10)   StatusLog("HYD\n/10:" + progressBar(fOrbitalHydroPower*10), textPanelReport);
+                else                        StatusLog("HYD:" + progressBar(fOrbitalHydroPower), textPanelReport);
             }
+            else StatusLog("HYD: None", textPanelReport);
             if (atmoThrustCount > 0)
             {
-                if(fAtmoPower<10)
-                StatusLog("ATM\n/10:" + progressBar(fAtmoPower*10), textPanelReport);
+                if (fOrbitalAtmoPower < .01) StatusLog("ATM: Off", textPanelReport);
+                else if (fOrbitalAtmoPower<10)
+                StatusLog("ATM\n/10:" + progressBar(fOrbitalAtmoPower*10), textPanelReport);
                 else
-                StatusLog("ATM:" + progressBar(fAtmoPower), textPanelReport);
+                StatusLog("ATM:" + progressBar(fOrbitalAtmoPower), textPanelReport);
             }
+            else StatusLog("ATM: None", textPanelReport);
             if (bOrbitalLaunchDebug)
-                StatusLog("I:" + fIonPower.ToString("0.00") + "H:" + fHydroPower.ToString("0.00") + " A:" + fAtmoPower.ToString("0.00"), textPanelReport);
+                StatusLog("I:" + fOrbitalIonPower.ToString("0.00") + "H:" + fOrbitalHydroPower.ToString("0.00") + " A:" + fOrbitalAtmoPower.ToString("0.00"), textPanelReport);
             current_state = next_state;
 
         }
@@ -427,21 +459,21 @@ namespace IngameScript
             if (dGravity > .5 && (atmoThrustCount ==0 || dAtmoEff > 0.10))
             //                if (dGravity > .5 && alt < dAtmoCrossOver)
             {
-                if (fAtmoPower < 100 && atmoThrustCount > 0)
-                    fAtmoPower += 5;
-                else if (fHydroPower == 0 && fIonPower > 0)
+                if (fOrbitalAtmoPower < 100 && atmoThrustCount > 0)
+                    fOrbitalAtmoPower += 5;
+                else if (fOrbitalHydroPower == 0 && fOrbitalIonPower > 0)
                 { // we are using ion already...
-                    if (fIonPower < 100 && ionThrustCount > 0)
-                        fIonPower += 5;
+                    if (fOrbitalIonPower < 100 && ionThrustCount > 0)
+                        fOrbitalIonPower += 5;
                     else
-                        fHydroPower += 5;
+                        fOrbitalHydroPower += 5;
                 }
-                else if (fIonPower < 100 && ionThrustCount > 0)
-                    fIonPower += 5;
-                else if (fHydroPower < 100 && hydroThrustCount > 0)
+                else if (fOrbitalIonPower < 100 && ionThrustCount > 0)
+                    fOrbitalIonPower += 5;
+                else if (fOrbitalHydroPower < 100 && hydroThrustCount > 0)
                 {
                     // fAtmoPower=100;
-                    fHydroPower += 5;
+                    fOrbitalHydroPower += 5;
                 }
                 else // no power left to give, captain!
                 {
@@ -451,22 +483,22 @@ namespace IngameScript
             }
             else if (dGravity > .5 || dAtmoEff < 0.10)
             {
-                if (fIonPower < fAtmoPower && atmoThrustCount > 0 && ionThrustCount > 0)
+                if (fOrbitalIonPower < fOrbitalAtmoPower && atmoThrustCount > 0 && ionThrustCount > 0)
                 {
-                    float f = fIonPower;
-                    fIonPower = fAtmoPower;
-                    fAtmoPower = f;
+                    float f = fOrbitalIonPower;
+                    fOrbitalIonPower = fOrbitalAtmoPower;
+                    fOrbitalAtmoPower = f;
                 }
-                if (fIonPower < 100 && ionThrustCount > 0)
-                    fIonPower += 10;
-                else if (fHydroPower < 100 && hydroThrustCount > 0)
+                if (fOrbitalIonPower < 100 && ionThrustCount > 0)
+                    fOrbitalIonPower += 10;
+                else if (fOrbitalHydroPower < 100 && hydroThrustCount > 0)
                 {
-                    fHydroPower += 5;
+                    fOrbitalHydroPower += 5;
                 }
-                else if (dAtmoEff > 0.10 && fAtmoPower < 100 && atmoThrustCount > 0)
-                    fAtmoPower += 10;
+                else if (dAtmoEff > 0.10 && fOrbitalAtmoPower < 100 && atmoThrustCount > 0)
+                    fOrbitalAtmoPower += 10;
                 else if (dAtmoEff > 0.10 && atmoThrustCount > 0)
-                    fAtmoPower -= 5; // we may be sucking power from ion
+                    fOrbitalAtmoPower -= 5; // we may be sucking power from ion
                 else // no power left to give, captain!
                 {
                     StatusLog("Not Enough Thrust!", textPanelReport);
@@ -475,14 +507,14 @@ namespace IngameScript
             }
             else if (dGravity > .01)
             {
-                if (fIonPower < 100 && ionThrustCount > 0)
-                    fIonPower += 15;
-                else if (fHydroPower < 100 && hydroThrustCount > 0)
+                if (fOrbitalIonPower < 100 && ionThrustCount > 0)
+                    fOrbitalIonPower += 15;
+                else if (fOrbitalHydroPower < 100 && hydroThrustCount > 0)
                 {
-                    fHydroPower += 5;
+                    fOrbitalHydroPower += 5;
                 }
-                else if (dAtmoEff > 0.10 && fAtmoPower < 100 && atmoThrustCount > 0)
-                    fAtmoPower += 10;
+                else if (dAtmoEff > 0.10 && fOrbitalAtmoPower < 100 && atmoThrustCount > 0)
+                    fOrbitalAtmoPower += 10;
                 else // no power left to give, captain!
                 {
                     StatusLog("Not Enough Thrust!", textPanelReport);
@@ -491,10 +523,10 @@ namespace IngameScript
 
             }
 
-            if (fIonPower > 100) fIonPower = 100;
-            if (fAtmoPower > 100) fAtmoPower = 100;
-            if (fAtmoPower < 0) fAtmoPower = 0;
-            if (fHydroPower > 100) fHydroPower = 100;
+            if (fOrbitalIonPower > 100) fOrbitalIonPower = 100;
+            if (fOrbitalAtmoPower > 100) fOrbitalAtmoPower = 100;
+            if (fOrbitalAtmoPower < 0) fOrbitalAtmoPower = 0;
+            if (fOrbitalHydroPower > 100) fOrbitalHydroPower = 100;
 
         }
 
@@ -502,42 +534,42 @@ namespace IngameScript
         {
             if (dGravity > .85 && AtmoEffectiveness() > 0.10)
             {
-                if (fHydroPower > 0)
+                if (fOrbitalHydroPower > 0)
                 {
-                    fHydroPower -= 5;
+                    fOrbitalHydroPower -= 5;
                 }
-                else if (fIonPower > 0)
-                    fIonPower -= 5;
-                else if (fAtmoPower > 10)
-                    fAtmoPower -= 5;
+                else if (fOrbitalIonPower > 0)
+                    fOrbitalIonPower -= 5;
+                else if (fOrbitalAtmoPower > 10)
+                    fOrbitalAtmoPower -= 5;
             }
             else if (dGravity > .3)
             {
-                if (fAtmoPower > 0)
-                    fAtmoPower -= 10;
-                else if (fHydroPower > 0)
+                if (fOrbitalAtmoPower > 0)
+                    fOrbitalAtmoPower -= 10;
+                else if (fOrbitalHydroPower > 0)
                 {
-                    fHydroPower -= 5;
+                    fOrbitalHydroPower -= 5;
                 }
-                else if (fIonPower > 10)
-                    fIonPower -= 5;
+                else if (fOrbitalIonPower > 10)
+                    fOrbitalIonPower -= 5;
 
             }
             else if (dGravity > .01)
             {
-                if (fAtmoPower > 0)
-                    fAtmoPower -= 5;
-                else if (fHydroPower > 0)
+                if (fOrbitalAtmoPower > 0)
+                    fOrbitalAtmoPower -= 5;
+                else if (fOrbitalHydroPower > 0)
                 {
-                    fHydroPower -= 5;
+                    fOrbitalHydroPower -= 5;
                 }
-                else if (fIonPower > 10)
-                    fIonPower -= 5;
+                else if (fOrbitalIonPower > 10)
+                    fOrbitalIonPower -= 5;
             }
 
-            if (fIonPower < 0) fIonPower = 0;
-            if (fAtmoPower < 0) fAtmoPower = 0;
-            if (fHydroPower < 0) fHydroPower = 0;
+            if (fOrbitalIonPower < 0) fOrbitalIonPower = 0;
+            if (fOrbitalAtmoPower < 0) fOrbitalAtmoPower = 0;
+            if (fOrbitalHydroPower < 0) fOrbitalHydroPower = 0;
 
         }
     }
