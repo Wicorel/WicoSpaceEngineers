@@ -35,13 +35,13 @@ namespace IngameScript
             GearsInitCustomData(iniCustomData);
             PowerInitCustomData(iniCustomData);
             CargoInitCustomData(iniCustomData);
+            CommunicationsInitCustomData(iniCustomData);
         }
 
 
-        string sInitResults = "";
-        int currentInit = 0;
 
-        double gridBaseMass = 0;
+
+        double gridBaseMass =-1;
 
         string doInit()
         {
@@ -49,7 +49,11 @@ namespace IngameScript
             // initialization of each module goes here:
 
             // when all initialization is done, set init to true.
-            Echo(gtsAllBlocks.Count.ToString() + " Blocks");
+//            Echo(gtsAllBlocks.Count.ToString() + " Blocks");
+            if(bStartupError)
+            {
+                Echo("(RE)INIT:"+sStartupError);
+            }
 
             do
             {
@@ -58,10 +62,12 @@ namespace IngameScript
                 switch (currentInit)
                 {
                     case 0:
+                        sStartupError = "";
+                        if (bStartupError) gridsInit(); // check the entire grid again
+                        bStartupError = false;
                         StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
                         break;
                     case 1:
-
                         /*
                          * add commands to set modes
                         if(!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
@@ -167,15 +173,97 @@ namespace IngameScript
                         }
 
                         sInitResults += modeOnInit(); // handle mode initializing from load/recompile..
-
+                        break;
+                    case 23:
+                        // do startup error check
                         init = true; // we are done
+                        sStartupError = "";
+                        bStartupError = false;
+                        if(shipOrientationBlock==null)
+                        {
+                            bStartupError = true;
+                            sStartupError += "\nNo Ship Controller";
+                        }
+                        if(ionThrustCount <1 && hydroThrustCount <1 && atmoThrustCount<1)
+                        {
+                            // no thrusters
+                            if(wheelSledList.Count<1)
+                            {
+                                // no sled wheels && no thrusters
+                                if(rotorNavRightList.Count<1)
+                                {
+                                    bStartupError = true;
+                                    sStartupError += "\nNo Propulsion Method Found";
+                                    sStartupError += "\nNo Thrusters.\nNo NAV Rotors\nNo Sled Wheels";
+
+                                }
+                            }
+                            else
+                            {
+                                // sled wheels, but not thrusters...
+                                bStartupError = true;
+                                sStartupError += "\nNo Valid Propulsion Method Found";
+                                sStartupError += "\nSled wheels, but No Thrusters.\nNo NAV Rotors";
+                            }
+                        }
+                        else
+                        {
+                            // we DO have thrusters
+                            if(gyros.Count<1)
+                            {
+                                // thrusters, but no gyros
+                                bStartupError = true;
+                                sStartupError += "\nNo Gyros Found";
+                            }
+                            // check for sled wheels?
+                            if(shipOrientationBlock is IMyShipController)
+                            {
+                                // can check gravity..
+                            }
+                        }
+                        // check for [WCCS] timer, but no Wico Craft Save.. and vice-versa
+                        if(TimerTriggerFind(sSubModuleTimer))
+                        { 
+                            // there is a submodule timer trigger
+                            if(SaveFile==null)
+                            { // no save text panel
+
+                                bStartupError = true;
+                                sStartupError += "\nSubmodule timer, but no text\n panel named:"+ SAVE_FILE_NAME;
+
+                            }
+                        }
+                        else
+                        {
+                            if(bSubModules)
+                            {
+                                bStartupError = true;
+                                sStartupError += "\nSubmodules Enabled, but no\n timer containing:" + sSubModuleTimer;
+                                if (SaveFile == null)
+                                { // no save text panel
+
+                                    bStartupError = true;
+                                    sStartupError += "\n No text\n panel containing:" + SAVE_FILE_NAME;
+
+                                }
+
+                            }
+                        }
+                        if(!bStartupError)
+                        {
+                            init = true;
+                        }
+                        else
+                        {
+                            currentInit = -1; // start init all over again
+                        }
                         break;
                 }
                 currentInit++;
  //               echoInstructions("EInit:" + currentInit + " | ");
  //               Echo("%=" + (float)Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount);
             }
-            while (!init && (((float)Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount) < 0.5f));
+            while (!init && (((float)Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount) < 0.2f));
             if (init) currentInit = 0;
 
             Log(sInitResults);

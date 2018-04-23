@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Master";
-        string sVersion = "3.4D";
+        string sVersion = "3.4E";
 
         const string velocityFormat = "0.00";
 
@@ -30,42 +30,56 @@ namespace IngameScript
         double dBatteryCheckWait = 5; //seconds between checks
         double dBatteryCheckLast = -1;
 
-//        double hydroPercent = -1;
-//        double oxyPercent = -1;
+        //        double hydroPercent = -1;
+        //        double oxyPercent = -1;
 
         void moduleDoPreModes()
         {
 
-
-
             StatusLog("clear", textPanelReport);
             StatusLog("clear", gpsPanel);
+            if (bStartupError)
+            {
+                Echo("Startup Error Detected"+sStartupError);
+                StatusLog("Startup Error Detected" + sStartupError, textPanelReport);
+            }
 
             string output = "";
             if (gridBaseMass > 0)
             {
                 output += "Ship\n";
             }
+            else if (gridBaseMass < 0)
+            {
+                //                output += "Unknown Mass\n";
+            }
             else
             {
                 output += "Station\n";
             }
-            if (AnyConnectorIsConnected()) output += "Connected";
-            else output += "Not Connected";
 
-            if (AnyConnectorIsLocked()) output += "\nLocked";
-            else output += " : Not Locked";
+            if (ConnectorsLocalExist())
+            {
+                if (AnyConnectorIsConnected()) output += "Connected";
+                else output += "Not Connected";
 
-            Echo(output);
-            Log(output);
+                if (AnyConnectorIsLocked()) output += "\nLocked";
+                else output += " : Not Locked";
+            }
+            // else no connectors
+
+            if (output != "")
+            {
+                Echo(output);
+                Log(output);
+            }
             output = "";
 
             if (bWantFast) Echo("FAST!");
 
-            if (dCargoCheckLast > dCargoCheckWait)
+            if ( dCargoCheckLast > dCargoCheckWait)
             {
                 dCargoCheckLast = 0;
-
 
                 doCargoCheck();
             }
@@ -80,8 +94,8 @@ namespace IngameScript
                 dCargoCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
             }
 
-            Echo("Cargo=" + cargopcent.ToString() + "%");
-            //            Echo("Cargo Mult=" + cargoMult.ToString());
+            if(cargopcent>=0)  Echo("Cargo=" + cargopcent.ToString() + "%");
+            // else no cargo
 
             if (dBatteryCheckLast > dBatteryCheckWait)
             {
@@ -98,7 +112,7 @@ namespace IngameScript
                 dBatteryCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
             }
 
-            output += "Batteries: #=" + batteryList.Count.ToString();
+            //output += "Batteries: #=" + batteryList.Count.ToString();
             if (batteryList.Count > 0 && maxBatteryPower > 0)
             {
                 output += " : " + (getCurrentBatteryOutput() / maxBatteryPower * 100).ToString("0.00") + "%";
@@ -124,10 +138,10 @@ namespace IngameScript
                 */
             }
 
-            Echo(output);
+            if(output!="") Echo(output);
             output = "";
 
-            Echo("Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW"));
+            //Echo("Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW"));
 
             float fCurrentReactorOutput = 0;
             reactorCheck(out fCurrentReactorOutput);
@@ -149,10 +163,10 @@ namespace IngameScript
                 */
 
             }
-            Echo(output);
+            if (output != "") Echo(output);
             output = "";
 
-            Echo("TotalMaxPower=" + totalMaxPowerOutput.ToString("0.00" + "MW"));
+//            Echo("TotalMaxPower=" + totalMaxPowerOutput.ToString("0.00" + "MW"));
 
             TanksCalculate();
             /*
@@ -163,13 +177,13 @@ namespace IngameScript
             {
                 Echo("O:" + oxyPercent.ToString("000.0%"));
             }
-            else Echo("No Oxygen Tanks");
+//            else Echo("No Oxygen Tanks");
 
             if (hydroPercent >= 0)
             {
                 Echo("H:" + hydroPercent.ToString("000.0%"));
             }
-            else Echo("No Hydrogen Tanks");
+//            else Echo("No Hydrogen Tanks");
 
             if(gasgenList.Count >0)
             {
@@ -190,7 +204,7 @@ namespace IngameScript
 
         void modulePostProcessing()
         {
-//            Echo(sInitResults);
+//              Echo(sInitResults);
             echoInstructions();
         }
 
@@ -203,6 +217,7 @@ namespace IngameScript
 	        if (shipOrientationBlock is IMyRemoteControl) ((IMyRemoteControl)shipOrientationBlock).SetAutoPilotEnabled(false);
 	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
             if(!bNoDrills) turnDrillsOff();
+            WheelsPowerUp(0);
         }
 
         void MasterReset()
@@ -218,11 +233,10 @@ namespace IngameScript
         }
 
         // need to use me.CustomData
-        #region autoconfig
         void autoConfig()
         {
             craft_operation = CRAFT_MODE_AUTO;
-            if ((craft_operation & CRAFT_MODE_MASK) == CRAFT_MODE_AUTO)
+ //           if ((craft_operation & CRAFT_MODE_MASK) == CRAFT_MODE_AUTO)
             {
                 int iThrustModes = 0;
 
@@ -247,14 +261,21 @@ namespace IngameScript
                 }
 
                 // if it has NAV ROTORS, assume rotor propulsion
-                if(rotorNavLeftList.Count>0 && rotorNavRightList.Count>0) craft_operation |= CRAFT_MODE_ROTOR;
+                if(rotorNavLeftList!=null && rotorNavLeftList.Count>0 && rotorNavRightList.Count>0) craft_operation |= CRAFT_MODE_ROTOR;
 
                 // if it has SLED wheels (and some thrusters), assume SLED propulsion
-                if(wheelSledList.Count>0 && iThrustModes>0) craft_operation |= CRAFT_MODE_SLED;
+                if(wheelSledList!=null && wheelSledList.Count>0 && iThrustModes>0) craft_operation |= CRAFT_MODE_SLED;
 
+                if (gyros!=null && gyros.Count > 1 && !Me.CustomName.ToLower().Contains("nogyros"))
+                    craft_operation |= CRAFT_MODE_HASGYROS;
 
                 if (iThrustModes > 1 || Me.CustomName.ToLower().Contains("orbital"))
                     craft_operation |= CRAFT_MODE_ORBITAL;
+                if (
+                    (wheelList!=null && wheelList.Count>0 && !((craft_operation & CRAFT_MODE_SLED)>0))
+                    ||  Me.CustomName.ToLower().Contains("wheel")
+                    )
+                    craft_operation |= CRAFT_MODE_WHEEL;
                 if (Me.CustomName.ToLower().Contains("rocket"))
                     craft_operation |= CRAFT_MODE_ROCKET;
                 if (Me.CustomName.ToLower().Contains("pet"))
@@ -267,7 +288,6 @@ namespace IngameScript
                     craft_operation |= CRAFT_MODE_NOTANK;
             }
         }
-        #endregion
 
         void processTimerCommand()
         {

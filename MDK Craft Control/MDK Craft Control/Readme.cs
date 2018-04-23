@@ -157,4 +157,9 @@
 * 
 * 3.4D Mar 29 2018 Current Source
 * removed ModeScans/MODE_DOSCAN
+* 
+* 3.4E Mar 22, 2018
+* Error messages on missing blocks on startup
+* Re-try startup if there are errors.
+* 
 */
