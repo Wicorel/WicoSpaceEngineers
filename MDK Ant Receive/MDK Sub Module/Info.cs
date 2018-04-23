@@ -19,12 +19,9 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-//        #region mdk preserve
+        #region mdk preserve
         #region mdk macros
-        // This script was deployed at $MDK_DATETIME$
-        const string Deployment = "$MDK_DATE$, $MDK_TIME$";
         #endregion
-//        #endregion
-
+        #endregion
     }
 }

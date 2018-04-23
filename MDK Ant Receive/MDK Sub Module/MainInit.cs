@@ -44,11 +44,6 @@ namespace IngameScript
 
         #region maininit
 
-        string sInitResults = "";
-        //       string sArgResults = "";
-
-        int currentInit = 0;
-
         string doInit()
         {
             // initialization of each module goes here:
@@ -71,9 +66,12 @@ namespace IngameScript
                 Deserialize();
                 sInitResults += DefaultOrientationBlockInit();
                 sInitResults += antennaInit();
-                SetAntennaMe();
+                if(!SetAntennaMe())
+                {
+                    bStartupError = true;
+                    sStartupError += "\nNo Antenna Available";
+                }
 
-                sInitResults += modeOnInit(); // handle mode initializting from load/recompile..
 
             }
             else if (currentInit == 1)
@@ -83,11 +81,12 @@ namespace IngameScript
                 sInitResults += camerasensorsInit(shipOrientationBlock);
                 sInitResults += connectorsInit();
                 sInitResults += initDockingInfo();
-                sInitResults += DefaultOrientationBlockInit();
-                init = true;
                 if (localBaseConnectors.Count < 1)
-                    sInitResults = "\nNo [BASE] Connectors found\n" + sInitResults;
+                    sStartupError+="\nNo [BASE] Connectors found";
 
+                sInitResults += modeOnInit(); // handle mode initializting from load/recompile..
+
+                init = true;
             }
             currentInit++;
             if (init) currentInit = 0;
