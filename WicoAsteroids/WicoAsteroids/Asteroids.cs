@@ -195,7 +195,10 @@ namespace IngameScript
             for (int i = 0; i < asteroidsInfo.Count; i++)
             {
                 if (asteroidsInfo[i].EntityId == AsteroidID)
+                {
                     box = asteroidsInfo[i].BoundingBox;
+                    break;
+                }
             }
             return box;
         }
