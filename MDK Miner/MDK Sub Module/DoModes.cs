@@ -36,6 +36,13 @@ namespace IngameScript
             if (iMode == MODE_SEARCHVERIFY) doModeSearchVerify();
             if (iMode == MODE_SEARCHCORE) doModeSearchCore();
 
+            if (iMode == MODE_DOCKED) OreClearAmounts();
+
+            if(iMode==MODE_LAUNCHED)
+            {
+                if (miningAsteroidID > 0)
+                    setMode(MODE_FINDORE);
+            }
 /*
             if (iMode == MODE_IDLE) doModeIdle();
             else if (iMode == MODE_DESCENT) doModeDescent();
@@ -105,6 +112,12 @@ namespace IngameScript
 
 
             TanksCalculate();
+
+            //            Echo("Width=" + shipDim.WidthInMeters());
+            //            Echo("Height=" + shipDim.HeightInMeters());
+            //            Echo("Length=" + shipDim.LengthInMeters());
+            Echo("AsteroidCurrentX=" + AsteroidCurrentX + " Y=" + AsteroidCurrentY);
+            Echo("AsteroidMaxX=" + AsteroidMaxX + " AsteroidMaxY=" + AsteroidMaxY);
         }
 
         void modulePostProcessing()
@@ -112,9 +125,6 @@ namespace IngameScript
             string output = "";
             if (init) // only if init is done
             {
-                OreDumpFound();
-
-                //dumpOreLocs();
 
                 double maxThrust = calculateMaxThrust(thrustForwardList);
 //                Echo("maxThrust=" + maxThrust.ToString("N0"));
@@ -130,6 +140,10 @@ namespace IngameScript
                     Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
                 }
                 Echo("Cargo=" + cargopcent.ToString() + "%");
+
+                OreDumpFound();
+
+                //dumpOreLocs();
             }
 
             output += "Batteries: #=" + batteryList.Count.ToString();

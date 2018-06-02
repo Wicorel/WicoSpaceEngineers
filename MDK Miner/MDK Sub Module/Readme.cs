@@ -2,6 +2,9 @@
  * 
  *  * Handles MODES:
  * MODE_MINE
+ * MODE_FINEORE
+ * MODE_SEARCHORIENT
+ * MODE_SEARCHSHIFT
  * 
  * Commands:
  * 
@@ -13,23 +16,5 @@
  * Source: https://github.com/Wicorel/WicoSpaceEngineers/tree/master/MDK%20Miner
  * MDK: https://github.com/malware-dev/MDK-SE/wiki
  * 
- * 3.4 01272018
- * 
- * 3.4a 02112018
- * 
- * 3.4B Build with current Code base Mar 08 2018
- * 
- * 3.4C Build with current Code base mar 27 2018
- * Call remote modules for NAV and DOSCAN.
- * 
- * 3.4D +Apr 03 2018
- * 
- * 3.4E Detect 'Boring' ship
- * Back out of hole when boring ship gets full
- * Apr 22 2018
- * 
- * NEED:  
- *  
- * WANTED: 
- *  
-*/
+ */
+

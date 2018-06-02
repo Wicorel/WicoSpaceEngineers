@@ -47,6 +47,7 @@ namespace IngameScript
             OreSerialize();
             ScansSerialize(iNIHolder);
             NavSerialize(iNIHolder);
+            DockedSerialize(iNIHolder);
         }
         void ModuleDeserialize(INIHolder iNIHolder)
         {
@@ -55,6 +56,7 @@ namespace IngameScript
             OreDeserialize();
             ScansDeserialize(iNIHolder);
             NavDeserialize(iNIHolder);
+            DockedDeserialize(iNIHolder);
         }
     }
 }

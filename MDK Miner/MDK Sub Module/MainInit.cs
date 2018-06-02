@@ -99,7 +99,7 @@ namespace IngameScript
                         sInitResults += camerasensorsInit(shipOrientationBlock);
                         break;
                     case 11:
-                        sInitResults += sensorInit();
+                        sInitResults += SensorInit(shipOrientationBlock);
                         break;
                     case 12:
                         sInitResults += tanksInit();
@@ -122,69 +122,40 @@ namespace IngameScript
                     case 18:
                         initAsteroidsInfo();
                         break;
-                    case 19:
-                        Deserialize();
+                    case 19: initOreLocInfo();
                         break;
                     case 20:
-                        initPower();
+                        Deserialize();
                         break;
                     case 21:
-                        sInitResults += modeOnInit();
+                        initPower();
                         break;
                     case 22:
+                        sInitResults += modeOnInit();
+                        break;
+                    case 23:
+                        if (sensorsList.Count < 2)
+                        {
+//                            bStartupError = true;
+                            sStartupError += "\nNot enough Sensors detected!";
+                        }
+                        if (!HasDrills())
+                        {
+//                            bStartupError = true;
+                            sStartupError += "\nNo Drills found!";
+                        }
+                        break;
+                    case 24:
                         init = true;
                         break;
 
                 }
                 currentInit++;
-                echoInstructions("EInit:" + currentInit + " | ");
+//                echoInstructions("EInit:" + currentInit + " | ");
                 Echo("%=" + (float)Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount);
             }
             while (!init && (((float)Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount) < 0.5f));
 
-            /*
-            Echo("Init: " + currentInit.ToString());
-            if (currentInit == 0)
-            {
-                //StatusLog("clear",textLongStatus,true);
-                StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + moduleName + ":INIT", textLongStatus, true);
-
-                modeCommands.Clear();
-                if (!modeCommands.ContainsKey("findore")) modeCommands.Add("findore", MODE_FINDORE);
-                if (!modeCommands.ContainsKey("doscan")) modeCommands.Add("doscan", MODE_DOSCAN);
-                if (!modeCommands.ContainsKey("mine")) modeCommands.Add("mine", MODE_MINE);
-
-                gridsInit();
-                //                sInitResults += initSerializeCommon();
-                sInitResults += SerializeInit();
-                Deserialize();
-                sInitResults += DefaultOrientationBlockInit();
-                initShipDim(shipOrientationBlock);
-            }
-            else if (currentInit == 1)
-            {
-		        sInitResults += connectorsInit();
-		        sInitResults += thrustersInit(shipOrientationBlock);
-		        sInitResults+=camerasensorsInit(shipOrientationBlock); 
-		        sInitResults+=sensorInit(); 
-
-//		        sInitResults += gearsInit();
-		        sInitResults += tanksInit();
-		        sInitResults += gyrosetup();
-                GyroControl.UpdateGyroList(gyros);
-
-		        sInitResults += drillInit();
-		        sInitResults += ejectorsInit();
-                initCargoCheck();
-                initAsteroidsInfo();
-
-                Deserialize();
-//                bWantFast = false;
-                sInitResults += modeOnInit();
-                init = true;
-            }
-            */
-            currentInit++;
             if (init) currentInit = 0;
 
 //            Log(sInitResults);
@@ -197,10 +168,19 @@ namespace IngameScript
         string modeOnInit()
         {
             // check current state and perform reload init to correct state
-            if(iMode==MODE_FINDORE)
+            if (miningAsteroidID > 0)
             {
-                if (current_state == 410)
-                    current_state = 400;// reinit
+                MinerCalculateAsteroidVector(miningAsteroidID);
+                //                vAsteroidBoreEnd = AsteroidCalculateBoreEnd();
+                //                vAsteroidBoreStart = AsteroidCalculateBoreStart();
+                AsteroidCalculateBestStartEnd();
+            }
+            if (iMode==MODE_FINDORE)
+            {
+                if(current_state==35)
+                {
+                    current_state = 31;
+                }
             }
             return ">";
         }
