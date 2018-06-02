@@ -162,4 +162,8 @@
 * Error messages on missing blocks on startup
 * Re-try startup if there are errors.
 * 
+* 3.4F 
+* handle stations having no propulsion methods
+* increase default sub-module trigger to 5seconds
+* May 27, 2018
 */

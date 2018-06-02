@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Master";
-        string sVersion = "3.4E";
+        string sVersion = "3.4F";
 
         const string velocityFormat = "0.00";
 
@@ -204,7 +204,7 @@ namespace IngameScript
 
         void modulePostProcessing()
         {
-//              Echo(sInitResults);
+//            Echo(sInitResults);
             echoInstructions();
         }
 
@@ -266,7 +266,7 @@ namespace IngameScript
                 // if it has SLED wheels (and some thrusters), assume SLED propulsion
                 if(wheelSledList!=null && wheelSledList.Count>0 && iThrustModes>0) craft_operation |= CRAFT_MODE_SLED;
 
-                if (gyros!=null && gyros.Count > 1 && !Me.CustomName.ToLower().Contains("nogyros"))
+                if (gyros!=null && gyros.Count > 0 && !Me.CustomName.ToLower().Contains("nogyros"))
                     craft_operation |= CRAFT_MODE_HASGYROS;
 
                 if (iThrustModes > 1 || Me.CustomName.ToLower().Contains("orbital"))

@@ -175,89 +175,129 @@ namespace IngameScript
                         sInitResults += modeOnInit(); // handle mode initializing from load/recompile..
                         break;
                     case 23:
-                        // do startup error check
-                        init = true; // we are done
-                        sStartupError = "";
-                        bStartupError = false;
-                        if(shipOrientationBlock==null)
                         {
-                            bStartupError = true;
-                            sStartupError += "\nNo Ship Controller";
-                        }
-                        if(ionThrustCount <1 && hydroThrustCount <1 && atmoThrustCount<1)
-                        {
-                            // no thrusters
-                            if(wheelSledList.Count<1)
-                            {
-                                // no sled wheels && no thrusters
-                                if(rotorNavRightList.Count<1)
-                                {
-                                    bStartupError = true;
-                                    sStartupError += "\nNo Propulsion Method Found";
-                                    sStartupError += "\nNo Thrusters.\nNo NAV Rotors\nNo Sled Wheels";
 
-                                }
+                            // do startup error check
+                            init = true; // we are done
+                                         //                       sStartupError = "";
+                                         //                        bStartupError = false;
+                            if (shipOrientationBlock == null)
+                            {
+                                bStartupError = true;
+                                sStartupError += "\nNo Ship Controller";
+                                dGravity = -1.0;
+
                             }
                             else
                             {
-                                // sled wheels, but not thrusters...
-                                bStartupError = true;
-                                sStartupError += "\nNo Valid Propulsion Method Found";
-                                sStartupError += "\nSled wheels, but No Thrusters.\nNo NAV Rotors";
-                            }
-                        }
-                        else
-                        {
-                            // we DO have thrusters
-                            if(gyros.Count<1)
-                            {
-                                // thrusters, but no gyros
-                                bStartupError = true;
-                                sStartupError += "\nNo Gyros Found";
-                            }
-                            // check for sled wheels?
-                            if(shipOrientationBlock is IMyShipController)
-                            {
-                                // can check gravity..
-                            }
-                        }
-                        // check for [WCCS] timer, but no Wico Craft Save.. and vice-versa
-                        if(TimerTriggerFind(sSubModuleTimer))
-                        { 
-                            // there is a submodule timer trigger
-                            if(SaveFile==null)
-                            { // no save text panel
+                                if (shipOrientationBlock is IMyShipController)
+                                {
+                                    velocityShip = ((IMyShipController)shipOrientationBlock).GetShipSpeed();
 
-                                bStartupError = true;
-                                sStartupError += "\nSubmodule timer, but no text\n panel named:"+ SAVE_FILE_NAME;
-
-                            }
-                        }
-                        else
-                        {
-                            if(bSubModules)
-                            {
-                                bStartupError = true;
-                                sStartupError += "\nSubmodules Enabled, but no\n timer containing:" + sSubModuleTimer;
-                                if (SaveFile == null)
-                                { // no save text panel
-
-                                    bStartupError = true;
-                                    sStartupError += "\n No text\n panel containing:" + SAVE_FILE_NAME;
-
+                                    Vector3D vNG = ((IMyShipController)shipOrientationBlock).GetNaturalGravity();
+                                    double dLength = vNG.Length();
+                                    dGravity = dLength / 9.81;
+                                }
+                                else
+                                {
+                                    dGravity = -1.0;
                                 }
 
                             }
+
+                            if (gridBaseMass != 0)
+                            { // Only require propulsion if not a station
+                                if (dGravity==0)
+                                {
+                                    if (ionThrustCount < 1 && hydroThrustCount < 1)
+                                        sStartupError += "\nIn Space, but no valid thrusters";
+                                }
+                                if (ionThrustCount < 1 && hydroThrustCount < 1 && atmoThrustCount < 1)
+                                {
+                                    // no thrusters
+                                    if (wheelSledList.Count < 1)
+                                    {
+                                        // no sled wheels && no thrusters
+                                        if (rotorNavRightList.Count < 1)
+                                        {
+                                            if (wheelRightList.Count < 1)
+                                            {
+                                                //TODO: Detect station and it's OK to not go anywhere..
+
+                                                bStartupError = true;
+                                                sStartupError += "\nNo Propulsion Method Found";
+                                                sStartupError += "\nNo Thrusters.\nNo NAV Rotors\nNo Sled Wheels\nNo Wheels";
+                                            }
+
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // sled wheels, but not thrusters...
+                                        bStartupError = true;
+                                        sStartupError += "\nNo Valid Propulsion Method Found";
+                                        sStartupError += "\nSled wheels, but No Thrusters.\nNo NAV Rotors";
+                                        if (gyros.Count < 1)
+                                        {
+                                            bStartupError = true;
+                                            sStartupError = "\nSled wheels, but no Gyros";
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // we DO have thrusters
+                                    if (gyros.Count < 1)
+                                    {
+                                        // thrusters, but no gyros
+                                        bStartupError = true;
+                                        sStartupError += "\nNo Gyros Found";
+                                    }
+                                    // check for sled wheels?
+                                    if (shipOrientationBlock is IMyShipController)
+                                    {
+                                        // can check gravity..
+                                    }
+                                }
+                                // check for [WCCS] timer, but no Wico Craft Save.. and vice-versa
+                                if (TimerTriggerFind(sSubModuleTimer))
+                                {
+                                    // there is a submodule timer trigger
+                                    if (SaveFile == null)
+                                    { // no save text panel
+
+                                        bStartupError = true;
+                                        sStartupError += "\nSubmodule timer, but no text\n panel named:" + SAVE_FILE_NAME;
+
+                                    }
+                                }
+                                else
+                                {
+                                    if (bSupportSubModules)
+                                    {
+                                        bStartupError = true;
+                                        sStartupError += "\nSubmodules Enabled, but no\n timer containing:" + sSubModuleTimer;
+                                        if (SaveFile == null)
+                                        { // no save text panel
+
+                                            bStartupError = true;
+                                            sStartupError += "\n No text\n panel containing:" + SAVE_FILE_NAME;
+
+                                        }
+
+                                    }
+                                }
+                            }
+                            if (!bStartupError)
+                            {
+                                init = true;
+                            }
+                            else
+                            {
+                                currentInit = -1; // start init all over again
+                            }
+                            break;
                         }
-                        if(!bStartupError)
-                        {
-                            init = true;
-                        }
-                        else
-                        {
-                            currentInit = -1; // start init all over again
-                        }
-                        break;
                 }
                 currentInit++;
  //               echoInstructions("EInit:" + currentInit + " | ");
