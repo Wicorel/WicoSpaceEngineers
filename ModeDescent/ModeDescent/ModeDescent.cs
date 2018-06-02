@@ -268,6 +268,10 @@ namespace IngameScript
             }
             if (current_state == 20)
             {
+                // TODO: fix the connector landings
+                bValidTarget = false; // TEMP: just do surface landings..
+                bValidOrbitalHome = false;
+                bValidOrbitalLaunch = false;
 
                 if (bValidTarget)
                     StatusLog("Move towards recorded landing location", textPanelReport);
