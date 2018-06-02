@@ -23,13 +23,15 @@ namespace IngameScript
         /*
          * 120617 Added delays for camera and scan checks
          * 041918 Added checks for sensors and cameras.  Lower speed limit if no cameras. Max 5 if neither.
+         * 502918 Increased size of sensor to shipsize+2
+         * 053x18 revert sensor size if forward cameras.  Do raycast of center + corners of ship bounding box
          * 
          */
 
 
 
         double tmCameraElapsedMs = -1;
-        double tmCameraWaitMs = 0.50;
+        double tmCameraWaitMs = 0.25;
 
         double tmScanElapsedMs = -1;
 
@@ -59,6 +61,10 @@ namespace IngameScript
 
         float tmMaxSensorM = 50f;
 
+        int dtmRayCastQuadrant = 0;
+        // 0 = center. 1= TL, 2= TR, 3=BL, 4=BR
+
+
         // propulsion mode
         bool btmRotor = false;
         bool btmSled = false;
@@ -73,10 +79,11 @@ namespace IngameScript
         {
             // invalidates any previous tm calculations
             tmShipController = null;
-            sleepAllSensors(); // set sensors to lower power
+            SensorsSleepAll(); // set sensors to lower power
             minAngleRad = 0.01f; // reset Gyro aim tolerance to default
             tmScanElapsedMs = 0;
             tmCameraElapsedMs = -1;
+            WheelsPowerUp(0, 50);
         }
 
         /// <summary>
@@ -97,6 +104,7 @@ namespace IngameScript
             {
                 btmSled = true;
                 //                if (shipSpeedMax > 45) shipSpeedMax = 45;
+                sStartupError += "\nI am a SLED!";
                 PrepareSledTravel();
             }
             else btmSled = false;
@@ -105,6 +113,7 @@ namespace IngameScript
             {
                 btmWheels = true;
                 // TODO: Turn brakes OFF
+                if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).HandBrake = false;
             }
             else btmWheels = false;
 
@@ -129,7 +138,7 @@ namespace IngameScript
             thrustersInit(tmShipController, ref thrustTmForwardList, ref  thrustTmBackwardList,
             ref thrustTmDownList, ref thrustTmUpList,
             ref thrustTmLeftList, ref thrustTmRightList,iThrustType);
-            sleepAllSensors();
+            SensorsSleepAll();
             if (sensorsList.Count > 0)
             {
                 tmSB = sensorsList[0];
@@ -142,10 +151,10 @@ namespace IngameScript
                 tmSB.DetectStations = true;
                 tmSB.DetectPlayers = false; // run them over!
                 tmMaxSensorM = tmSB.GetMaximum<float>("Front");
-                if (cameraForwardList.Count <1)
+                if ( cameraForwardList.Count < 1)
                 {
                     // sensors, but no cameras.
-                    tmMaxSpeed = tmMaxSensorM / 2;
+                    if (!AllowBlindNav)   tmMaxSpeed = tmMaxSensorM / 2;
                     if (dTMUseCameraCollision) sStartupError += "\nNo Cameras for collision detection";
                 }
             }
@@ -157,14 +166,13 @@ namespace IngameScript
                 if (cameraForwardList.Count < 1)
                 {
                     if (dTMUseCameraCollision || dTMUseSensorCollision) sStartupError += "\nNo Sensor nor cameras\n for collision detection";
-                    tmMaxSpeed = 5;
+                    if (!AllowBlindNav) tmMaxSpeed = 5;
                 }
                 else
                 {
                     if (dTMUseSensorCollision) sStartupError += "\nNo Sensor for collision detection";
                 }
             }
-
             btmApproach = false; // we have reached approach range
             btmPrecision = false; // we have reached precision range
             btmClose = false; // we have reached close range
@@ -205,6 +213,7 @@ namespace IngameScript
 
             tmCameraElapsedMs = -1; // no delay for next check  
             tmScanElapsedMs = 0;// do delay until check 
+            dtmRayCastQuadrant = 0;
 
             minAngleRad = 0.01f; // reset Gyro aim tolerance to default
         }
@@ -234,7 +243,6 @@ namespace IngameScript
             if(tmCameraElapsedMs>=0) tmCameraElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
             if(tmScanElapsedMs>=0) tmScanElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
 
-
             Vector3D vVec = vTargetLocation - tmShipController.CenterOfMass;
 
             double distance = vVec.Length();
@@ -250,7 +258,7 @@ namespace IngameScript
                 ResetMotion(); // start the stopping
                 current_state = arrivalState; // we have arrived
                 ResetTravelMovement(); // reset our brain so we re-calculate for the next time we're called
-                // TODO: Turn brakes ON
+                // TODO: Turn brakes ON (if not done in ResetMotion())
                 bWantFast = true; // process this quickly
                 return;
             }
@@ -261,19 +269,23 @@ namespace IngameScript
             double stoppingDistance =0;
             if (!(btmWheels || btmRotor))
             {
-                if (dTMDebug) Echo("CalcStopD)");
+//                if (dTMDebug) Echo("CalcStopD()");
 
                 stoppingDistance = calculateStoppingDistance(thrustTmBackwardList, velocityShip, 0);
             }
+            // TODO: calculate stopping D for wheels
+
 //            Echo("dtmStoppingD=" + niceDoubleMeters(stoppingDistance));
 
             if (sensorsList.Count > 0)
             {
                 //                    float fScanDist = Math.Min(1f, (float)stoppingDistance * 1.5f);
-                float fScanDist = Math.Min(50f, (float)stoppingDistance * 1.5f);
-                setSensorShip(tmSB, 0, 0, 0, 0, fScanDist, 0);
+                float fScanDist = Math.Min(tmMaxSensorM, (float)stoppingDistance * 1.5f);
+                if(!dTMUseCameraCollision)   SensorSetToShip(tmSB, 1, 1, 1, 1, fScanDist, 0);
+                else  SensorSetToShip(tmSB, 0, 0, 0, 0, fScanDist, 0);
+
             }
-//            else Echo("No Sensor for Travel movement");
+            //            else Echo("No Sensor for Travel movement");
             bool bAimed = false;
 
             Vector3D grav = (shipOrientationBlock as IMyShipController).GetNaturalGravity();
@@ -300,14 +312,14 @@ namespace IngameScript
             }
             else if(btmWheels && btmHasGyros)
             {
-                Echo("Wheels");
+                Echo("Wheels W/ Gyro");
                 double yawangle = -999;
                 yawangle = CalculateYaw(vTargetLocation, shipOrientationBlock);
                 Echo("yawangle=" + yawangle.ToString());
                 bAimed = Math.Abs(yawangle) < .05;
                 if (!bAimed)
                 {
-                    WheelsPowerUp(0, 0);
+                    WheelsPowerUp(0, 5);
 //                    WheelsSetFriction(0);
                     DoRotate(yawangle, "Yaw");
                 }
@@ -348,7 +360,8 @@ namespace IngameScript
             if((distance - stoppingDistance) < arrivalDistance)
             { // we are within stopping distance, so start slowing
                 minAngleRad = 0.005f;// aim tighter (next time)
-    Echo("Waiting for stop");
+                StatusLog("\"Arriving at target.  Slowing", textPanelReport);
+                Echo("Waiting for stop");
                 if (!bAimed) bWantFast = true;
                 ResetMotion();
                 return;
@@ -366,7 +379,8 @@ namespace IngameScript
                     )
                 {
                     tmScanElapsedMs = 0;
-                    aSensors = activeSensors();
+                    aSensors = SensorsGetActive();
+                    
                     if (aSensors.Count > 0)
                     {
 
@@ -433,9 +447,11 @@ namespace IngameScript
                 //                if (btmRotor || btmSled)
                 {
                     if (scanDistance < 100)
-                        if (distance < 1000)
+                    {
+                        if (distance < 500)
                             scanDistance = distance;
-                        else scanDistance = 1000;
+                        else scanDistance = 500;
+                    }
                     scanDistance = Math.Min(distance, scanDistance);
                 }
 
@@ -452,9 +468,58 @@ namespace IngameScript
                     )
                 {
 
-                    // assumes moving forward...
+                    OrientedBoundingBoxFaces orientedBoundingBox = new OrientedBoundingBoxFaces(shipOrientationBlock);
+                    Vector3D[] points = new Vector3D[4];
+                    orientedBoundingBox.GetFaceCorners(OrientedBoundingBoxFaces.LookupFront, points); // front output order is BL, BR, TL, TR
 
-                    if (doCameraScan(cameraForwardList, scanDistance))
+                    // assumes moving forward...
+                    // May 29, 2018 do a BB forward scan instead of just center..
+                    bool bDidScan = false;
+                    Vector3D vTarget;
+                    switch (dtmRayCastQuadrant)
+                    {
+                        case 0:
+                            if (doCameraScan(cameraForwardList, scanDistance))
+                            {
+                                bDidScan = true;
+                                dtmRayCastQuadrant = 1;
+                            }
+                                break;
+                        case 1:
+                            vTarget = points[2] + shipOrientationBlock.WorldMatrix.Forward * distance;
+                            if(doCameraScan(cameraForwardList, vTarget))
+                            {
+                                bDidScan = true;
+                                dtmRayCastQuadrant = 2;
+                            }
+                            break;
+                        case 2:
+                            vTarget = points[3] + shipOrientationBlock.WorldMatrix.Forward * distance;
+                            if (doCameraScan(cameraForwardList, vTarget))
+                            {
+                                bDidScan = true;
+                                dtmRayCastQuadrant = 3;
+                            }
+                            break;
+                        case 3:
+                            vTarget = points[0] + shipOrientationBlock.WorldMatrix.Forward * distance;
+                            if (doCameraScan(cameraForwardList, vTarget))
+                            {
+                                bDidScan = true;
+                                dtmRayCastQuadrant = 4;
+                            }
+                            break;
+                        case 4:
+                            vTarget = points[1] + shipOrientationBlock.WorldMatrix.Forward * distance;
+                            if (doCameraScan(cameraForwardList, vTarget))
+                            {
+                                bDidScan = true;
+                                dtmRayCastQuadrant = 0;
+                            }
+                            break;
+                    }
+
+                    if (bDidScan)
                     {
                         tmCameraElapsedMs = 0;
                         // the routine sets lastDetetedInfo itself if scan succeeds
@@ -495,7 +560,7 @@ namespace IngameScript
                             {
                                 //                            Echo(s);
                                 Echo("raycast hit:" + lastDetectedInfo.Type.ToString());
-                                StatusLog("Camera Trigger collision", textLongStatus);
+                                StatusLog("Camera Trigger collision", textPanelReport);
                             }
                             if (bValidCollision)
                             {
@@ -513,7 +578,7 @@ namespace IngameScript
                             if (dTMDebug)
                             {
                                 //                            Echo(s);
-                                StatusLog("Camera Scan Clear", textLongStatus);
+                                StatusLog("Camera Scan Clear", textPanelReport);
                             }
                         }
                     }
@@ -522,7 +587,7 @@ namespace IngameScript
                         if (dTMDebug)
                         {
                             //                            Echo(s);
-                            StatusLog("No Scan Available", textLongStatus);
+                            StatusLog("No Scan Available", textPanelReport);
                         }
                     }
                 }
@@ -540,6 +605,7 @@ namespace IngameScript
                     // we are 'far' from target location.  use fastest movement
 //                    if(dTMDebug)
                         Echo("dtmFar");
+                    StatusLog("\"Far\" from target\n Target Speed="+dtmFarSpeed.ToString("N0")+"m/s", textPanelReport);
 
                     TmDoForward(dtmFarSpeed, 100f);
                 }
@@ -548,6 +614,7 @@ namespace IngameScript
                     // we are on 'approach' to target location.  use a good speed
 //                    if(dTMDebug)
                         Echo("Approach");
+                    StatusLog("\"Approach\" distance from target\n Target Speed=" + dtmApproachSpeed.ToString("N0") + "m/s", textPanelReport);
                     btmApproach = true;
                     TmDoForward(dtmApproachSpeed, 100f);
                 }
@@ -556,7 +623,8 @@ namespace IngameScript
                     // we are getting nearto our target.  use a slower speed
 //                    if(dTMDebug)
                         Echo("Precision");
-                    if(!btmPrecision) minAngleRad = 0.005f;// aim tighter (next time)
+                    StatusLog("\"Precision\" distance from target\n Target Speed=" + dtmPrecisionSpeed.ToString("N0") + "m/s", textPanelReport);
+                    if (!btmPrecision) minAngleRad = 0.005f;// aim tighter (next time)
                     btmPrecision = true;
                     TmDoForward(dtmPrecisionSpeed, 55f);
                 }
@@ -565,14 +633,16 @@ namespace IngameScript
                     // we are very close to our target. use a very small speed
 //                    if(dTMDebug)
                         Echo("Close");
-                     if(!btmClose) minAngleRad = 0.005f;// aim tighter (next time)
+                    StatusLog("\"Close\" distance from target\n Target Speed=" + dtmCloseSpeed.ToString("N0") + "m/s", textPanelReport);
+                    if (!btmClose) minAngleRad = 0.005f;// aim tighter (next time)
                    btmClose = true;
                     TmDoForward(dtmCloseSpeed, 55f);
                 }
             }
             else
             {
-                if(dTMDebug) Echo("Aiming");
+                StatusLog("Aiming at target", textPanelReport);
+                if (dTMDebug) Echo("Aiming");
                 bWantFast = true;
                 tmShipController.DampenersOverride = true;
                 if (velocityShip < 5)
