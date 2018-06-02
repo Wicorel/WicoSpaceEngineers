@@ -69,7 +69,7 @@ namespace IngameScript
 
         174 initilize escape plan
         ->175
-
+   
         175 scan for an 'escape' route (pathfind)
         timeout of (default) 5 seconds ->MODE_ATTENTION
         after scans, ->180
@@ -87,7 +87,7 @@ namespace IngameScript
             StatusLog("clear", textPanelReport);
 
             StatusLog(moduleName + ":Going Target!", textPanelReport);
-            StatusLog(moduleName + ":GT: current_state=" + current_state.ToString(), textPanelReport);
+//            StatusLog(moduleName + ":GT: current_state=" + current_state.ToString(), textPanelReport);
 //            bWantFast = true;
             Echo("Going Target: state=" + current_state.ToString());
 
@@ -290,7 +290,8 @@ namespace IngameScript
                 Echo("velocity=" + velocityShip.ToString("0.00"));
 
                 StatusLog("clear",sledReport);
-                StatusLog("Moving to Target\nD:" + niceDoubleMeters(distance) + " V:" + velocityShip.ToString(velocityFormat),sledReport);
+                StatusLog("Moving to Target\nD:" + niceDoubleMeters(distance) + " V:" + velocityShip.ToString(velocityFormat), sledReport);
+                StatusLog("Moving to Target\nDistance: " + niceDoubleMeters(distance) + "\nVelocity: " + niceDoubleMeters(velocityShip)+"/s", textPanelReport);
 
 
                 if (bGoOption && (distance < arrivalDistanceMin))
@@ -511,6 +512,7 @@ namespace IngameScript
                 Echo("Collision Avoid");
                 StatusLog("clear", sledReport);
                 StatusLog("Collision Avoid", sledReport);
+                StatusLog("Collision Avoid", textPanelReport);
                 doTravelMovement(vAvoid, 5.0f, 160, 173);
             }
             else if (current_state == 173)
@@ -535,6 +537,7 @@ namespace IngameScript
             }
             else if (current_state == 175)
             {
+                StatusLog("Collision Avoid\nScan for escape route", textPanelReport);
                 DateTime dtMaxWait = dtNavStartShip.AddSeconds(5.0f);
                 DateTime dtNow = DateTime.Now;
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
@@ -553,19 +556,21 @@ namespace IngameScript
            }
             else if(current_state==180)
             {
+                StatusLog("Collision Avoid Travel", textPanelReport);
                 doTravelMovement(vAvoid,1f, 160, 173);
             }
             else if(current_state==200)
             { // we have arrived at target
                 StatusLog("clear", sledReport);
                 StatusLog("Arrived at Target", sledReport);
+                StatusLog("Arrived at Target", textPanelReport);
                 sNavDebug += " ARRIVED!";
 
                 ResetMotion();
                 bValidNavTarget = false; // we used this one up.
 //                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
                 antennaMaxPower(false);
-                sleepAllSensors();
+                SensorsSleepAll();
 
                 // set to desired mode and state
                 setMode(NAVArrivalMode);
