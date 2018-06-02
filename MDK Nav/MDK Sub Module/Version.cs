@@ -18,16 +18,16 @@ using VRageMath;
 
 namespace IngameScript
 {
-    partial class Program : MyGridProgram
-    {
-        // MDK 1.1
-        #region mdk preserve
-        #region mdk macros
+partial class Program : MyGridProgram
+{
+// MDK 1.1
+#region mdk preserve
+#region mdk macros
 // Minified script was deployed at $MDK_DATETIME$
-        #endregion
-        #endregion
+#endregion
+#endregion
 
-        #region mdk preserve
+#region mdk preserve
 /*
 * 
 * Commands:
@@ -144,22 +144,29 @@ push to max speed and then coast..
 3.4J Apr 21 2018
 Show initialization problems and retry if necessary items are missing
 
+3.4K May 06 2018+
+Sensor code update
+Tested with higher world speeds
+May 27 2018
+
+
 TODO: 
+    test DTM speed selection with high speed limits (ex, 400m/s)
+    Do quadrant search for escape
     Support multiple waypoints
     Support 'Loop' (patrol) command
-    Do quadrant search for escape
     handle sides without cameras
-    handle no cameras forward (slower min speed?)
+    TEST: handle no cameras forward (slower min speed)
     Timer triggers on mode/state changes
 
 */
 
-#endregion
+        #endregion
 
         string OurName = "Wico Craft";
 
         string moduleName = "NAV";
-        string sVersion = "3.4J";
+        string sVersion = "3.4K";
 
     }
 }

@@ -46,10 +46,11 @@ namespace IngameScript
             // when all initialization is done, set init to true.
 
             // set autogyro defaults.
-            LIMIT_GYROS = 1;
-            minAngleRad = 0.09f;
-            CTRL_COEFF = 0.75;
+//            LIMIT_GYROS = 1;
+//            minAngleRad = 0.09f;
+//            CTRL_COEFF = 0.75;
 
+            // TODO: change to more atomic init
             Echo("Init:"+currentInit);
             if (currentInit == 0)
             {
@@ -60,8 +61,8 @@ namespace IngameScript
                 //	if(!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
 
                 sInitResults += SerializeInit();
-
                 Deserialize();
+
                 sInitResults += gridsInit();
                 sInitResults += DefaultOrientationBlockInit();
                 initLogging();
@@ -72,7 +73,7 @@ namespace IngameScript
                 sInitResults += rotorsNavInit();
                 sInitResults += wheelsInit(shipOrientationBlock);
 
-                sInitResults += sensorInit();
+                sInitResults += SensorInit(shipOrientationBlock);
                 sInitResults += camerasensorsInit(shipOrientationBlock);
                 sInitResults += connectorsInit();
             }
@@ -91,7 +92,6 @@ namespace IngameScript
                 init = true;
 
             }
-
             currentInit++;
             if (init)
             {

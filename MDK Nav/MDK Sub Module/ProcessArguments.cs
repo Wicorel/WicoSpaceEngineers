@@ -48,6 +48,7 @@ namespace IngameScript
                         {
                             Echo("Found NAV: command:");
                             sArgument = tList[i1].CustomName.Substring("NAV:".Length);
+//                            sStartupError += "Found OLDNAV:" + sArgument;
                             break;
                         }
                     }
@@ -152,7 +153,7 @@ namespace IngameScript
                         continue;
                     }
 
-
+//                    sStartupError = "CMD Initiated NAV:\n" + sArgument;
                     NavGoTarget(new Vector3D(x, y, z),30,0,arrivalDistanceMin);
 
                     //                    vNavTarget = new Vector3D(x, y, z);

@@ -37,7 +37,7 @@ namespace IngameScript
 
         void modulePostProcessing()
         {
-//            Echo(sInitResults);
+            Echo(sInitResults);
             echoInstructions();
             Echo(craftOperation());
         }
@@ -48,11 +48,12 @@ namespace IngameScript
             gyrosOff();
             powerDownRotors(rotorNavLeftList);
             powerDownRotors(rotorNavRightList);
-            WheelsPowerUp(0);
+            WheelsPowerUp(0,75);
 
 	        if (shipOrientationBlock is IMyRemoteControl) ((IMyRemoteControl)shipOrientationBlock).SetAutoPilotEnabled(false);
-	        if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
-        } 
+            if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).DampenersOverride = true;
+//            if (shipOrientationBlock is IMyShipController) ((IMyShipController)shipOrientationBlock).HandBrake = true;
+        }
 
     }
 }
