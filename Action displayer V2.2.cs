@@ -1,5 +1,5 @@
 ﻿//V 2.3 Mar 14 2018
-
+// V2.4 May 15 2018.  Min/Max values
 
 MyDefinitionId oxygenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Oxygen");
 MyDefinitionId hydrogenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
@@ -102,7 +102,9 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         else if (propList[i].TypeName == "Single")
         {
             float f = unit.GetValueFloat(propList[i].Id);
-            values.Append(" (" + f + ")");
+            float fMax=unit.GetMaximum<float>(propList[i].Id);
+            float fMin = unit.GetMinimum<float>(propList[i].Id);
+            values.Append(" (" + f + ") Valid Range: " + fMin + "->" + fMax);
         }
         else if (propList[i].TypeName == "StringBuilder")
         {
@@ -112,7 +114,10 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         else if (propList[i].TypeName == "Int64")
         {
             long l = unit.GetValue<long>(propList[i].Id);
-            values.Append(" (" + l + ")");
+            long Max = unit.GetMaximum<long>(propList[i].Id);
+            long Min = unit.GetMinimum<long>(propList[i].Id);
+            values.Append(" (" + l + ") Valid Range: " + Min + "->" + Max);
+//            values.Append(" (" + l + ")");
         }
         else if (propList[i].TypeName == "HashSet`1")
         { // from Cheetah's radar mod. http://steamcommunity.com/sharedfiles/filedetails/?id=907384096
