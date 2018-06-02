@@ -50,6 +50,8 @@
 *  add timer names to CustomData
 *  optimize updatetype. Add debug update to show updatetype
 *  Apr 03 2018
+*  
+*  3.4C Apr 26 2018
 * 
 * Need:
 *  circumnavigate planet to target spot

@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Orbital Descent";
-        string sVersion = "3.4B";
+        string sVersion = "3.4D";
 
 
         int minAltRotate = 2000; // minimum altitude to start rotation into retro position
@@ -117,7 +117,7 @@ namespace IngameScript
             Echo(output);
             output = "";
 
-            Echo("Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW"));
+            if(solarList.Count>0) Echo("Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW"));
 
             float fCurrentReactorOutput = 0;
             reactorCheck(out fCurrentReactorOutput);

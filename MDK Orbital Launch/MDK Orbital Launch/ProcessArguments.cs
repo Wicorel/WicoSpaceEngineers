@@ -22,7 +22,7 @@ namespace IngameScript
 
         bool moduleProcessArguments(string sArgument)
         {
-            sArgResults = "";
+//            sArgResults = "";
             // string output="";
             if (sArgument == "" || sArgument == "timer" || sArgument == "wccs" || sArgument == "wcct")
             {
@@ -66,7 +66,7 @@ namespace IngameScript
                     return false;
                 }
                 fMaxWorldMps = fValue;
-                sArgResults = "max speed set to " + fMaxWorldMps.ToString() + "mps";
+ //               sArgResults = "max speed set to " + fMaxWorldMps.ToString() + "mps";
 
             }
             else if (args[0] == "autogyro")
@@ -94,13 +94,13 @@ namespace IngameScript
                 int iDMode;
                 if (modeCommands.TryGetValue(args[0].ToLower(), out iDMode))
                 {
-                    sArgResults = "mode set to " + iDMode;
+//                    sArgResults = "mode set to " + iDMode;
                     setMode(iDMode);
                     // return true;
                 }
                 else
                 {
-                    sArgResults = "Unknown argument:" + args[0];
+//                    sArgResults = "Unknown argument:" + args[0];
                 }
             }
             return false; // keep processing in main

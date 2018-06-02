@@ -26,11 +26,6 @@ namespace IngameScript
 
         #region maininit
 
-        string sInitResults = "";
-        string sArgResults = "";
-
-        int currentInit = 0;
-
         string doInit()
         {
 
@@ -78,6 +73,7 @@ namespace IngameScript
                 initReactors();
                 sInitResults += gearsInit();
                 sInitResults += tanksInit();
+                initPower();
 
                 //                sInitResults += NAVInit();
                 sInitResults += gyrosetup();
@@ -162,6 +158,23 @@ namespace IngameScript
         }
         string modeOnInit()
         {
+            if (iMode == MODE_HOVER)
+            {
+                current_state = 0; // re-init 
+                bWantFast = true;
+            }
+            else if (iMode == MODE_ORBITALLAUNCH)
+            {
+                bWantFast = true;
+            }
+            else if (iMode == MODE_LAUNCHPREP)
+            {
+                bWantFast = true;
+            }
+            else if (iMode == MODE_LANDED)
+            {
+                bWantFast = true;
+            }
 
             return ">";
         }

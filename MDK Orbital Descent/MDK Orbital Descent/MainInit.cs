@@ -35,11 +35,6 @@ namespace IngameScript
 
         #region maininit
 
-        string sInitResults = "";
-        string sArgResults = "";
-
-        int currentInit = 0;
-
         string doInit()
         {
 
@@ -76,7 +71,7 @@ namespace IngameScript
                 sInitResults += thrustersInit(shipOrientationBlock);
                 sInitResults += camerasensorsInit(shipOrientationBlock);
                 sInitResults += landingsInit(shipOrientationBlock);
-
+                initPower();
                 sInitResults += gearsInit();
                 sInitResults += tanksInit();
                 sInitResults += gyrosetup();

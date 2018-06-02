@@ -45,7 +45,12 @@
  * 3.4A Current Source build Mar 03 2018 (Gyro Property)
  * 
  * 3.4B Current Source Apr 03 2018
-
+ * 
+ * 3.4C Current Source Apr 23 2018
+ * Just do surface landings for now until debug/rewrite connector landings.
+ * 
+ * 3.4D May 01 2018
+ * 
  * NEED:  
  *  
  *  trigger timers on stages of descent (see rotor legs example)

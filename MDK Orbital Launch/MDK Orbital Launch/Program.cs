@@ -21,7 +21,7 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "Orbital Launch";
-        string sVersion = "3.4B";
+        string sVersion = "3.4C";
 
         const string sshipOrientationBlock = "Craft Remote Control";
 
@@ -62,51 +62,54 @@ namespace IngameScript
                 }
                 dCargoCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
             }
-            output += "Batteries: #=" + batteryList.Count.ToString();
-            if (dBatteryCheckLast > dBatteryCheckWait)
+            if (batteryList.Count > 0)
             {
-                dBatteryCheckLast = 0;
-                batteryCheck(0, false);
-            }
-            else
-            {
-                Echo("Battery Check Delay");
-                if (dBatteryCheckLast < 0)
+                output += "Batteries: #=" + batteryList.Count.ToString();
+                if (dBatteryCheckLast > dBatteryCheckWait)
                 {
-                    // first-time init
-                    dBatteryCheckLast = dBatteryCheckWait + 5; // force check
+                    dBatteryCheckLast = 0;
+                    batteryCheck(0, false);
                 }
-                dBatteryCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
-            }
-
-            if (batteryList.Count > 0 && maxBatteryPower > 0)
-            {
-                output += " : " + (getCurrentBatteryOutput() / maxBatteryPower * 100).ToString("0.00") + "%";
-                output += "\n Storage=" + batteryPercentage.ToString() + "%";
-                /*
-                // Debug Info:
-                foreach (var tb in batteryList)
+                else
                 {
-                    float foutput = 0;
-                    IMyBatteryBlock r = tb as IMyBatteryBlock;
-
-                    MyResourceSourceComponent source;
-                    r.Components.TryGet<MyResourceSourceComponent>(out source);
-
-                    if (source != null)
+                    //                Echo("Battery Check Delay");
+                    if (dBatteryCheckLast < 0)
                     {
-                        foutput = source.MaxOutput;
+                        // first-time init
+                        dBatteryCheckLast = dBatteryCheckWait + 5; // force check
                     }
-
-//                    PowerProducer.GetMaxOutput(r, out foutput);
-                    output+=foutput.ToString() + "MW " + r.CustomName;
+                    dBatteryCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
                 }
-                */
+
+                if (batteryList.Count > 0 && maxBatteryPower > 0)
+                {
+                    output += " : " + (getCurrentBatteryOutput() / maxBatteryPower * 100).ToString("0.00") + "%";
+                    output += "\n Storage=" + batteryPercentage.ToString() + "%";
+                    /*
+                    // Debug Info:
+                    foreach (var tb in batteryList)
+                    {
+                        float foutput = 0;
+                        IMyBatteryBlock r = tb as IMyBatteryBlock;
+
+                        MyResourceSourceComponent source;
+                        r.Components.TryGet<MyResourceSourceComponent>(out source);
+
+                        if (source != null)
+                        {
+                            foutput = source.MaxOutput;
+                        }
+
+    //                    PowerProducer.GetMaxOutput(r, out foutput);
+                        output+=foutput.ToString() + "MW " + r.CustomName;
+                    }
+                    */
+                }
             }
             if (output != "") Echo(output);
             output = "";
 
-            output+="Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW");
+            if(solarList.Count>0) output+="Solar: #" + solarList.Count.ToString() + " " + currentSolarOutput.ToString("0.00" + "MW");
             if (output != "") Echo(output);
 
             output = "";
@@ -172,7 +175,7 @@ namespace IngameScript
 
         void modulePostProcessing()
         {
-	        Echo(sInitResults);
+//	        Echo(sInitResults);
 	        echoInstructions();
         }
         void ModuleSerialize(INIHolder iNIHolder)
