@@ -54,7 +54,7 @@ namespace IngameScript
         /// <summary>
         /// GYRO:max number of gyros to use to align craft. Leaving some available allows for player control to continue during auto-align 
         /// </summary>
-        int LIMIT_GYROS = 3;
+        int LIMIT_GYROS = 99;
 
         /// <summary>
         /// GYRO:leave this many gyros free for user. less than 0 means none. (not fully tested)
@@ -69,7 +69,7 @@ namespace IngameScript
         /// <summary>
         /// GYRO:The list of approved gyros to use for aiming
         /// </summary>
-        List<IMyGyro> gyros;
+        List<IMyGyro> gyros = new List<IMyGyro>();
 
         /// <summary>
         /// GYRO:how tight to maintain aim. Lower is tighter. Default is 0.01f
@@ -150,7 +150,7 @@ namespace IngameScript
                 }
                 //		Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
 
-                /// !KEEN  Change in 1.185 or .186..  gah...
+                // !KEEN  Change in 1.185 or .186..  gah...
                 //                float yawMax = g.GetMaximum<float>("Yaw"); // we assume all three are the same max
 
                 float yawMax = (float)(2 * Math.PI);
@@ -189,6 +189,7 @@ namespace IngameScript
             string s = "";
             var l1 = new List<IMyTerminalBlock>();
             gyroControl = shipOrientationBlock as IMyShipController;
+            gyros.Clear();
 
             if (gyroControl == null)
             {
@@ -199,23 +200,26 @@ namespace IngameScript
             gyrosOff(); // turn off any working gyros from previous runs
                         // NOTE: Uses grid of controller, not ME, nor localgridfilter
             GridTerminalSystem.GetBlocksOfType<IMyGyro>(l1, x => x.CubeGrid == shipOrientationBlock.CubeGrid);
-            //    s += "ALLGYRO#=" + l.Count + "#";
-            var l2 = new List<IMyTerminalBlock>();
+ //               s += "ALLGYRO#=" + l1.Count + "#";
+ //           var l2 = new List<IMyTerminalBlock>();
             int skipped = 0;
             for (int i1 = 0; i1 < l1.Count; i1++)
             {
-                //       s += "\n" + l[i].CustomName;
+//                       s += "\n" + l1[i1].CustomName;
                 if (l1[i1].CustomName.Contains(sGyroIgnore) || l1[i1].CustomData.Contains(sGyroIgnore))
                 {
                     skipped++;
                     continue;
                 }
-                //        s += " ADDED";
-                l2.Add(l1[i1]);
+//                        s += " ADDED";
+                gyros.Add(l1[i1] as IMyGyro);
+//                l2.Add(l1[i1]);
             }
-            gyros = l2.ConvertAll(x => (IMyGyro)x);
+            //            gyros = l2.ConvertAll(x => (IMyGyro)x);
+ //           s += "PRELIMITGYRO#" + gyros.Count.ToString("00") + "#";
             if (LIMIT_GYROS > 0)
             {
+//                s += " Limiting to " + LIMIT_GYROS;
                 if (gyros.Count > LIMIT_GYROS)
                 {
                     gyros.RemoveRange(LIMIT_GYROS, gyros.Count - LIMIT_GYROS);
