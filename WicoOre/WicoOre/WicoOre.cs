@@ -150,9 +150,8 @@ namespace IngameScript
         const string IRON = "Iron";
         const string SCRAP = "Scrap";
         const string STONE = "Stone";
-
         string[] aOres = { "Unknown", URANIUM, PLATINUM, ICE, COBALT, GOLD, MAGNESIUM, NICKEL, SILICON, SILVER, IRON, STONE };
-        long[] lOreDesirability = { 0, 100, 95, 75, 55, 45, 45, 45, 45, 45, 45, -1 };
+        long[] lOreDesirability = { 0, 100, 95, 75, 55, 45, 45, 45, 45, 45, 15, -1 };
 
         void OreInitInfo()
         {
@@ -267,7 +266,7 @@ namespace IngameScript
             for (int i = 0; i < oreInfos.Count; i++)
             {
                 if (oreInfos[i].localAmount > 0  || oreInfos[i].bFound)
-                    Echo(oreInfos[i].oreName + " " + oreInfos[i].localAmount);
+                    Echo(oreInfos[i].oreName + " " + oreInfos[i].localAmount.ToString("N0"));
             }
         }
 
@@ -308,8 +307,13 @@ namespace IngameScript
 //                    Echo(item.Content.ToString());
                     if (item.Content.ToString().Contains("Ore"))
                     {
-//                        Echo("Adding " + item.Content.SubtypeName);
-                        OreAddAmount(item.Content.SubtypeName, (double)item.Amount, bInit);
+//                        Echo("Adding " + item.Content.SubtypeId.ToString());
+                        OreAddAmount(item.Content.SubtypeId.ToString(), (double)item.Amount, bInit);
+                        //                        item.Content.SubtypeId;
+
+
+                        // PROHIBITED as of 1.187
+                        //                        OreAddAmount(item.Content.SubtypeName, (double)item.Amount, bInit);
                         //				stoneamount+=(double)item.Amount;
                     }
                 }
