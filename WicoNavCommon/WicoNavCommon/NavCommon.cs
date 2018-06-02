@@ -36,7 +36,8 @@ namespace IngameScript
         bool dTMDebug = false;
         bool dTMUseCameraCollision = true;
         bool dTMUseSensorCollision = true;
-        bool NAVEmulateOld = true;
+        bool NAVEmulateOld = false;
+        bool AllowBlindNav = false;
         float NAVGravityMinElevation = -1;
 
         bool bNavBeaconDebug = false;
@@ -51,6 +52,7 @@ namespace IngameScript
             iNIHolder.GetValue(sNavSection, "NAVEmulateOld", ref NAVEmulateOld, true);
             iNIHolder.GetValue(sNavSection, "NAVGravityMinElevation", ref NAVGravityMinElevation, true);
             iNIHolder.GetValue(sNavSection, "NavBeaconDebug", ref bNavBeaconDebug, true);
+            iNIHolder.GetValue(sNavSection, "AllowBlindNav", ref AllowBlindNav, true);
         }
 
         void NavSerialize(INIHolder iNIHolder)
