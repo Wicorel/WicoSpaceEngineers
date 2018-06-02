@@ -56,7 +56,11 @@ namespace IngameScript
                     {
                         StatusLog("Long Range Scan", textPanelReport);
                         if (scanfrontScanner == null) // in case we reload/compile in this state..
+                        {
+                            bWantFast = true;
                             current_state = 0;
+                            return;
+                        }
                         bWantMedium = true;
                         scanElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
                         // use for timeout...
@@ -105,7 +109,7 @@ namespace IngameScript
                         {
                             s += scanfrontScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
-                        s += " " + scanfrontScanner.myLDEI.Count + " asteroids";
+                        s += " " + scanfrontScanner.myLDEI.Count + " objects";
                         s += "\n";
 
                         s += "Back: ";
@@ -115,7 +119,7 @@ namespace IngameScript
                         {
                             s += scanbackScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
-                        s += " " + scanbackScanner.myLDEI.Count + " asteroids";
+                        s += " " + scanbackScanner.myLDEI.Count + " objects";
                         s += "\n";
 
                         s += "Left: ";
@@ -125,7 +129,7 @@ namespace IngameScript
                         {
                             s += scanleftScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
-                        s += " " + scanleftScanner.myLDEI.Count + " asteroids";
+                        s += " " + scanleftScanner.myLDEI.Count + " objects";
                         s += "\n";
 
                         s += "Right: ";
@@ -135,7 +139,7 @@ namespace IngameScript
                         {
                             s += scanrightScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
-                        s += " " + scanrightScanner.myLDEI.Count + " asteroids";
+                        s += " " + scanrightScanner.myLDEI.Count + " objects";
                         s += "\n";
 
                         s += "Top: ";
@@ -145,7 +149,7 @@ namespace IngameScript
                         {
                             s += scantopScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
-                        s += " " + scantopScanner.myLDEI.Count + " asteroids";
+                        s += " " + scantopScanner.myLDEI.Count + " objects";
                         s += "\n";
 
                         s += "Bottom: ";
@@ -155,7 +159,7 @@ namespace IngameScript
                         {
                             s += scanbottomScanner.SCAN_DISTANCE.ToString("0") + " meters";
                         }
-                        s += " " + scanbottomScanner.myLDEI.Count + " asteroids";
+                        s += " " + scanbottomScanner.myLDEI.Count + " objects";
                         s += "\n";
 
                         if (AsteroidFindNearest() < 0)
