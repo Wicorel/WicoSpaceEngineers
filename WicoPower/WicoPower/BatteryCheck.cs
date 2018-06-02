@@ -170,10 +170,22 @@ namespace IngameScript
                 batteryPercentage = -1;
             return bFoundRecharging;
         }
+
+        void BatterySetNormal()
+        {
+            for (int i = 0; i < batteryList.Count; i++)
+            {
+                IMyBatteryBlock b;
+                b = batteryList[i] as IMyBatteryBlock;
+                b.OnlyRecharge = false;
+                b.OnlyDischarge = false;
+                b.SemiautoEnabled = false;
+            }
+        }
         // Set the state of the batteries and optionally display state of the batteries
         void batteryDischargeSet(bool bEcho = false, bool bDischarge=true)
         {
-            Echo(batteryList.Count + " Batteries");
+            if(bEcho)  Echo(batteryList.Count + " Batteries");
             string s;
             for (int i = 0; i < batteryList.Count; i++)
             {
