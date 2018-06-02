@@ -67,10 +67,16 @@
 * Added MODE_DOSCANS
 * Add asteroids and ore message processing.
 * 
+* 3.4D  May 05 2018
+* text panel reports during scans
+* May 27, 2018
+* 
 * TODO: Process size info to select connectors
 * TODO: drones may take up more than one connector depending on height, width.
 * 
 * TODO: Hangar door control: open/close by antenna request
+* 
+* TODO: send/receive 'timer' messages. Like https://steamcommunity.com/sharedfiles/filedetails/?id=1287452364
 * 
 * 
 */
