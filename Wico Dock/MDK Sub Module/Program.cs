@@ -22,10 +22,9 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "Dock";
-        string sVersion = "3.4D";
+        string sVersion = "3.4E";
 
         const string velocityFormat = "0.00";
-
 
         void moduleDoPreModes()
         {
@@ -35,7 +34,7 @@ namespace IngameScript
 
         void modulePostProcessing()
         {
-            Echo(sInitResults);
+//            Echo(sInitResults);
 //            Echo(craftOperation());
             echoInstructions();
         }
@@ -52,7 +51,6 @@ namespace IngameScript
         void ModuleSerialize(INIHolder iNIHolder)
         {
             DockingSerialize(iNIHolder);
-            RelaunchSerialize(iNIHolder);
             DockedSerialize(iNIHolder);
             LaunchSerialize(iNIHolder);
             NavSerialize(iNIHolder);
@@ -61,7 +59,6 @@ namespace IngameScript
         void ModuleDeserialize(INIHolder iNIHolder)
         {
             DockingDeserialize(iNIHolder);
-            RelaunchDeserialize(iNIHolder);
             DockedDeserialize(iNIHolder);
             LaunchDeserialize(iNIHolder);
             NavDeserialize(iNIHolder);

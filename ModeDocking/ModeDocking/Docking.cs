@@ -40,7 +40,7 @@ namespace IngameScript
         101 wait for slow speed
           choose base.  Send request.
         102 wait for reply from base
-        105  timeout while wiating for a reply from a base; try to move closer to base ->101
+        105  timeout while waiting for a reply from a base; try to move closer to base ->101
         106 collision calc from 105
         107 collision avoid from 106 ->101
 
@@ -87,53 +87,8 @@ namespace IngameScript
         DockableConnector targetConnector = new DockableConnector();
         IMyTerminalBlock dockingConnector;
 
-        int iPushCount = 0;
+        int iDockingPushCount = 0;
 
-        Vector3D vDockAlign;
-        bool bDoDockAlign = false;
-        Vector3D vDock;
-        Vector3D vLaunch1;
-        Vector3D vHome;
-        bool bValidDock = false;
-        bool bValidLaunch1 = false;
-        bool bValidHome = false;
-
-        long lTargetBase = 0;
-        DateTime dtDockingActionStart;
-
-        string sDockingSection = "DOCKING";
-
-        void DockingInitCustomData(INIHolder iNIHolder)
-        {
-        }
-
-        void DockingSerialize(INIHolder iNIHolder)
-        {
-            iNIHolder.SetValue(sDockingSection, "vDock", vDock);
-            iNIHolder.SetValue(sDockingSection, "ValidDock", bValidDock);
-            iNIHolder.SetValue(sDockingSection, "vLaunch1", vLaunch1);
-            iNIHolder.SetValue(sDockingSection, "bValidLaunch1", bValidLaunch1);
-            iNIHolder.SetValue(sDockingSection, "vHome", vHome);
-            iNIHolder.SetValue(sDockingSection, "bValidHome", bValidHome);
-
-            iNIHolder.SetValue(sDockingSection, "TargetBase", lTargetBase);
-            iNIHolder.SetValue(sDockingSection, "ActionStart", dtDockingActionStart);
-
-        }
-
-        void DockingDeserialize(INIHolder iNIHolder)
-        {
-            iNIHolder.GetValue(sDockingSection, "vDock", ref vDock, true);
-            iNIHolder.GetValue(sDockingSection, "ValidDock", ref bValidDock, true);
-            iNIHolder.GetValue(sDockingSection, "vLaunch1", ref vLaunch1, true);
-            iNIHolder.GetValue(sDockingSection, "bValidLaunch1", ref bValidLaunch1, true);
-            iNIHolder.GetValue(sDockingSection, "vHome", ref vHome, true);
-            iNIHolder.GetValue(sDockingSection, "bValidHome", ref bValidHome, true);
-
-            iNIHolder.GetValue(sDockingSection, "TargetBase", ref lTargetBase, true);
-            iNIHolder.GetValue(sDockingSection, "ActionStart", ref dtDockingActionStart);
-
-        }
 
         List<IMyTerminalBlock> thrustDockBackwardList = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> thrustDockForwardList = new List<IMyTerminalBlock>();
@@ -150,6 +105,8 @@ namespace IngameScript
 //            StatusLog(moduleName + ":Docking: current_state=" + current_state, textLongStatus, true);
  //           bWantFast = true;
             Echo("DOCKING: state=" + current_state);
+
+            bWantSlow = true;
 
             IMySensorBlock sb;
 
@@ -199,6 +156,8 @@ namespace IngameScript
             if (current_state == 100)
             {
                 // TODO: allow for relay ships that are NOT bases..
+                // TODO: if memory docking, don't need to adjust antenna
+                // TODO: if stealth mode, don't mess with antenna
                 float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
                 antennaMaxPower(false,range);
                 if (sensorsList.Count > 0)
@@ -252,6 +211,8 @@ namespace IngameScript
             }
             else if (current_state == 102)
             { // wait for reply from base
+                StatusLog("Awaiting Response from Base", textPanelReport);
+
                 bWantFast = false;
                 DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
                 DateTime dtNow = DateTime.Now;
@@ -317,6 +278,7 @@ namespace IngameScript
                 // move closer to the chosen base's last known position.
                 if (lTargetBase <= 0)
                 {
+                    // TODO: remove base from list and try again.  ATTENTION if no remaining bases
                     setMode(MODE_ATTENTION);
                     return;
                 }
@@ -339,6 +301,7 @@ namespace IngameScript
             else if (current_state == 109)
             {
                 // no known bases. requested response. wait for a while to see if we get one
+                StatusLog("Trying to find a base", textPanelReport);
                 bWantFast = false;
                 DateTime dtMaxWait = dtDockingActionStart.AddSeconds(2.0f);
                 DateTime dtNow = DateTime.Now;
@@ -385,6 +348,7 @@ namespace IngameScript
             }
             else if (current_state == 120)
             {//120	request available docking connector
+                StatusLog("Requsting Docking Connector", textPanelReport);
                 if (velocityShip < 1)
                 {
 
@@ -422,6 +386,7 @@ namespace IngameScript
             }
             else if (current_state == 131)
             { //131	wait for available connector
+                StatusLog("Awating reply with Docking Connector", textPanelReport);
                 bWantFast = false;
                 DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
                 DateTime dtNow = DateTime.Now;
@@ -532,7 +497,7 @@ namespace IngameScript
             else if (current_state == 150)
             { //150  Start:	Move through locations
                 current_state = 160;
-                iPushCount = 0;
+                iDockingPushCount = 0;
                 bWantFast = true;
             }
             else if (current_state == 160)
@@ -550,7 +515,7 @@ namespace IngameScript
                 ResetTravelMovement();
                 calcCollisionAvoid(vHome);
                 current_state = 162;
-                iPushCount = 0;
+                iDockingPushCount = 0;
                 bWantFast = true;
             }
             //OBS
@@ -605,7 +570,7 @@ namespace IngameScript
                 ResetMotion();
                 Echo("Waiting for ship to stop");
                 turnEjectorsOff();
-                iPushCount = 0;
+                iDockingPushCount = 0;
                 if (velocityShip < 0.1f)
                 {
                     bWantFast = true;
@@ -620,6 +585,7 @@ namespace IngameScript
             else if (current_state == 170 || current_state == 172)
             { //170 172 'reverse' to dock, aiming connector at dock location
               // align to docking alignment if needed
+                StatusLog("Align Up to Docking Connector", textPanelReport);
                 bWantFast = true;
 //                turnEjectorsOff();
                 if (!bDoDockAlign)
@@ -638,6 +604,7 @@ namespace IngameScript
             }
             else if (current_state == 171)
             { //171 align to dock
+                StatusLog("Align to Docking Connector", textPanelReport);
                 bWantFast = true;
                 Vector3D vTargetLocation = vDock;
                 Vector3D vVec = vTargetLocation - dockingConnector.GetPosition();
@@ -657,8 +624,9 @@ namespace IngameScript
             }
             else if (current_state == 173)
             { //173 'reverse' to dock, aiming connector at dock location
-                // needs a time-out for when misaligned or base connector moves.
-                bWantFast = true;
+              // needs a time-out for when misaligned or base connector moves.
+              //               bWantFast = true;
+                StatusLog("Reversing to Docking Connector", textPanelReport);
                 Echo("bDoDockAlign=" + bDoDockAlign);
 //                StatusLog(moduleName + ":Docking: Reversing to dock! Velocity=" + velocityShip.ToString("0.00"), textPanelReport);
                 Echo("Reversing to Dock");
@@ -670,6 +638,8 @@ namespace IngameScript
                 double distance = vVec.Length();
                 Echo("distance=" + niceDoubleMeters(distance));
                 Echo("velocity=" + velocityShip.ToString("0.00"));
+                StatusLog("Distance=" + niceDoubleMeters(distance), textPanelReport);
+                StatusLog("Velocity=" + niceDoubleMeters(velocityShip)+"/s", textPanelReport);
 
                 if (distance > 10)
                     minAngleRad = 0.03f;
@@ -690,35 +660,54 @@ namespace IngameScript
                 */
                 bAimed = GyroMain("forward", vVec, dockingConnector);
 
+                double maxThrust = calculateMaxThrust(thrustDockForwardList);
+                MyShipMass myMass;
+                myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
+                double effectiveMass = myMass.PhysicalMass;
+                double maxDeltaV = (maxThrust) / effectiveMass;
+                if(iDockingPushCount<1)
+                {
+                    if (maxDeltaV < 2)
+                        iDockingPushCount = 75;
+                    else if (maxDeltaV < 5)
+                        iDockingPushCount = 25;
+                }
+ //               Echo("dockingPushCount=" + iDockingPushCount);
+                // TODO: if we aren't moving and dockingpushcount>100, then we need to wiggle.
+
                 if (bAimed)
                 {
                     // we are aimed at location
                     Echo("Aimed");
                     if (distance > 15)
                     {
+                        bWantMedium = true;
                         Echo(">15");
                         if (velocityShip < .5)
                         {
-                            iPushCount++;
-                            powerUpThrusters(thrustDockForwardList, 25+ iPushCount);
+                            iDockingPushCount++;
+                            powerUpThrusters(thrustDockForwardList, 25 + iDockingPushCount);
                         }
                         else if (velocityShip < 5)
+                        {
                             powerUpThrusters(thrustDockForwardList, 1);
+                        }
                         else
                             powerDownThrusters(thrustAllList);
                     }
                     else
                     {
                         Echo("<=15");
+                        bWantFast = true;
                         if (velocityShip < .5)
                         {
-                            iPushCount++;
-                            powerUpThrusters(thrustDockForwardList, 25 + iPushCount);
+                            iDockingPushCount++;
+                            powerUpThrusters(thrustDockForwardList, 25 + iDockingPushCount);
                         }
                         else if (velocityShip < 1.4)
                         {
                             powerUpThrusters(thrustDockForwardList, 1);
-                            if (iPushCount > 0) iPushCount--;
+                            if (iDockingPushCount > 0) iDockingPushCount--;
                         }
                         else
                             powerDownThrusters(thrustAllList);

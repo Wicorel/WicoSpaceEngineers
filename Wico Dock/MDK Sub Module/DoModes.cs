@@ -22,10 +22,6 @@ namespace IngameScript
         void doModes()
         {
 	        Echo("mode=" + iMode.ToString());
-	        if (AnyConnectorIsConnected() && (iMode!=MODE_LAUNCH ) && iMode!=MODE_DOCKED )
-	        {
-		        setMode(MODE_DOCKED);
-	        }
             doModeAlways();
 
             if (iMode==MODE_IDLE && (craft_operation & CRAFT_MODE_SLED) > 0)
@@ -60,18 +56,23 @@ namespace IngameScript
             if (iMode != MODE_ATTENTION)
             {
                 // TODO: allow for relay ships that are NOT bases..
-                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
+                // TODO: allow flag to turn this 'feature' off
+                // TODO: check CommunicationStealth flag
+                // TODO: check if shipcontroller occupied and... ?
+
+                float range = RangeToNearestBase() + 100f + (float)velocityShip * 15f;
                 antennaMaxPower(false, range);
             }
             processPendingSends();
             processReceives();
-            if (AnyConnectorIsConnected() && (iMode != MODE_LAUNCH) && iMode != MODE_DOCKED)
+            if (AnyConnectorIsConnected() && (iMode != MODE_LAUNCH) && iMode != MODE_DOCKED && iMode!=MODE_RELAUNCH)
             {
+                Echo("Force to DOCKED");
                 setMode(MODE_DOCKED);
             }
             logState();
             checkBases();
-            Echo(baseInfoString());
+//            Echo(baseInfoString());
         }
         #endregion
 

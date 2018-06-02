@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2037
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Wico Dock Common", "Wico Dock Common\Wico Dock Common.shproj", "{B00D1759-BE09-4FFC-A44F-1442F5604E9A}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Wico Dock Common\Wico Dock Common.projitems*{b00d1759-be09-4ffc-a44f-1442f5604e9a}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3E9F6CE7-78FE-4995-B067-6CF58A63B26F}
+	EndGlobalSection
+EndGlobal

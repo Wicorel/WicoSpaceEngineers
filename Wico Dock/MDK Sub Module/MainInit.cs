@@ -32,13 +32,13 @@ namespace IngameScript
             CamerasInitCustomData(iniCustomData);
             SensorInitCustomData(iniCustomData);
             PowerInitCustomData(iniCustomData);
-            //            CargoInitCustomData(iniCustomData);
+            CargoInitCustomData(iniCustomData);
             CommunicationsInitCustomData(iniCustomData);
 
             NavInitCustomData(iniCustomData);
 
             DockingInitCustomData(iniCustomData);
-            RelaunchInitCustomData(iniCustomData);
+
             DockedInitCustomData(iniCustomData);
             LaunchInitCustomData(iniCustomData);
         }
@@ -79,7 +79,7 @@ namespace IngameScript
                         sInitResults += rotorsNavInit();
                         break;
                     case 7:
-                        sInitResults += sensorInit();
+                        sInitResults += SensorInit(shipOrientationBlock);
                         break;
                     case 8:
                         sInitResults += camerasensorsInit(shipOrientationBlock);
@@ -104,9 +104,10 @@ namespace IngameScript
                         BaseInitInfo();
                         break;
                     case 14:
-                        sInitResults += modeOnInit();
+                        initCargoCheck();
                         break;
                     case 15:
+                        sInitResults += modeOnInit();
                         init = true;
                         break;
                     case 16:

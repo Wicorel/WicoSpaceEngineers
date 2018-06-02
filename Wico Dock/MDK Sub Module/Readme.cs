@@ -119,9 +119,15 @@ Use NAV module for long-range travel
 
 3.4D Current Code Apr 22, 2018
 
+3.4E May 05 2018 + May 18 2018 May 27 2018
+Added Report text panel output to docking states.
 
 TODO:
-option to Support 'memory' connectors; like MK3 did
-option to turn off 'wico' communication docking
+forget known bases when new grid (DONE by craft control)
+support 'memory' connector; like MK3 did
+support multiple 'memmory' connectors
+ability to turn off 'wico' communication docking (no antenna communications)
+Need relaunch handling
+timeout after requesting dock; remove base from list or mark 'dead?'
 
 */

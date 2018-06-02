@@ -22,58 +22,91 @@ namespace IngameScript
         /*
          * TODO:
          * 
+         * add 'memory' connector like MK3 does
+         * 
          * Unload ship when docked..
          * 
          * Load uranium
          * stockpile tanks
          * battery charge
+         * 
+         * relaunch
          */
 
- //       string sDockedSection = "DOCKED";
-
-        void DockedInitCustomData(INIHolder iNIHolder)
-        {
-//            iNIHolder.GetValue(sDockedSection, "ActionStart", ref dtDockedActionStart);
-        }
-        void DockedSerialize(INIHolder iNIHolder)
-        {
-        }
-
-        void DockedDeserialize(INIHolder iNIHolder)
-        {
-        }
 
 
         // 0 = master init
-        // 1 = inited.
+        // 1 battery check 30%.  If no batteries->4
+        // 2 battery check 80%
+        // 3 battery check 100%
+        // 4 no battery checks
 
         void doModeDocked()
         {
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":DOCKED!", textPanelReport);
             Echo("Docked!");
-            /*
-            if (bAutoRelaunch && bValidDock)
+            Echo("Autorelaunch=" + bAutoRelaunch.ToString());
+            bWantFast = false;
+            bWantMedium = false;
+            bWantSlow = true;
+
+            //TODO: autounload
+
+            if (bAutoRelaunch )
             {
+                doCargoCheck();
                 Echo("Docked. Checking Relaunch");
-                if (batteryPercentage > batterypcthigh && cargopcent < cargopctmin)
+
+                bool BatteryGo = true;
+                bool TanksGo = true;
+                bool ReactorsGo = true;
+                bool CargoGo = true;
+
+                // Check battery charge
+                if (batteryPercentage >= 0 && batteryPercentage < batterypcthigh)
+                    BatteryGo = false;
+
+                // check cargo emptied
+                if (cargopcent > cargopctmin)
+                    CargoGo = false;
+
+                // TODO: Check H2 tanks
+                // TODO: check reactor fuel
+
+                if (BatteryGo && TanksGo && ReactorsGo && CargoGo)
                 {
-                    setMode(MODE_RELAUNCH);//StartRelaunch();
+                    Echo("RELAUNCH!");
+                    setMode(MODE_RELAUNCH);
+                    bWantFast = true;
                     return;
                 }
                 else
+                {
                     Echo(" Awaiting Relaunch Criteria");
+                    StatusLog("Awaiting Relaunch Criteria", textPanelReport);
+                    if (!BatteryGo)
+                    {
+                        StatusLog(" Battery " + batteryPercentage + "% (" + batterypcthigh + "%)", textPanelReport);
+                        Echo(" Battery " + batteryPercentage + "% (" + batterypcthigh + "%)");
+                    }
+                    if(!CargoGo)
+                    {
+                        StatusLog(" Cargo: " + cargopcent + "% (" + cargopctmin + ")", textPanelReport);
+                        Echo(" Cargo: " + cargopcent + "% (" + cargopctmin + ")");
+                    }
+                }
             }
-            */
             if (!AnyConnectorIsConnected())
             {
                 // we magically got disconnected..
                 setMode(MODE_IDLE);
-                powerDownThrusters(thrustAllList);
+                powerDownThrusters(thrustAllList); // turn thrusters ON
+                if ((craft_operation & CRAFT_MODE_NOTANK) == 0) TanksStockpile(false); // turn tanks ON
                 // TODO: allow for relay ships that are NOT bases..
                 float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
                 antennaMaxPower(false,range);
-                // Need battery management.
+                BatterySetNormal();
             }
             else
             {
@@ -82,10 +115,10 @@ namespace IngameScript
                 Echo("Power Saving Mode");
                 if (current_state == 0)
                 {
-                    if ((craft_operation & CRAFT_MODE_NOTANK) == 0) TanksStockpile(true);// blockApplyAction(tankList, "Stockpile_On");
+                    if ((craft_operation & CRAFT_MODE_NOTANK) == 0) TanksStockpile(true);
                     powerDownThrusters(thrustAllList, thrustAll, true);
                     antennaLowPower();
-                    sleepAllSensors();
+                    SensorsSleepAll();
                     // TODO: ??? turn gyos off?
                     batteryCheck(0, true);
                     current_state = 1;
@@ -93,10 +126,9 @@ namespace IngameScript
                 else if (current_state == 1)
                 {
                     batteryCheck(0, true);
-                    if (batteryPercentage < 0 || (craft_operation & CRAFT_MODE_NOPOWERMGMT) == 0 )
+                    if (batteryPercentage < 0 || (craft_operation & CRAFT_MODE_NOPOWERMGMT) == 0)
                         current_state = 4; // skip battery checks
-                    else
-                                                   if (!batteryCheck(30, true))
+                    else if (!batteryCheck(30, true))
                         current_state = 2;
                 }
                 else if (current_state == 2)
@@ -109,9 +141,12 @@ namespace IngameScript
                     if (!batteryCheck(100, true))
                         current_state = 1; // go back and check again
                 }
-                else batteryCheck(0, true); //,textBlock);
+                else //state 4
+                {
+                    batteryCheck(0, true); //,textBlock);
+                }
 
-                ///
+                // all states
                 {
                     if (batteryPercentage >= 0) StatusLog("Bat:" + progressBar(batteryPercentage), textPanelReport);
                     else Echo("No Batteries");
@@ -133,6 +168,11 @@ namespace IngameScript
                     else Echo("No Hydrogen Tanks");
                     if (batteryPercentage >=0 && batteryPercentage < batterypctlow)
                         StatusLog(" WARNING: Low Battery Power", textPanelReport);
+
+                    if(bAutoRelaunch)
+                    {
+                        doCargoCheck();
+                    }
 
                     // TODO: get uranium into reactors; take out excess ingots; turn off conveyor usage (like TIM)
                     // TODO: get ore OUT of ship and into base (including stone)
