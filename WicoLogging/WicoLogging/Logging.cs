@@ -144,7 +144,7 @@ namespace IngameScript
             }
             */
             textRangeReport = getTextBlock(sRangeReport);
-            gpsPanel = getTextBlock(sGPSTextpanel,bSubModule);
+            gpsPanel = getTextBlock(sGPSTextpanel,bIAmSubModule);
             sledReport = getTextBlock(ssledReport);
             bLoggingInit = true;
         }

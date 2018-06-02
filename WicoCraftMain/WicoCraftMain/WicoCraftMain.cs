@@ -27,7 +27,7 @@ namespace IngameScript
         /// <summary>
         /// Do we support submodules?
         /// </summary>
-        bool bSubModules = true;
+        bool bSupportSubModules = true;
 
         /// <summary>
         /// Display the init text as craft Operation
@@ -41,9 +41,9 @@ namespace IngameScript
         /// <summary>
         /// We are a MAIN module, not sub-module
         /// </summary>
-        bool bSubModule = false;
+        bool bIAmSubModule = false;
 
-        double dSubmoduleTriggerWait = 1; //seconds between triggers
+        double dSubmoduleTriggerWait = 5; //seconds between submodule triggers
         double dSubmoduleTriggerLast = -1;
 
         double dErrorGridReInitWait = 5; //seconds between trying to re-init between errors
@@ -65,7 +65,7 @@ namespace IngameScript
 
             iniCustomData.GetValue(sMainSection, "EchoOn", ref bEchoOn, true);
             iniCustomData.GetValue(sMainSection, "DebugUpdate", ref bDebugUpdate, true);
-            iniCustomData.GetValue(sMainSection, "SubModules", ref bSubModules, true);
+            iniCustomData.GetValue(sMainSection, "SubModules", ref bSupportSubModules, true);
             iniCustomData.GetValue(sMainSection, "SubmoduleTriggerWait", ref dSubmoduleTriggerWait, true);
 
             _oldEcho = Echo;
@@ -295,7 +295,7 @@ namespace IngameScript
             }
             else
             {
-                if(bSubModules) Deserialize();
+                if(bSupportSubModules) Deserialize();
                 sPassedArgument = sArgument;
 
                 if (bWasInit)
@@ -376,10 +376,10 @@ namespace IngameScript
 
                 doModes();
             }
-            if(bSubModules) Serialize();
+            if(bSupportSubModules) Serialize();
 
             //            if ((anchorPosition == null || SaveFile == null ))
-            if (bSubModules)
+            if (bSupportSubModules)
             {
                 if ((SaveFile == null))
                 {
@@ -428,12 +428,12 @@ namespace IngameScript
                 Runtime.UpdateFrequency &= ~(UpdateFrequency.Update10);
             }
 
-            bWasInit = false;
 
             if(bCraftOperation) Echo(craftOperation());
 
             modulePostProcessing();
             UpdateAllPanels();
+            bWasInit = false;
         }
 
         void echoInstructions(string sBanner = null)
