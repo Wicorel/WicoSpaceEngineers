@@ -46,7 +46,7 @@ namespace IngameScript
                     if (SaveFile == null)
                     {
                         //                if (bVerboseSerialize)
-                        //                        Echo("WARNING: saving to Storage");
+                                                Echo("WARNING: saving to Storage");
                         Storage = sINI;
                     }
                     else
