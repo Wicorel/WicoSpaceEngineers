@@ -26,10 +26,11 @@ namespace IngameScript
         List<IMyTerminalBlock> thrustLaunchUpList = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> thrustLaunchDownList = new List<IMyTerminalBlock>();
 
- //       string sLaunchSection = "LAUNCH";
+        //       string sLaunchSection = "LAUNCH";
 
         void LaunchInitCustomData(INIHolder iNIHolder)
         {
+
         }
         void LaunchSerialize(INIHolder iNIHolder)
         {
@@ -44,6 +45,7 @@ namespace IngameScript
         {
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":LAUNCH!", textPanelReport);
+            bWantMedium = true;
             if (current_state == 0)
             {
                 StatusLog(DateTime.Now.ToString() + " ACTION: StartLaunch", textLongStatus, true);
@@ -105,27 +107,21 @@ namespace IngameScript
             StatusLog(moduleName + ":Distance Launched=" + dist.ToString("0.00") + "m", textPanelReport);
             Echo(moduleName + ":Distance Launched=" + dist.ToString("0.00") + "m");
 
-            if (dist > 10)
+            if (velocityShip > LaunchMaxVelocity * 0.9)
             {
-                ConnectAnyConnectors(true, true);// "OnOff_On");
+                powerDownThrusters(thrustLaunchForwardList);
+                powerDownThrusters(thrustLaunchBackwardList, thrustAll, true);
             }
-
+            else if (velocityShip > 2)
             {
-
-                if (velocityShip > 2) powerUpThrusters(thrustLaunchBackwardList, 25);
-                else powerUpThrusters(thrustLaunchBackwardList);
+                powerUpThrusters(thrustLaunchBackwardList, 25);
             }
-            if (dist > 45)
+            double stoppingD = calculateStoppingDistance(thrustLaunchBackwardList, velocityShip, 0);
+            if ((dist+stoppingD)> LaunchDistance)
             {
+                ConnectAnyConnectors(true, true);
                 ResetMotion();
                 setMode(MODE_LAUNCHED);
-                /*
-                if (bValidTarget || bValidAsteroid) setMode(MODE_GOINGTARGET);//ActionGoMine();
-                else
-                {
-                    setMode(MODE_INSPACE);
-                }
-                */
             }
         }
         #endregion
