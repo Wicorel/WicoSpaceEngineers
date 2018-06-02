@@ -18,28 +18,11 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        DateTime dtRelaunchActionStart;
-
-        string sRelaunchSection = "RELAUNCH";
-
-        void RelaunchInitCustomData(INIHolder iNIHolder)
-        {
-        }
-        void RelaunchSerialize(INIHolder iNIHolder)
-        {
-            iNIHolder.SetValue(sRelaunchSection, "ActionStart", dtRelaunchActionStart);
-        }
-
-        void RelaunchDeserialize(INIHolder iNIHolder)
-        {
-            iNIHolder.GetValue(sRelaunchSection, "ActionStart", ref dtRelaunchActionStart);
-        }
-
         void doModeRelaunch()
         {
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":RELAUNCH!", textPanelReport);
-
+            Echo("Relaunch countdown in progress");
             if (current_state == 0)
             {
                 StatusLog(DateTime.Now.ToString() + " ACTION: ReLaunch", textLongStatus, true);
@@ -54,14 +37,13 @@ namespace IngameScript
                 {
                     return;
                 }*/
-                setMode(MODE_RELAUNCH);
+//                setMode(MODE_RELAUNCH);
                 dtRelaunchActionStart = DateTime.Now;
                 current_state = 1;
                 Serialize();
                 return;
-
-
             }
+            // delay launch
             DateTime dtMaxWait = dtRelaunchActionStart.AddSeconds(5.0f);
             DateTime dtNow = DateTime.Now;
             if (DateTime.Compare(dtNow, dtMaxWait) > 0)
