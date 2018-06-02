@@ -140,6 +140,13 @@ namespace IngameScript
             // Gets the points defining a face of the bounding box in world space.
             // 0 = right, 1 = left, 2 = top, 3 = bottom, 4 = back, 5 = front
             // alt: dir<<1 + sign with dir: 0 = X, 1 = Y, 2 = Z, sign: 0 = +, 1 = - (i.e. 3 = -Y (1<1+1))
+
+            /// <summary>
+            /// Get the corners for a specified face.
+            /// </summary>
+            /// <param name="face">0=right, 1=left, 2=top, 3=bottom, 4=back, 5=front</param>
+            /// <param name="points">array of points to return. See implementation source for corner order</param>
+            /// <param name="index">optional offset</param>
             public void GetFaceCorners(int face, Vector3D[] points, int index = 0)
             {
                 face %= PointsLookup.Length;
