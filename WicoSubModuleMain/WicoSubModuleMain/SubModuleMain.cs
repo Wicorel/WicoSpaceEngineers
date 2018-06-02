@@ -26,7 +26,7 @@ namespace IngameScript
         /// <summary>
         /// We are a submodule
         /// </summary>
-        bool bSubModule = true;
+        bool bIAmSubModule = true;
 
         /// <summary>
         /// should we debug Dump the UpdateType? Settable in CustomData. 
@@ -106,6 +106,7 @@ namespace IngameScript
 
         bool bWantFast = false;
         bool bWantMedium = false;
+        bool bWantSlow = false;
 
         bool bWorkingProjector = false;
 
@@ -121,6 +122,7 @@ namespace IngameScript
 
             bWantFast = false;
             bWantMedium = false;
+            bWantSlow = false;
 
             bWorkingProjector = false;
             var list = new List<IMyTerminalBlock>();
@@ -180,6 +182,7 @@ namespace IngameScript
                     // pay attention to argument
                     if (moduleProcessArguments(sArgument))
                     {
+                        SetUpdateFrequency();
                         Serialize();
                         UpdateAllPanels();
                         return;
@@ -194,6 +197,7 @@ namespace IngameScript
                         antReceive(sArgument);
 // Already done in antReceive()                        doTriggerMain(); // Run everybody
                     }
+                    SetUpdateFrequency();
                     Serialize();
                     UpdateAllPanels();
                     return;
@@ -211,39 +215,61 @@ namespace IngameScript
                         sInitResults = "";
                     }
                 }
-
+//                Echo("Main:1:fast=" + bWantFast.ToString());
                 processPendingReceives();
                 processPendingSends();
+//                Echo("Main:2:fast=" + bWantFast.ToString());
 
                 moduleDoPreModes();
+//                Echo("Main:3:fast=" + bWantFast.ToString());
 
                 doModes();
+//                Echo("Main:4:fast=" + bWantFast.ToString());
             }
-
-            if (bWantFast)
-            {
-                Echo("FAST!");
-                Runtime.UpdateFrequency |= ufFast;
-            }
-            else
-            {
-                Runtime.UpdateFrequency &= ~(ufFast);
-            }
-            if (bWantMedium)
-            {
-                Echo("MEDIUM");
-                Runtime.UpdateFrequency |= UpdateFrequency.Update10;
-            }
-            else
-            {
-                Runtime.UpdateFrequency &= ~(UpdateFrequency.Update10);
-            }
+            SetUpdateFrequency();
 
             modulePostProcessing();
             Serialize();
 
             bWasInit = false;
             UpdateAllPanels();
+        }
+
+        void SetUpdateFrequency()
+        {
+            UpdateFrequency desireduf = UpdateFrequency.None;
+            if (bWantFast)
+            {
+                Echo("FAST!");
+                //                Runtime.UpdateFrequency |= ufFast;
+                desireduf |= ufFast;
+            }
+            else
+            {
+//                Runtime.UpdateFrequency &= ~(ufFast);
+            }
+            if (bWantMedium)
+            {
+                Echo("MEDIUM");
+                //                Runtime.UpdateFrequency |= UpdateFrequency.Update10;
+                desireduf |= UpdateFrequency.Update10;
+            }
+            else
+            {
+//                Runtime.UpdateFrequency &= ~(UpdateFrequency.Update10);
+            }
+            if (bWantSlow)
+            {
+                Echo("SLOW");
+                //                Runtime.UpdateFrequency |= UpdateFrequency.Update100;
+                desireduf |= UpdateFrequency.Update100;
+            }
+            else
+            {
+//                Runtime.UpdateFrequency &= ~(UpdateFrequency.Update100);
+            }
+            Runtime.UpdateFrequency = desireduf;
+
         }
 
         void echoInstructions(string sBanner = null)
