@@ -132,7 +132,7 @@ namespace IngameScript
             {
                 var w1 = wh1 as IMyMotorSuspension;
                 float currentPower = w1.GetValueFloat("Propulsion override");
-                Echo("CPower:" + currentPower.ToString("0.00") + w1.CustomName);
+                Echo("CPower:" + currentPower.ToString("0.00") + "\n" + w1.CustomName);
                 float cPower = (currentPower );
                 cPower = Math.Abs(cPower);
                 if (cPower < 1) cPower *= 100f;
@@ -154,13 +154,13 @@ namespace IngameScript
                 if (fFriction >= 0) w1.SetValueFloat("Friction", fFriction);
 //                if (cPower > 1) cPower /= 100f;
                 Echo("Setting override to" + cPower.ToString("0.000"));
-                w1.SetValueFloat("Propulsion override", cPower);
+                w1.SetValueFloat("Propulsion override", -cPower);
             }
             foreach (var wh1 in wheelLeftList)
             {
                 var w1 = wh1 as IMyMotorSuspension;
                 float currentPower = w1.GetValueFloat("Propulsion override");
-                Echo("CPower:" + currentPower.ToString("0.00") + w1.CustomName);
+                Echo("CPower:" + currentPower.ToString("0.00") + "\n"+w1.CustomName);
                 float cPower = (currentPower);
                 cPower = Math.Abs(cPower);
                 if (cPower < 1) cPower *= 100f;
@@ -181,8 +181,8 @@ namespace IngameScript
                 // BUG in 1.186.200.  using setter sets to MAX and not set value
                 if (fFriction >= 0) w1.SetValueFloat("Friction", fFriction);
 //                if (cPower > 1) cPower /= 100f;
-                Echo("Setting override to" + (-targetPower).ToString("0.000"));
-                w1.SetValueFloat("Propulsion override", -targetPower);
+                Echo("Setting override to" + (cPower).ToString("0.000"));
+                w1.SetValueFloat("Propulsion override", cPower);
             }
             return bAtMax;
         }
