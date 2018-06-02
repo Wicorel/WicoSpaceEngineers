@@ -1363,6 +1363,7 @@ float processRotorTargetAngle(GimbalRotor gr, float targetAngleD)
 			newVelocity = gr.maxVelocity * Math.Sign(angleDelta);
 		}
 	}
+
 	r.TargetVelocityRPM = newVelocity;
 //	r.TargetVelocity = newVelocity;
 	return newVelocity;
