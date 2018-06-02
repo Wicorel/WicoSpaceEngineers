@@ -500,16 +500,15 @@ namespace IngameScript
         /// <summary>
         /// Stopping distance based on thrust available, mass, current velocity and an optional gravity factor
         /// </summary>
-        /// <param name="thrustUpList">list of thrusters to use</param>
+        /// <param name="thrustStopList">list of thrusters to use</param>
         /// <param name="currentV">velocity to calculage</param>
         /// <param name="dGrav">optional gravity factor</param>
         /// <returns>stopping distance in meters</returns>
-        double calculateStoppingDistance(List<IMyTerminalBlock> thrustUpList, double currentV, double dGrav)
+        double calculateStoppingDistance(List<IMyTerminalBlock> thrustStopList, double currentV, double dGrav)
         {
             var myMass= ((IMyShipController)shipOrientationBlock).CalculateShipMass();
-            double hoverthrust = 0;
-            hoverthrust = myMass.PhysicalMass * dGrav * 9.810;
-            double maxThrust = calculateMaxThrust(thrustUpList);
+            double hoverthrust = myMass.PhysicalMass * dGrav * 9.810;
+            double maxThrust = calculateMaxThrust(thrustStopList);
             double maxDeltaV = (maxThrust - hoverthrust) / myMass.PhysicalMass;
             double secondstozero = currentV / maxDeltaV;
 //            Echo("secondstozero=" + secondstozero.ToString("0.00"));
