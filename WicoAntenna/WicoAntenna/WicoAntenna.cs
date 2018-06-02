@@ -260,11 +260,15 @@ namespace IngameScript
             if (lPendingMessages.Count > 0)
             {
                 AntennaSetDesiredPower(); // another sub-module may have turned it down.
+                Echo("pPS("+ lPendingMessages.Count+"):" + lPendingMessages[0]);
+                AntennaSetDesiredPower();
                 antSend(lPendingMessages[0],false);
                 lPendingMessages.RemoveAt(0);
             }
             if (lPendingMessages.Count > 0)
             {
+                Echo("Pending Send.  Request FAST!");
+                AntennaSetDesiredPower();
                 bWantFast = true; // if there are more, process quickly
             }
             else
@@ -290,12 +294,16 @@ namespace IngameScript
             { // try all available antennas
 
                 // queue if we are in silent mode or this is not immediate send
-                if(!bQueue || CommunicationsStealth)
+                //                if (!bQueue || CommunicationsStealth)
+                /*
+                if (bQueue || CommunicationsStealth)
                 {
                     // request antenna powerup
                     AntennaSetDesiredPower();
                 }
                 else
+                */
+                if(!bQueue)
                 {
                     // try immediate send:
                     bSent = antennaList[i].TransmitMessage(message);
@@ -308,6 +316,8 @@ namespace IngameScript
                 if (AntennaCount() > 0)
                 { // no sense queueing if we don't have any antennas.
                     lPendingMessages.Add(message);
+                    Echo("Adding outgoing message to queue. Request FAST!");
+                    Echo(message);
                     bWantFast = true;
                 }
             }
