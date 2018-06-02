@@ -19,6 +19,8 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
+        double HoverCameraElapsedMs = -1;
+        double HoverCameraWaitMs = 0.50;
 
         // states
         // 0 = init
@@ -89,6 +91,7 @@ namespace IngameScript
                 {
                     if ((craft_operation & CRAFT_MODE_NOTANK) == 0)
                     {
+                        powerDownThrusters(thrustAllList); // turns ON all thusters
                         TanksStockpile(false);
 //                        blockApplyAction(tankList, "Stockpile_Off");
                         //				blockApplyAction(gasgenList,"OnOff_On");
@@ -98,20 +101,30 @@ namespace IngameScript
                 }
                 landingDoMode(0);
             }
-            if (doCameraScan(cameraOrbitalLandingList, elevation * 2)) // scan down 2x current alt
-            {
-                // we are able to do a scan
-                if (!lastDetectedInfo.IsEmpty())
-                { // we got something
-                    double distance = Vector3D.Distance(lastCamera.GetPosition(), lastDetectedInfo.HitPosition.Value);
-                    //			if (distance < elevation)
-                    { // try to land on found thing below us.
-                        Echo("Scan found:" + lastDetectedInfo.Name + " " + distance.ToString("N0") + "m below");
-                        if (!bGearsLocked) StatusLog("Hovering above: " + lastDetectedInfo.Name + " " + distance.ToString("N0") + "m below", textPanelReport);
 
+            // add to delay time
+            if (HoverCameraElapsedMs >= 0) HoverCameraElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
+
+            // check for delay
+            if (HoverCameraElapsedMs > HoverCameraWaitMs || HoverCameraElapsedMs < 0) // it is time to scan..
+            {
+                if (doCameraScan(cameraOrbitalLandingList, elevation * 2)) // scan down 2x current alt
+                {
+                    HoverCameraElapsedMs = 0;
+                    // we are able to do a scan
+                    if (!lastDetectedInfo.IsEmpty())
+                    { // we got something
+                        double distance = Vector3D.Distance(lastCamera.GetPosition(), lastDetectedInfo.HitPosition.Value);
+                        //			if (distance < elevation)
+                        { // try to land on found thing below us.
+                            Echo("Scan found:" + lastDetectedInfo.Name + " " + distance.ToString("N0") + "m below");
+                            if (!bGearsLocked) StatusLog("Hovering above: " + lastDetectedInfo.Name + " " + distance.ToString("N0") + "m below", textPanelReport);
+
+                        }
                     }
                 }
             }
+            else Echo("Camera Scan delay");
 
             if (bGearsLocked)
             {
