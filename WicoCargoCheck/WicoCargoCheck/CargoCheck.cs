@@ -168,9 +168,71 @@ namespace IngameScript
             double totalMax = 0.0;
             double ratio = 0;
 
+            bool bCargoFull = true;
+            bool bDrillFull = false;
+
+            // TODO: if all cargo containers are full and ANY drill is full, call it 99%
             for (int i = 0; i < lContainers.Count; i++)
             {
-                totalMax += cargoCapacity(lContainers[i]);
+                //                totalMax += cargoCapacity(lContainers[i]);
+                double capacity = -1;
+
+                var count = lContainers[i].InventoryCount;
+                for (var invcount = 0; invcount < count; invcount++)
+                {
+                    var inv = lContainers[i].GetInventory(invcount);
+
+                    if (inv != null) // null means, no items in inventory.
+                    {
+                        totalCurrentVolume += (double)inv.CurrentVolume;
+
+                        if ((double)inv.MaxVolume > 9223372036854)
+                        {
+                            bCreative = true;
+                        }
+                        else
+                        {
+                            bCreative = false;
+                        }
+
+                        if (!bCreative)
+                        {
+                            //Echo("NCreateive");
+                            capacity = (double)inv.MaxVolume;
+                            double dCapacity = defaultCapacity(lContainers[i]);
+                            if (dCapacity > 0) cargoMult = capacity / dCapacity;
+                            //					Echo("lContainers="+theContainer.DefinitionDisplayNameText+"'"+inv.MaxVolume.ToString());
+                        }
+                        else
+                        {
+                            capacity = defaultCapacity(lContainers[i]) * 10;
+                            cargoMult = 9999;
+                        }
+
+                        if ((double)inv.CurrentVolume < capacity)
+                        {
+                            // there is room
+                            if (!(lContainers[i] is IMyShipDrill))
+                            {
+                                bCargoFull = false;
+                            }
+
+                        }
+
+                        else //if ((double)inv.CurrentVolume + 5 > capacity)
+                        {
+                            // we are full
+                            if (lContainers[i] is IMyShipDrill)
+                            {
+                                bDrillFull = true;
+                            }
+                        }
+
+                    }
+                    totalMax += capacity;
+                }
+                //	Echo("cargoCapacity=" + capacity.ToString());
+
             }
             //	Echo("totalMax=" + totalMax.ToString("0.00"));
             if (totalMax > 0)
@@ -184,6 +246,9 @@ namespace IngameScript
             //Echo("ratio="+ratio.ToString());
             cargopcent = (int)ratio;
 
+            // if any drill is full and ALL cargo are full, call it 100%
+            if (bCargoFull && bDrillFull)
+                cargopcent = 101;
         }
 
         double cargoCapacity(IMyTerminalBlock theContainer)
