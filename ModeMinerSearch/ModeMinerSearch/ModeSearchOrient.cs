@@ -40,6 +40,9 @@ namespace IngameScript
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":SearchOrient", textPanelReport);
             Echo("Search Orient:current_state=" + current_state.ToString());
+            Echo(Vector3DToString(vExpectedAsteroidExit));
+            Echo(Vector3DToString(vLastAsteroidContact));
+            Echo(Vector3DToString(vLastAsteroidExit));
             double maxThrust = calculateMaxThrust(thrustForwardList);
             Echo("maxThrust=" + maxThrust.ToString("N0"));
 
@@ -67,6 +70,7 @@ namespace IngameScript
                     setMode(MODE_DOCKING);
                     return;
                 }
+//                sStartupError += "\nSO Start:" + Vector3DToString(vLastAsteroidContact);
                 /*
                 double dist = (vCurrentPos - vLastContact).Length();
                 if (dist < 14)
@@ -92,12 +96,23 @@ namespace IngameScript
             {
                 // NEED: Time out.
                 bWantFast = true;
-                if(GyroMain("forward",vLastAsteroidContact-shipOrientationBlock.GetPosition(),shipOrientationBlock))
-                { // we are aimed
+                if (GyroMain("forward", -vExpectedAsteroidExit, shipOrientationBlock))
+                { // we are aimed roll to 'up'
+                    current_state = 30;
+                }
+            }
+            else if(current_state==30)
+            {
+                bWantFast = true;
+                bool bAimed = GyroMain("up", AsteroidUpVector, shipOrientationBlock);
+                if (bAimed)
+                {
                     ResetMotion();
                     vLastAsteroidExit = shipOrientationBlock.GetPosition();
+                    vExpectedAsteroidExit = -vExpectedAsteroidExit;
                     setMode(MODE_SEARCHSHIFT);
                 }
+
             }
 
         }
