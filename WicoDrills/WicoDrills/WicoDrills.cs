@@ -80,7 +80,8 @@ namespace IngameScript
         {
             foreach(IMyFunctionalBlock b in ejectorList)
             {
-                b.Enabled = true;
+                if(!b.Enabled)
+                    b.Enabled = true;
             }
 //                            blockApplyAction(ejectorList, "OnOff_On");
 
@@ -92,7 +93,8 @@ namespace IngameScript
 
             foreach(IMyFunctionalBlock b in ejectorList)
             {
-                b.Enabled = false;
+                if(b.Enabled)
+                    b.Enabled = false;
             }
 
         }
