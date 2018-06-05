@@ -118,10 +118,12 @@ namespace IngameScript
          * 
          */
 
-        double shiftElapsedMs = 0;
+        //double shiftElapsedMs = 0;
 
         void doModeSearchShift()
         {
+            setMode(MODE_ATTENTION);
+            /*
             List<IMySensorBlock> aSensors = null;
 
             StatusLog("clear", textPanelReport);
@@ -373,6 +375,7 @@ namespace IngameScript
                     }
                     break;
             }
+            */
         }
     }
 }

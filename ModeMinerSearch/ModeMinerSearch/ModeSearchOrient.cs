@@ -40,9 +40,9 @@ namespace IngameScript
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":SearchOrient", textPanelReport);
             Echo("Search Orient:current_state=" + current_state.ToString());
-            Echo(Vector3DToString(vExpectedAsteroidExit));
-            Echo(Vector3DToString(vLastAsteroidContact));
-            Echo(Vector3DToString(vLastAsteroidExit));
+//            Echo(Vector3DToString(vExpectedAsteroidExit));
+//            Echo(Vector3DToString(vLastAsteroidContact));
+//            Echo(Vector3DToString(vLastAsteroidExit));
             double maxThrust = calculateMaxThrust(thrustForwardList);
             Echo("maxThrust=" + maxThrust.ToString("N0"));
 
@@ -59,6 +59,8 @@ namespace IngameScript
             Echo("velocity=" + velocityShip.ToString("0.00"));
             Echo("SOElapsedMs=" + SOElapsedMs.ToString("0.00"));
 
+            setMode(MODE_ATTENTION);
+            /*
             if (current_state == 0)
             {
                 StatusLog(DateTime.Now.ToString() + " StartSearchOrient", textLongStatus, true);
@@ -71,14 +73,6 @@ namespace IngameScript
                     return;
                 }
 //                sStartupError += "\nSO Start:" + Vector3DToString(vLastAsteroidContact);
-                /*
-                double dist = (vCurrentPos - vLastContact).Length();
-                if (dist < 14)
-                {
-                    setMode(MODE_SEARCHVERIFY);
-                    return;
-                }
-                */
                 current_state = 10;
             }
             else if (current_state == 10)
@@ -114,6 +108,7 @@ namespace IngameScript
                 }
 
             }
+            */
 
         }
     }
