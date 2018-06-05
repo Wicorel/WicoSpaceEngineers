@@ -118,6 +118,9 @@ namespace IngameScript
             //            Echo("Length=" + shipDim.LengthInMeters());
             Echo("AsteroidCurrentX=" + AsteroidCurrentX + " Y=" + AsteroidCurrentY);
             Echo("AsteroidMaxX=" + AsteroidMaxX + " AsteroidMaxY=" + AsteroidMaxY);
+//            MinerCalculateBoreSize();
+//            Echo("Boreheight=" + MiningBoreHeight);
+//            Echo("BoreWidth=" + MiningBoreWidth);
         }
 
         void modulePostProcessing()

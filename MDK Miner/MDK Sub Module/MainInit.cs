@@ -168,6 +168,7 @@ namespace IngameScript
         string modeOnInit()
         {
             // check current state and perform reload init to correct state
+            MinerCalculateBoreSize();
             if (miningAsteroidID > 0)
             {
                 MinerCalculateAsteroidVector(miningAsteroidID);
