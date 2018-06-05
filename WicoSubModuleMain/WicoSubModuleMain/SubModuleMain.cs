@@ -42,7 +42,7 @@ namespace IngameScript
         }
 
         string sMainSection = "WICOCRAFT";
-        void ProcessInitCustomData()
+        void ProcessInitCustomData(bool bForceWrite = false)
         {
             INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
 
@@ -55,7 +55,7 @@ namespace IngameScript
             TimersInitCustomData(iniCustomData);
 
             ModuleInitCustomData(iniCustomData);
-            if (iniCustomData.IsDirty)
+            if (iniCustomData.IsDirty || bForceWrite)
             {
                 Me.CustomData = iniCustomData.GenerateINI(true);
             }
