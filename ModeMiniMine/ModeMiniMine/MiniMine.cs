@@ -178,15 +178,10 @@ namespace IngameScript
             //            if (miningAsteroidID > 0)
             //                Echo("Our Asteroid=" + miningAsteroidID.ToString());
 
-            //            if(vExpectedExit.AbsMax()>.5)
-            {
-                //                Vector3D vT = shipOrientationBlock.GetPosition() + vExpectedExit * 150;
-                //                debugGPSOutput("ExpectedExit", vT);
-            }
             if (current_state > 0)
             {
                 if (miningChecksElapsedMs >= 0) miningChecksElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
-                if (miningChecksElapsedMs < 0 || miningChecksElapsedMs > 1)
+                if (miningChecksElapsedMs < 0 || miningChecksElapsedMs > 1*1000)
                 {
                     miningChecksElapsedMs = 0;
 
@@ -203,9 +198,9 @@ namespace IngameScript
                     // TODO: check hydrogen tanks
                     // TODO: check reactor uranium
 
-                    StatusLog("Cargo =" + cargopcent + "% / " + MiningCargopcthighwater + "% Max", textPanelReport);
-                    StatusLog("Battery " + batteryPercentage + "% (Min:" + batterypctlow + "%)", textPanelReport);
                 }
+                StatusLog("Cargo =" + cargopcent + "% / " + MiningCargopcthighwater + "% Max", textPanelReport);
+                StatusLog("Battery " + batteryPercentage + "% (Min:" + batterypctlow + "%)", textPanelReport);
             }
             if (sensorsList.Count >= 2)
             {
@@ -504,7 +499,10 @@ namespace IngameScript
                             var lmyDEI = new List<MyDetectedEntityInfo>();
                             s.DetectedEntities(lmyDEI);
                             if (AsteroidProcessLDEI(lmyDEI))
+                            {
+                                // TODO: if we find ANOTHER asteroid in sensors, figure out what to do
                                 bLocalAsteroid = true;
+                            }
                         }
 
                         double distance = (vAsteroidBoreStart - shipOrientationBlock.GetPosition()).Length();
@@ -514,9 +512,9 @@ namespace IngameScript
                         Echo("Distance=" + niceDoubleMeters(distance) + " (" + niceDoubleMeters(boreLength) + ")");
                         double stoppingDistance = calculateStoppingDistance(thrustBackwardList, velocityShip, 0);
                         StatusLog("Bore:" + ((distance + stoppingDistance) / boreLength * 100).ToString("N0") + "%", textPanelReport);
-                        if ((distance+stoppingDistance) < (AsteroidDiameter + shipDim.LengthInMeters()* MineShipLengthScale*2))
+    //                        if ((distance + stoppingDistance) < (AsteroidDiameter + shipDim.LengthInMeters() * MineShipLengthScale * 2))// even if sensors don't see anything. continue to end of the bore.
+                        if ((distance + stoppingDistance) < boreLength*0.65) // if we are <65% done with bore, continue no matter what sensors say
                         {
-                            // even if sensors don't see anything. continue to end of the bore.
                             bLocalAsteroid = true;
                         }
                         if (!bLocalAsteroid)
@@ -567,6 +565,8 @@ namespace IngameScript
                             }
                             else
                             {
+                                // TODO: need a 'BeamRider' routine that takes start,end and tries to stay on that beam.
+                                // TODO: display COM to see if it's effecting the aiming
                                 Vector3D vAim = (vAsteroidBoreEnd - ((IMyShipController)shipOrientationBlock).CenterOfMass);
                                 //Vector3D vAim = (((IMyShipController)shipOrientationBlock).CenterOfMass - vAsteroidBoreStart);
                                 //                                Vector3D vAim = (vAsteroidBoreEnd - vAsteroidBoreStart);
@@ -1138,7 +1138,7 @@ namespace IngameScript
                 case 190:
                     {
                         // start NAV travel
-                        NavGoTarget(vAsteroidBoreStart, iMode, 195, 25);
+                        NavGoTarget(vAsteroidBoreStart, iMode, 195, 11);
                     }
                     break;
                 case 195:

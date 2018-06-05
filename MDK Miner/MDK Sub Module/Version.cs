@@ -21,11 +21,11 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-// MDK 1.1
-#region mdk preserve
-#region mdk macros
-// This script was deployed at $MDK_DATETIME$
-#endregion
+        // MDK 1.1
+        #region mdk preserve
+        #region mdk macros
+        // This script was deployed at $MDK_DATETIME$
+        #endregion
 
 /*
 3.4 01272018
@@ -62,29 +62,39 @@ check battery remaining before starting/ending bore (doh)
 3.4H June 03,2018
 Do sensor and raycast scan of bore and don't do run if nothing found
 
+3.4I June 04, 2018
+When boring, check rear sensor for 'out'.  verify with raycast ahead to be sure it's 'clear'.
+change default boreheight/width to FULL bounding box.
+
+
 TODO:
-  add other mining modes
-  check for complete destruction of asteroid like MK3 did
-  select asteroids
-  select ore
-  mine only target ore
-  relaunch
-  spread mining for searching for ores
-  manual triangulation for ore locations
-  manual triangulation for asteroid locations
-  'Manual mine' mode for player controlled mining.  and still report ore locations, etc
-  
-  
+    check for complete destruction of asteroid like MK3 did
+    announce 'asteroid removed'
+
+     Menu system.
+    select asteroids
+    select ore
+    mine only target ore
+    manual triangulation for ore locations
+    manual triangulation for asteroid locations
+
+    ::  add other mining modes
+    spread mining for searching for ores
+    'Manual mine' mode for player controlled mining.  and still report ore locations, etc
+    'seam following' mode
+    support partial bore depth? 
+
+
 NEED:  
- 
+
 WANTED: 
- 
+
 */
-#endregion
+        #endregion
 
         string OurName = "Wico Craft";
         string moduleName = "MINER";
-        string sVersion = "3.4H";
+        string sVersion = "3.4I";
 
     }
 }

@@ -301,8 +301,10 @@ namespace IngameScript
         {
             if (MiningBoreHeight <= 0)
             {
-                MiningBoreHeight = (shipDim.HeightInMeters() - shipDim.BlockMultiplier() * 2);
-                MiningBoreWidth = (shipDim.WidthInMeters() - shipDim.BlockMultiplier() * 2);
+                MiningBoreHeight = (shipDim.HeightInMeters() );
+                MiningBoreWidth = (shipDim.WidthInMeters());
+//                MiningBoreHeight = (shipDim.HeightInMeters() - shipDim.BlockMultiplier() * 2);
+//                MiningBoreWidth = (shipDim.WidthInMeters() - shipDim.BlockMultiplier() * 2);
 
                 // save defaults back to customdata to allow player to change
                 INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
