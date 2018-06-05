@@ -121,13 +121,26 @@ Use NAV module for long-range travel
 
 3.4E May 05 2018 + May 18 2018 May 27 2018
 Added Report text panel output to docking states.
+Source published June 01 2018
+
+3.4F June 02 2018
+
 
 TODO:
 forget known bases when new grid (DONE by craft control)
 support 'memory' connector; like MK3 did
-support multiple 'memmory' connectors
+support multiple 'memmory' connectors (named for ease of use by player)
 ability to turn off 'wico' communication docking (no antenna communications)
-Need relaunch handling
 timeout after requesting dock; remove base from list or mark 'dead?'
+docking maneuver sequence (runway) (text panel sequence like other scripts?)
+launch maneuver sequence (ditto)
+support working in gravity
+Need to support cargo transport ship modes.  With pull from one dock and push to another.
+Dock request (Get power, give power, ore dump, get ice, give ice, etc)
+get launch info (speed, length, etc) from dock, not CustomData..
+hangar opening/closing sequence
+
+See: https://steamcommunity.com/sharedfiles/filedetails/?id=1330904900
+
 
 */

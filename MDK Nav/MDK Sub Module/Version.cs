@@ -149,9 +149,10 @@ Sensor code update
 Tested with higher world speeds
 May 27 2018
 
+3.4L June 02 2018
+Raycast collision also checks half-way distance for size of ship instea of just full scan distance.
 
 TODO: 
-    test DTM speed selection with high speed limits (ex, 400m/s)
     Do quadrant search for escape
     Support multiple waypoints
     Support 'Loop' (patrol) command
@@ -166,7 +167,7 @@ TODO:
         string OurName = "Wico Craft";
 
         string moduleName = "NAV";
-        string sVersion = "3.4K";
+        string sVersion = "3.4L";
 
     }
 }
