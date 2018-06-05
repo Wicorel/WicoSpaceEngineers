@@ -482,7 +482,6 @@ namespace IngameScript
                             if (doCameraScan(cameraForwardList, scanDistance))
                             {
                                 bDidScan = true;
-                                dtmRayCastQuadrant = 1;
                             }
                                 break;
                         case 1:
@@ -490,7 +489,6 @@ namespace IngameScript
                             if(doCameraScan(cameraForwardList, vTarget))
                             {
                                 bDidScan = true;
-                                dtmRayCastQuadrant = 2;
                             }
                             break;
                         case 2:
@@ -498,7 +496,6 @@ namespace IngameScript
                             if (doCameraScan(cameraForwardList, vTarget))
                             {
                                 bDidScan = true;
-                                dtmRayCastQuadrant = 3;
                             }
                             break;
                         case 3:
@@ -506,7 +503,6 @@ namespace IngameScript
                             if (doCameraScan(cameraForwardList, vTarget))
                             {
                                 bDidScan = true;
-                                dtmRayCastQuadrant = 4;
                             }
                             break;
                         case 4:
@@ -514,13 +510,50 @@ namespace IngameScript
                             if (doCameraScan(cameraForwardList, vTarget))
                             {
                                 bDidScan = true;
-                                dtmRayCastQuadrant = 0;
+                            }
+                            break;
+                        case 5:
+                            // check center again.  always full length
+                            if (doCameraScan(cameraForwardList, scanDistance))
+                            {
+                                bDidScan = true;
+                            }
+                            break;
+                        case 6:
+                            vTarget = points[2] + shipOrientationBlock.WorldMatrix.Forward * distance/2;
+                            if (doCameraScan(cameraForwardList, vTarget))
+                            {
+                                bDidScan = true;
+                            }
+                            break;
+                        case 7:
+                            vTarget = points[3] + shipOrientationBlock.WorldMatrix.Forward * distance/2;
+                            if (doCameraScan(cameraForwardList, vTarget))
+                            {
+                                bDidScan = true;
+                            }
+                            break;
+                        case 8:
+                            vTarget = points[0] + shipOrientationBlock.WorldMatrix.Forward * distance/2;
+                            if (doCameraScan(cameraForwardList, vTarget))
+                            {
+                                bDidScan = true;
+                            }
+                            break;
+                        case 9:
+                            vTarget = points[1] + shipOrientationBlock.WorldMatrix.Forward * distance/2;
+                            if (doCameraScan(cameraForwardList, vTarget))
+                            {
+                                bDidScan = true;
                             }
                             break;
                     }
 
                     if (bDidScan)
                     {
+                        dtmRayCastQuadrant++;
+                        if (dtmRayCastQuadrant > 9) dtmRayCastQuadrant = 0;
+
                         tmCameraElapsedMs = 0;
                         // the routine sets lastDetetedInfo itself if scan succeeds
                         if (!lastDetectedInfo.IsEmpty())
