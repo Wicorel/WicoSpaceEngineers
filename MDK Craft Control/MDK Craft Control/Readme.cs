@@ -166,4 +166,8 @@
 * handle stations having no propulsion methods
 * increase default sub-module trigger to 5seconds
 * May 27, 2018
+* 
+* 3.4G June 08,2018
+* Add setmode and setstate commands
+* Clear all panels on masterreset command
 */

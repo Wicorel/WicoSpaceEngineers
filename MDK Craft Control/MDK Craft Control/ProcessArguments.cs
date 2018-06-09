@@ -37,6 +37,48 @@ namespace IngameScript
                 }
                 else if (args[0] == "idle")
                     ResetToIdle();
+                else if (args[0] == "setmode")
+                {
+                    if(args.Length<2)
+                    {
+                        Echo("Invalid command format:\nsetmode <mode#>");
+                    }
+                    else
+                    {
+                        int iValue;
+                        bool bOK = int.TryParse(args[1], out iValue);
+                        if(!bOK)
+                        {
+                            Echo("Invalid INT value:" + args[1]);
+                        }
+                        else
+                        {
+                            Echo("Set Mode to" + iValue);
+                            setMode(iValue);
+                        }
+                    }
+                }
+                else if (args[0] == "setstate")
+                {
+                    if (args.Length < 2)
+                    {
+                        Echo("Invalid command format:\nsetstate <state#>");
+                    }
+                    else
+                    {
+                        int iValue;
+                        bool bOK = int.TryParse(args[1], out iValue);
+                        if (!bOK)
+                        {
+                            Echo("Invalid INT value:" + args[1]);
+                        }
+                        else
+                        {
+                            Echo("Set State to" + iValue);
+                            current_state=iValue;
+                        }
+                    }
+                }
                 else if (args[0] == "masterreset")
                     MasterReset();
                 else if (args[0].ToLower() == "coast")
@@ -45,7 +87,7 @@ namespace IngameScript
                     if (thrustBackwardList.Count > 1)
                     {
                         blocksToggleOnOff(thrustBackwardList);
-//                        blockApplyAction(thrustBackwardList, "OnOff");
+                        //                        blockApplyAction(thrustBackwardList, "OnOff");
                         //				blockApplyAction(thrustBackwardList, "OnOff_Off");
                     }
                 }
