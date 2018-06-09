@@ -189,6 +189,7 @@ namespace IngameScript
 
             // now get the perpindicular normal of the plane
             Vector3D vPlanePerp = Vector3D.Cross(vN1, vN2);
+            vPlanePerp.Normalize();
             return vPlanePerp;
         }
 
