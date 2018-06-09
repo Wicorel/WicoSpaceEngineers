@@ -116,11 +116,13 @@ namespace IngameScript
             //            Echo("Width=" + shipDim.WidthInMeters());
             //            Echo("Height=" + shipDim.HeightInMeters());
             //            Echo("Length=" + shipDim.LengthInMeters());
-            Echo("AsteroidCurrentX=" + AsteroidCurrentX + " Y=" + AsteroidCurrentY);
-            Echo("AsteroidMaxX=" + AsteroidMaxX + " AsteroidMaxY=" + AsteroidMaxY);
-//            MinerCalculateBoreSize();
-//            Echo("Boreheight=" + MiningBoreHeight);
-//            Echo("BoreWidth=" + MiningBoreWidth);
+            if (miningAsteroidID > 0)
+                Echo("AsteroidCurrentX=" + AsteroidCurrentX + " Y=" + AsteroidCurrentY);
+//            Echo("AsteroidMaxX=" + AsteroidMaxX + " AsteroidMaxY=" + AsteroidMaxY);
+            //            MinerCalculateBoreSize();
+            //            Echo("Boreheight=" + MiningBoreHeight);
+            //            Echo("BoreWidth=" + MiningBoreWidth);
+//            Echo("iMMFWiggle=" + iMMFWiggle);
         }
 
         void modulePostProcessing()
