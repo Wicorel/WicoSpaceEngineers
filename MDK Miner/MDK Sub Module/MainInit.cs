@@ -174,14 +174,17 @@ namespace IngameScript
                 MinerCalculateAsteroidVector(miningAsteroidID);
                 //                vAsteroidBoreEnd = AsteroidCalculateBoreEnd();
                 //                vAsteroidBoreStart = AsteroidCalculateBoreStart();
-                AsteroidCalculateBestStartEnd();
+                MinerCalculateBoreSize();
+//                AsteroidCalculateBestStartEnd(); can swap start/end.  Dont want to do that when in the tunnel.
             }
             if (iMode==MODE_FINDORE)
             {
-                if(current_state==35)
+                if (current_state == 35)
                 {
                     current_state = 31;
                 }
+                else if (current_state == 143)
+                    current_state = 120;
             }
             return ">";
         }
