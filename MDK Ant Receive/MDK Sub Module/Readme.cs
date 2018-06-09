@@ -73,8 +73,7 @@ May 27, 2018
 published June 1, 2018
 
 3.4E June 02, 2018
-
-
+June 08,2018 FAST doscan mode current 0->410 FAST
 
 TODO: Choose closest connector as 'best'
 TODO: Process size info to select connectors
