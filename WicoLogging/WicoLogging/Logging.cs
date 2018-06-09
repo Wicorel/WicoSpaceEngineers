@@ -149,6 +149,17 @@ namespace IngameScript
             bLoggingInit = true;
         }
 
+        void PanelsClearAll()
+        {
+            if (statustextblock != null) StatusLog("clear", statustextblock);
+            if (textLongStatus != null) StatusLog("clear", textLongStatus);
+            if (textPanelReport != null) StatusLog("clear", textPanelReport);
+            if (textRangeReport != null) StatusLog("clear", textRangeReport);
+            if (gpsPanel != null) StatusLog("clear", gpsPanel);
+            if (sledReport != null) StatusLog("clear", sledReport);
+
+        }
+
         void UpdateAllPanels()
         {
             if (statustextblock != null) statustextblock.WritePanels();
