@@ -29,7 +29,8 @@ namespace IngameScript
             iNIHolder.GetValue(sGridSection, "CTRL_COEFF", ref CTRL_COEFF, true);
         }
 
-        // 03/08/2018: Fix for change in Terminal Properties. Was using MaxValue of "Yaw" to determine range...  now that's WRONG!
+        // 0608/2018: Add BeamRider
+        // 03/08/2018: Fix for change in Terminal Properties. Was using MaxValue of "Yaw" to determine range...  now (after Keen changes) that's WRONG!
         // 12/09 Add Summaries to members and functions
         // 09/11 Turn on gyros we are going to use
         // 04/30 only .ToLower ONCE
@@ -255,6 +256,37 @@ namespace IngameScript
         }
         #endregion
 
+        bool BeamRider(Vector3D vStart, Vector3D vEnd, IMyTerminalBlock OrientationBlock)
+        {
+            // 'BeamRider' routine that takes start,end and tries to stay on that beam.
+            bool bAimed = false;
+            Vector3D vBoreEnd = (vEnd - vStart);
+            Vector3D vPosition;
+            if (OrientationBlock is IMyShipController)
+            {
+                vPosition = ((IMyShipController)OrientationBlock).CenterOfMass;
+            }
+            else
+            {
+                vPosition = OrientationBlock.GetPosition();
+            }
+            Vector3D vAimEnd = (vEnd - vPosition );
+            Vector3D vRejectEnd = VectorRejection(vBoreEnd, vAimEnd);
+
+            Vector3D vCorrectedAim = (vEnd - vRejectEnd * 2) - vPosition;
+
+            bAimed = GyroMain("forward", vCorrectedAim, OrientationBlock);
+            return bAimed;
+        }
+
+        // From Whip. on discord
+        Vector3D VectorRejection(Vector3D a, Vector3D b) //reject a on b    
+        {
+            if (Vector3D.IsZero(b))
+                return Vector3D.Zero;
+
+            return a - a.Dot(b) / b.LengthSquared() * b;
+        }
 
 
     }
