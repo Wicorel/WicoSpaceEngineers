@@ -188,14 +188,14 @@ namespace IngameScript
             // add offset size of 0,0 opening
             iSign = Math.Sign(AsteroidCurrentX);
             if (iSign == 0) iSign = 1;
-            if (AsteroidCurrentX != 0) vXOffset += AsteroidRightVector * iSign * MiningBoreWidth/2;
+//            if (AsteroidCurrentX != 0) vXOffset += AsteroidRightVector * iSign * MiningBoreWidth/2;
 
             // calculate the offset value.
             Vector3D vYOffset = AsteroidUpVector * AsteroidCurrentY * MiningBoreHeight;
             // offset size of 0,0 opening
             iSign = Math.Sign(AsteroidCurrentY);
             if (iSign == 0) iSign = 1;
-            if (AsteroidCurrentY != 0) vYOffset += AsteroidUpVector * iSign * MiningBoreHeight/2;
+//            if (AsteroidCurrentY != 0) vYOffset += AsteroidUpVector * iSign * MiningBoreHeight/2;
 
 
             Vector3D vStart = AsteroidPosition + vXOffset + vYOffset;
@@ -227,7 +227,10 @@ namespace IngameScript
 
         bool AsteroidCalculateNextBore()
         {
+            // TODO: handle other mine modes like spread out
             if (AsteroidMineMode == 1) return false; // there are no next bores :)
+
+            bool bAsteroidDone = false;
 
             if(AsteroidCurrentX==0 && AsteroidCurrentY==0)
             {
@@ -241,29 +244,7 @@ namespace IngameScript
                 if (AsteroidCurrentX >= AsteroidMaxX)
                 {
                     AsteroidCurrentX = 0;
-                    if (AsteroidCurrentY == 0)
-                        AsteroidCurrentY = 1;
-                    else
-                    {
-                        if (AsteroidCurrentY > 0)
-                        {
-                            if (AsteroidCurrentY >= AsteroidMaxY)
-                            {
-                                // We are done with asteroid.
-                                AsteroidCurrentX = 0;
-                                AsteroidCurrentY = 0;
-                                return false;
-                            }
-                            AsteroidCurrentY = -AsteroidCurrentY;
-
-                        }
-                        else
-                        { // back to positive
-                            AsteroidCurrentY = -AsteroidCurrentY;
-                            // and increment
-                            AsteroidCurrentY++;
-                        }
-                    }
+                    bAsteroidDone = AsteroidCalculateNextRow();
                 }
                 else
                 { // make it negative.
@@ -273,11 +254,44 @@ namespace IngameScript
             else// if (AsteroidCurrentX < 0)
             {
                 // make it positive
-                AsteroidCurrentX = -AsteroidCurrentX;
+                AsteroidCurrentX = Math.Abs(AsteroidCurrentX);
                 AsteroidCurrentX++;
+            }
+            if (Math.Abs(AsteroidCurrentX) >= AsteroidMaxX)
+            {
+                bAsteroidDone = AsteroidCalculateNextRow();
             }
             AsteroidCalculateBestStartEnd();
             return true;
+        }
+
+        bool AsteroidCalculateNextRow()
+        {
+            AsteroidCurrentX = 0;
+            if (AsteroidCurrentY == 0)
+                AsteroidCurrentY = 1;
+            else
+            {
+                if (AsteroidCurrentY > 0)
+                {
+                    if (AsteroidCurrentY >= AsteroidMaxY)
+                    {
+                        // We are done with asteroid.
+                        AsteroidCurrentY = 0;
+                        return false;
+                    }
+                    AsteroidCurrentY = -AsteroidCurrentY;
+
+                }
+                else
+                { // back to positive
+                    AsteroidCurrentY = -AsteroidCurrentY;
+                    // and increment
+                    AsteroidCurrentY++;
+                }
+            }
+            return true;
+
         }
 
         void AsteroidDoNextBore()
@@ -308,8 +322,12 @@ namespace IngameScript
 
                 // save defaults back to customdata to allow player to change
                 INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
-                iniCustomData.SetValue(sMiningSection, "MiningBoreHeight", MiningBoreHeight);
-                iniCustomData.SetValue(sMiningSection, "MiningBoreWidth", MiningBoreWidth);
+                iniCustomData.SetValue(sMiningSection, "MiningBoreHeight", MiningBoreHeight.ToString("0.00"));
+                iniCustomData.SetValue(sMiningSection, "MiningBoreWidth", MiningBoreWidth.ToString("0.00"));
+                // informational for the player
+                iniCustomData.SetValue(sMiningSection, "ShipWidth", shipDim.WidthInMeters().ToString("0.00"));
+                iniCustomData.SetValue(sMiningSection, "ShipHeight", shipDim.HeightInMeters().ToString("0.00"));
+
                 Me.CustomData = iniCustomData.GenerateINI(true);
             }
         }
@@ -322,8 +340,10 @@ namespace IngameScript
             AsteroidPosition = bbd.Center;
             AsteroidDiameter = (bbd.Max - bbd.Min).Length();
 
-            AsteroidMaxX = (int)(AsteroidDiameter / shipDim.WidthInMeters() / 2);
-            AsteroidMaxY = (int)(AsteroidDiameter / shipDim.HeightInMeters() / 2);
+            MinerCalculateBoreSize();
+
+            AsteroidMaxX = (int)(AsteroidDiameter / MiningBoreWidth / 2);
+            AsteroidMaxY = (int)(AsteroidDiameter / MiningBoreHeight / 2);
             /*
              * Near Side  Far Side
              * 3---0    7---4
@@ -360,8 +380,6 @@ namespace IngameScript
             v1 = bbd.Center + AsteroidOutVector * 100;
             debugGPSOutput("OutV", v1);
             */
-            MinerCalculateBoreSize();
-
         }
 
         void MinerProcessScan(MyDetectedEntityInfo mydei)
