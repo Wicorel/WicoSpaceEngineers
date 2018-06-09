@@ -37,7 +37,7 @@ namespace IngameScript
             switch (current_state)
             {
                 case 0:
-                    { // init camera scan for asteroids
+                    { // init camera scan for asteroids/objects
                         ResetMotion();
                         scanElapsedMs = 0;
 
@@ -50,6 +50,7 @@ namespace IngameScript
                         scanbottomScanner = new QuadrantCameraScanner(this, cameraDownList, 5000);
 
                         current_state = 410;
+                        bWantFast = true;
                         break;
                     }
                 case 410:
@@ -92,15 +93,12 @@ namespace IngameScript
                             AsteroidProcessLDEI(scanbottomScanner.myLDEI);
                         }
 
-                        // take the first one found.
-                        // TODO: do all search and then choose 'best' (closest?)
-                        // TODO: Aim at the hit position and not 'CENTER' for more randomized start on asteroid
-                        // TODO: once we find asteroid(s) choose how to find ore intelligently and not just randomly
                         // TODO: if missing cameras on a side(s), rotate ship to point cameras at that side
-                        /*
-                        if (bValidAsteroid)
-                            current_state = 120;
-                            */
+                        // TODO: Flags for other options (TBD)
+                        // TODO: scan range
+                        // TODO: stop on first hit (by type?)
+                        // TODO: all sides or specific sides?
+
                         string s = "";
                         s += "Front: ";
                         if (scanfrontScanner.DoneScanning())
