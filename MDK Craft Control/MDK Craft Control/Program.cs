@@ -222,6 +222,7 @@ namespace IngameScript
 
         void MasterReset()
         {
+            PanelsClearAll();            
             ResetToIdle();
             ResetMotion();
             iAlertStates = 0;
