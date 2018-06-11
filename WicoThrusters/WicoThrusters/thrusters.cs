@@ -517,6 +517,70 @@ namespace IngameScript
             return stoppingM;
         }
 
+        int iMFSWiggle = 0;
+        //        double mmfLastVelocity = -1;
+        void MoveForwardSlow(float fTarget, float fAbort, List<IMyTerminalBlock> mfsForwardThrust, List<IMyTerminalBlock> mfsBackwardThrust)
+        {
+            if (iMFSWiggle < 0) iMFSWiggle = 0;
+
+            //            Echo("mMF " + iMMFWiggle.ToString());
+            double maxThrust = calculateMaxThrust(mfsForwardThrust);
+            //            Echo("maxThrust=" + maxThrust.ToString("N0"));
+
+            MyShipMass myMass;
+            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
+            double effectiveMass = myMass.PhysicalMass;
+            float thrustPercent = 100f;
+            if (effectiveMass > 0)
+            {
+                double maxDeltaV = (maxThrust) / effectiveMass;
+                //           Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+                if (maxDeltaV > 0) thrustPercent = (float)(fTarget / maxDeltaV);
+                //                Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
+            }
+            //            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
+
+            if (velocityShip > fAbort)
+            {
+                //               Echo("ABORT");
+                powerDownThrusters(thrustAllList);
+                //               iMMFWiggle/=2;
+            }
+            else if (velocityShip < (fTarget * 0.90))
+            {
+                if (velocityShip < 0.09)
+                    iMFSWiggle++;
+                if (velocityShip < fTarget * 0.25)
+                    iMFSWiggle++;
+                //                Echo("Push ");
+                //                Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
+                powerUpThrusters(mfsForwardThrust, thrustPercent + iMFSWiggle / 5);
+                //                powerUpThrusters(thrustForwardList, 15f + iMMFWiggle);
+            }
+            else if (velocityShip < (fTarget * 1.1))
+            {
+                // we are around target. 90%<-current->120%
+                //                                 Echo("Coast");
+                iMFSWiggle--;
+                // turn off reverse thrusters and 'coast'.
+                powerDownThrusters(mfsBackwardThrust, thrustAll, true);
+                powerDownThrusters(mfsForwardThrust);
+            }
+            else
+            { // above 110% target, but below abort
+              //                Echo("Coast2");
+                iMFSWiggle--;
+                iMFSWiggle--;
+                powerUpThrusters(mfsForwardThrust, 1f); // coast
+            }
+
+        }
+
+        void MoveForwardSlowReset()
+        {
+            iMFSWiggle = 0;
+        }
+
 
     }
 }
