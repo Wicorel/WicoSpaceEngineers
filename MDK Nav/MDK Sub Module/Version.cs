@@ -151,6 +151,7 @@ May 27 2018
 
 3.4L June 02 2018
 Raycast collision also checks half-way distance for size of ship instea of just full scan distance.
+June 10 Added target name so it can be shown
 
 TODO: 
     Do quadrant search for escape

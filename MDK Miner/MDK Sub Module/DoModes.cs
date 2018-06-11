@@ -43,10 +43,18 @@ namespace IngameScript
                 if (miningAsteroidID > 0)
                     setMode(MODE_FINDORE);
             }
-/*
-            if (iMode == MODE_IDLE) doModeIdle();
-            else if (iMode == MODE_DESCENT) doModeDescent();
-*/
+            if (iMode == MODE_GOINGTARGET)
+            {
+                if (NAVTargetName != "")
+                {
+                    Echo("Going to " + NAVTargetName);
+                }
+            }
+
+            /*
+                        if (iMode == MODE_IDLE) doModeIdle();
+                        else if (iMode == MODE_DESCENT) doModeDescent();
+            */
         }
         #endregion
 

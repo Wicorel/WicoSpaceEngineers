@@ -90,6 +90,7 @@ namespace IngameScript
 //            StatusLog(moduleName + ":GT: current_state=" + current_state.ToString(), textPanelReport);
 //            bWantFast = true;
             Echo("Going Target: state=" + current_state.ToString());
+            if (NAVTargetName != "") Echo(NAVTargetName);
 
             string sNavDebug = "";
             sNavDebug+="GT:S=" + current_state;
@@ -290,8 +291,10 @@ namespace IngameScript
                 Echo("velocity=" + velocityShip.ToString("0.00"));
 
                 StatusLog("clear",sledReport);
-                StatusLog("Moving to Target\nD:" + niceDoubleMeters(distance) + " V:" + velocityShip.ToString(velocityFormat), sledReport);
-                StatusLog("Moving to Target\nDistance: " + niceDoubleMeters(distance) + "\nVelocity: " + niceDoubleMeters(velocityShip)+"/s", textPanelReport);
+                string sTarget = "Moving to Target";
+                if (NAVTargetName != "") sTarget = "Moving to " + NAVTargetName;
+                StatusLog(sTarget+"\nD:" + niceDoubleMeters(distance) + " V:" + velocityShip.ToString(velocityFormat), sledReport);
+                StatusLog(sTarget+"\nDistance: " + niceDoubleMeters(distance) + "\nVelocity: " + niceDoubleMeters(velocityShip)+"/s", textPanelReport);
 
 
                 if (bGoOption && (distance < arrivalDistanceMin))
@@ -579,6 +582,7 @@ namespace IngameScript
                 // set up defaults for next run (in case they had been changed)
                 NAVArrivalMode = MODE_ARRIVEDTARGET;
                 NAVArrivalState = 0;
+                NAVTargetName = "";
                 bGoOption = true; 
 
 //                setMode(MODE_ARRIVEDTARGET);
