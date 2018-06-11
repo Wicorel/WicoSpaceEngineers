@@ -21,17 +21,24 @@ namespace IngameScript
         #region domodes
         void doModes()
         {
-	        Echo("mode=" + iMode.ToString());
+            Echo("mode=" + iMode.ToString());
             doModeAlways();
 
-            if (iMode==MODE_IDLE && (craft_operation & CRAFT_MODE_SLED) > 0)
-		        setMode(MODE_SLEDMMOVE);
+            if (iMode == MODE_IDLE && (craft_operation & CRAFT_MODE_SLED) > 0)
+                setMode(MODE_SLEDMMOVE);
 
-            if (iMode==MODE_LAUNCH){doModeLaunch();return;}
-	        if(iMode==MODE_RELAUNCH){doModeRelaunch();return;}
-	        if(iMode==MODE_DOCKING){doModeDocking();return;}
-	        if(iMode==MODE_DOCKED){doModeDocked();return;}
-
+            if (iMode == MODE_LAUNCH) { doModeLaunch(); return; }
+            if (iMode == MODE_RELAUNCH) { doModeRelaunch(); return; }
+            if (iMode == MODE_DOCKING) { doModeDocking(); return; }
+            if (iMode == MODE_DOCKED) { doModeDocked(); return; }
+            if (iMode == MODE_LAUNCHED) { doModeLaunched(); return; }
+            if(iMode==MODE_GOINGTARGET)
+            {
+                if (NAVTargetName != "")
+                {
+                    Echo("Going to " + NAVTargetName);
+                }
+            }
         }
         #endregion
 
@@ -49,6 +56,15 @@ namespace IngameScript
             StatusLog(moduleName + " Manual Control", textPanelReport);
         }
         #endregion
+
+        void doModeLaunched()
+        {
+            Echo("Launched. Awaiting commands");
+            StatusLog("clear", textPanelReport);
+            StatusLog("Launched. Defalt handling", textPanelReport);
+            StatusLog("Awaiting Commands", textPanelReport);
+            bWantSlow = true;
+        }
 
         #region modealways
         void doModeAlways()
@@ -76,21 +92,12 @@ namespace IngameScript
         }
         #endregion
 
-        /*
-        long lMomID = 0;
-        Vector3D vMomPosition;
-        string sMomName = "";
-
-        bool bMomRequestSent = false;
-        */
         void processReceives()
         {
- //           double x, y, z;
-
             if (sReceivedMessage != "")
             {
                 Echo("Received Message=\n" + sReceivedMessage);
-                //                sInitResults += "Received Message=\n" + sReceivedMessage;
+sInitResults += "Received Message=\n" + sReceivedMessage;
 
                 if (BaseProcessMessages(sReceivedMessage))
                 {
@@ -111,58 +118,46 @@ namespace IngameScript
                     {
                         if (aMessage[1] == "MOM")
                         {
-                        /* OBSOLETE
-                            Echo("MOM says hello!");
-                            // FORMAT:			antSend("WICO:MOM:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition()));
-                            int iOffset = 2;
-                            string sName = aMessage[iOffset++];
+                            /* OBSOLETE
+                                Echo("MOM says hello!");
+                                // FORMAT:			antSend("WICO:MOM:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition()));
+                                int iOffset = 2;
+                                string sName = aMessage[iOffset++];
 
-                            long id = 0;
-                            long.TryParse(aMessage[iOffset++], out id);
-                            x = Convert.ToDouble(aMessage[iOffset++]);
-                            y = Convert.ToDouble(aMessage[iOffset++]);
-                            z = Convert.ToDouble(aMessage[iOffset++]);
-                            Vector3D vPosition = new Vector3D(x, y, z);
-                            if (lMomID == 0)
-                            {
-                                lMomID = id;
-                                sMomName = sName;
-                                vMomPosition = vPosition;
-                            }
-                            else if (lMomID == id)
-                            {
-                                vMomPosition = vPosition;
-                            }
-                            else
-                            {
-                                double distancesqmom = Vector3D.DistanceSquared(vMomPosition, shipOrientationBlock.GetPosition());
-                                double distancenewmom = Vector3D.DistanceSquared(vPosition, shipOrientationBlock.GetPosition());
-                                if (distancesqmom > distancenewmom)
+                                long id = 0;
+                                long.TryParse(aMessage[iOffset++], out id);
+                                x = Convert.ToDouble(aMessage[iOffset++]);
+                                y = Convert.ToDouble(aMessage[iOffset++]);
+                                z = Convert.ToDouble(aMessage[iOffset++]);
+                                Vector3D vPosition = new Vector3D(x, y, z);
+                                if (lMomID == 0)
                                 {
                                     lMomID = id;
                                     sMomName = sName;
                                     vMomPosition = vPosition;
                                 }
-                            }
-                        */
+                                else if (lMomID == id)
+                                {
+                                    vMomPosition = vPosition;
+                                }
+                                else
+                                {
+                                    double distancesqmom = Vector3D.DistanceSquared(vMomPosition, shipOrientationBlock.GetPosition());
+                                    double distancenewmom = Vector3D.DistanceSquared(vPosition, shipOrientationBlock.GetPosition());
+                                    if (distancesqmom > distancenewmom)
+                                    {
+                                        lMomID = id;
+                                        sMomName = sName;
+                                        vMomPosition = vPosition;
+                                    }
+                                }
+                            */
                         }
 
                     }
                 }
             }
-            /* OBSOLETE
-            if (lMomID == 0)
-            {
-                Echo("Orphan!!!");
-                if (!bMomRequestSent)
-                {
-                    antSend("WICO:HELLO:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
-                    bMomRequestSent = true;
-                }
-            }
-            else
-                Echo("Mom=" + sMomName);
-                */
+            else Echo("No pending incoming message");
         }
 
         #region logstate
