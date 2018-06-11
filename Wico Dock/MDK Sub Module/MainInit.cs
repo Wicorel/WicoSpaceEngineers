@@ -107,10 +107,11 @@ namespace IngameScript
                         initCargoCheck();
                         break;
                     case 15:
-                        sInitResults += modeOnInit();
-                        init = true;
+                        tanksInit();
                         break;
                     case 16:
+                        sInitResults += modeOnInit();
+                        init = true;
                         break;
                     case 17:
                         break;

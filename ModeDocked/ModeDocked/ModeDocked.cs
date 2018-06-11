@@ -55,9 +55,9 @@ namespace IngameScript
 
             if (bAutoRelaunch )
             {
-                doCargoCheck();
                 Echo("Docked. Checking Relaunch");
-
+/*
+                doCargoCheck();
                 bool BatteryGo = true;
                 bool TanksGo = true;
                 bool ReactorsGo = true;
@@ -75,6 +75,8 @@ namespace IngameScript
                 // TODO: check reactor fuel
 
                 if (BatteryGo && TanksGo && ReactorsGo && CargoGo)
+                    */
+                if(DockAirWorthy())
                 {
                     Echo("RELAUNCH!");
                     setMode(MODE_RELAUNCH);
@@ -85,15 +87,20 @@ namespace IngameScript
                 {
                     Echo(" Awaiting Relaunch Criteria");
                     StatusLog("Awaiting Relaunch Criteria", textPanelReport);
-                    if (!BatteryGo)
+//                    if (!BatteryGo)
                     {
                         StatusLog(" Battery " + batteryPercentage + "% (" + batterypcthigh + "%)", textPanelReport);
                         Echo(" Battery " + batteryPercentage + "% (" + batterypcthigh + "%)");
                     }
-                    if(!CargoGo)
+ //                   if(!CargoGo)
                     {
                         StatusLog(" Cargo: " + cargopcent + "% (" + cargopctmin + ")", textPanelReport);
                         Echo(" Cargo: " + cargopcent + "% (" + cargopctmin + ")");
+                    }
+                    if(TanksHasHydro())
+                    {
+                        StatusLog(" Hydro: " + hydroPercent + "% (" + cargopctmin + ")", textPanelReport);
+                        Echo(" Hydro: " + hydroPercent + "% (" + cargopctmin + ")");
                     }
                 }
             }
@@ -148,6 +155,12 @@ namespace IngameScript
 
                 // all states
                 {
+//                    if (bAutoRelaunch)
+                    {
+                        doCargoCheck();
+                        TanksCalculate();
+                    }
+
                     if (batteryPercentage >= 0) StatusLog("Bat:" + progressBar(batteryPercentage), textPanelReport);
                     else Echo("No Batteries");
                     if (oxyPercent >= 0)
@@ -160,19 +173,16 @@ namespace IngameScript
                     if (hydroPercent >= 0)
                     {
                         StatusLog("Hyd:" + progressBar(hydroPercent * 100), textPanelReport);
+                        // TODO: use setting for 'low' (and 'enough')
                         if (hydroPercent < 0.20f)
                             StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
 
-                        Echo("H:" + hydroPercent.ToString("000.0%"));
+                        Echo("H:" + (hydroPercent*100).ToString("000.0%"));
                     }
                     else Echo("No Hydrogen Tanks");
                     if (batteryPercentage >=0 && batteryPercentage < batterypctlow)
                         StatusLog(" WARNING: Low Battery Power", textPanelReport);
 
-                    if(bAutoRelaunch)
-                    {
-                        doCargoCheck();
-                    }
 
                     // TODO: get uranium into reactors; take out excess ingots; turn off conveyor usage (like TIM)
                     // TODO: get ore OUT of ship and into base (including stone)

@@ -110,6 +110,80 @@ namespace IngameScript
             iNIHolder.GetValue(sDockingSection, "ActionStart", ref dtDockingActionStart);
 
         }
+        double airworthyChecksElapsedMs = -1;
+
+        bool DockAirWorthy(bool bForceCheck = false, bool bLaunchCheck = true, int cargohighwater=80)
+        {
+            bool BatteryGo = true;
+            bool TanksGo = true;
+            bool ReactorsGo = true;
+            bool CargoGo = true;
+
+            if (airworthyChecksElapsedMs >= 0)
+                airworthyChecksElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
+            bool bDoChecks = bForceCheck;
+            if(airworthyChecksElapsedMs>0.5*1000)
+            {
+                airworthyChecksElapsedMs = 0;
+                bDoChecks = true;
+            }
+
+            // Check battery charge
+            if(bDoChecks) batteryCheck(0, false);
+            if(bLaunchCheck)
+            {
+                if (batteryPercentage >= 0 && batteryPercentage < batterypcthigh)
+                {
+                    BatteryGo = false;
+                }
+
+            }
+            else
+            { 
+                // check if we need to go back and refill
+                if (batteryPercentage >= 0 && batteryPercentage < batterypctlow)
+                {
+                    BatteryGo = false;
+                }
+            }
+
+            // check cargo emptied
+            if (bDoChecks) doCargoCheck();
+            if (bLaunchCheck)
+            {
+                if (cargopcent > cargopctmin)
+                {
+                    CargoGo = false;
+                }
+            }
+            else
+            {
+                if (cargopcent > cargohighwater)
+                {
+                    CargoGo = false;
+                }
+            }
+            // TODO: Check H2 tanks
+            if (bDoChecks) TanksCalculate();
+            if (bLaunchCheck)
+            {
+                if (TanksHasHydro() && hydroPercent*100 < 70)
+                    TanksGo = false;
+            }
+            else
+            {
+                if (TanksHasHydro() && hydroPercent*100 < 30)
+                    TanksGo = false;
+            }
+            // TODO: check reactor fuel
+
+            if (BatteryGo && TanksGo && ReactorsGo && CargoGo)
+            {
+                return true;
+            }
+            else return false;
+
+        }
 
     }
 }
