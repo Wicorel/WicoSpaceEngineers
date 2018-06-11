@@ -52,6 +52,9 @@
 *  Apr 03 2018
 *  
 *  3.4C Apr 26 2018
+*  
+*  3.4D
+*  June 09,2018
 * 
 * Need:
 *  circumnavigate planet to target spot

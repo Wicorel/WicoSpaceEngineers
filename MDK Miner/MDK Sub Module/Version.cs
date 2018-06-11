@@ -65,6 +65,8 @@ Do sensor and raycast scan of bore and don't do run if nothing found
 3.4I June 04, 2018
 When boring, check rear sensor for 'out'.  verify with raycast ahead to be sure it's 'clear'.
 change default boreheight/width to FULL bounding box.
+Calculate offset from beam of the bore and offset direction to compensate
+bore raycast scan does 100%, 55% and 35%
 
 
 TODO:

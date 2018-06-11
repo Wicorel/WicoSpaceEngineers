@@ -124,7 +124,8 @@ Added Report text panel output to docking states.
 Source published June 01 2018
 
 3.4F June 02 2018
-
+BeamRider for docking
+test with off-center connetors (hence beamrider)
 
 TODO:
 forget known bases when new grid (DONE by craft control)
