@@ -40,6 +40,12 @@ namespace IngameScript
             oxyPercent = tanksFill(iTankOxygen);
 
         }
+
+        bool TanksHasHydro()
+        {
+            return hydrotankList.Count > 0;
+        }
+
         string tanksInit()
         {
             {
