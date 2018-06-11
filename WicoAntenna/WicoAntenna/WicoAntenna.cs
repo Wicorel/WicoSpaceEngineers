@@ -341,15 +341,19 @@ namespace IngameScript
                 { // receiver signals processed by removing message
                     sReceivedMessage = lPendingIncomingMessages[0];
                     lPendingIncomingMessages.RemoveAt(0);
+                    /*
                     if (bMain)
                     {
                         bWantFast = true;
                     }
                     else
                     {
-                       doTriggerMain();
+                        doTriggerMain();
                     }
+                    */
                 }
+                else Echo("Waiting for message to be processed");
+                doTriggerMain();
             }
             if (lPendingIncomingMessages.Count > 0)
             {
