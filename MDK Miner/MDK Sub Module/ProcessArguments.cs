@@ -60,6 +60,21 @@ namespace IngameScript
             {
 
             }
+            else if (args[0] == "nextbore")
+            {
+                if (iMode == MODE_FINDORE)
+                {
+                    AsteroidDoNextBore();
+                }
+            }
+            else if (args[0] == "resetasteroid")
+            {
+                if (iMode == MODE_FINDORE)
+                {
+
+                }
+                miningAsteroidID = 0;
+            }
             else if (args[0] == "masterreset")
                 MasterReset();
             else
