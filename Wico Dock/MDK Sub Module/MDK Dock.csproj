@@ -126,7 +126,6 @@
   <Import Project="..\..\ModeRelaunch\ModeRelaunch\ModeRelaunch.projitems" Label="Shared" />
   <Import Project="..\..\ModeLaunch\ModeLaunch\ModeLaunch.projitems" Label="Shared" />
   <Import Project="..\..\WicoRemoteDockableConnectors\WicoRemoteDockableConnectors\WicoRemoteDockableConnectors.projitems" Label="Shared" />
-  <Import Project="..\..\WicoTravelMovement\WicoTravelMovement\WicoTravelMovement.projitems" Label="Shared" />
   <Import Project="..\..\WicoBases\WicoBases\WicoBases.projitems" Label="Shared" />
   <Import Project="..\..\WicoDrills\WicoDrills\WicoDrills.projitems" Label="Shared" />
   <Import Project="..\..\WicoOrientedBB\WicoOrientedBB\WicoOrientedBB.projitems" Label="Shared" />
