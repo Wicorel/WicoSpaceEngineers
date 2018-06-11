@@ -75,6 +75,8 @@ namespace IngameScript
                 }
                 vDock = ((IMyShipController)shipOrientationBlock).CenterOfMass;
                 TanksStockpile(false);
+                BatterySetNormal();
+                turnEjectorsOff();
 //                vDock = shipOrientationBlock.GetPosition();
                 powerDownThrusters(thrustAllList); // turns ON all thrusters.
                                                    // TODO: allow for relay ships that are NOT bases..
