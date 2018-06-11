@@ -33,18 +33,20 @@ namespace IngameScript
         {
             ResetMotion();
 
-            MinerMasterReset();
-
             iniWicoCraftSave.ParseINI("");
+            MinerMasterReset();
+            ProcessInitCustomData();
+
             Serialize();
+            init = false;
             bWantFast = true;
         }
 
         void ModuleSerialize(INIHolder iNIHolder)
         {
             MiningSerialize(iNIHolder);
-            AsteroidSerialize();
-            OreSerialize();
+            initAsteroidsInfo();
+            initOreLocInfo();
             ScansSerialize(iNIHolder);
             NavSerialize(iNIHolder);
             DockedSerialize(iNIHolder);
