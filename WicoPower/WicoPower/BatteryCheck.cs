@@ -19,6 +19,9 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         double maxBatteryPower = -1;
+        /// <summary>
+        /// current battery power. -1 means no batteries. percentage is 0->100
+        /// </summary>
         int batteryPercentage = -1;
 
         List<IMyTerminalBlock> batteryList = new List<IMyTerminalBlock>();
