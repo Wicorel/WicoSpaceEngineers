@@ -201,6 +201,7 @@ namespace IngameScript
                 }
                 StatusLog("Cargo =" + cargopcent + "% / " + MiningCargopcthighwater + "% Max", textPanelReport);
                 StatusLog("Battery " + batteryPercentage + "% (Min:" + batterypctlow + "%)", textPanelReport);
+                if (TanksHasHydro()) StatusLog("H2 " + hydroPercent + "% (Min:" + batterypctlow + "%)", textPanelReport);
             }
             if (sensorsList.Count >= 2)
             {
@@ -210,7 +211,6 @@ namespace IngameScript
             switch (current_state)
             {
                 case 0:
-//                    bValidAsteroid = false; // really?  shouuldn't we be keeping this?
                     bValidExit = false;
                     bMiningWaitingCargo = false;
 
@@ -218,6 +218,7 @@ namespace IngameScript
                     turnEjectorsOff();
                     OreDoCargoCheck(true); // init ores to what's currently in inventory
                     MinerCalculateBoreSize();
+                    MoveForwardSlowReset();
 
                     bWantFast = true;
 
@@ -326,7 +327,6 @@ namespace IngameScript
                             {
                                 StartScans(iMode, 5); // try again after a scan
                             }
-                            //                            else sStartupError += " MISSED";
                         }
                         else
                         {
@@ -565,19 +565,30 @@ namespace IngameScript
                             }
                             else
                             {
-                                // TODO: need a 'BeamRider' routine that takes start,end and tries to stay on that beam.
-                                // TODO: display COM to see if it's effecting the aiming
-                                Vector3D vAim = (vAsteroidBoreEnd - ((IMyShipController)shipOrientationBlock).CenterOfMass);
-                                //Vector3D vAim = (((IMyShipController)shipOrientationBlock).CenterOfMass - vAsteroidBoreStart);
-                                //                                Vector3D vAim = (vAsteroidBoreEnd - vAsteroidBoreStart);
-                                bAimed = GyroMain("forward", vAim, shipOrientationBlock);
+/*
+                                // 'BeamRider' routine that takes start,end and tries to stay on that beam.
+                                // Todo: probably should use center of ship BB, not COM.
+                                Vector3D vBoreEnd = (vAsteroidBoreEnd - vAsteroidBoreStart);
+                                Vector3D vAimEnd = (vAsteroidBoreEnd - ((IMyShipController)shipOrientationBlock).CenterOfMass);
+                                Vector3D vRejectEnd = VectorRejection(vBoreEnd, vAimEnd);
+//                                Echo("BoreEnd=" + Vector3DToString(vBoreEnd));
+//                                Echo("AimEnd=" + Vector3DToString(vAimEnd));
+//                                Echo("RejectEnd=" + Vector3DToString(vRejectEnd));
+//                                Vector3D vCorrectedAim = vAsteroidBoreEnd - vRejectEnd;
+
+                                Vector3D vCorrectedAim = (vAsteroidBoreEnd- vRejectEnd*2) - ((IMyShipController)shipOrientationBlock).CenterOfMass;
+
+                                bAimed = GyroMain("forward", vCorrectedAim, shipOrientationBlock);
+*/
+                                bAimed = BeamRider(vAsteroidBoreStart, vAsteroidBoreEnd, shipOrientationBlock);
+
                                 turnDrillsOn();
                                 //                                Echo("bAimed=" + bAimed.ToString());
-                                Echo("minAngleRad=" + minAngleRad);
+//                                Echo("minAngleRad=" + minAngleRad);
                                 if (bAimed)
                                 {
                                     Echo("Aimed");
-                                    mineMoveForward(fTargetMiningMps, fMiningAbortMps, thrustForwardList, thrustBackwardList);
+                                    MoveForwardSlow(fTargetMiningMps, fMiningAbortMps, thrustForwardList, thrustBackwardList);
                                     bWantMedium = true;
                                     /*
                                     gyrosOff();
@@ -606,7 +617,7 @@ namespace IngameScript
                             Vector3D vAim = (vAsteroidBoreEnd - vAsteroidBoreStart);
 
                             bAimed = GyroMain("forward", vAim, shipOrientationBlock);
-                            mineMoveForward(fAsteroidExitMps, fAsteroidExitMps*1.25f, thrustForwardList, thrustBackwardList);
+                            MoveForwardSlow(fAsteroidExitMps, fAsteroidExitMps*1.25f, thrustForwardList, thrustBackwardList);
                             if (!bAimed) bWantFast = true;
                             else bWantMedium = true;
                         }
@@ -738,25 +749,28 @@ namespace IngameScript
 
 
                 case 120:
-                    // we have a known asteroid.  go toward our starting location
-                    // wait for ship to slow
-                    ResetMotion();
-                    if (maxDeltaV < fMiningMinThrust || cargopcent > MiningCargopctlowwater || batteryPercentage < batterypctlow)
                     {
-                        //TODO: check H2 tanks.
-                        //TODO: Check uranium supply
-                        // we don't have enough oomph to do the bore.  go dock and refill/empty and then try again.
+                        // we have a known asteroid.  go toward our starting location
+                        // wait for ship to slow
+                        ResetMotion();
+                        bool bReady = DockAirWorthy(true,false,MiningCargopcthighwater);
+                        if (maxDeltaV < fMiningMinThrust || !bReady) //cargopcent > MiningCargopctlowwater || batteryPercentage < batterypctlow)
+                        {
+                            //TODO: check H2 tanks.
+                            //TODO: Check uranium supply
+                            // we don't have enough oomph to do the bore.  go dock and refill/empty and then try again.
                             bAutoRelaunch = true;
                             miningChecksElapsedMs = -1;
                             setMode(MODE_DOCKING);
+                        }
+                        else
+                        if (velocityShip < fAsteroidApproachMps)
+                        {
+                            current_state = 121;
+                            bWantFast = true;
+                        }
+                        else bWantMedium = true;
                     }
-                    else
-                    if (velocityShip < .05)
-                    {
-                        current_state = 121;
-                        bWantFast = true;
-                    }
-                    else bWantMedium = true;
                     break;
 
                 case 121:
@@ -771,7 +785,6 @@ namespace IngameScript
                         {
                             // do far travel.
                             current_state = 190;
-                            // already set                                    bWantFast = true;
                             return;
                         }
                         current_state = 125;
@@ -784,7 +797,7 @@ namespace IngameScript
                         double stoppingDistance = calculateStoppingDistance(thrustBackwardList, velocityShip, 0);
                         StatusLog("Move to Bore Start", textPanelReport);
 
-                        if ((distanceSQ - stoppingDistance * 2) > 1)
+                        if ((distanceSQ - stoppingDistance * 2) > 2)
                         {
                             // set aim to ending location
                             Vector3D vAim = (vAsteroidBoreStart - ((IMyShipController)shipOrientationBlock).CenterOfMass);
@@ -794,7 +807,7 @@ namespace IngameScript
                                 //                                Echo("Aimed");
                                 bWantFast = false;
                                 bWantMedium = true;
-                                mineMoveForward(fAsteroidApproachMps, fAsteroidApproachAbortMps, thrustForwardList, thrustBackwardList);
+                                MoveForwardSlow(fAsteroidApproachMps, fAsteroidApproachAbortMps, thrustForwardList, thrustBackwardList);
                             }
                             else bWantFast = true;
                         }
@@ -802,7 +815,6 @@ namespace IngameScript
                         {
                             // we have arrived
                             ResetMotion();
- //                           vExpectedAsteroidExit = AsteroidOutVector;
                             current_state = 130;
                             bWantFast = true;
                         }
@@ -824,11 +836,13 @@ namespace IngameScript
                         if (velocityShip < 0.5)
                         { // wait for ship to slow down
                             double distanceSQ = (vAsteroidBoreStart - ((IMyShipController)shipOrientationBlock).CenterOfMass).LengthSquared();
+                            /*
                             if (distanceSQ > 1.5)
                             {
                                 current_state = 120; // try again.
                             }
                             else
+                            */
                             {
                                 // align with 'up'
                                 bWantFast = true;
@@ -885,15 +899,62 @@ namespace IngameScript
                         if (bAimed)
                         {
                             OrientedBoundingBoxFaces orientedBoundingBox = new OrientedBoundingBoxFaces(shipOrientationBlock);
-                            orientedBoundingBox.GetFaceCorners(OrientedBoundingBoxFaces.LookupFront, BoreScanFrontPoints); 
+                            orientedBoundingBox.GetFaceCorners(OrientedBoundingBoxFaces.LookupFront, BoreScanFrontPoints);
                             // front output order is BL, BR, TL, TR
+
+                            // NOTE: This may be wrong order for opposite facing bores..
+                            Vector3D vTL = vAsteroidBoreStart + AsteroidUpVector * MiningBoreHeight / 2 - AsteroidRightVector * MiningBoreWidth / 2;
+                            Vector3D vTR = vAsteroidBoreStart + AsteroidUpVector * MiningBoreHeight / 2 + AsteroidRightVector * MiningBoreWidth / 2;
+                            Vector3D vBL = vAsteroidBoreStart - AsteroidUpVector * MiningBoreHeight / 2 - AsteroidRightVector * MiningBoreWidth / 2;
+                            Vector3D vBR = vAsteroidBoreStart - AsteroidUpVector * MiningBoreHeight / 2 + AsteroidRightVector * MiningBoreWidth / 2;
+
+                            BoreScanFrontPoints[0] = vBL;
+                            BoreScanFrontPoints[1] = vBR;
+                            BoreScanFrontPoints[2] = vTL;
+                            BoreScanFrontPoints[3] = vTR;
                             current_state = 145;
+//                            current_state = 143; //Beam testing
                         }
                         else
                         {
                             bWantFast = true;
                             Echo("Aiming");
                         }
+                    }
+                    break;
+                case 143:
+                    {
+                        // TESTING..  beam-rider testing
+                        //                        Vector3D vCrossStart = Vector3D.Cross(vAsteroidBoreStart- ((IMyShipController)shipOrientationBlock).CenterOfMass, shipOrientationBlock.WorldMatrix.Backward);
+                        //                        Vector3D vCrossEnd = Vector3D.Cross((vAsteroidBoreEnd - vAsteroidBoreStart), shipOrientationBlock.WorldMatrix.Right);
+
+                        //https://answers.unity.com/questions/437111/calculate-vector-exactly-between-2-vectors.html
+                        Vector3D vBoreEnd = (vAsteroidBoreEnd - vAsteroidBoreStart);
+//                        vBoreEnd.Normalize();
+                        Echo("BoreEnd=" + Vector3DToString(vBoreEnd));
+                        Vector3D vAimEnd = (vAsteroidBoreEnd - ((IMyShipController)shipOrientationBlock).CenterOfMass);
+                        //Vector3D vAimEnd = shipOrientationBlock.WorldMatrix.Forward;
+//                        vAimEnd.Normalize();
+                        Echo("AimEnd=" + Vector3DToString(vAimEnd));
+//                        Vector3D vCrossEnd = (vBoreEnd - vAimEnd * 2);
+                        Vector3D vRejectEnd = VectorRejection(vBoreEnd , vAimEnd);
+                        //                        vCrossEnd.Normalize();
+
+                        Echo("CrossEnd=" + Vector3DToString(vRejectEnd));
+                        //                        Vector3D vCrossEnd = (vBoreEnd + vAimEnd) / 2;
+                        debugGPSOutput("CrossStartEnd", vAsteroidBoreStart + vRejectEnd);
+                        //                        debugGPSOutput("CrossEndStart", vAsteroidBoreEnd - vCrossStart);
+                        //                        debugGPSOutput("COM", ((IMyShipController)shipOrientationBlock).CenterOfMass);
+                        //                        Echo("CrossStart=" + Vector3DToString(vCrossStart));
+
+
+                        //                        Echo("FW=" + Vector3DToString(shipOrientationBlock.WorldMatrix.Forward));
+                        //                          doCameraScan(cameraForwardList, vAsteroidBoreEnd + vCrossEnd);
+                        //                        doCameraScan(cameraBackwardList, vAsteroidBoreStart + vCrossStart);
+                        Vector3D vCorrectedAim = vAsteroidBoreEnd - vRejectEnd;
+                        doCameraScan(cameraForwardList, vCorrectedAim);
+//                        doCameraScan(cameraBackwardList, vAsteroidBoreStart - vCrossEnd);
+                        bWantMedium = true;
                     }
                     break;
                 case 145:
@@ -924,6 +985,7 @@ namespace IngameScript
                             SensorIsActive(sb1, ref bAsteroidInFront, ref bLarge, ref bSmall);
                             SensorIsActive(sb2, ref bFoundCloseAsteroid, ref bLarge, ref bSmall);
 
+                            /* TEST: Always do the scans
                             if (bFoundCloseAsteroid || bAsteroidInFront)
                             {
                                 // sensor is active.. go forth and mine
@@ -931,94 +993,199 @@ namespace IngameScript
                                 bWantFast = true;
                             }
                             else 
+                            */
                             {
                                 bWantMedium = true;
                                 // try a raycast to see if we can hit anything
-                                if(cameraForwardList.Count<1)
+                                if (cameraForwardList.Count < 1)
                                 {
                                     // no cameras to scan with.. assume
                                     current_state = 150;
                                     bWantFast = true;
                                     return;
                                 }
-//                                Echo("BoreHoleScanMode=" + BoreHoleScanMode);
+                                //                                Echo("BoreHoleScanMode=" + BoreHoleScanMode);
 
                                 double scanDistance = (shipOrientationBlock.GetPosition() - vAsteroidBoreEnd).Length();
                                 bool bDidScan = false;
                                 Vector3D vTarget;
-                                if (BoreHoleScanMode < 0) BoreHoleScanMode = 0; ;
-                                if (BoreHoleScanMode > 9)
+                                if (BoreHoleScanMode < 0) BoreHoleScanMode = 0;
+                                if (BoreHoleScanMode > 21)
                                 {
                                     // we have scanned all of the areas and not hit anyhing..  skip this borehole
                                     AsteroidDoNextBore();
                                     return;
+                                    BoreHoleScanMode = 0;
+                                }
+                                Vector3D vScanVector = (vAsteroidBoreEnd - vAsteroidBoreStart);
+                                vScanVector.Normalize();
+                                for (int i1 = 0; i1 < 4; i1++)
+                                {
+                                    debugGPSOutput("Points" + i1, BoreScanFrontPoints[i1]);
                                 }
                                 switch (BoreHoleScanMode)
                                 {
                                     case 0:
-                                        if (doCameraScan(cameraForwardList, scanDistance))
+                                        if (doCameraScan(cameraForwardList, vAsteroidBoreEnd))
                                         {
                                             bDidScan = true;
                                         }
                                         break;
                                     case 1:
-                                        vTarget = BoreScanFrontPoints[2] + shipOrientationBlock.WorldMatrix.Forward * scanDistance;
+                                        vTarget = BoreScanFrontPoints[2] + vScanVector * scanDistance;
                                         if (doCameraScan(cameraForwardList, vTarget))
                                         {
                                             bDidScan = true;
                                         }
                                         break;
                                     case 2:
-                                        vTarget = BoreScanFrontPoints[3] + shipOrientationBlock.WorldMatrix.Forward * scanDistance;
+                                        vTarget = BoreScanFrontPoints[3] + vScanVector * scanDistance;
                                         if (doCameraScan(cameraForwardList, vTarget))
                                         {
                                             bDidScan = true;
                                         }
                                         break;
                                     case 3:
-                                        vTarget = BoreScanFrontPoints[0] + shipOrientationBlock.WorldMatrix.Forward * scanDistance;
+                                        vTarget = BoreScanFrontPoints[0] + vScanVector * scanDistance;
                                         if (doCameraScan(cameraForwardList, vTarget))
                                         {
                                             bDidScan = true;
                                         }
                                         break;
                                     case 4:
-                                        vTarget = BoreScanFrontPoints[1] + shipOrientationBlock.WorldMatrix.Forward * scanDistance;
+                                        vTarget = BoreScanFrontPoints[1] + vScanVector * scanDistance;
                                         if (doCameraScan(cameraForwardList, vTarget))
                                         {
                                             bDidScan = true;
                                         }
                                         break;
                                     case 5:
+                                        /*
                                         // check center again.  always full length
                                         if (doCameraScan(cameraForwardList, scanDistance))
                                         {
                                             bDidScan = true;
                                         }
+                                        */
+                                        bDidScan = true;
                                         break;
                                     case 6:
-                                        vTarget = BoreScanFrontPoints[2] + shipOrientationBlock.WorldMatrix.Forward * scanDistance / 2;
+                                        vTarget = BoreScanFrontPoints[2] + vScanVector * (scanDistance * 0.55);
                                         if (doCameraScan(cameraForwardList, vTarget))
                                         {
                                             bDidScan = true;
                                         }
                                         break;
                                     case 7:
-                                        vTarget = BoreScanFrontPoints[3] + shipOrientationBlock.WorldMatrix.Forward * scanDistance / 2;
+                                        vTarget = BoreScanFrontPoints[3] + vScanVector * (scanDistance * 0.55);
                                         if (doCameraScan(cameraForwardList, vTarget))
                                         {
                                             bDidScan = true;
                                         }
                                         break;
                                     case 8:
-                                        vTarget = BoreScanFrontPoints[0] + shipOrientationBlock.WorldMatrix.Forward * scanDistance / 2;
+                                        vTarget = BoreScanFrontPoints[0] + vScanVector * (scanDistance * 0.55);
                                         if (doCameraScan(cameraForwardList, vTarget))
                                         {
                                             bDidScan = true;
                                         }
                                         break;
                                     case 9:
-                                        vTarget = BoreScanFrontPoints[1] + shipOrientationBlock.WorldMatrix.Forward * scanDistance / 2;
+                                        vTarget = BoreScanFrontPoints[1] + vScanVector * (scanDistance * 0.55);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    // front output order is 0=BL, 1=BR, 2=TL, 3=TR
+                                    case 10:
+                                        // bottom middle
+                                        vTarget = (BoreScanFrontPoints[1] + BoreScanFrontPoints[0]) / 2 + vScanVector * (scanDistance * 0.55);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    case 11:
+                                        // top middle
+                                        vTarget = (BoreScanFrontPoints[2] + BoreScanFrontPoints[3]) / 2 + vScanVector * (scanDistance * 0.55);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    case 12:
+                                        // right middle
+                                        vTarget = (BoreScanFrontPoints[1] + BoreScanFrontPoints[3]) / 2 + vScanVector * (scanDistance * 0.55);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    case 13:
+                                        // left middle
+                                        vTarget = (BoreScanFrontPoints[2] + BoreScanFrontPoints[0]) / 2 + vScanVector * (scanDistance * 0.55);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    case 14:
+                                        vTarget = BoreScanFrontPoints[2] + vScanVector * (scanDistance * 0.35);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    case 15:
+                                        vTarget = BoreScanFrontPoints[3] + vScanVector * (scanDistance * 0.35);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    case 16:
+                                        vTarget = BoreScanFrontPoints[0] + vScanVector * (scanDistance * 0.35);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    case 17:
+                                        vTarget = BoreScanFrontPoints[1] + vScanVector * (scanDistance * 0.35);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    // front output order is 0=BL, 1=BR, 2=TL, 3=TR
+                                    case 18:
+                                        // bottom middle
+                                        vTarget = (BoreScanFrontPoints[1] + BoreScanFrontPoints[0]) / 2 + vScanVector * (scanDistance * 0.35);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    case 19:
+                                        // top middle
+                                        vTarget = (BoreScanFrontPoints[2] + BoreScanFrontPoints[3]) / 2 + vScanVector * (scanDistance * 0.35);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    case 20:
+                                        // right middle
+                                        vTarget = (BoreScanFrontPoints[1] + BoreScanFrontPoints[3]) / 2 + vScanVector * (scanDistance * 0.35);
+                                        if (doCameraScan(cameraForwardList, vTarget))
+                                        {
+                                            bDidScan = true;
+                                        }
+                                        break;
+                                    case 21:
+                                        // left middle
+                                        vTarget = (BoreScanFrontPoints[2] + BoreScanFrontPoints[0]) / 2 + vScanVector * (scanDistance * 0.35);
                                         if (doCameraScan(cameraForwardList, vTarget))
                                         {
                                             bDidScan = true;
@@ -1027,20 +1194,25 @@ namespace IngameScript
                                 }
                                 if (bDidScan)
                                 {
-                                    BoreHoleScanMode++;
-
-                                    // the routine sets lastDetetedInfo itself if scan succeeds
+                                    // the camera scan routine sets lastDetetedInfo itself if scan succeeds
                                     if (!lastDetectedInfo.IsEmpty())
                                     {
                                         if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid)
                                         {
-                                            // we found an asteroid.
+//                                            sStartupError += "BoreScan hit on " + BoreHoleScanMode + "\n";
+                                            // we found an asteroid. (hopefully it's ours..)
                                             bFoundCloseAsteroid = true;
                                         }
-                                        else
+                                        else if (lastDetectedInfo.Type == MyDetectedEntityType.FloatingObject)
                                         {
- //                                           Echo("Found NON-Asteroid in SCAN");
-                                              // TODO: don't count raycast if we hit debris.
+                                            //                                           Echo("Found NON-Asteroid in SCAN");
+                                            // don't count raycast if we hit debris.
+                                            bDidScan = false;
+                                        }
+                                        else
+                                        { 
+                                            // something else.. maybe ourselves or another ship?
+
                                         }
 
                                         if (bFoundCloseAsteroid)
@@ -1053,6 +1225,7 @@ namespace IngameScript
                                     else
                                     {
                                     }
+                                    if(bDidScan) BoreHoleScanMode++;
                                 }
                                 else
                                 {
@@ -1079,9 +1252,24 @@ namespace IngameScript
                         bool bAsteroidInFront = false;
                         bool bFoundCloseAsteroid = false;
 
-                        Vector3D vAim = (vAsteroidBoreEnd - vAsteroidBoreStart);
-                        bAimed = GyroMain("forward", vAim, shipOrientationBlock);
+                        bAimed = BeamRider(vAsteroidBoreStart, vAsteroidBoreEnd, shipOrientationBlock);
+                        /*
+                        // 'BeamRider' routine that takes start,end and tries to stay on that beam.
+                        Vector3D vBoreEnd = (vAsteroidBoreEnd - vAsteroidBoreStart);
+                        Vector3D vAimEnd = (vAsteroidBoreEnd - ((IMyShipController)shipOrientationBlock).CenterOfMass);
+                        Vector3D vRejectEnd = VectorRejection(vBoreEnd, vAimEnd);
 
+                        Vector3D vCorrectedAim = (vAsteroidBoreEnd - vRejectEnd * 2) - ((IMyShipController)shipOrientationBlock).CenterOfMass;
+
+                        bAimed = GyroMain("forward", vCorrectedAim, shipOrientationBlock);
+                        */
+                        /*                        Vector3D vAim = (vAsteroidBoreEnd - vAsteroidBoreStart);
+                                                bAimed = GyroMain("forward", vAim, shipOrientationBlock);
+                        */
+                        double distance = (vAsteroidBoreStart - shipOrientationBlock.GetPosition()).Length();
+                        Echo("Distance=" + niceDoubleMeters(distance) + " (" + niceDoubleMeters(AsteroidDiameter + shipDim.LengthInMeters() * MineShipLengthScale * 2) + ")");
+                        StatusLog("Distance=" + niceDoubleMeters(distance) + " (" + niceDoubleMeters(AsteroidDiameter + shipDim.LengthInMeters() * MineShipLengthScale * 2) + ")", textPanelReport);
+                        double stoppingDistance = calculateStoppingDistance(thrustBackwardList, velocityShip, 0);
                         miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
                         if (miningElapsedMs < dSensorSettleWaitMS)
                         {
@@ -1109,36 +1297,53 @@ namespace IngameScript
                             }
                             else if (bAsteroidInFront)
                             {
-                                double distance = (vAsteroidBoreStart - shipOrientationBlock.GetPosition()).Length();
-                                Echo("Distance=" + niceDoubleMeters(distance) + " (" + niceDoubleMeters(AsteroidDiameter + shipDim.LengthInMeters() * MineShipLengthScale * 2) + ")");
-                                StatusLog("Distance=" + niceDoubleMeters(distance) + " (" + niceDoubleMeters(AsteroidDiameter + shipDim.LengthInMeters() * MineShipLengthScale * 2) + ")", textPanelReport);
-                                double stoppingDistance = calculateStoppingDistance(thrustBackwardList, velocityShip, 0);
                                 if ((distance+stoppingDistance) > (AsteroidDiameter + shipDim.LengthInMeters() * MineShipLengthScale * 2))
                                 {
                                     // we have gone too far.  nothing to mine
                                     //                                    sStartupError += "\nTOO FAR! ("+AsteroidCurrentX+"/"+AsteroidCurrentY+")";
 
-                                    ResetMotion();
-                                    if(velocityShip<1)
-                                    AsteroidDoNextBore();
-                                }
-                                else
-                                {
-                                    mineMoveForward(fAsteroidApproachMps, fAsteroidApproachAbortMps, thrustForwardList, thrustBackwardList);
+                                    current_state = 155;
+                                    /*
+                                       ResetMotion();
+                                        if(velocityShip<1)
+                                        AsteroidDoNextBore();
+                                        */
+                                    }
+                                    else
+                                    {
+                                        MoveForwardSlow(fAsteroidApproachMps, fAsteroidApproachAbortMps, thrustForwardList, thrustBackwardList);
+                                    }
                                 }
                             }
-                        }
-                        else
-                        {
-                            bWantFast = true;
-                            Echo("Aiming");
-                        }
+                            else
+                            {
+                                bWantFast = true;
+                                Echo("Aiming");
+                                if ((distance + stoppingDistance) > (AsteroidDiameter + shipDim.LengthInMeters() * MineShipLengthScale * 2))
+                                {
+                                    // we have gone too far.  nothing to mine
+                                    //                                    sStartupError += "\nTOO FAR! ("+AsteroidCurrentX+"/"+AsteroidCurrentY+")";
+                                    current_state = 155;
+                                    /*
+                                    ResetMotion();
+                                    if (velocityShip < 1)
+                                        AsteroidDoNextBore();
+                                        */
+                                }
+                            }
+                    }
+                    break;
+                case 155:
+                    {
+                        ResetMotion();
+//                        if (velocityShip < 1)
+                            AsteroidDoNextBore();
                     }
                     break;
                 case 190:
                     {
                         // start NAV travel
-                        NavGoTarget(vAsteroidBoreStart, iMode, 195, 11);
+                        NavGoTarget(vAsteroidBoreStart, iMode, 195, 11, "MINE-Bore start");
                     }
                     break;
                 case 195:
@@ -1146,7 +1351,10 @@ namespace IngameScript
                         // wait for motion to slow
                         bWantMedium = true;
                         if (velocityShip < fAsteroidApproachMps)
+                        {
                             current_state = 120;
+                            bWantFast = true;
+                        }
                         ResetMotion();
                         break;
                     }
@@ -1162,22 +1370,24 @@ namespace IngameScript
                         break;
                     }
                 case 305:
-                    bWantMedium = true;
-                    if (velocityShip > 1) return;
+                    {
+                        bWantMedium = true;
+                        if (velocityShip > 1) return;
 
-                    if (AsteroidMineMode == 1)
-                    {
-                        // we did a single bore.
-                        // so now we are done.
-                        AsteroidMineMode = 0;
-                        bAutoRelaunch = false;
-                        setMode(MODE_DOCKING);
-                        miningAsteroidID = -1;
-                        break;
-                    }
-                    // else mine mode !=1
-                    if (maxDeltaV < fMiningMinThrust || cargopcent > MiningCargopctlowwater || batteryPercentage < batterypctlow)
-                    {
+                        if (AsteroidMineMode == 1)
+                        {
+                            // we did a single bore.
+                            // so now we are done.
+                            AsteroidMineMode = 0;
+                            bAutoRelaunch = false;
+                            setMode(MODE_DOCKING);
+                            miningAsteroidID = -1;
+                            break;
+                        }
+                        // else mine mode !=1
+                        bool bReady = DockAirWorthy(true, false, MiningCargopcthighwater);
+                        if (maxDeltaV < fMiningMinThrust || !bReady) //cargopcent > MiningCargopctlowwater || batteryPercentage < batterypctlow)
+                        {
                             bool bBoresRemaining = AsteroidCalculateNextBore();
                             if (bBoresRemaining)
                             {
@@ -1189,19 +1399,20 @@ namespace IngameScript
                             {
                                 current_state = 500;
                             }
-                    }
-                    else
-                    {
-                        // UNLESS: we have another target asteroid..
-                        // TODO: 'recall'.. but code probably doesn't go here.
-                        AsteroidDoNextBore();
+                        }
+                        else
+                        {
+                            // UNLESS: we have another target asteroid..
+                            // TODO: 'recall'.. but code probably doesn't go here.
+                            AsteroidDoNextBore();
+                        }
                     }
                     break;
                     case 310:
                     {
                         AsteroidCalculateBestStartEnd();
 //                        vAsteroidBoreStart = AsteroidCalculateBoreStart();
-                        NavGoTarget(vAsteroidBoreStart, iMode, 120);
+                        NavGoTarget(vAsteroidBoreStart, iMode, 120,11,"MINE-Next Bore start");
                         break;
 
                     }
@@ -1361,6 +1572,7 @@ namespace IngameScript
 
                     StatusLog("Cargo =" + cargopcent + "% / " + MiningCargopcthighwater + "% Max", textPanelReport);
                     StatusLog("Battery " + batteryPercentage + "% (Min:" + batterypctlow + "%)", textPanelReport);
+                    if(TanksHasHydro()) StatusLog("H2 " + hydroPercent + "% (Min:" + batterypctlow + "%)", textPanelReport);
                 }
             }
 
@@ -1468,7 +1680,7 @@ namespace IngameScript
                         if (bAimed)
                         {
                             current_state = 30;
-                            //mineMoveForward(fTargetMiningmps,fAbortmps, thrustForwardList, thrustBackwardList);
+                            //MoveForwardSlow(fTargetMiningmps,fAbortmps, thrustForwardList, thrustBackwardList);
                         }
 
                     }
@@ -1488,11 +1700,11 @@ namespace IngameScript
                             bWantMedium = true;
                             if (bBoringOnly)
                             {
-                                mineMoveForward(fTargetMiningMps, fMiningAbortMps, thrustBackwardList, thrustForwardList);
+                                MoveForwardSlow(fTargetMiningMps, fMiningAbortMps, thrustBackwardList, thrustForwardList);
                             }
                             else
                             {
-                                mineMoveForward(fTargetMiningMps, fMiningAbortMps, thrustForwardList, thrustBackwardList);
+                                MoveForwardSlow(fTargetMiningMps, fMiningAbortMps, thrustForwardList, thrustBackwardList);
                             }
                         }
                         else bWantFast = true;
@@ -1554,63 +1766,8 @@ namespace IngameScript
             }
         }
 
-        int iMMFWiggle = 0;
-//        double mmfLastVelocity = -1;
-        void mineMoveForward(float fTarget, float fAbort, List<IMyTerminalBlock> mmfForwardThrust, List<IMyTerminalBlock> mmfBackwardThrust)
-        {
-            if (iMMFWiggle < 0) iMMFWiggle = 0;
-
-//            Echo("mMF " + iMMFWiggle.ToString());
-            double maxThrust = calculateMaxThrust(mmfForwardThrust);
-            //            Echo("maxThrust=" + maxThrust.ToString("N0"));
-
-            MyShipMass myMass;
-            myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
-            double effectiveMass = myMass.PhysicalMass;
-            float thrustPercent = 100f;
-            if (effectiveMass>0)
-            {
-                double maxDeltaV = (maxThrust) / effectiveMass;
-                //           Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
-                if(maxDeltaV>0) thrustPercent = (float)(fTarget / maxDeltaV);
-//                            Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
-            }
-            //            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
-
-            if (velocityShip > fAbort)
-            {
- //               Echo("ABORT");
-                powerDownThrusters(thrustAllList);
-                iMMFWiggle--;
-            }
-            else if (velocityShip < (fTarget*0.90))
-            {
-                if (velocityShip < fTarget * 0.5)
-                    iMMFWiggle++;
-                if (velocityShip < fTarget * 0.25)
-                    iMMFWiggle++;
-//                Echo("Push ");
-                powerUpThrusters(mmfForwardThrust, thrustPercent + iMMFWiggle/5);
-//                powerUpThrusters(thrustForwardList, 15f + iMMFWiggle);
-            }
-            else if(velocityShip<(fTarget*1.1))
-            {
-                // we are around target. 90%<-current->120%
-//                                 Echo("Coast");
-//                iMMFWiggle--;
-               // turn off reverse thrusters and 'coast'.
-                powerDownThrusters(mmfBackwardThrust, thrustAll, true);
-                powerDownThrusters(mmfForwardThrust);
-            }
-            else
-            { // above 110% target, but below abort
-//                Echo("Coast2");
-                iMMFWiggle /= 2;
-                powerUpThrusters(mmfForwardThrust, 1f); // coast
-            }
-
-        }
-
 
     }
+
 }
+
