@@ -39,34 +39,48 @@ namespace IngameScript
         INIHolder iniWicoCraftSave=null;
 
         // Saved info:
+        /// <summary>
+        /// Serliazed across modules:
+        /// </summary>
         int current_state = 0;
 
+        /// <summary>
+        /// Serliazed across modules:
+        /// </summary>
         long allBlocksCount = 0;
 
-//        Vector3D vCurrentPos;
-//        Vector3D vDock;
-//        Vector3D vLaunch1;
-//        Vector3D vHome;
-//        bool bValidDock = false;
-//        bool bValidLaunch1 = false;
-//        bool bValidHome = false;
-//        double dGravity = -2;
+        //        Vector3D vCurrentPos;
+        //        Vector3D vDock;
+        //        Vector3D vLaunch1;
+        //        Vector3D vHome;
+        //        bool bValidDock = false;
+        //        bool bValidLaunch1 = false;
+        //        bool bValidHome = false;
+        //        double dGravity = -2;
+        /// <summary>
+        /// Serliazed across modules:
+        /// </summary>
         int craft_operation = CRAFT_MODE_AUTO;
-//        int currentRun = 0;
+        //        int currentRun = 0;
+        /// <summary>
+        /// Serliazed across modules:
+        /// </summary>
         string sPassedArgument = "";
 
         // valid vectors
-//        bool bValidInitialContact = false;
-//        bool bValidInitialExit = false;
-//        bool bValidTarget = false;
-//        bool bValidAsteroid = false;
-//        bool bValidNextTarget = false;
+        //        bool bValidInitialContact = false;
+        //        bool bValidInitialExit = false;
+        //        bool bValidTarget = false;
+        //        bool bValidAsteroid = false;
+        //        bool bValidNextTarget = false;
 
         // operation flags
-//        bool bAutopilotSet = true;
-//        bool bAutoRelaunch = false;
+        //        bool bAutopilotSet = true;
+        //        bool bAutoRelaunch = false;
 
-        // 
+        /// <summary>
+        /// Serliazed across modules:
+        /// </summary>
         int iAlertStates = 0;
 
         // time outs
@@ -108,6 +122,9 @@ namespace IngameScript
 //        double maxSolarPower = -1;
 //        double maxBatteryPower = -1;
 
+            /// <summary>
+            /// Serliazed across modules: Currently received message.  "" for none.
+            /// </summary>
         string sReceivedMessage = "";
 
         string SerializeInit()
