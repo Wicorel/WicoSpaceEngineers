@@ -131,21 +131,24 @@ namespace IngameScript
                         initPower();
                         break;
                     case 22:
-                        sInitResults += modeOnInit();
+                        tanksInit();
                         break;
                     case 23:
+                        sInitResults += modeOnInit();
+                        break;
+                    case 24:
                         if (sensorsList.Count < 2)
                         {
-//                            bStartupError = true;
+                            //                            bStartupError = true;
                             sStartupError += "\nNot enough Sensors detected!";
                         }
                         if (!HasDrills())
                         {
-//                            bStartupError = true;
+                            //                            bStartupError = true;
                             sStartupError += "\nNo Drills found!";
                         }
                         break;
-                    case 24:
+                    case 25:
                         init = true;
                         break;
 
@@ -163,7 +166,6 @@ namespace IngameScript
             return sInitResults;
 
         }
-
 
         string modeOnInit()
         {
@@ -183,8 +185,10 @@ namespace IngameScript
                 {
                     current_state = 31;
                 }
-                else if (current_state == 143)
-                    current_state = 120;
+                else if (current_state == 143) // testing
+                    current_state = 120; // go back to start of bore
+                else if (current_state == 145) // bore scans
+                    current_state = 140; // reinit bore scan
             }
             return ">";
         }
