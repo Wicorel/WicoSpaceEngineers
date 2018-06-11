@@ -155,17 +155,9 @@ namespace IngameScript
 
         void MinerMasterReset()
         {
-//            bValidInitialAsteroidContact = false;
-//            bValidInitialAsteroidExit = false;
-//            bValidAsteroid = false;
-
             miningAsteroidID = -1;
             AsteroidMineMode = 0;
-
             AsteroidUpVector = Vector3D.Zero;
-//            vTargetAsteroid = AsteroidUpVector;
-//            vLastAsteroidContact = AsteroidUpVector;
-//            vLastAsteroidExit = AsteroidUpVector;
         }
 
         void AsteroidCalculateFirstBore()
