@@ -153,6 +153,13 @@ May 27 2018
 Raycast collision also checks half-way distance for size of ship instea of just full scan distance.
 June 10 Added target name so it can be shown
 
+3.4M
+Set target name from GPS Waypointcommend
+
+3.4N  default speed to world max speed, not 100
+June 15, 2018
+Renumber modes >150 to make room
+
 TODO: 
     Do quadrant search for escape
     Support multiple waypoints
@@ -168,7 +175,7 @@ TODO:
         string OurName = "Wico Craft";
 
         string moduleName = "NAV";
-        string sVersion = "3.4L";
+        string sVersion = "3.4N";
 
     }
 }

@@ -59,6 +59,7 @@ namespace IngameScript
 
                 //                if (!modeCommands.ContainsKey("launch")) modeCommands.Add("launch", MODE_LAUNCH);
                 //	if(!modeCommands.ContainsKey("godock")) modeCommands.Add("godock", MODE_DOCKING);
+                if(!modeCommands.ContainsKey("scantest")) modeCommands.Add("scantest", MODE_SCANTEST);
 
                 sInitResults += SerializeInit();
                 Deserialize();

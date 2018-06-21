@@ -154,7 +154,7 @@ namespace IngameScript
                     }
 
 //                    sStartupError = "CMD Initiated NAV:\n" + sArgument;
-                    NavGoTarget(new Vector3D(x, y, z),30,0,arrivalDistanceMin);
+                    NavGoTarget(new Vector3D(x, y, z),30,0,arrivalDistanceMin, sWaypointName);
 
                     //                    vNavTarget = new Vector3D(x, y, z);
                     //                    bValidNavTarget = true;

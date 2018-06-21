@@ -21,19 +21,20 @@ namespace IngameScript
         #region domodes 
         void doModes()
         {
-            Echo("mode=" + iMode.ToString());
-/*            if (AnyConnectorIsConnected() && !((craft_operation & CRAFT_MODE_ORBITAL) > 0))
-            {
-                Echo("DM:docked");
-                setMode(MODE_DOCKED);
-            }
-            */
+            Echo("mode=" + iMode.ToString() + " state=" + current_state.ToString());
+            /*            if (AnyConnectorIsConnected() && !((craft_operation & CRAFT_MODE_ORBITAL) > 0))
+                        {
+                            Echo("DM:docked");
+                            setMode(MODE_DOCKED);
+                        }
+                        */
             /*
             if (iMode == MODE_IDLE) doModeIdle();
             else if (iMode == MODE_DESCENT) doModeDescent();
 */
 
-        	if (iMode == MODE_GOINGTARGET) { doModeGoTarget(); return; } 
+            if (iMode == MODE_GOINGTARGET) { doModeGoTarget(); return; } 
+            if(iMode==MODE_SCANTEST) { doModeScanTest(); return; }
        }
         #endregion
 
