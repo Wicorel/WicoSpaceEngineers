@@ -118,8 +118,10 @@ namespace IngameScript
                 GetTargetBlocks<IMyShipConnector>(ref blocks);
 
             foreach (var c in blocks)
-            { // don't count ejectors
+            { // don't count ejectors nor sorters
                 if (c.CustomName.Contains("Ejector") || c.CustomData.Contains("Ejector"))
+                    continue;
+                else if (c.CustomName.Contains("Sorter") || c.CustomData.Contains("Sorter"))
                     continue;
                 else
                     lContainers.Add(c);
