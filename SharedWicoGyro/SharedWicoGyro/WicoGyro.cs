@@ -122,6 +122,10 @@ namespace IngameScript
                 down = or1.Backward;
             else if (argument.Contains("forward"))
                 down = or1.Forward;
+            else if (argument.Contains("right"))
+                down = or1.Right;
+            else if (argument.Contains("left"))
+                down = or1.Left;
             else
                 down = or1.Down;
 
