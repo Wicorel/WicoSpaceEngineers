@@ -290,6 +290,7 @@ namespace IngameScript
 //            Echo("Sending:\n" + message);
             bool bSent = false;
             if (antennaList.Count < 1) antennaInit();
+
             for (int i = 0; i < antennaList.Count; i++)
             { // try all available antennas
 
@@ -308,7 +309,10 @@ namespace IngameScript
                     // try immediate send:
                     bSent = antennaList[i].TransmitMessage(message);
                     if (bSent)
+                    {
+//                        sStartupError += "\nMessage Sent";
                         break;
+                    }
                 }
             }
             if (!bSent)
@@ -316,9 +320,15 @@ namespace IngameScript
                 if (AntennaCount() > 0)
                 { // no sense queueing if we don't have any antennas.
                     lPendingMessages.Add(message);
+//                    sStartupError += "\nMessage Queued";
                     Echo("Adding outgoing message to queue. Request FAST!");
                     Echo(message);
                     bWantFast = true;
+                }
+                else
+                {
+//                    sStartupError += "\nNo Antenna to send message";
+                    Echo("Unable to send Antenna Message!");
                 }
             }
         }
@@ -332,8 +342,7 @@ namespace IngameScript
         /// <summary>
         /// Process pending receives.
         /// </summary>
-        /// <param name="bMain">set to true if we are a 'Main' craft control. default false if we are a sub-module</param>
-        void processPendingReceives(bool bMain=false)
+        void processPendingReceives()
         {
             if (lPendingIncomingMessages.Count > 0)
             {
@@ -341,16 +350,6 @@ namespace IngameScript
                 { // receiver signals processed by removing message
                     sReceivedMessage = lPendingIncomingMessages[0];
                     lPendingIncomingMessages.RemoveAt(0);
-                    /*
-                    if (bMain)
-                    {
-                        bWantFast = true;
-                    }
-                    else
-                    {
-                        doTriggerMain();
-                    }
-                    */
                 }
                 else Echo("Waiting for message to be processed");
                 doTriggerMain();
