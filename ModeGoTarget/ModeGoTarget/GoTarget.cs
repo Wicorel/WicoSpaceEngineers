@@ -54,34 +54,38 @@ namespace IngameScript
 
         *** below here are thruster-only routines (for now)
 
-        170 Collision Detected From 160
+        300 Collision Detected From 160
             Calculate collision avoidance 
-            then ->172
+            then ->320
 
-        171 dummy state for debugging.
-        172 do travel movemenet for collision avoidance. 
+        301 dummy state for debugging.
+        320 do travel movement for collision avoidance. 
         if arrive target, ->160
-        if secondary collision ->173
+        if secondary collision ->340
 
-        173 secondary collision
-        if a type we can move around, try to move ->174
-        else go back to collision detection ->170
+        340 secondary collision
+        if a type we can move around, try to move ->350
+        else go back to collision detection ->300
 
-        174 initilize escape plan
-        ->175
+        350 initilize escape plan
+        ->360
    
-        175 scan for an 'escape' route (pathfind)
+        360 scan for an 'escape' route (pathfind)
         timeout of (default) 5 seconds ->MODE_ATTENTION
-        after scans, ->180
+        after scans, ->380
 
-        180 travel to avoidance waypoint
+        380 travel to avoidance waypoint
         on arrival ->160 (main travel)
-        on collision ->173
+        on collision ->340
 
-        200 Arrived at target
+        500 Arrived at target
         ->MODE_ARRIVEDTARGET
 
         */
+
+        Vector3D GridUpVector;
+        Vector3D GridRightVector;
+
         void doModeGoTarget()
         {
             StatusLog("clear", textPanelReport);
@@ -100,7 +104,7 @@ namespace IngameScript
             if (current_state == 0)
             {
                 ResetTravelMovement();
-
+//                sStartupError+="\nStart movemenet: ArrivalMode="+NAVArrivalMode+" State="+NAVArrivalState;
                 if ((craft_operation & CRAFT_MODE_SLED) > 0)
                 {
                     bSled = true;
@@ -299,7 +303,7 @@ namespace IngameScript
 
                 if (bGoOption && (distance < arrivalDistanceMin))
                 {
-                    current_state = 200;
+                    current_state = 500;
 
                     Echo("we have arrived");
                     bWantFast = true;
@@ -483,7 +487,7 @@ namespace IngameScript
                 if (bDoTravel)
                 {
                     Echo("Do Travel");
-                    doTravelMovement(vTargetLocation, (float)arrivalDistanceMin, 200, 170);
+                    doTravelMovement(vTargetLocation, (float)arrivalDistanceMin, 500, 300);
                 }
                 else
                 {
@@ -491,7 +495,7 @@ namespace IngameScript
                 }
             }
 
-            else if(current_state==170)
+            else if(current_state==300)
             { // collision detection
 
                 bWantFast = true;
@@ -499,46 +503,81 @@ namespace IngameScript
                 ResetTravelMovement();
                 calcCollisionAvoid(vTargetLocation);
 
-//                current_state = 171; // testing
-                current_state = 172;
+//                current_state = 301; // testing
+                current_state = 320;
             }
-            else if (current_state == 171)
+            else if (current_state == 301)
             { 
                 // just hold this state
                 bWantFast = false;
             }
 
-            else if (current_state == 172)
+            else if (current_state == 320)
             {
                 //                 Vector3D vVec = vAvoid - shipOrientationBlock.GetPosition();
                 //                double distanceSQ = vVec.LengthSquared();
-                Echo("Collision Avoid");
+                Echo("Primary Collision Avoid");
                 StatusLog("clear", sledReport);
                 StatusLog("Collision Avoid", sledReport);
                 StatusLog("Collision Avoid", textPanelReport);
-                doTravelMovement(vAvoid, 5.0f, 160, 173);
+                doTravelMovement(vAvoid, 5.0f, 160, 340);
             }
-            else if (current_state == 173)
+            else if (current_state == 340)
             {       // secondary collision
-                if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid 
-                    || lastDetectedInfo.Type == MyDetectedEntityType.LargeGrid 
-                    || lastDetectedInfo.Type == MyDetectedEntityType.SmallGrid 
+                if (
+                    lastDetectedInfo.Type == MyDetectedEntityType.LargeGrid
+                    || lastDetectedInfo.Type == MyDetectedEntityType.SmallGrid
                     )
                 {
-                    current_state = 174;
+                    current_state = 345;
                 }
-                else current_state = 170;// setMode(MODE_ATTENTION);
+                else if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid
+                    )
+                {
+                    current_state = 350;
+                }
+                else current_state = 300;// setMode(MODE_ATTENTION);
                 bWantFast = true;
             }
-            else if (current_state == 174)
+            else if(current_state==345)
             {
-                initEscapeScan();
+                // we hit a grid.  align to it
+                Vector3D[] corners = new Vector3D[BoundingBoxD.CornerCount];
+
+                BoundingBoxD bbd = lastDetectedInfo.BoundingBox;
+                bbd.GetCorners(corners);
+
+                GridUpVector = PlanarNormal(corners[3], corners[4], corners[7]);
+                GridRightVector = PlanarNormal(corners[0], corners[1], corners[4]);
+                bWantFast = true;
+                current_state = 348;
+            }
+            else if(current_state==348)
+            {
+                bWantFast = true;
+                if(GyroMain("up",GridUpVector,shipOrientationBlock))
+                {
+                    current_state = 349;
+                }
+            }
+            else if (current_state == 349)
+            {
+                bWantFast = true;
+                if (GyroMain("right", GridRightVector, shipOrientationBlock))
+                {
+                    current_state = 350;
+                }
+            }
+            else if (current_state == 350)
+            {
+//                initEscapeScan(bCollisionWasSensor, !bCollisionWasSensor);
+                initEscapeScan(bCollisionWasSensor);
                 ResetTravelMovement();
                 dtNavStartShip = DateTime.Now;
-                current_state = 175;
+                current_state = 360;
                 bWantFast = true;
             }
-            else if (current_state == 175)
+            else if (current_state == 360)
             {
                 StatusLog("Collision Avoid\nScan for escape route", textPanelReport);
                 DateTime dtMaxWait = dtNavStartShip.AddSeconds(5.0f);
@@ -552,17 +591,18 @@ namespace IngameScript
                 if (scanEscape())
                 {
                     Echo("ESCAPE!");
-                    current_state = 180;
+                    current_state = 380;
                 }
                 bWantMedium = true;
 //                bWantFast = true;
            }
-            else if(current_state==180)
+            else if(current_state==380)
             {
                 StatusLog("Collision Avoid Travel", textPanelReport);
-                doTravelMovement(vAvoid,1f, 160, 173);
+                Echo("Escape Collision Avoid");
+                doTravelMovement(vAvoid,1f, 160, 340);
             }
-            else if(current_state==200)
+            else if(current_state==500)
             { // we have arrived at target
                 StatusLog("clear", sledReport);
                 StatusLog("Arrived at Target", sledReport);
@@ -633,6 +673,34 @@ namespace IngameScript
         {
             powerDownThrusters(thrustAllList);
             powerDownRotors();
+        }
+
+
+        void doModeScanTest()
+        {
+            Echo("ScanTest");
+            StatusLog("clear", gpsPanel);
+            switch (current_state)
+            {
+                case 0:
+                    Echo("Init");
+                    initEscapeScan(true);
+                    current_state = 100;
+                    bWantFast = true;
+                    break;
+                case 100:
+                    Echo("Scanning for Escape");
+                    bWantMedium = true;
+                    if (!scanEscape())
+                        current_state = 500;
+                    break;
+                case 500:
+                    // we got a target
+                    Echo("Escape Found!");
+                    debugGPSOutput("EscapeTarget", vAvoid);
+                    break;
+
+            }
         }
     }
 }
