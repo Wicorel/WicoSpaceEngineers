@@ -19,7 +19,7 @@ namespace IngameScript
         /// Set maximum speed of ship. 
         /// Set this using S command for NAV
         /// </summary>
-        double shipSpeedMax = 100;
+        double shipSpeedMax = 9999;
 
         /// <summary>
         /// the minimum distance to be from the target to be considered 'arrived'
@@ -55,6 +55,8 @@ namespace IngameScript
             iNIHolder.GetValue(sNavSection, "NAVGravityMinElevation", ref NAVGravityMinElevation, true);
             iNIHolder.GetValue(sNavSection, "NavBeaconDebug", ref bNavBeaconDebug, true);
             iNIHolder.GetValue(sNavSection, "AllowBlindNav", ref AllowBlindNav, true);
+            if (shipSpeedMax > fMaxWorldMps)
+                shipSpeedMax = fMaxWorldMps;
         }
 
         void NavSerialize(INIHolder iNIHolder)
@@ -102,7 +104,7 @@ namespace IngameScript
         }
 
         //TODO: Add istarget asteroid?
-        void NavGoTarget(Vector3D vTarget, int modeArrival=MODE_ARRIVEDTARGET, int stateArrival=0, double DistanceMin=50, string TargetName="")
+        void NavGoTarget(Vector3D vTarget, int modeArrival=MODE_ARRIVEDTARGET, int stateArrival=0, double DistanceMin=50, string TargetName="", double maxSpeed=9999)
         {
             vNavTarget = vTarget;
             bValidNavTarget = true;
@@ -111,6 +113,11 @@ namespace IngameScript
             arrivalDistanceMin = DistanceMin;
             NAVTargetName = TargetName;
             current_state = 0;
+
+            if (maxSpeed > fMaxWorldMps)
+                maxSpeed = fMaxWorldMps;
+            shipSpeedMax = maxSpeed;
+
             setMode(MODE_GOINGTARGET);
         }
 
