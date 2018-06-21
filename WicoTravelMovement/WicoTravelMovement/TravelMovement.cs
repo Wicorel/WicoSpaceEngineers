@@ -28,6 +28,7 @@ namespace IngameScript
          * 
          */
 
+            public bool bCollisionWasSensor=false;
 
 
         double tmCameraElapsedMs = -1;
@@ -211,6 +212,7 @@ namespace IngameScript
 
             if (dTMDebug) sInitResults += "\nFar=="+niceDoubleMeters(dtmFar)+" A=" + niceDoubleMeters(dtmApproach) + " P="+niceDoubleMeters(dtmPrecision);
 
+            bCollisionWasSensor = false;
             tmCameraElapsedMs = -1; // no delay for next check  
             tmScanElapsedMs = 0;// do delay until check 
             dtmRayCastQuadrant = 0;
@@ -433,6 +435,7 @@ namespace IngameScript
                                 lastDetectedInfo = entities[j1];
                                 ResetTravelMovement();
                                 current_state = colDetectState; // set the collision detetected state
+                                bCollisionWasSensor = true;
                                 bWantFast = true; // process next state quickly
                                 ResetMotion(); // start stopping
                                 return;
@@ -458,7 +461,7 @@ namespace IngameScript
                 //               if (dTMDebug)
                 if(dTMUseCameraCollision)
                 {
-                    Echo("Scanning distance=" + niceDoubleMeters(scanDistance));
+//                    Echo("Scanning distance=" + niceDoubleMeters(scanDistance));
                 }
                 if (
                     dTMUseCameraCollision
@@ -483,7 +486,7 @@ namespace IngameScript
                             {
                                 bDidScan = true;
                             }
-                                break;
+                            break;
                         case 1:
                             vTarget = points[2] + shipOrientationBlock.WorldMatrix.Forward * distance;
                             if(doCameraScan(cameraForwardList, vTarget))
@@ -601,6 +604,7 @@ namespace IngameScript
                                 // something in way.
                                 ResetTravelMovement(); // reset our brain for next call
                                 current_state = colDetectState; // set the detetected state
+                                bCollisionWasSensor = false;
                                 bWantFast = true; // process next state quickly
                                 ResetMotion(); // start stopping
                                 return;
@@ -637,7 +641,7 @@ namespace IngameScript
                 {
                     // we are 'far' from target location.  use fastest movement
 //                    if(dTMDebug)
-                        Echo("dtmFar");
+                        Echo("dtmFar. Target Vel=" + dtmFarSpeed.ToString("N0"));
                     StatusLog("\"Far\" from target\n Target Speed="+dtmFarSpeed.ToString("N0")+"m/s", textPanelReport);
 
                     TmDoForward(dtmFarSpeed, 100f);
@@ -646,7 +650,8 @@ namespace IngameScript
                 {
                     // we are on 'approach' to target location.  use a good speed
 //                    if(dTMDebug)
-                        Echo("Approach");
+                        Echo("Approach. Target Vel="+dtmApproachSpeed.ToString("N0"));
+
                     StatusLog("\"Approach\" distance from target\n Target Speed=" + dtmApproachSpeed.ToString("N0") + "m/s", textPanelReport);
                     btmApproach = true;
                     TmDoForward(dtmApproachSpeed, 100f);
@@ -655,7 +660,7 @@ namespace IngameScript
                 {
                     // we are getting nearto our target.  use a slower speed
 //                    if(dTMDebug)
-                        Echo("Precision");
+                        Echo("Precision. Target Vel=" + dtmPrecisionSpeed.ToString("N0"));
                     StatusLog("\"Precision\" distance from target\n Target Speed=" + dtmPrecisionSpeed.ToString("N0") + "m/s", textPanelReport);
                     if (!btmPrecision) minAngleRad = 0.005f;// aim tighter (next time)
                     btmPrecision = true;
@@ -665,7 +670,7 @@ namespace IngameScript
                 {
                     // we are very close to our target. use a very small speed
 //                    if(dTMDebug)
-                        Echo("Close");
+                        Echo("Close. Target Speed=" + dtmCloseSpeed.ToString("N0") + "m/s");
                     StatusLog("\"Close\" distance from target\n Target Speed=" + dtmCloseSpeed.ToString("N0") + "m/s", textPanelReport);
                     if (!btmClose) minAngleRad = 0.005f;// aim tighter (next time)
                    btmClose = true;
@@ -816,13 +821,20 @@ namespace IngameScript
         MyDetectedEntityInfo backwardDetectedInfo = new MyDetectedEntityInfo();
         MyDetectedEntityInfo forwardDetectedInfo = new MyDetectedEntityInfo();
 
-//        bool bEscapeGrid = false;
+        //        bool bEscapeGrid = false;
+
+        QuadrantCameraScanner ScanEscapeFrontScanner;
+        QuadrantCameraScanner ScanEscapeBackScanner;
+        QuadrantCameraScanner ScanEscapeLeftScanner;
+        QuadrantCameraScanner ScanEscapeRightScanner;
+        QuadrantCameraScanner ScanEscapeTopScanner;
+        QuadrantCameraScanner ScanEscapeBottomScanner;
 
         /// <summary>
         /// Initialize the escape scanning (mini-pathfinding)
         /// Call once to setup
         /// </summary>
-        void initEscapeScan()
+        void initEscapeScan(bool bWantBack = false, bool bWantForward = true)
         {
             if(tmCameraElapsedMs>=0) tmCameraElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
             if(tmScanElapsedMs>=0) tmScanElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
@@ -831,9 +843,9 @@ namespace IngameScript
             bScanRight = true;
             bScanUp = true;
             bScanDown = true;
-            bScanBackward = false;// don't rescan where we just came from..
-                                  //	bScanBackward = true;
-            bScanForward = true;
+            bScanBackward = bWantBack;// don't rescan where we just came from..
+            bScanForward = bWantForward;
+
             leftDetectedInfo = new MyDetectedEntityInfo();
             rightDetectedInfo = new MyDetectedEntityInfo();
             upDetectedInfo = new MyDetectedEntityInfo();
@@ -856,12 +868,18 @@ namespace IngameScript
             if (cameraDownList.Count < 1) bScanDown = false;
             if (cameraForwardList.Count < 1) bScanForward = false;
             if (cameraBackwardList.Count < 1) bScanBackward = false;
+            ScanEscapeFrontScanner = new QuadrantCameraScanner(this, cameraForwardList,200,45,45,2,1,5,200,true);
+            ScanEscapeBackScanner = new QuadrantCameraScanner(this, cameraBackwardList, 200, 45, 45, 2, 1, 5, 200, true);
+            ScanEscapeLeftScanner = new QuadrantCameraScanner(this, cameraLeftList, 200, 45, 45, 2, 1, 5, 200, true);
+            ScanEscapeRightScanner = new QuadrantCameraScanner(this, cameraRightList, 200, 45, 45, 2, 1, 5, 200, true);
+            ScanEscapeTopScanner = new QuadrantCameraScanner(this, cameraUpList, 200, 45, 45, 2, 1, 5, 200, true);
+            ScanEscapeBottomScanner = new QuadrantCameraScanner(this, cameraDownList, 200, 45, 45, 2, 1, 5, 200, true);
 
         }
         /// <summary>
-        /// Perform the pathfinding. Call until it returns true
+        /// Perform the pathfinding. Call this until it returns true
         /// </summary>
-        /// <returns>true if vAvoid now contains the location to go to to (try to) escapet</returns>
+        /// <returns>true if vAvoid now contains the location to go to to (try to) escape</returns>
         bool scanEscape()
         {
             if(tmCameraElapsedMs>=0) tmCameraElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
@@ -872,53 +890,85 @@ namespace IngameScript
             Echo("ScanEscape()");
             if (bScanLeft)
             {
+//                sStartupError+="\nLeft";
                 if (doCameraScan(cameraLeftList, 200))
                 {
                     bScanLeft = false;
                     leftDetectedInfo = lastDetectedInfo;
                     if (lastDetectedInfo.IsEmpty())
                     {
+//                        sStartupError += "\n Straight Camera HIT!";
                         vVec = worldtb.Left;
                         vVec.Normalize();
                         vAvoid = shipOrientationBlock.GetPosition() + vVec * 200;
                         return true;
                     }
                 }
+                bScanLeft = ScanEscapeLeftScanner.DoScans();
+                if(ScanEscapeLeftScanner.bFoundExit)
+                {
+//                    sStartupError += "\n Quadrant Camera HIT!";
+                    leftDetectedInfo = lastDetectedInfo;
+                    vAvoid = shipOrientationBlock.GetPosition() + ScanEscapeLeftScanner.vEscapeTarget * 200;
+                    return true;
+                }
             }
             if (bScanRight)
             {
+//                sStartupError += "\nRight";
                 if (doCameraScan(cameraRightList, 200))
                 {
                     bScanRight = false;
                     rightDetectedInfo = lastDetectedInfo;
                     if (lastDetectedInfo.IsEmpty())
                     {
+//                        sStartupError += "\n Straight Camera HIT!";
                         vVec = worldtb.Right;
                         vVec.Normalize();
                         vAvoid = shipOrientationBlock.GetPosition() + vVec * 200;
                         return true;
                     }
                 }
+                bScanRight = ScanEscapeRightScanner.DoScans();
+                if (ScanEscapeRightScanner.bFoundExit)
+                {
+//                    sStartupError += "\n Quadrant Camera HIT!";
+                    rightDetectedInfo = lastDetectedInfo;
+                    vAvoid = shipOrientationBlock.GetPosition() + ScanEscapeRightScanner.vEscapeTarget * 200;
+                    return true;
+                }
             }
             if (bScanUp)
             {
+//                sStartupError += "\nUp";
                 if (doCameraScan(cameraUpList, 200))
                 {
-                    upDetectedInfo = lastDetectedInfo;
+//                  upDetectedInfo = lastDetectedInfo;
                     bScanUp = false;
                     if (lastDetectedInfo.IsEmpty())
                     {
+                        sStartupError += "\n Straight Camera HIT!";
                         vVec = worldtb.Up;
                         vVec.Normalize();
                         vAvoid = shipOrientationBlock.GetPosition() + vVec * 200;
                         return true;
                     }
                 }
+                bScanUp = ScanEscapeTopScanner.DoScans();
+                if (ScanEscapeTopScanner.bFoundExit)
+                {
+//                    sStartupError += "\n Quadrant Camera HIT!";
+                    upDetectedInfo = lastDetectedInfo;
+                    vAvoid = shipOrientationBlock.GetPosition() + ScanEscapeTopScanner.vEscapeTarget * 200;
+                    return true;
+                }
             }
             if (bScanDown)
             {
+//                sStartupError += "\nDown";
                 if (doCameraScan(cameraDownList, 200))
                 {
+//                    sStartupError += "\n Straight Camera HIT!";
                     downDetectedInfo = lastDetectedInfo;
                     bScanDown = false;
                     if (lastDetectedInfo.IsEmpty())
@@ -929,11 +979,21 @@ namespace IngameScript
                         return true;
                     }
                 }
+                bScanDown = ScanEscapeBottomScanner.DoScans();
+                if (ScanEscapeBottomScanner.bFoundExit)
+                {
+//                    sStartupError += "\n Quadrant Camera HIT!";
+                    downDetectedInfo = lastDetectedInfo;
+                    vAvoid = shipOrientationBlock.GetPosition() + ScanEscapeBottomScanner.vEscapeTarget * 200;
+                    return true;
+                }
             }
             if (bScanBackward)
             {
+//                sStartupError += "\nBack";
                 if (doCameraScan(cameraBackwardList, 200))
                 {
+//                    sStartupError += "\n Straight Camera HIT!";
                     backwardDetectedInfo = lastDetectedInfo;
                     bScanBackward = false;
                     if (lastDetectedInfo.IsEmpty())
@@ -944,19 +1004,39 @@ namespace IngameScript
                         return true;
                     }
                 }
+                bScanBackward = ScanEscapeBackScanner.DoScans();
+                if (ScanEscapeBackScanner.bFoundExit)
+                {
+//                    sStartupError += "\n Quadrant Camera HIT!";
+                    backwardDetectedInfo = lastDetectedInfo;
+                    vAvoid = shipOrientationBlock.GetPosition() + ScanEscapeBackScanner.vEscapeTarget * 200;
+                    return true;
+                }
             }
             if (bScanForward)
             {
+//                sStartupError += "\nForward";
                 if (doCameraScan(cameraForwardList, 200))
                 {
                     bScanForward = false;
+                    forwardDetectedInfo = lastDetectedInfo;
                     if (lastDetectedInfo.IsEmpty())
                     {
+//                        sStartupError += "\n Straight Camera HIT!";
                         vVec = worldtb.Forward;
                         vVec.Normalize();
                         vAvoid = shipOrientationBlock.GetPosition() + vVec * 200;
                         return true;
                     }
+                }
+                bScanForward = ScanEscapeFrontScanner.DoScans();
+                if (ScanEscapeFrontScanner.bFoundExit)
+                {
+//                    sStartupError += "\n Quadrant Camera HIT!";
+                    forwardDetectedInfo = lastDetectedInfo;
+                    vAvoid = ScanEscapeFrontScanner.vEscapeTarget*200;
+                    vAvoid = shipOrientationBlock.GetPosition() + ScanEscapeFrontScanner.vEscapeTarget * 200;
+                    return true;
                 }
             }
 
@@ -1061,6 +1141,7 @@ namespace IngameScript
                 return true;
             }
 
+            Echo("not FAR enough: ERROR!");
             return false;
         }
 
