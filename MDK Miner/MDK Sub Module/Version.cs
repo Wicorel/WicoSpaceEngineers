@@ -21,13 +21,16 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        // MDK 1.1
-        #region mdk preserve
-        #region mdk macros
-        // This script was deployed at $MDK_DATETIME$
-        #endregion
+// MDK 1.1
+#region mdk preserve
+#region mdk macros
+// This script was deployed at $MDK_DATETIME$
+#endregion
 
 /*
+
+Commands
+
 3.4 01272018
 
 3.4a 02112018
@@ -68,6 +71,12 @@ change default boreheight/width to FULL bounding box.
 Calculate offset from beam of the bore and offset direction to compensate
 bore raycast scan does 100%, 55% and 35%
 
+3.4J June 15, 2018
+Next Bore Target needed to set target name correctly
+(NAV now supports using world mps as default)
+If no current asteroid and known is >5000 away, then don't go there by default
+Add "bore" command to do single bore at target in front MODE_BORESINGLE->MODE_MINE
+rename doModeFineOre to doModeMine since it's the core mining mode
 
 TODO:
     check for complete destruction of asteroid like MK3 did
@@ -84,7 +93,9 @@ TODO:
     spread mining for searching for ores
     'Manual mine' mode for player controlled mining.  and still report ore locations, etc
     'seam following' mode
-    support partial bore depth? 
+    'surface deposit' mine mode (place bores around target and go until just mining stone/unwanted ore) (partial bore depth)
+    control sorter directly to set unwanted ore types
+    take commands to set unwanted/wanted ore types
 
 
 NEED:  
@@ -96,7 +107,7 @@ WANTED:
 
         string OurName = "Wico Craft";
         string moduleName = "MINER";
-        string sVersion = "3.4I";
+        string sVersion = "3.4J";
 
     }
 }

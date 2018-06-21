@@ -25,9 +25,9 @@ namespace IngameScript
             doModeAlways();
 
  //           if (iMode == MODE_DOSCAN) doModeScans();
-            if (iMode == MODE_FINDORE) doModeFindOre();
-            if (iMode == MODE_GOTOORE) doModeGotoOre();
             if (iMode == MODE_MINE) doModeMine();
+            if (iMode == MODE_GOTOORE) doModeGotoOre();
+            if (iMode == MODE_BORESINGLE) doModeMineSingleBore();
             //            if (iMode == MODE_BORINGMINE) doModeBoringMine();
             if (iMode == MODE_EXITINGASTEROID) doModeExitingAsteroid();
 
@@ -41,7 +41,7 @@ namespace IngameScript
             if(iMode==MODE_LAUNCHED)
             {
                 if (miningAsteroidID > 0)
-                    setMode(MODE_FINDORE);
+                    setMode(MODE_MINE);
             }
             if (iMode == MODE_GOINGTARGET)
             {
@@ -51,10 +51,6 @@ namespace IngameScript
                 }
             }
 
-            /*
-                        if (iMode == MODE_IDLE) doModeIdle();
-                        else if (iMode == MODE_DESCENT) doModeDescent();
-            */
         }
         #endregion
 
@@ -218,7 +214,7 @@ namespace IngameScript
 
             Echo(asteroidsInfo.Count.ToString() + " Known Asteroids");
             Echo(oreLocs.Count.ToString() + " Known Ores");
-            OreDumpLocs();
+ //           OreDumpLocs();
 
             //            Echo("width=" + shipDim.WidthInMeters().ToString("0.0"));
             //            Echo("height=" + shipDim.HeightInMeters().ToString("0.0"));

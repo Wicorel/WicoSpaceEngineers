@@ -64,12 +64,14 @@ namespace IngameScript
                         
                         /*
                          * add commands to set modes
+                         * For Example:
                         if(!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
                         */
                         modeCommands.Clear();
                         if (!modeCommands.ContainsKey("findore")) modeCommands.Add("findore", MODE_FINDORE);
-                        if (!modeCommands.ContainsKey("doscan")) modeCommands.Add("doscan", MODE_DOSCAN);
+//                        if (!modeCommands.ContainsKey("doscan")) modeCommands.Add("doscan", MODE_DOSCAN);
                         if (!modeCommands.ContainsKey("mine")) modeCommands.Add("mine", MODE_MINE);
+                        if (!modeCommands.ContainsKey("bore")) modeCommands.Add("bore", MODE_BORESINGLE);
                         break;
                     case 2:
                         initLogging();

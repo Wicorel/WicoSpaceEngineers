@@ -121,6 +121,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoScansCommon", "..\WicoS
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Wico Dock Common", "..\Wico Dock Common\Wico Dock Common\Wico Dock Common.shproj", "{B00D1759-BE09-4FFC-A44F-1442F5604E9A}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoSorters", "..\WicoSorters\WicoSorters\WicoSorters.shproj", "{F6D3F028-DA05-4935-B19A-FB2297F24114}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\WicoOre\WicoOre\WicoOre.projitems*{00c60f2d-4ac4-4a0c-8fc5-f610a7fddf5c}*SharedItemsImports = 13
@@ -171,6 +173,7 @@ Global
 		..\WicoScansCommon\WicoScansCommon\WicoScansCommon.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSensors\WicoSensors\WicoSensors.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSerialize\WicoSerialize\WicoSerialize.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
+		..\WicoSorters\WicoSorters\WicoSorters.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoThrusters\WicoThrusters\WicoThrusters.projitems*{52a1f87f-c99b-456d-a12e-3689b36eeaac}*SharedItemsImports = 4
 		..\WicoSubModuleMain\WicoSubModuleMain\WicoSubModuleMain.projitems*{5731b863-8478-4f96-99fe-914deffb6b79}*SharedItemsImports = 13
@@ -208,6 +211,7 @@ Global
 		..\WicoConnectors\WicoConnectors\WicoConnectors.projitems*{ebdc9b7f-652a-45bc-90c3-d16b2e3a6914}*SharedItemsImports = 13
 		..\WicoDetectedEntities\WicoDetectedEntities\WicoDetectedEntities.projitems*{f4a99ae8-36f6-4801-a032-8a03e3d52220}*SharedItemsImports = 13
 		..\ModeHover\ModeHover\ModeHover.projitems*{f6cd999f-d1a8-4f3d-b360-5d7a0141b9de}*SharedItemsImports = 13
+		..\WicoSorters\WicoSorters\WicoSorters.projitems*{f6d3f028-da05-4935-b19a-fb2297f24114}*SharedItemsImports = 13
 		..\ModeMinerSearch\ModeMinerSearch\ModeMinerSearch.projitems*{fde58c62-dd08-4081-81f4-3b505e91619b}*SharedItemsImports = 13
 		..\WicoModes\WicoModes\WicoModes.projitems*{ff33a42f-da7b-48f2-bd4a-2471d51f7898}*SharedItemsImports = 13
 	EndGlobalSection
