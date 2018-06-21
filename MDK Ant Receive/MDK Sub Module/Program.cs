@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "AntReceive";
-        string sVersion = "3.4E";
+        string sVersion = "3.4G";
 
         void ModuleDeserialize(INIHolder iNIHolder)
         {
@@ -46,7 +46,7 @@ namespace IngameScript
             AntDisplayPendingMessages();
             Echo(asteroidsInfo.Count.ToString() + " Known Asteroids");
             Echo(oreLocs.Count.ToString() + " Known Ores");
-            OreDumpLocs();
+ //           OreDumpLocs();
             Echo(sInitResults);
             echoInstructions();
         }

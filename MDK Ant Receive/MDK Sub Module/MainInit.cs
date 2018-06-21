@@ -23,6 +23,8 @@ namespace IngameScript
             // called from main constructor.
         }
 
+        bool bAllowPatrol = false;
+
         void ModuleInitCustomData(INIHolder iniCustomData)
         {
             //           INIHolder iniCustomData = new INIHolder(this, Me.CustomData);
@@ -31,7 +33,8 @@ namespace IngameScript
             ConnectorInitCustomData(iniCustomData);
             BaseInitCustomData(iniCustomData);
             CamerasInitCustomData(iniCustomData);
-
+            iniCustomData.GetValue("PATROL", "AllowPatrol", ref bAllowPatrol, true);
+           
             //            ThrustersInitCustomData(iniCustomData);
 
             /*

@@ -75,6 +75,11 @@ published June 1, 2018
 3.4E June 02, 2018
 June 08,2018 FAST doscan mode current 0->410 FAST
 
+3.4F June 19, 2018
+Add PATROL antenna message processing
+
+3.4G 
+
 TODO: Choose closest connector as 'best'
 TODO: Process size info to select connectors
 TODO: drones may take up more than one connector depending on height, width.
