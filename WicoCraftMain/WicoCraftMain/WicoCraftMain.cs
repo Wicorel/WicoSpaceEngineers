@@ -136,8 +136,10 @@ namespace IngameScript
         void Main(string sArgument, UpdateType ut)
         {
            Echo(sBanner + tick());
-            if(bDebugUpdate)  Echo(ut.ToString());
-
+            if (bDebugUpdate)
+            {
+                Echo(ut.ToString() + " : " + (int)ut);
+            }
             bWantFast = false;
             bWantMedium = false;
             //ProfilerGraph();
@@ -322,8 +324,11 @@ namespace IngameScript
                 {
                     dGravity = -1.0;
                 }
+              
                 if (
                     (ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0
+                    || (ut & (UpdateType.Trigger)) > 0 // script run by a mod
+                    || (ut & (UpdateType.Terminal)) > 0 // script run by a mod
                     || (ut & (UpdateType.Mod)) > 0 // script run by a mod
                     || (ut & (UpdateType.Script)) > 0 // this pb run by another script (PB)
                     )
@@ -372,6 +377,8 @@ namespace IngameScript
                     return;
                 }
                 */
+                processPendingReceives();
+                processPendingSends();
                 moduleDoPreModes();
 
                 doModes();
