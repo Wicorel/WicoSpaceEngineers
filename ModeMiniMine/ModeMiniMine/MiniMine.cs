@@ -118,15 +118,15 @@ namespace IngameScript
         int BoreHoleScanMode = -1;
         Vector3D[] BoreScanFrontPoints = new Vector3D[4];
 
-        void doModeFindOre()
+        void doModeMine()
         {
             List<IMySensorBlock> aSensors = null;
             IMySensorBlock sb1=null;
             IMySensorBlock sb2=null;
 
             StatusLog("clear", textPanelReport);
-            StatusLog(moduleName + ":FindOre", textPanelReport);
-            Echo("FIND ORE:current_state=" + current_state.ToString());
+            StatusLog(moduleName + ":MINE", textPanelReport);
+            Echo("MINE:current_state=" + current_state.ToString());
             Echo("Mine Mode=" + AsteroidMineMode);
             //            Echo(Vector3DToString(vExpectedAsteroidExit));
             //            Echo(Vector3DToString(vLastAsteroid            Vector3D[] corners= new Vector3D[BoundingBoxD.CornerCount];
@@ -240,6 +240,13 @@ namespace IngameScript
                     {
                         // check if we know one
                         miningAsteroidID = AsteroidFindNearest();
+                        Vector3D AsteroidPos = AsteroidGetPosition(miningAsteroidID);
+                        double curDistanceSQ = Vector3D.DistanceSquared(AsteroidPos, shipOrientationBlock.GetPosition());
+                        if(curDistanceSQ>5000*5000)
+                        {
+                            // it's too far away. ignore it.
+                            miningAsteroidID = 0;
+                        }
                     }
                     if (miningAsteroidID > 0) // return to a known asteroid
                     {
@@ -304,17 +311,6 @@ namespace IngameScript
 
                                     AsteroidUpVector = shipOrientationBlock.WorldMatrix.Up;
 
-                                    // the following SHOULD be obsolete..
-                                    /*
-                                    vExpectedAsteroidExit = (Vector3D)lastDetectedInfo.HitPosition - shipOrientationBlock.GetPosition();
-                                    vExpectedAsteroidExit.Normalize();
-                                    vLastAsteroidContact = shipOrientationBlock.GetPosition();
-                                    if (!bValidInitialAsteroidContact)
-                                    {
-                                        vInitialAsteroidContact = vLastAsteroidContact;
-                                        bValidInitialAsteroidContact = true;
-                                    }
-                                    */
                                     current_state = 120;
                                     bWantFast = true;
                                 }
@@ -1464,12 +1460,14 @@ namespace IngameScript
 
         }
 
-        void doModeMine()
+        void doModeMineSingleBore()
         {
             StatusLog("clear", textPanelReport);
-            StatusLog(moduleName + ":MINE", textPanelReport);
+            StatusLog(moduleName + ":MINE Line", textPanelReport);
             Echo("MINE:current_state=" + current_state.ToString());
             double maxThrust = calculateMaxThrust(thrustForwardList);
+            IMySensorBlock sb1 = null;
+            IMySensorBlock sb2 = null;
             //            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
             MyShipMass myMass;
@@ -1479,60 +1477,45 @@ namespace IngameScript
 
             double maxDeltaV = (maxThrust) / effectiveMass;
             Echo("Our Asteroid=" + miningAsteroidID.ToString());
+            if (sensorsList.Count >= 2)
+            {
+                sb1 = sensorsList[0];
+                sb2 = sensorsList[1];
+            }
             switch (current_state)
             {
                 case 0:
-                    if (fMiningMinThrust < fTargetMiningMps * 1.1f)
-                        fMiningMinThrust = fTargetMiningMps * 1.1f;
- //                   bValidAsteroid = false; // really?  shouuldn't we be keeping this?
-                    miningAsteroidID = -1;
                     bValidExit = false;
                     bMiningWaitingCargo = false;
 
                     ResetMotion();
-                    //                    turnDrillsOff();
                     turnEjectorsOff();
+                    OreDoCargoCheck(true); // init ores to what's currently in inventory
+                    MinerCalculateBoreSize();
+                    MoveForwardSlowReset();
 
-                    current_state = 10;
                     bWantFast = true;
 
-                    if (!HasDrills())
+                    if (sensorsList.Count < 2)
                     {
-                        sStartupError += "No Drills found!";
-                        miningChecksElapsedMs = -1;
+                        StatusLog(OurName + ":" + moduleName + " Find Ore: Not Enough Sensors!", textLongStatus, true);
                         setMode(MODE_ATTENTION);
                         return;
                     }
-                    break;
-                case 10: // check for asteroid in front of us
-                    double scandist = 500;
-                    if (doCameraScan(cameraForwardList, scandist))
-                    { // we scanned
-                        if (!lastDetectedInfo.IsEmpty())
-                        {  // we hit something
+                    sb1.DetectAsteroids = true;
+                    sb2.DetectAsteroids = true;
 
-                            if (lastDetectedInfo.Type == MyDetectedEntityType.Asteroid)
-                            {
-                                MinerProcessScan(lastDetectedInfo);
-                                AsteroidMineMode = 1;
-                                miningChecksElapsedMs = -1;
-                                miningAsteroidID = -1;
-                                setMode(MODE_FINDORE);
-//                                current_state = 120;
-                            }
-                        }
-                        else
-                        {
-                            // no asteroid detected.  Check surroundings for one.
-                            setMode(MODE_ATTENTION);
-                            /*
-                            current_state = 110;
-                            bValidExit = false;
-                            */
-                        }
-                    }
-                    break;
+                    // Can we turn in our own tunnel?
+                    if (shipDim.LengthInMeters() > shipDim.WidthInMeters() && shipDim.LengthInMeters() > shipDim.HeightInMeters())
+                        bBoringOnly = true;
+                    else bBoringOnly = false;
 
+                    miningAsteroidID = 0;
+                    current_state = 1;
+                    iMode = MODE_MINE;
+                    AsteroidMineMode = 1;// drill exactly where we're aimed for.
+                    bWantFast = true;
+                    break;
             }
         }
 
@@ -1552,7 +1535,7 @@ namespace IngameScript
 
             double maxThrust = calculateMaxThrust(thrustForwardList);
 
-            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
+//            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
 //            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
             double maxDeltaV = (maxThrust) / effectiveMass;
@@ -1565,11 +1548,13 @@ namespace IngameScript
                 if (miningChecksElapsedMs < 0 || miningChecksElapsedMs > 1)
                 {
                     miningChecksElapsedMs = 0;
+                    DockAirWorthy(false, false); // does the current value checks.
+                    /*
                     OreDoCargoCheck();
                     batteryCheck(0);
-                    // TODO: check hydrogen tanks
+                    TanksCalculate();
                     // TODO: check reactor uranium
-
+                    */
                     StatusLog("Cargo =" + cargopcent + "% / " + MiningCargopcthighwater + "% Max", textPanelReport);
                     StatusLog("Battery " + batteryPercentage + "% (Min:" + batterypctlow + "%)", textPanelReport);
                     if(TanksHasHydro()) StatusLog("H2 " + hydroPercent + "% (Min:" + batterypctlow + "%)", textPanelReport);
