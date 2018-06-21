@@ -33,7 +33,7 @@ namespace IngameScript
             // detection types:
             // pointed at by player with camera
             // from ore detector (!)
-            // from 'tasting' with drills
+            // 69  from 'tasting' with drills
             // player given GPS
         }
 
@@ -121,11 +121,11 @@ namespace IngameScript
 
         void OreDumpLocs()
         {
+            // WARNING: can cause too complex..
             for (int i = 0; i < oreLocs.Count; i++)
             {
                 Echo(OreName(oreLocs[i].oreId) + ":" + oreLocs[i].position.ToString() + ":" + oreLocs[i].detectionType.ToString());
             }
-
         }
 
         List<OreInfo> oreInfos = new List<OreInfo>();
@@ -202,19 +202,21 @@ namespace IngameScript
                 //		Echo(oreInfos[i].oreName);
                 if (oreInfos[i].oreName == sOre)
                 {
- //                   Echo("Is in list!");
- //                   Echo("Current amount=" + oreInfos[i].localAmount);
+                    //                   Echo("Is in list!");
+                    //                   Echo("Current amount=" + oreInfos[i].localAmount);
+                    oreInfos[i].localAmount += lAmount;
+                    if (lAmount > 0)
+                        oreInfos[i].bFound = true;
                     if (
                         !bNoFind 
                         && lAmount > 0 
                         && !oreInfos[i].bFound
                         )
                     {
-                        oreInfos[i].bFound = true;
                         OreFound(oreInfos[i].oreID);
+//                        OreFound(oreInfos[i]);
                     }
-//                    else Echo("already 'found'");
-                    oreInfos[i].localAmount += lAmount;
+                    //                    else Echo("already 'found'");
                 }
             }
         }
@@ -239,24 +241,24 @@ namespace IngameScript
 
         void OreFound(int oreIndex)
         {
-//            Echo("FIRST FIND!:" + oreInfos[oreIndex].oreName);
+            //            Echo("FIRST FIND!:" + oreInfos[oreIndex].oreName);
             if (oreInfos[oreIndex].desireability > 0)
             {
                 // add ore found loc...
                 MatrixD refOrientation = new MatrixD();
                 refOrientation = shipOrientationBlock.WorldMatrix;
 
-//                MatrixD refOrientation = GetBlock2WorldTransform(shipOrientationBlock);
+                //                MatrixD refOrientation = GetBlock2WorldTransform(shipOrientationBlock);
                 Vector3D vVec = Vector3D.Normalize(refOrientation.Forward);
 
                 // but only if we got it inside asteroid.
                 long astEntity = AsteroidFindNearest(true);
                 if (astEntity > 0)
                 {
-//                    sInitResults += "\nOreAddLoc for  oreid=" + oreIndex.ToString();
+                    //                    sInitResults += "\nOreAddLoc for  oreid=" + oreIndex.ToString();
                     OreAddLoc(astEntity, oreIndex, shipOrientationBlock.GetPosition(), vVec, 69);
                 }
-//                sInitResults += "\nNo Asteroid found for oreid=" + oreIndex.ToString();
+                //                sInitResults += "\nNo Asteroid found for oreid=" + oreIndex.ToString();
             }
         }
 
