@@ -72,6 +72,7 @@ namespace IngameScript
         const int MODE_FINDORE = 200; // find ore on specified asteroid
         const int MODE_GOTOORE = 210; // go to known ore (on specified asteroid)
         const int MODE_BORINGMINE = 220; // old-school boring mine
+        const int MODE_BORESINGLE = 225;
         const int MODE_EXITINGASTEROID = 290; // getting out of an asteroid while full
 
         // Scaning
@@ -81,6 +82,9 @@ namespace IngameScript
         // attack/coodrination modes
         const int MODE_WAITINGCOHORT = 500;
         const int MODE_ATTACK = 510;
+
+        const int MODE_SCANTEST = 999;
+
 
         void setMode(int newMode)
         {
