@@ -300,7 +300,7 @@ namespace IngameScript
             }
             else
             {
-                NavGoTarget(vAsteroidBoreStart, iMode, 120);
+                NavGoTarget(vAsteroidBoreStart, iMode, 120,12,"Asteroid-Next Bore");
             }
         }
         void MinerCalculateBoreSize()
