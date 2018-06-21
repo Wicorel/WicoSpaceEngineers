@@ -13,6 +13,8 @@
  * 
  * 3.4A Current Source Apr 08 2018
  * 
+ * 3.4B Current Source June 19 2018
+ * 
  * NEED:  
  *  
  * WANTED: 
