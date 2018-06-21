@@ -24,12 +24,13 @@ namespace IngameScript
 
         bool moduleProcessArguments(string sArgument)
         {
+//            sStartupError += "\nArgument:" + sArgument;
             string[] varArgs = sArgument.Trim().Split(';');
 
             for (int iArg = 0; iArg < varArgs.Length; iArg++)
             {
                 string[] args = varArgs[iArg].Trim().Split(' ');
-
+//                sStartupError += "\n Arg:" + iArg + "=" + args[0];
                 if (args[0] == "timer")
                 {
                     processTimerCommand();
@@ -39,7 +40,7 @@ namespace IngameScript
                     ResetToIdle();
                 else if (args[0] == "setmode")
                 {
-                    if(args.Length<2)
+                    if (args.Length < 2)
                     {
                         Echo("Invalid command format:\nsetmode <mode#>");
                     }
@@ -47,7 +48,7 @@ namespace IngameScript
                     {
                         int iValue;
                         bool bOK = int.TryParse(args[1], out iValue);
-                        if(!bOK)
+                        if (!bOK)
                         {
                             Echo("Invalid INT value:" + args[1]);
                         }
@@ -75,7 +76,7 @@ namespace IngameScript
                         else
                         {
                             Echo("Set State to" + iValue);
-                            current_state=iValue;
+                            current_state = iValue;
                         }
                     }
                 }
@@ -140,6 +141,45 @@ namespace IngameScript
                     }
                     else Echo("No Ship Controller found");
 
+                }
+                else if (args[0] == "genpatrol")
+                {
+//                    sStartupError += "\n FOUND genpatrol Command";
+                    Echo("genpatrol");
+                    double range = 500;
+                    double height = 500;
+                    if (args.Length > 1)
+                    {
+                    bool fOK = double.TryParse(args[1].Trim(), out range);
+                    }
+                    if (args.Length > 2)
+                    {
+                        bool fOK = double.TryParse(args[2].Trim(), out height);
+                    }
+                    string sCmd = "WICO:PATROL:";
+                    Vector3D vTarget;
+                    Vector3D vUp = shipOrientationBlock.WorldMatrix.Up;
+                    if (shipOrientationBlock is IMyShipController)
+                    {
+                        Vector3D vNG = ((IMyShipController)shipOrientationBlock).GetNaturalGravity();
+                        if (vNG.Length() > 0.05)
+                        {
+                            vUp = vNG;
+                            vUp.Normalize();
+                        }
+                    }
+                    sCmd += "4:"; // number of waypoints
+                    vTarget = shipOrientationBlock.GetPosition() + shipOrientationBlock.WorldMatrix.Up * height + shipOrientationBlock.WorldMatrix.Right * range;
+                    sCmd += Vector3DToString(vTarget)+":";
+                    vTarget = shipOrientationBlock.GetPosition() + shipOrientationBlock.WorldMatrix.Up * height + shipOrientationBlock.WorldMatrix.Forward * range;
+                    sCmd += Vector3DToString(vTarget) + ":";
+                    vTarget = shipOrientationBlock.GetPosition() + shipOrientationBlock.WorldMatrix.Up * height + shipOrientationBlock.WorldMatrix.Left * range;
+                    sCmd += Vector3DToString(vTarget) + ":";
+                    vTarget = shipOrientationBlock.GetPosition() + shipOrientationBlock.WorldMatrix.Up * height + shipOrientationBlock.WorldMatrix.Backward * range;
+                    sCmd += Vector3DToString(vTarget) + ":";
+
+                    antSend(sCmd);
+                    sStartupError += "PATROL:\n" + sCmd;
                 }
                 /*
                 else if (args[0] == "namecameras")
