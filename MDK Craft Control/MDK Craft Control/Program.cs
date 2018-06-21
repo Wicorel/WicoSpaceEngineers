@@ -20,7 +20,7 @@ namespace IngameScript
     {
         string OurName = "Wico Craft";
         string moduleName = "Master";
-        string sVersion = "3.4G";
+        string sVersion = "3.4I";
 
         const string velocityFormat = "0.00";
 
@@ -40,9 +40,11 @@ namespace IngameScript
             StatusLog("clear", gpsPanel);
             if (bStartupError)
             {
-                Echo("Startup Error Detected"+sStartupError);
+                Echo("Startup Error Detected" + sStartupError);
                 StatusLog("Startup Error Detected" + sStartupError, textPanelReport);
             }
+            else if (sStartupError != "")
+                Echo(sStartupError);
 
             string output = "";
             if (gridBaseMass > 0)

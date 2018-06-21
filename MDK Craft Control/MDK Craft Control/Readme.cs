@@ -170,4 +170,13 @@
 * 3.4G June 08,2018
 * Add setmode and setstate commands
 * Clear all panels on masterreset command
+* 
+* 3.4H June 19,2018
+* Add genpatrol command to generate a set of patrol waypoints around this ship.
+* Defaults for distance are 500 and up  is 500
+* 
+* genpatrol [distance [up]]
+* genpatrol
+* genpatrol 300 150
+* genpatrol 500
 */
