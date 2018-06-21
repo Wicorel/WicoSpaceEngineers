@@ -39,7 +39,7 @@ namespace IngameScript
             {
                 powerDownThrusters(thrustAllList, thrustAll, true);
                 antennaLowPower();
-                sleepAllSensors();
+                SensorsSleepAll();
                 initCutters();
                 initProjectors();
                 // turn gyos off?

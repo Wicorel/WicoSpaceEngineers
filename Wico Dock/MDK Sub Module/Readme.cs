@@ -127,6 +127,15 @@ Source published June 01 2018
 BeamRider for docking
 test with off-center connetors (hence beamrider)
 
+3.4G June 20 2018
+Current Source
+Dont count sorters (nor ejectors) in cargo space
+Gyro: Add support for 'right' and 'left' align
+NavCommon: default max speed to 999
+Added quadrant scan to ScanEscape
+Some ScanEscape() improvements for being inside grids (still needs work)
+Add ScanTest() routine for raycasts.
+
 TODO:
 forget known bases when new grid (DONE by craft control)
 support 'memory' connector; like MK3 did
