@@ -50,14 +50,14 @@ namespace IngameScript
                     // toggle: ShowOnlyBuildable
                     bool bBuildable = false;
 
-//                    bBuildable=localProjectorList[i].GetValueBool("ShowOnlyBuildable");
+                    //                    bBuildable=localProjectorList[i].GetValueBool("ShowOnlyBuildable");
                     bBuildable = localProjectorList[i].ShowOnlyBuildable;
-//                    localProjectorList[i].SetValueBool("ShowOnlyBuildable", !bBuildable);
-                    localProjectorList[i].ShowOnlyBuildable=!bBuildable;
+                    //                    localProjectorList[i].SetValueBool("ShowOnlyBuildable", !bBuildable);
+                    localProjectorList[i].ShowOnlyBuildable = !bBuildable;
 
-                    if(bEcho) Echo(localProjectorList[i].CustomName);
-                    if(bEcho) Echo("Buildable:" + localProjectorList[i].BuildableBlocksCount);
-                    if(bEcho) Echo("Remaining:" + localProjectorList[i].RemainingBlocks);
+                    if (bEcho) Echo(localProjectorList[i].CustomName);
+                    if (bEcho) Echo("Buildable:" + localProjectorList[i].BuildableBlocksCount);
+                    if (bEcho) Echo("Remaining:" + localProjectorList[i].RemainingBlocks);
                     if (bBuildable || localProjectorList[i].RemainingBlocks < 1)
                     {
                         bBuilding = true;
@@ -69,11 +69,115 @@ namespace IngameScript
 
         void turnoffProjectors()
         {
-		    for (int i = 0; i < localProjectorList.Count; i++)
-		    {
-			    localProjectorList[i].Enabled = false;
+            for (int i = 0; i < localProjectorList.Count; i++)
+            {
+                localProjectorList[i].Enabled = false;
                 localProjectorList[i].ShowOnlyBuildable = false;
-		    }
+            }
+        }
+
+        void ProjectorsHorz(bool bIncrease = true)
+        {
+            for (int i = 0; i < localProjectorList.Count; i++)
+            {
+                if (localProjectorList[i].Enabled)
+                {
+                    Vector3I vOffset =
+                    localProjectorList[i].ProjectionOffset;
+                    if (bIncrease)
+                        vOffset.X++;
+                    else
+                        vOffset.X--;
+                    localProjectorList[i].ProjectionOffset = vOffset;
+                }
+            }
+
+        }
+
+        void ProjectorsVert(bool bIncrease = true)
+        {
+            for (int i = 0; i < localProjectorList.Count; i++)
+            {
+                if (localProjectorList[i].Enabled)
+                {
+                    Vector3I vOffset =
+                    localProjectorList[i].ProjectionOffset;
+                    if (bIncrease)
+                        vOffset.Y++;
+                    else
+                        vOffset.Y--;
+                    localProjectorList[i].ProjectionOffset = vOffset;
+                }
+            }
+
+        }
+        void ProjectorsFw(bool bIncrease = true)
+        {
+            for (int i = 0; i < localProjectorList.Count; i++)
+            {
+                if (localProjectorList[i].Enabled)
+                {
+                    Vector3I vOffset =
+                    localProjectorList[i].ProjectionOffset;
+                    if (bIncrease)
+                        vOffset.Z++;
+                    else
+                        vOffset.Z--;
+                    localProjectorList[i].ProjectionOffset = vOffset;
+                }
+            }
+
+        }
+        void ProjectorsRoll(bool bIncrease = true)
+        {
+            for (int i = 0; i < localProjectorList.Count; i++)
+            {
+                if (localProjectorList[i].Enabled)
+                {
+                    Vector3I vOffset =
+                    localProjectorList[i].ProjectionRotation;
+                    if (bIncrease)
+                        vOffset.X++; // -2 -1 0 +1 +2
+                    else
+                        vOffset.X--;
+                    localProjectorList[i].ProjectionRotation = vOffset;
+                }
+            }
+
+        }
+        void ProjectorsYaw(bool bIncrease = true)
+        {
+            for (int i = 0; i < localProjectorList.Count; i++)
+            {
+                if (localProjectorList[i].Enabled)
+                {
+                    Vector3I vOffset =
+                    localProjectorList[i].ProjectionRotation;
+                    if (bIncrease)
+                        vOffset.Y++; // -2 -1 0 +1 +2
+                    else
+                        vOffset.Y--;
+                    localProjectorList[i].ProjectionRotation = vOffset;
+                }
+            }
+        }
+
+        void ProjectorsPitch(bool bIncrease = true)
+        {
+            for (int i = 0; i < localProjectorList.Count; i++)
+            {
+                if (localProjectorList[i].Enabled)
+                {
+                    Vector3I vOffset =
+                    localProjectorList[i].ProjectionRotation;
+                    if (bIncrease)
+                        vOffset.Z++; // -2 -1 0 +1 +2
+                    else
+                        vOffset.Z--;
+                    localProjectorList[i].ProjectionRotation = vOffset;
+                }
+            }
+
         }
     }
 }

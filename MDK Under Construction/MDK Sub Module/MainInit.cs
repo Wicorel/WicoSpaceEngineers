@@ -71,6 +71,8 @@ namespace IngameScript
                 sInitResults += gyrosetup();
                 sInitResults += lightsInit();
                 initShipDim(shipOrientationBlock);
+                sInitResults+=camerasensorsInit(shipOrientationBlock);
+                initProjectors();
 
                 Deserialize();
                 //                bWantFast = false;
