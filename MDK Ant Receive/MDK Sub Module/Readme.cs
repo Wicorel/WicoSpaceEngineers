@@ -78,7 +78,7 @@ June 08,2018 FAST doscan mode current 0->410 FAST
 3.4F June 19, 2018
 Add PATROL antenna message processing
 
-3.4G 
+3.4G Add PATROL supprot for planepilot RC block
 
 TODO: Choose closest connector as 'best'
 TODO: Process size info to select connectors

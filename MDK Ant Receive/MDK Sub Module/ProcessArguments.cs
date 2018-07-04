@@ -183,6 +183,13 @@ namespace IngameScript
                         int currOffset = 3;
                         for (int iWaypoint = 0; iWaypoint < NumberWaypoints; iWaypoint++)
                         {
+                            // TODO: start at the nearest patrol point in FRONT of the ship.
+                            // if none in front, then use closest
+                            // TODO: random/fixed height offset to allow mutiple drones to pass by each other?
+                            // TODO: save points and offset when ship moves
+                            // TODO: save points across compiles (game loads)
+                            // TODO: modify to use Wico NAV
+                            // TODO: make MODE_PATROL
 //                            for (; currOffset < aMessage.Length;)
                             {
                                 double x, y, z;
@@ -207,7 +214,20 @@ namespace IngameScript
                                 }
                             }
                         }
-                        rc.SetAutoPilotEnabled(true);
+                        // support for planepilot MOD block: https://steamcommunity.com/sharedfiles/filedetails/?id=1379321171
+                        ITerminalAction ita;
+                        ita = rc.GetActionWithName("planepilot_onoff_on_Action");
+
+                        if (ita != null)
+                        {
+                            //                        "planepilot_onoff""
+                            // it's a planepilot block
+                            ita.Apply(rc);
+                        }
+                        else
+                        { // it's a regular Keen RC Block
+                           rc.SetAutoPilotEnabled(true);
+                        }
                         return true;
                     }
                 }
