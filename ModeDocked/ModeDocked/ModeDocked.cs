@@ -128,6 +128,7 @@ namespace IngameScript
                     SensorsSleepAll();
                     // TODO: ??? turn gyos off?
                     batteryCheck(0, true);
+                    doSubModuleTimerTriggers("[DOCKED]");
                     current_state = 1;
                 }
                 else if (current_state == 1)

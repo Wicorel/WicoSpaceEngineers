@@ -230,10 +230,15 @@ namespace IngameScript
             }
             if (current_state == 31)
             { // accelerate to max speed
-                // turn on in case they change...
-                powerDownThrusters(thrustOrbitalDownList, thrustAll);
-                if(calculateBestGravityThrust())
+                if (calculateBestGravityThrust(true))
                 {
+                    // reset the old thrusters
+                    powerDownThrusters(thrustOrbitalDownList);
+                    powerDownThrusters(thrustOrbitalUpList);
+
+                    calculateBestGravityThrust(); // do the change
+                    powerDownThrusters(thrustOrbitalDownList, thrustAll, true);
+
                     current_state = 35;
                     bWantFast = true;
                     return;
@@ -274,15 +279,19 @@ namespace IngameScript
             }
             if (current_state == 40)
             { // maintain max speed
-                // turn on in case they change...
-                powerDownThrusters(thrustOrbitalDownList, thrustAll);
-                if (calculateBestGravityThrust())
+                if (calculateBestGravityThrust(true))
                 {
+                    // reset the old thrusters
+                    powerDownThrusters(thrustOrbitalDownList);
+                    powerDownThrusters(thrustOrbitalUpList);
+
+                    calculateBestGravityThrust(); // do the change
+                    powerDownThrusters(thrustOrbitalDownList, thrustAll, true);
+
                     current_state = 45;
                     bWantFast = true;
                     return;
                 }
-                powerDownThrusters(thrustOrbitalDownList, thrustAll, true);
 
                 Log("Maintain max speed");
                 Echo("Maintain max speed");
@@ -365,10 +374,10 @@ namespace IngameScript
                 powerDownThrusters(thrustAllList);
                 gyrosOff();
                 //                startNavCommand("!;V");
-                setMode(MODE_INSPACE);
+                setMode(MODE_NAVNEXTTARGET);
                 StatusLog("clear", textPanelReport);
                 Log("clear");
-                return;
+                return; //GPS:Wicorel #5:14690.86:106127.43:10724.23:
             }
 
             int iPowered = 0;

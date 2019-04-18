@@ -90,6 +90,8 @@ namespace IngameScript
             //	Echo("Found " + subBlocks.Count + " matching lights");
             di.subBlocks = subBlocks;
 
+            // TODO: Use MyINI Parsing
+
             string sData = tb.CustomData;
             string[] lines = sData.Trim().Split('\n');
             Echo(lines.Length + " Lines");
@@ -259,7 +261,6 @@ namespace IngameScript
             IMyTerminalBlock connector = dockingInfo[iDock].tb;
 
             Vector3D vPosition = connector.GetPosition();
-//            Vector3D vVec = calcBlockForwardVector(connector);
 	        MatrixD worldConnectortb = connector.WorldMatrix;
 
 	        Vector3D vVec = worldConnectortb.Forward;

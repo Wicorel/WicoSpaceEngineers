@@ -176,6 +176,11 @@ namespace IngameScript
         }
         int thrusterType(IMyTerminalBlock theBlock)
         {
+
+            /*
+            IMyTerminalBlock tb;
+            tb.EntityId;
+            */
             if (theBlock is IMyThrust)
             {
                 // HoverEngines  http://steamcommunity.com/sharedfiles/filedetails/?id=1225107070

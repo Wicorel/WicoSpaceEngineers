@@ -106,6 +106,27 @@ namespace IngameScript
             return false;
         }
 
+        /*
+        /// <summary>
+        /// Connector on a drone for docking to a base
+        /// </summary>
+        public class DockingConnectorInfo 
+        {
+            public IMyTerminalBlock tb;
+            public List<IMyTerminalBlock> subBlocks;
+        }
+        */
+        void DockingConnectorsInit()
+        {
+            for(int i=0; i<localDockConnectors.Count; i++)
+            {
+                var sc1 = localDockConnectors[i] as IMyShipConnector;
+                if (sc1 == null) continue;
+
+            }
+
+        }
+
         IMyTerminalBlock getDockingConnector() // maybe pass in prefered orientation?
         { // dumb mode for now.
             getLocalConnectors();
@@ -121,7 +142,6 @@ namespace IngameScript
 
         IMyTerminalBlock getConnectedConnector(bool bMe = false)
         {
-
             getLocalConnectors();
 
             for (int i = 0; i < localDockConnectors.Count; i++)
@@ -150,37 +170,36 @@ namespace IngameScript
             }
             return null;
         }
-        //        void ConnectAnyConnectors(bool bConnect = true, string sAction = "")
+
         void ConnectAnyConnectors(bool bConnect = true, bool bOn = true)
+        {
+            getLocalConnectors();
+            //	Echo("CCA:"+ localDockConnectors.Count);
+            for (int i = 0; i < localDockConnectors.Count; i++)
             {
-//            string sAction = "";
-                getLocalConnectors();
-                //	Echo("CCA:"+ localDockConnectors.Count);
-                for (int i = 0; i < localDockConnectors.Count; i++)
+                var sc1 = localDockConnectors[i] as IMyShipConnector;
+                if (sc1 == null) continue;
+                if (sc1.Status == MyShipConnectorStatus.Connected)
                 {
-                    var sc1 = localDockConnectors[i] as IMyShipConnector;
-                    if (sc1 == null) continue;
-                    if (sc1.Status == MyShipConnectorStatus.Connected)
+                    var sco = sc1.OtherConnector;
+                    if (sco.CubeGrid == sc1.CubeGrid)
                     {
-                        var sco = sc1.OtherConnector;
-                        if (sco.CubeGrid == sc1.CubeGrid)
-                        {
-                            //Echo("Locked-but connected to 'us'");
-                            continue; // skip it.
-                        }
+                        //Echo("Locked-but connected to 'us'");
+                        continue; // skip it.
                     }
-                    if (bConnect)
-                    {
+                }
+                if (bConnect)
+                {
                     if (sc1.Status == MyShipConnectorStatus.Connectable)
                         //sc1.ApplyAction("SwitchLock");
                         sc1.Connect();
-                    }
-                    else
-                    {
-                          if (sc1.Status == MyShipConnectorStatus.Connected)
+                }
+                else
+                {
+                    if (sc1.Status == MyShipConnectorStatus.Connected)
                         //sc1.ApplyAction("SwitchLock");
                         sc1.Disconnect();
-                    }
+                }
                 sc1.Enabled = bOn;
                 /*
                     if (sAction != "")
@@ -190,13 +209,13 @@ namespace IngameScript
                         if (ita != null) ita.Apply(sc);
                     }
                     */
-                }
-                return;
             }
-
-            #endregion
-
-
-
+            return;
         }
+
+        #endregion
+
+
+
     }
+}

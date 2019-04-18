@@ -27,9 +27,15 @@
 * init: re-init all blocks
 * idle : force MODE_IDLE
 * coast: turns on/off backward thrusters
+* masterreset: attempts to do a master reset of all saved information
 * setvaluef <blockname>:<property>:<value>  -> sets specified block's property to specified value
 * Example:
 *  setvaluef Advanced Rotor:UpperLimit:-24
+* genpatrol [distance [up]]
+* Examples:
+* genpatrol
+* genpatrol 300 150
+* genpatrol 500
 *
 * Need:
 
@@ -175,8 +181,21 @@
 * Add genpatrol command to generate a set of patrol waypoints around this ship.
 * Defaults for distance are 500 and up  is 500
 * 
+* 3.4I
+* July 23 SE 1.187 MDK 1.1.16
+* 
+* 3.4J Sep 08 2018
+* MDK Update
+* Performance Pass
+* 
+* 
 * genpatrol [distance [up]]
 * genpatrol
 * genpatrol 300 150
 * genpatrol 500
+* 
+* 3.4J
+* 
+* 3.5 SE V1.189
+* 
 */

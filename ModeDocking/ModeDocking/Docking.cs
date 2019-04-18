@@ -117,6 +117,7 @@ namespace IngameScript
                     setMode(MODE_DOCKED);
                     return;
                 }
+                doSubModuleTimerTriggers("[DOCKING]");
                 dockingConnector = getDockingConnector();
                 if (dockingConnector == null)// || getAvailableRemoteConnector(out targetConnector))
                 {
@@ -277,8 +278,28 @@ namespace IngameScript
                     setMode(MODE_ATTENTION);
                     return;
                 }
-                NavGoTarget(BasePositionOf(lTargetBase), iMode, 110, 3100, "DOCK Base Proximity");
+                else if (RangeToNearestBase() < 3000)
+                {
+                    // we think we are close enough
+                    // force recheck
+                    sStartupError += "\nForce Recheck";
+                    lTargetBase = -1;
+                    checkBases(true);
+                    current_state = 110;
+                }
+                else
+                {
+                    // get closer
+                    sStartupError += "\nGet Closer";
+                    NavGoTarget(BasePositionOf(lTargetBase), iMode, 110, 3100, "DOCK Base Proximity");
+                    current_state = 126;
+                }
                 //                doTravelMovement(BasePositionOf(lTargetBase), 3100, 110, 106);
+            }
+            else if(current_state==126)
+            {
+                // we are waiting for NAV module to get message and start
+                Echo("Waiting for NAV to start");
             }
             else if (current_state == 130)
             {
@@ -315,6 +336,12 @@ namespace IngameScript
             else if (current_state == 175)
             { // get closer to approach location
                 NavGoTarget(vHome, iMode, 200, 5, "DOCK Base Approach");
+                current_state = 176;
+            }
+            else if (current_state == 176)
+            {
+                // we are waiting for NAV module to get message and start
+                Echo("Waiting for NAV to start");
             }
             else if (current_state == 200)
             {//200	Arrived at approach location
@@ -476,6 +503,12 @@ namespace IngameScript
 
                 NavGoTarget(vHome, iMode, 340, 3, "DOCK Approach");
                 //               doTravelMovement(vHome, 3.0f, 350, 161);
+                current_state = 311;
+            }
+            else if (current_state == 311)
+            {
+                // we are waiting for NAV module to get message and start
+                Echo("Waiting for NAV to start");
             }
             else if (current_state == 340)
             { // arrived at 'home' from NAV
@@ -509,6 +542,7 @@ namespace IngameScript
                 else
                 {
                     ResetMotion();
+                    doSubModuleTimerTriggers("[DOCKING:APPROACH]");
                     MoveForwardSlowReset();
                     current_state = 400;
                     bWantFast = true;
@@ -520,8 +554,14 @@ namespace IngameScript
                 Echo("Moving to Launch1");
 
                 NavGoTarget(vLaunch1, iMode, 410, 3,"DOCK Connector Entry");
+                current_state = 401;
             }
-            else if(current_state==410)
+            else if (current_state == 401)
+            {
+                // we are waiting for NAV module to get message and start
+                Echo("Waiting for NAV to start");
+            }
+            else if (current_state==410)
             {
                 // move closer to Launch1
                 double distanceSQ = (vLaunch1 - ((IMyShipController)shipOrientationBlock).CenterOfMass).LengthSquared();
@@ -546,6 +586,7 @@ namespace IngameScript
                 bWantFast = true;
                 dockingLastDistance = -1;
                 current_state = 450;
+                // TODO: do/waitfor mechanical changes needed for docking
             }
             else if (current_state == 450 || current_state == 452)
             { //450 452 'reverse' to dock, aiming connector at dock location

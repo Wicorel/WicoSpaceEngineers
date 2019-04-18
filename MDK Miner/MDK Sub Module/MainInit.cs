@@ -68,7 +68,7 @@ namespace IngameScript
                         if(!modeCommands.ContainsKey("launchprep")) modeCommands.Add("launchprep", MODE_LAUNCHPREP);
                         */
                         modeCommands.Clear();
-                        if (!modeCommands.ContainsKey("findore")) modeCommands.Add("findore", MODE_FINDORE);
+//                        if (!modeCommands.ContainsKey("findore")) modeCommands.Add("findore", MODE_FINDORE);
 //                        if (!modeCommands.ContainsKey("doscan")) modeCommands.Add("doscan", MODE_DOSCAN);
                         if (!modeCommands.ContainsKey("mine")) modeCommands.Add("mine", MODE_MINE);
                         if (!modeCommands.ContainsKey("bore")) modeCommands.Add("bore", MODE_BORESINGLE);
@@ -183,14 +183,23 @@ namespace IngameScript
             }
             if (iMode==MODE_FINDORE)
             {
+                iMode = MODE_MINE; // OLD MODE TRANSLATION
+                /*
                 if (current_state == 35)
                 {
-                    current_state = 31;
+ //                   current_state = 31;
                 }
                 else if (current_state == 143) // testing
                     current_state = 120; // go back to start of bore
                 else if (current_state == 145) // bore scans
                     current_state = 140; // reinit bore scan
+                    */
+            }
+            else if(iMode == MODE_EXITINGASTEROID)
+            {
+                current_state = 0; // restart with init to make sure we are set up correctly
+                // as of 09/05/18 just need to make sure dBoreOnly is set
+
             }
             return ">";
         }

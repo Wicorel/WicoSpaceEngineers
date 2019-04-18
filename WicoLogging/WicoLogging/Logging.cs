@@ -13,11 +13,13 @@ using VRage.Game.ModAPI.Ingame;
 using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Game;
 using VRageMath;
+using VRage.Game.GUI.TextPanel;
 
 namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        // 04092019 SE V1.190 text panel API changes
         // 01172018 Separate project
         // 01152018 INI settings
         // 110517 search order for the text panels
@@ -65,6 +67,7 @@ namespace IngameScript
         {
             Program _pg;
             string _sSearchName = "";
+            // TODO: Change into Surfaces.
             List<IMyTextPanel> _textPanels = new List<IMyTextPanel>();
             string _sCurrentText = "";
             string _sOldtext = "";
@@ -102,7 +105,9 @@ namespace IngameScript
                     _bNotCached = false;
                     if (_textPanels.Count > 0)
                     {
-                        _sCurrentText = _textPanels[0].GetPublicText();
+                        //V1.190
+                       //_sCurrentText = _textPanels[0].GetPublicText();
+                        _sCurrentText = _textPanels[0].GetText();
                         _sOldtext = "X";// it should NOT match current text.
                     }
                 }
@@ -121,7 +126,10 @@ namespace IngameScript
 //                    _pg.Echo("Updating Panels:" + _sSearchName);
                     foreach (var t in _textPanels)
                     {
-                        t.WritePublicText(_sCurrentText);
+                        t.WriteText(_sCurrentText);
+
+                        // V 1.190 Depracated 
+                        //t.WritePublicText(_sCurrentText);
                     }
                     _sOldtext = _sCurrentText;
                 }
@@ -281,6 +289,42 @@ namespace IngameScript
             }
             return nice;
         }
+        /*
+        Vector2 SIZE = new Vector2(128, 128);
+        Vector2 POS = new Vector2(64, 80);
+
+        void DrawStuff(IMyTextSurface surface)
+        {
+            surface.ContentType = ContentType.SCRIPT;
+
+            Vector2 surfaceSize = surface.SurfaceSize;
+            Vector2 halfSurfaceSize = surfaceSize * 0.5f;
+            float sideLength = surfaceSize.Y;
+
+            using (var frame = surface.DrawFrame())
+            {
+                // Draw velocity indicator
+                MySprite sprite;
+
+                // Background
+                sprite = new MySprite(SpriteType.TEXTURE, "SquareSimple", color: new Color(50, 150, 255, 255), size: SIZE);
+                sprite.Position = surfaceSize * 0.5f + POS;
+                frame.Add(sprite);
+
+                MySprite sprite2;
+                sprite2 = new MySprite();
+                sprite2.Type = SpriteType.TEXT;
+                sprite2.Data = "Example Text";
+                sprite2.Color = new Color(50, 150, 255, 255);
+                sprite2.Size = SIZE;
+                sprite2.Position = new Vector2(1, 1);
+                //                sprite2.FontId = 0000;
+                frame.Add(sprite2);
+
+
+            }
+        }
+        */
 
     }
 }

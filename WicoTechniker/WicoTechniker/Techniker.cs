@@ -29,7 +29,7 @@ namespace IngameScript
             StatusLog(OurName + " Control", textPanelReport);
 
             string output = "";
-            output += "Velocity: " + velocityShip.ToString("N0") + "m/s\n";
+            output += "Velocity: " + velocityShip.ToString("N0") + "m/s";
 
             Echo(output);
             StatusLog(output, textPanelReport);
@@ -58,7 +58,7 @@ namespace IngameScript
                 sb.AppendLine();
 
                 StatusLog("clear", textRangeReport);
-                StatusLog("No Target to Range", textRangeReport);
+                StatusLog("No Target found", textRangeReport);
 
             }
             else
@@ -66,7 +66,8 @@ namespace IngameScript
                 Echo("EntityID: " + lastDetectedInfo.EntityId);
                 Echo("Name: " + lastDetectedInfo.Name);
                 sb.Append("Name: " + lastDetectedInfo.Name);
-                sb.AppendLine();
+                //sb.AppendLine();
+                sb.Append(" - ");
                 sb.Append("Type: " + lastDetectedInfo.Type);
                 sb.AppendLine();
                 sb.Append("Relationship: " + lastDetectedInfo.Relationship);
@@ -87,9 +88,9 @@ namespace IngameScript
                     }
 
                     if (distance > 1000)
-                        s += (distance / 1000).ToString("RANGE:         00000.0km");
+                        s += (distance / 1000).ToString("RANGE:   0000.0km");
                     else
-                        s += (distance).ToString("RANGE:           00000m ");
+                        s += (distance).ToString("RANGE:     00000m ");
 
 
                     StatusLog("clear", textRangeReport);
@@ -108,9 +109,9 @@ namespace IngameScript
             }
             s = "";
             if (stoppingDistance > 1000)
-                s += (stoppingDistance / 1000).ToString("STOP DIST:     00000.0km");
+                s += (stoppingDistance / 1000).ToString("STOP DIST: 000.0km");
             else
-                s += (stoppingDistance).ToString("STOP DIST:       00000m ");
+                s += (stoppingDistance).ToString("STOP DIST: 00000m ");
             StatusLog(s, textRangeReport);
 
             double maxRange = findMaxCameraRange(cameraForwardList);

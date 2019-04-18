@@ -59,6 +59,12 @@ namespace IngameScript
             {
 //                Echo("Init:" + currentInit);
                 echoInstructions("Init:" + currentInit+" ");
+                if (bStartupError)
+                {
+                    Echo("ERROR: Need (RE)INIT:" + sStartupError);
+                    Echo(sStartupError);
+                }
+
                 switch (currentInit)
                 {
                     case 0:
@@ -183,7 +189,10 @@ namespace IngameScript
                                          //                        bStartupError = false;
                             if (shipOrientationBlock == null)
                             {
-                                bStartupError = true;
+                                shipOrientationBlock = Me;
+                                sStartupError += "\nUsing " + Me.CustomName + " as orientation";
+
+                                //bStartupError = true;
                                 sStartupError += "\nNo Ship Controller";
                                 dGravity = -1.0;
 
@@ -204,8 +213,8 @@ namespace IngameScript
                                 }
 
                             }
-
-                            if (gridBaseMass != 0)
+                            Echo("Grid Mass=" + gridBaseMass.ToString());
+                            if (gridBaseMass > 0)
                             { // Only require propulsion if not a station
                                 if (dGravity==0)
                                 {
@@ -305,6 +314,12 @@ namespace IngameScript
             }
             while (!init && (((float)Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount) < 0.2f));
             if (init) currentInit = 0;
+            if (bStartupError)
+            {
+                Echo("ERROR: Need (RE)INIT:" + sStartupError);
+            }
+
+            Echo(sStartupError);
 
             Log(sInitResults);
 

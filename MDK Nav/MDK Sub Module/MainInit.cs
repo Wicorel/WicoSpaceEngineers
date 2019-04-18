@@ -21,8 +21,10 @@ namespace IngameScript
         void doModuleConstructor()
         {
             // called from main constructor.
-
+            //
+            NavInitIGC();
         }
+
         void ModuleInitCustomData(INIHolder iniCustomData)
         {
             ConnectorInitCustomData(iniCustomData);
@@ -32,6 +34,7 @@ namespace IngameScript
             CommunicationsInitCustomData(iniCustomData);
 
             NavInitCustomData(iniCustomData);
+
 
 //            GearsInitCustomData(iniCustomData);
         }

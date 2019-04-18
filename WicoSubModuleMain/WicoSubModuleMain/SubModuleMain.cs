@@ -91,6 +91,20 @@ namespace IngameScript
             {
                 Echo("I am turned OFF!");
             }
+
+            // SE V1.190
+            IMyTextSurface mesurface0 = Me.GetSurface(0);
+            IMyTextSurface mesurface1 = Me.GetSurface(1);
+            mesurface0.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+            mesurface0.WriteText("Wicorel\n" + moduleName);
+            mesurface0.FontSize = 2;
+            mesurface0.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+
+            mesurface1.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+            mesurface1.WriteText("Version:" + sVersion);
+            mesurface1.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+            mesurface1.TextPadding = 0.25f;
+            mesurface1.FontSize = 3.5f;
         }
 
         // added UpdateType and UpdateFrequency
@@ -109,7 +123,8 @@ namespace IngameScript
         bool bWantSlow = false;
 
         bool bWorkingProjector = false;
-
+        double dProjectorCheckWait = 5; //seconds between checks
+        double dProjectorCheckLast = -1;
 
         double velocityShip = -1;
         double dGravity = -2;
@@ -117,24 +132,51 @@ namespace IngameScript
         //       void Main(string sArgument)
         void Main(string sArgument, UpdateType ut)
         {
+//            _commandLine.
             Echo(sBanner + tick());
             if (bDebugUpdate) Echo(ut.ToString());
+
+//            ProfilerGraph();
 
             bWantFast = false;
             bWantMedium = false;
             bWantSlow = false;
 
-            bWorkingProjector = false;
-            var list = new List<IMyTerminalBlock>();
-            GridTerminalSystem.GetBlocksOfType<IMyProjector>(list, localGridFilter);
-            for (int i = 0; i < list.Count; i++)
+//            echoInstructions("A");
+            if (dProjectorCheckLast > dProjectorCheckWait)
             {
-                if (list[i].IsWorking)
+                Echo("Projector Check");
+                dProjectorCheckLast = 0;
+
+                bWorkingProjector = false;
+                var list = new List<IMyTerminalBlock>();
+                GridTerminalSystem.GetBlocksOfType<IMyProjector>(list, localGridFilter);
+                for (int i = 0; i < list.Count; i++)
                 {
-                    Echo("Projector:" + list[i].CustomName);
-                    bWorkingProjector = true;
+                    if (list[i].IsWorking)
+                    {
+                        if (list[i].CustomName.Contains("!WCC") || list[i].CustomData.Contains("!WCC")) continue; // ignore
+                        Echo("Working local Projector found!");
+                        //            init = false;
+                        //            sInitResults = "";
+                        bWorkingProjector = true;
+                    }
                 }
             }
+            else
+            {
+                //                Echo("Delay Projector Check");
+                if (dProjectorCheckLast < 0)
+                {
+                    // first-time init
+                    //                    dProjectorCheckLast = Me.EntityId % dProjectorCheckWait; // randomize initial check
+                    dProjectorCheckLast = dProjectorCheckWait + 5; // force check
+                }
+                dProjectorCheckLast += Runtime.TimeSinceLastRun.TotalSeconds;
+            }
+
+//            echoInstructions("B");
+
             if (bWorkingProjector)
                 Echo("Working local Projector found!");
 
@@ -163,7 +205,9 @@ namespace IngameScript
             {
                 if (bWasInit) StatusLog(DateTime.Now.ToString() + " " + OurName + ":" + sInitResults, textLongStatus, true);
                 if (sStartupError != "") Echo(sStartupError);
-                Deserialize();
+//                echoInstructions("C");
+                Deserialize(); // 1% instructions
+//                echoInstructions("C2");
 
                 if (shipOrientationBlock is IMyShipController)
                 {
@@ -173,6 +217,8 @@ namespace IngameScript
                     double dLength = vNG.Length();
                     dGravity = dLength / 9.81;
                 }
+//                echoInstructions("D");
+
                 if (
                     (ut & (UpdateType.Trigger | UpdateType.Terminal)) > 0
                     || (ut & (UpdateType.Mod)) > 0 // script run by a mod
@@ -180,6 +226,13 @@ namespace IngameScript
                     )
                 {
                     // pay attention to argument
+                    if(sArgument.ToLower()=="profilerreset")
+                    {
+                        ProfilerReset();
+                        bWantFast = true;
+                    }
+//                    echoInstructions("T:A");
+
                     if (moduleProcessArguments(sArgument))
                     {
                         SetUpdateFrequency();
@@ -187,6 +240,7 @@ namespace IngameScript
                         UpdateAllPanels();
                         return;
                     }
+//                    echoInstructions("T:B");
 
                 }
                 else if ((ut & (UpdateType.Antenna)) > 0)
@@ -215,24 +269,27 @@ namespace IngameScript
                         sInitResults = "";
                     }
                 }
-//                Echo("Main:1:fast=" + bWantFast.ToString());
+//                echoInstructions("E");
                 processPendingReceives();
                 processPendingSends();
-//                Echo("Main:2:fast=" + bWantFast.ToString());
+//                echoInstructions("F");
 
                 moduleDoPreModes();
-//                Echo("Main:3:fast=" + bWantFast.ToString());
+//                echoInstructions("G");
 
                 doModes();
-//                Echo("Main:4:fast=" + bWantFast.ToString());
+//                echoInstructions("H");
             }
             SetUpdateFrequency();
 
             modulePostProcessing();
-            Serialize();
+//            echoInstructions("I");
+            Serialize(); // 0.5% instructions.
+//            echoInstructions("J");
 
             bWasInit = false;
             UpdateAllPanels();
+//          echoInstructions("K");
         }
 
         void SetUpdateFrequency()
@@ -280,7 +337,42 @@ namespace IngameScript
             Echo(sBanner + " " + (fper * 100).ToString("0.00") + "%");
         }
 
+        #region profiler
+        // from Whip's Profiler Graph Code
+        int profilerCount = 1;
+        int profilerMaxSeconds = 20;
+        bool profilerHasWritten = false;
+        StringBuilder profile = new StringBuilder();
+        void ProfilerGraph()
+        {
+            if (profilerCount <= profilerMaxSeconds) // assume 1 tick per second.
+            {
+                double timeToRunCode = Runtime.LastRunTimeMs;
+                Echo("Profiler("+profilerCount+"):Add:" + timeToRunCode.ToString());
 
+                profile.Append(timeToRunCode.ToString()).Append("\n");
+                profilerCount++;
+            }
+            else if(!profilerHasWritten)
+            {
+                Echo("Profiler:DISPLAY");
+                var screen = GridTerminalSystem.GetBlockWithName("DEBUG") as IMyTextPanel;
+                screen?.WriteText(profile.ToString());
+//                screen?.WritePublicText(profile.ToString());
+                profilerHasWritten = true;
+            }
+        }
+
+        void ProfilerReset()
+        {
+            profilerCount = 1;
+            profile = new StringBuilder();
+            var screen = GridTerminalSystem.GetBlockWithName("DEBUG") as IMyTextPanel;
+            screen?.WriteText("");
+//            screen?.WritePublicText("");
+            profilerHasWritten = false;
+        }
+        #endregion
 
     }
 }

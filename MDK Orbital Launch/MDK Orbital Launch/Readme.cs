@@ -55,6 +55,8 @@
 *  
 *  3.4D
 *  June 09,2018
+*  
+*  3.5 Jan 21+.  SE 1.189
 * 
 * Need:
 *  circumnavigate planet to target spot

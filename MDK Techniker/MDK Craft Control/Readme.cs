@@ -53,6 +53,10 @@
  * 3.4C NAV?
  * 
  * 3.4D Apr 23 2018
+ * 
+ * 3.4E Feb 16 2019
+ * Update for current source.
+ * 
 * * 
 * MODE_IDLE
 * MODE_ATTENTION

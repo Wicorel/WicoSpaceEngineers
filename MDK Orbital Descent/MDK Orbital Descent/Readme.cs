@@ -51,6 +51,8 @@
  * 
  * 3.4D May 01 2018
  * 
+ * 3.5 SE 1.189  Mar 28 2019
+ * 
  * NEED:  
  *  
  *  trigger timers on stages of descent (see rotor legs example)

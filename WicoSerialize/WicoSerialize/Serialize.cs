@@ -30,7 +30,7 @@ namespace IngameScript
             iniWicoCraftSave.SetValue(sSerializeSection, "PassedArgument", sPassedArgument);
             iniWicoCraftSave.SetValue(sSerializeSection, "AlertStates", iAlertStates.ToString());
             iniWicoCraftSave.SetValue(sSerializeSection, "craft_operation", craft_operation.ToString());
-            iniWicoCraftSave.SetValue(sSerializeSection, "PassedArgument", sPassedArgument);
+//            iniWicoCraftSave.SetValue(sSerializeSection, "PassedArgument", sPassedArgument);
             iniWicoCraftSave.SetValue(sSerializeSection, "ReceivedMessage", sReceivedMessage);
             long SaveID = 0;
             if (SaveFile != null) SaveID = SaveFile.EntityId;
@@ -46,20 +46,22 @@ namespace IngameScript
                     if (SaveFile == null)
                     {
                         //                if (bVerboseSerialize)
-                                                Echo("WARNING: saving to Storage");
+                        Echo("WARNING: saving to Storage");
                         Storage = sINI;
                     }
                     else
                     {
                         //                    SaveFile.WritePublicText(sb.ToString(), false);
-                        SaveFile.WritePublicText(sINI, false);
+                        SaveFile.WriteText(sINI, false);
+                        // Depracated V1.190       
+                        //SaveFile.WritePublicText(sINI, false);
                     }
                 }
             }
             else
             {
 //                if (bVerboseSerialize)
-//                    Echo("Not saving: Same");
+                    Echo("Not saving: Same");
             }
 
         }

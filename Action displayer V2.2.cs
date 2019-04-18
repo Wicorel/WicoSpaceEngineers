@@ -1,11 +1,16 @@
 ﻿//V 2.3 Mar 14 2018
 // V2.4 May 15 2018.  Min/Max values
 
+
+// V 2.5 Jan 13-24, 2019 SE V 1.189 
+ 
+
 MyDefinitionId oxygenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Oxygen");
 MyDefinitionId hydrogenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
 
 void Main(string sArgument)
 {
+    
     List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
     IMyTextPanel screen = (IMyTextPanel)GridTerminalSystem.GetBlockWithName("LCD Test IMyTerminalBlock");
     if (screen == null)
@@ -61,8 +66,11 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
 
     Echo(unit.CustomName);
     unit.GetActions(resultList);
+    
     values.Append(unit.CustomName + "\n");
     values.Append(unit.ToString() + "\n");
+    values.Append(unit.EntityId.ToString() + "\n");
+
     values.Append("TyepID=" + unit.BlockDefinition.TypeIdString + "\n");
     values.Append("SubtyepID=" + unit.BlockDefinition.SubtypeId + "\n");
     values.Append("Mass=" + unit.Mass.ToString() + "\n");
@@ -73,27 +81,39 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
     values.Append("DisplayNameText =" + unit.DisplayNameText.ToString() + "\n");
     values.Append("\nActions:\n");
 
-    Echo(resultList.Count.ToString());
+    Echo("#Results="+resultList.Count.ToString());
     for (int i = 0; i < resultList.Count; i++)
     {
         StringBuilder temp = new StringBuilder();
-        Echo(resultList[i].Id.ToString());
-        Echo(resultList[i].Name.ToString());
+//        Echo(resultList[i].Id.ToString());
+  //      Echo(resultList[i].Name.ToString());
         values.Append(resultList[i].Id + ":" + resultList[i].Name + "(");
+  //      Echo(resultList[i].Id + ":" + resultList[i].Name + "(");
         if (resultList[i].Id.Length == 0)
             resultList[i].WriteValue(unit, temp);
         else
+        {
+//            Echo(resultList[i].Id.ToString());
             unit.GetActionWithName(resultList[i].Id.ToString()).WriteValue(unit, temp);
-        Echo("Temp=" + temp.ToString());
+        }
+//        Echo(temp.ToString());
         values.Append(temp.ToString());
         values.Append(")\n");
     }
+//    Echo("AA1");
     List<ITerminalProperty> propList = new List<ITerminalProperty>();
     unit.GetProperties(propList);
+//    Echo("AA2");
+    Echo("#Properties=" + propList.Count.ToString());
     values.Append("\nProperties:\n");
+//    Echo("AA3");
     for (int i = 0; i < propList.Count; i++)
     {
+//        Echo(i + ":" + propList[i].TypeName);
+//        Echo("AA4:"+i.ToString());
+
         values.Append(propList[i].Id + ":" + propList[i].TypeName);
+        Echo(propList[i].Id + ":" + propList[i].TypeName);
         if (propList[i].TypeName == "Boolean")
         {
             bool b = unit.GetValueBool(propList[i].Id);
@@ -122,8 +142,15 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         else if (propList[i].TypeName == "HashSet`1")
         { // from Cheetah's radar mod. http://steamcommunity.com/sharedfiles/filedetails/?id=907384096
             HashSet<MyDetectedEntityInfo> hsInfo = unit.GetValue<HashSet<MyDetectedEntityInfo>>(propList[i].Id);
-
-            values.Append(" (" + hsInfo.Count + " Entries)");
+            if (hsInfo == null)
+            {
+                // NavBall
+                Echo("NOT deiinfo");
+            }
+            else
+            {
+                https://steamcommunity.com/sharedfiles/filedetails/?id=907384096
+                values.Append(" (" + hsInfo.Count + " Entries)");
             //						if (hsInfo.Count > 0) values.AppendLine();
             foreach (var myDei in hsInfo)//int i2=0;i2<hsInfo.Count; i2++)
             {
@@ -142,10 +169,12 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
                     values.AppendLine(); values.Append(" ---");
                 }
             }
+            }
         }
 
         values.AppendLine();
     }
+    Echo("End of Properties");
 
     values.Append("\nDetailedInfo:\n" + unit.DetailedInfo);
     values.Append("\n----------\n");
@@ -164,18 +193,31 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n Enabled=" + ipp.Enabled.ToString());
         values.Append("\n");
     }
-    /*
-                if(unit is IMyPowerProducer)
-                {
-                    IMyPowerProducer ipp=unit as IMyPowerProducer;
-                    values.Append("\nIMyPowerProducer");
-                    values.Append("\n CurrentPowerOutput="+ipp.CurrentPowerOutput.ToString());
-                    values.Append("\n DefinedPowerOutput="+ipp.DefinedPowerOutput.ToString());
-                    values.Append("\n MaxPowerOutput="+ipp.MaxPowerOutput.ToString());
-                    values.Append("\n ProductionEnabled="+ipp.ProductionEnabled.ToString());	
-                    values.Append("\n");
-                }
-     */
+    //readded in 1.189 with different members
+    if (unit is IMyPowerProducer)
+    {
+        IMyPowerProducer ipp = unit as IMyPowerProducer;
+        
+        values.Append("\nIMyPowerProducer");
+        values.Append("\n CurrentOutput=" + ipp.CurrentOutput.ToString());
+//        values.Append("\n DefinedOutput=" + ipp.DefinedPowerOutput.ToString());
+        values.Append("\n MaxOutput=" + ipp.MaxOutput.ToString());
+//        values.Append("\n ProductionEnabled=" + ipp.ProductionEnabled.ToString());
+        values.Append("\n");
+    }
+
+    /* Old PowerProducer
+    if(unit is IMyPowerProducer)
+    {
+        IMyPowerProducer ipp=unit as IMyPowerProducer;
+        values.Append("\nIMyPowerProducer");
+        values.Append("\n CurrentPowerOutput="+ipp.CurrentPowerOutput.ToString());
+        values.Append("\n DefinedPowerOutput="+ipp.DefinedPowerOutput.ToString());
+        values.Append("\n MaxPowerOutput="+ipp.MaxPowerOutput.ToString());
+        values.Append("\n ProductionEnabled="+ipp.ProductionEnabled.ToString());	
+        values.Append("\n");
+    }
+    */
     /* Handled by HasInventory now
                if(unit is IMyCargoContainer)
                {
@@ -208,10 +250,14 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n CurrentStoredPower=" + ipp.CurrentStoredPower.ToString());
         values.Append("\n HasCapacityRemaining=" + ipp.HasCapacityRemaining.ToString());
         values.Append("\n MaxStoredPower=" + ipp.MaxStoredPower.ToString());
+        values.Append("\n MaxOutput=" + ipp.MaxOutput.ToString());
+        values.Append("\n ChargeMode=" + ipp.ChargeMode.ToString());
+        /*
         values.Append("\n IsCharging=" + ipp.IsCharging.ToString());
         values.Append("\n OnlyDischarge=" + ipp.OnlyDischarge.ToString());
         values.Append("\n OnlyRecharge=" + ipp.OnlyRecharge.ToString());
         values.Append("\n SemiautoEnabled=" + ipp.SemiautoEnabled.ToString());
+        */
 
         values.Append("\n");
     }
@@ -329,6 +375,8 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\nIMyAssembler");
         // OBSOLETE values.Append("\n DisassembleEnabled="+ipp.DisassembleEnabled.ToString()); 
         values.Append("\n Mode=" + ipp.Mode.ToString());
+        values.Append("\n CoopMode=" + ipp.CooperativeMode.ToString());
+        values.Append("\n CurrentProgress=" + ipp.CurrentProgress.ToString());
         values.Append("\n");
     }
     if (unit is IMyProductionBlock)

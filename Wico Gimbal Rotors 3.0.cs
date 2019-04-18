@@ -45,7 +45,6 @@ string sVersion = "3.1C";
 string OurName = "Wico Gimbal";
 string moduleName = "Gimbal Control";
 
-//string sFast = "[GIMBAL]"; // put this in name of timer that runs this PB
 string sID = "[GIMBAL]"; // put this name in CustomName or CustomData of rotors to be controlled
 
 public Program() 

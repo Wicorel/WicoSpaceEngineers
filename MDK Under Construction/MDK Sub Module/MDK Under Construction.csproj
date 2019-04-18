@@ -129,6 +129,8 @@
   <Import Project="..\..\WicoINI\WicoINI\WicoINI.projitems" Label="Shared" />
   <Import Project="..\..\WicoLogging\WicoLogging\WicoLogging.projitems" Label="Shared" />
   <Import Project="..\..\WicoOrientedBB\WicoOrientedBB\WicoOrientedBB.projitems" Label="Shared" />
+  <Import Project="..\..\WicoCameras\WicoCameras\WicoCameras.projitems" Label="Shared" />
+  <Import Project="..\..\WicoDetectedEntities\WicoDetectedEntities\WicoDetectedEntities.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="mdk\mdk.options" DestinationFolder="$(TargetDir)\mdk" />

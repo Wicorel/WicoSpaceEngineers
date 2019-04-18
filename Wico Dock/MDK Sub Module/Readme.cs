@@ -1,4 +1,12 @@
-﻿/* Wico Craft DOCKING Control sub-module
+﻿#region mdk preserve
+#region mdk macros
+// Minified script was deployed at $MDK_DATETIME$
+#endregion
+#endregion
+
+
+
+/* Wico Craft DOCKING Control sub-module
  * 
  * Workshop: http://steamcommunity.com/sharedfiles/filedetails/?id=883865519
  * 
@@ -135,6 +143,16 @@ NavCommon: default max speed to 999
 Added quadrant scan to ScanEscape
 Some ScanEscape() improvements for being inside grids (still needs work)
 Add ScanTest() routine for raycasts.
+
+3.4H July 18 2018
+Add timer triggers to the different docking modes
+July 22 2018: SE 1.187  MDK 1.1.16
+
+3.4I Sep 08 2018
+Performance Pass
+
+3.5 Jan 25 2019 SE 1.189 
+
 
 TODO:
 forget known bases when new grid (DONE by craft control)

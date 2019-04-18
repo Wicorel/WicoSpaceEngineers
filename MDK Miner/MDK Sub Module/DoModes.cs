@@ -24,7 +24,7 @@ namespace IngameScript
             Echo("mode=" + iMode.ToString() + " state="+current_state.ToString());
             doModeAlways();
 
- //           if (iMode == MODE_DOSCAN) doModeScans();
+            //           if (iMode == MODE_DOSCAN) doModeScans();
             if (iMode == MODE_MINE) doModeMine();
             if (iMode == MODE_GOTOORE) doModeGotoOre();
             if (iMode == MODE_BORESINGLE) doModeMineSingleBore();

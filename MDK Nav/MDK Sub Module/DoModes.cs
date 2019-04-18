@@ -33,7 +33,14 @@ namespace IngameScript
             else if (iMode == MODE_DESCENT) doModeDescent();
 */
 
-            if (iMode == MODE_GOINGTARGET) { doModeGoTarget(); return; } 
+            // todo. on IDLE or reset, remove all nav commands
+            Echo("Commands=" + wicoNavCommands.Count.ToString());
+            if (wicoNavCommands.Count > 0)
+                Echo("Next=" + wicoNavCommands[0].NAVTargetName);
+
+            if (iMode == MODE_GOINGTARGET) { doModeGoTarget(); return; }
+            if (iMode == MODE_STARTNAV) { doModeStartNav(); return; }
+            if (iMode == MODE_NAVNEXTTARGET) { doModeNavNext(); return; } 
             if(iMode==MODE_SCANTEST) { doModeScanTest(); return; }
        }
         #endregion

@@ -90,10 +90,10 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="MDKUtilities">
-      <HintPath>C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\ug4jmm2e.sex\MDKUtilities.dll</HintPath>
+      <HintPath>c:\users\saett\appdata\local\microsoft\visualstudio\15.0_ce59efb3\extensions\vz0o0whu.ese\MDKUtilities.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Analyzer Include="C:\Users\saett\AppData\Local\Microsoft\VisualStudio\15.0_ce59efb3\Extensions\ug4jmm2e.sex\Analyzers\MDKAnalyzer.dll" />
+    <Analyzer Include="c:\users\saett\appdata\local\microsoft\visualstudio\15.0_ce59efb3\extensions\vz0o0whu.ese\Analyzers\MDKAnalyzer.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DoModes.cs" />

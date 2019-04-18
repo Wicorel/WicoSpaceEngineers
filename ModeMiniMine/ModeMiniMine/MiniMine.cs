@@ -128,6 +128,7 @@ namespace IngameScript
             StatusLog(moduleName + ":MINE", textPanelReport);
             Echo("MINE:current_state=" + current_state.ToString());
             Echo("Mine Mode=" + AsteroidMineMode);
+//            echoInstructions("MM-A:" + current_state );
             //            Echo(Vector3DToString(vExpectedAsteroidExit));
             //            Echo(Vector3DToString(vLastAsteroid            Vector3D[] corners= new Vector3D[BoundingBoxD.CornerCount];
             //            Echo(Vector3DToString(vLastAsteroidExit));
@@ -177,6 +178,7 @@ namespace IngameScript
             //                debugGPSOutput("Pre-Valid Ast", vTargetAsteroid);
             //            if (miningAsteroidID > 0)
             //                Echo("Our Asteroid=" + miningAsteroidID.ToString());
+//            echoInstructions("MM-B:" + current_state);
 
             if (current_state > 0)
             {
@@ -195,14 +197,22 @@ namespace IngameScript
                     */
                     OreDoCargoCheck();
                     batteryCheck(0,false);
+//                    echoInstructions("MM-C:" + current_state);
                     // TODO: check hydrogen tanks
                     // TODO: check reactor uranium
-
+                    float fper = 0;
+                    fper = Runtime.CurrentInstructionCount / (float)Runtime.MaxInstructionCount;
+                    if(fper>0.35f)
+                    {
+                        bWantFast = true;
+                        return;
+                    }
                 }
                 StatusLog("Cargo =" + cargopcent + "% / " + MiningCargopcthighwater + "% Max", textPanelReport);
                 StatusLog("Battery " + batteryPercentage + "% (Min:" + batterypctlow + "%)", textPanelReport);
                 if (TanksHasHydro()) StatusLog("H2 " + hydroPercent + "% (Min:" + batterypctlow + "%)", textPanelReport);
             }
+//            echoInstructions("MM-D:" + current_state);
             if (sensorsList.Count >= 2)
             {
                 sb1 = sensorsList[0];
@@ -467,6 +477,8 @@ namespace IngameScript
                 case 35:
                     { // active mining
                       //
+                        int eoicount = 0;
+//                        echoInstructions("S=" + current_state + " " + eoicount++);
                         bool bAimed = false;
                         Echo("Mining forward");
                         StatusLog("Mining Forward!", textPanelReport);
@@ -483,8 +495,10 @@ namespace IngameScript
                         // TODO: Make sensors optional (and just always do runs and use distance to know when done with bore.
                         sb1 = sensorsList[0];
                         sb2 = sensorsList[1];
+//                        echoInstructions("S=" + current_state + "S " + eoicount++);
                         SensorIsActive(sb1, ref bForwardAsteroid, ref bLarge, ref bSmall);
                         SensorIsActive(sb2, ref bSourroundAsteroid, ref bLarge, ref bSmall);
+//                        echoInstructions("S=" + current_state + "ES " + eoicount++);
                         //                        Echo("FW=" + bForwardAsteroid.ToString() + " AR=" + bSourroundAsteroid.ToString());
                         aSensors = SensorsGetActive();
                         //                        Echo(aSensors.Count + " Active Sensors");
@@ -500,6 +514,7 @@ namespace IngameScript
                                 bLocalAsteroid = true;
                             }
                         }
+//                        echoInstructions("S=" + current_state + "EDEI " + eoicount++);
 
                         double distance = (vAsteroidBoreStart - shipOrientationBlock.GetPosition()).Length();
 
@@ -517,18 +532,21 @@ namespace IngameScript
                         { // no asteroid detected on ANY sensors. ->we have exited the asteroid.
 //                            Echo("No Local Asteroid found");
                             ResetMotion();
+//                            echoInstructions("S=" + current_state + "RM " + eoicount++);
                             if (cargopcent > MiningCargopctlowwater || maxDeltaV < (fMiningMinThrust))
                             {
                                 // we need to dump our contents
                                 turnEjectorsOn();
+//                                echoInstructions("S=" + current_state + "EJ " + eoicount++);
                             }
                             //                            sStartupError += "\nOut:" + aSensors.Count + " : " +bForwardAsteroid.ToString() + ":"+bSourroundAsteroid.ToString();
                             //                            sStartupError += "\nFW=" + bForwardAsteroid.ToString() + " Sur=" + bSourroundAsteroid.ToString();
-                              current_state = 300;
+                            current_state = 300;
                             bWantFast = true;
                             return;
                         }
-                        if(bForwardAsteroid)
+//                        echoInstructions("S=" + current_state + "bfacheck " + eoicount++);
+                        if (bForwardAsteroid)
                         { // asteroid in front of us
                             turnEjectorsOn();
                             //                            blockApplyAction(ejectorList, "OnOff_On");
@@ -538,12 +556,15 @@ namespace IngameScript
 // already done                                turnEjectorsOn();
                                 bMiningWaitingCargo = true;
                             }
+//                            echoInstructions("S=" + current_state + "bmwc check " + eoicount++);
                             if (bMiningWaitingCargo)
                             { // continue to wait
                                 bWantSlow = true;
                                 ResetMotion();
                                 // need to check how much stone we have.. if zero(ish), then we're full.. go exit.
-                                OreDoCargoCheck();
+//                                echoInstructions("S=" + current_state + "ODCC " + eoicount++);
+//                                OreDoCargoCheck(); redundant
+//                                echoInstructions("S=" + current_state + "EDOCC " + eoicount++);
                                 double currStone = currentStoneAmount();
                                 if (currStone < 15 && (maxDeltaV < fMiningMinThrust || cargopcent > MiningCargopctlowwater))
                                 {
@@ -561,26 +582,28 @@ namespace IngameScript
                             }
                             else
                             {
-/*
-                                // 'BeamRider' routine that takes start,end and tries to stay on that beam.
-                                // Todo: probably should use center of ship BB, not COM.
-                                Vector3D vBoreEnd = (vAsteroidBoreEnd - vAsteroidBoreStart);
-                                Vector3D vAimEnd = (vAsteroidBoreEnd - ((IMyShipController)shipOrientationBlock).CenterOfMass);
-                                Vector3D vRejectEnd = VectorRejection(vBoreEnd, vAimEnd);
-//                                Echo("BoreEnd=" + Vector3DToString(vBoreEnd));
-//                                Echo("AimEnd=" + Vector3DToString(vAimEnd));
-//                                Echo("RejectEnd=" + Vector3DToString(vRejectEnd));
-//                                Vector3D vCorrectedAim = vAsteroidBoreEnd - vRejectEnd;
+                                /*
+                                                                // 'BeamRider' routine that takes start,end and tries to stay on that beam.
+                                                                // Todo: probably should use center of ship BB, not COM.
+                                                                Vector3D vBoreEnd = (vAsteroidBoreEnd - vAsteroidBoreStart);
+                                                                Vector3D vAimEnd = (vAsteroidBoreEnd - ((IMyShipController)shipOrientationBlock).CenterOfMass);
+                                                                Vector3D vRejectEnd = VectorRejection(vBoreEnd, vAimEnd);
+                                //                                Echo("BoreEnd=" + Vector3DToString(vBoreEnd));
+                                //                                Echo("AimEnd=" + Vector3DToString(vAimEnd));
+                                //                                Echo("RejectEnd=" + Vector3DToString(vRejectEnd));
+                                //                                Vector3D vCorrectedAim = vAsteroidBoreEnd - vRejectEnd;
 
-                                Vector3D vCorrectedAim = (vAsteroidBoreEnd- vRejectEnd*2) - ((IMyShipController)shipOrientationBlock).CenterOfMass;
+                                                                Vector3D vCorrectedAim = (vAsteroidBoreEnd- vRejectEnd*2) - ((IMyShipController)shipOrientationBlock).CenterOfMass;
 
-                                bAimed = GyroMain("forward", vCorrectedAim, shipOrientationBlock);
-*/
+                                                                bAimed = GyroMain("forward", vCorrectedAim, shipOrientationBlock);
+                                */
+//                                echoInstructions("S=" + current_state + "BR " + eoicount++);
                                 bAimed = BeamRider(vAsteroidBoreStart, vAsteroidBoreEnd, shipOrientationBlock);
 
                                 turnDrillsOn();
+//                                echoInstructions("S=" + current_state + "EOtDO " + eoicount++);
                                 //                                Echo("bAimed=" + bAimed.ToString());
-//                                Echo("minAngleRad=" + minAngleRad);
+                                //                                Echo("minAngleRad=" + minAngleRad);
                                 if (bAimed)
                                 {
                                     Echo("Aimed");
@@ -1750,7 +1773,6 @@ namespace IngameScript
                     }
             }
         }
-
 
     }
 

@@ -33,6 +33,72 @@ namespace IngameScript
 
         void moduleDoPreModes()
         {
+            // check for IGC Listeners
+            do
+            {
+                if(_StartNavListener.HasPendingMessage)
+                {
+                    var msg = _StartNavListener.AcceptMessage();
+                    var src = msg.Source;
+                    Vector3D vTarget;
+                    int modeArrival;
+                    int stateArrival;
+                    double DistanceMin;
+                    string TargetName;
+                    double maxSpeed;
+                    bool bGo;
+                    NAVDeserializeCommand(msg.Data.ToString(), out vTarget, out modeArrival, out stateArrival, out DistanceMin, out TargetName, out maxSpeed, out bGo);
+                    _NavGoTarget(vTarget, modeArrival, stateArrival, DistanceMin, TargetName, maxSpeed, bGo);
+
+                }
+            } while (_StartNavListener.HasPendingMessage); // Process all pending messages
+            do
+            {
+                if (_AddNavListener.HasPendingMessage)
+                {
+                    var msg = _StartNavListener.AcceptMessage();
+                    // information about the received message
+                    Vector3D vTarget;
+                    int modeArrival;
+                    int stateArrival;
+                    double DistanceMin;
+                    string TargetName;
+                    double maxSpeed;
+                    bool bGo;
+                    NAVDeserializeCommand(msg.Data.ToString(), out vTarget, out modeArrival, out stateArrival, out DistanceMin, out TargetName, out maxSpeed, out bGo);
+                    _NavAddTarget(vTarget, modeArrival, stateArrival, DistanceMin, TargetName, maxSpeed, bGo);
+                }
+            } while (_AddNavListener.HasPendingMessage); // Process all pending messages
+            do
+            {
+                if (_ResetNavListener.HasPendingMessage)
+                {
+                    var msg = _ResetNavListener.AcceptMessage();
+                    // information about the received message
+                    Echo("ResetNav Received Message");
+//                  _NavReset();
+                }
+            } while (_ResetNavListener.HasPendingMessage); // Process all pending messages
+            do
+            {
+                if (_LaunchNavListener.HasPendingMessage)
+                {
+                    var msg = _ResetNavListener.AcceptMessage();
+                    // information about the received message
+                    Echo("_NavQueueLaunch Received Message");
+                    _NavQueueLaunch();
+                }
+            } while (_LaunchNavListener.HasPendingMessage); // Process all pending messages
+            do
+            {
+                if (_OrbitalNavListener.HasPendingMessage)
+                {
+                    var msg = _ResetNavListener.AcceptMessage();
+                    // information about the received message
+                    Echo("_NavQueueOrbitalLaunch Received Message");
+                    _NavQueueOrbitalLaunch();
+                }
+            } while (_OrbitalNavListener.HasPendingMessage); // Process all pending messages
         }
 
         void modulePostProcessing()

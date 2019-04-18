@@ -61,18 +61,25 @@ namespace IngameScript
         const int MODE_ARRIVEDTARGET = 30; // we have arrived at target
 
         const int MODE_UNDERCONSTRUCTION = 31;
+        const int MODE_EXTRUSIONPROJECTION = 33;
 
         const int MODE_LAUNCHED = 50; // we have completed launch
 
         const int MODE_AIRDROP = 60; // we are doing a drop in gravity
 
+        // auto-follow modes
         const int MODE_PET = 111; // pet that follows the player
+        const int MODE_GRIDFOLLOW = 112; // follow a (specified?) grid 
+        // 'follow front'(for trains)
+        // TODO: add other alignments for formations. (maybe default to maintain alignment?)
+
+
 
         // new mining modes
         const int MODE_FINDORE = 200; // find ore on specified asteroid
         const int MODE_GOTOORE = 210; // go to known ore (on specified asteroid)
         const int MODE_BORINGMINE = 220; // old-school boring mine
-        const int MODE_BORESINGLE = 225;
+        const int MODE_BORESINGLE = 225; // single bore. return to dock as needed. don't return to asteroid when bore is completed
         const int MODE_EXITINGASTEROID = 290; // getting out of an asteroid while full
 
         // Scaning
@@ -82,6 +89,9 @@ namespace IngameScript
         // attack/coodrination modes
         const int MODE_WAITINGCOHORT = 500;
         const int MODE_ATTACK = 510;
+
+        const int MODE_STARTNAV = 600; // start the navigation operations
+        const int MODE_NAVNEXTTARGET = 610; // go to the next target
 
         const int MODE_SCANTEST = 999;
 

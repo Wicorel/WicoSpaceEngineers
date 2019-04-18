@@ -57,11 +57,21 @@ namespace IngameScript
                 else Echo("Incomplete command");
 
             }
-
-            if (DockProcessMessage(sArgument))
+            else if (args[0] == "namecameras")
+            {
+                nameCameras(cameraForwardList, "Front");
+                nameCameras(cameraBackwardList, "Back");
+                nameCameras(cameraDownList, "Down");
+                nameCameras(cameraUpList, "Up");
+                nameCameras(cameraLeftList, "Left");
+                nameCameras(cameraRightList, "Right");
+            }
+            /*
+            else if (DockProcessMessage(sArgument))
             {
                 Echo("Processed");
             }
+            */
             else
             {
                 int iDMode;

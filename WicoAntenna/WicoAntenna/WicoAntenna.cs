@@ -24,7 +24,7 @@ namespace IngameScript
 
         void CommunicationsInitCustomData(INIHolder iNIHolder)
         {
-            iNIHolder.GetValue(sAntennaSection, "CommunicationsStealth", ref CommunicationsStealth, true);
+            iNIHolder.GetValue(sAntennaSection, "CommunicationsStealth", ref CommunicationsStealth, false);
         }
 
         bool bGotAntennaName = false;
@@ -287,6 +287,7 @@ namespace IngameScript
         /// <param name="bQueue">Should the message be queued (true)</param>
         void antSend(string message, bool bQueue = true)
         {
+            //TODO: Update to IGC system
 //            Echo("Sending:\n" + message);
             bool bSent = false;
             if (antennaList.Count < 1) antennaInit();
@@ -306,6 +307,7 @@ namespace IngameScript
                 */
                 if(!bQueue)
                 {
+                    // TODO: Update to IGC system
                     // try immediate send:
                     bSent = antennaList[i].TransmitMessage(message);
                     if (bSent)
@@ -369,7 +371,7 @@ namespace IngameScript
         /// <param name="message">The message to add to the queue</param>
         void antReceive(string message)
         {
-//            Echo("RECEIVE:\n" + message);
+            Echo("RECEIVE:\n" + message);
             lPendingIncomingMessages.Add(message);
             processPendingReceives();
 

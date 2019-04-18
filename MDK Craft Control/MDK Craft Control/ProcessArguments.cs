@@ -34,7 +34,6 @@ namespace IngameScript
                 if (args[0] == "timer")
                 {
                     processTimerCommand();
-
                 }
                 else if (args[0] == "idle")
                     ResetToIdle();
@@ -169,13 +168,18 @@ namespace IngameScript
                         }
                     }
                     sCmd += "4:"; // number of waypoints
+                    StatusLog("clear", gpsPanel);
                     vTarget = shipOrientationBlock.GetPosition() + shipOrientationBlock.WorldMatrix.Up * height + shipOrientationBlock.WorldMatrix.Right * range;
+                    debugGPSOutput("Patrol0", vTarget);
                     sCmd += Vector3DToString(vTarget)+":";
                     vTarget = shipOrientationBlock.GetPosition() + shipOrientationBlock.WorldMatrix.Up * height + shipOrientationBlock.WorldMatrix.Forward * range;
+                    debugGPSOutput("Patrol1", vTarget);
                     sCmd += Vector3DToString(vTarget) + ":";
                     vTarget = shipOrientationBlock.GetPosition() + shipOrientationBlock.WorldMatrix.Up * height + shipOrientationBlock.WorldMatrix.Left * range;
+                    debugGPSOutput("Patrol2", vTarget);
                     sCmd += Vector3DToString(vTarget) + ":";
                     vTarget = shipOrientationBlock.GetPosition() + shipOrientationBlock.WorldMatrix.Up * height + shipOrientationBlock.WorldMatrix.Backward * range;
+                    debugGPSOutput("Patrol3", vTarget);
                     sCmd += Vector3DToString(vTarget) + ":";
 
                     antSend(sCmd);

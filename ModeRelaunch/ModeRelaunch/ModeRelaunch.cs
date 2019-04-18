@@ -32,12 +32,13 @@ namespace IngameScript
                     ResetMotion(); setMode(MODE_IDLE);// ResetToIdle();
                     return;
                 }
+                doSubModuleTimerTriggers("[RELAUNCH]");
                 /*
                 if (!bValidTarget && !bValidInitialContact && !bValidAsteroid)
                 {
                     return;
                 }*/
-//                setMode(MODE_RELAUNCH);
+                //                setMode(MODE_RELAUNCH);
                 dtRelaunchActionStart = DateTime.Now;
                 current_state = 1;
                 Serialize();

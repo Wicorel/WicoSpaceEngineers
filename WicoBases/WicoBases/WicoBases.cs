@@ -174,6 +174,13 @@ namespace IngameScript
         {
             string sName = Me.CubeGrid.CustomName;
             Vector3D vPosition = Me.GetPosition();
+
+            if(bForceRequest)
+            {
+                // empty the list because somebody might have been deleted/destroyed/etc
+                baseList.Clear();
+                BaseSerialize();
+            }
             if (shipOrientationBlock != null)
             {
                 sName = shipOrientationBlock.CubeGrid.CustomName;

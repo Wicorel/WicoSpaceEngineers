@@ -66,6 +66,8 @@ namespace IngameScript
 
             string[] varArgs = sArgument.Trim().Split(';');
 
+            bool bFoundNAVCommands = false;
+
             for (int iArg = 0; iArg < varArgs.Length; iArg++)
             {
                 string[] args = varArgs[iArg].Trim().Split(' ');
@@ -84,8 +86,9 @@ namespace IngameScript
                 }
                 else if (args[0] == "W" || args[0] == "O")
                 { // [W|O] <x>:<y>:<z>  || W <x>,<y>,<z>
-                    // W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
+                  // W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
                   // O means orient towards.  W means orient, then move to
+                    bFoundNAVCommands = true;
                     Echo("Args:");
                     for (int icoord = 0; icoord < args.Length; icoord++)
                         Echo(args[icoord]);
@@ -154,19 +157,26 @@ namespace IngameScript
                     }
 
 //                    sStartupError = "CMD Initiated NAV:\n" + sArgument;
-                    NavGoTarget(new Vector3D(x, y, z),30,0,arrivalDistanceMin, sWaypointName);
 
                     //                    vNavTarget = new Vector3D(x, y, z);
                     //                    bValidNavTarget = true;
                     if (args[0] == "W")
-                        bGoOption = true;
-                    else bGoOption = false;
-
+                    {
+                        _NavAddTarget(new Vector3D(x, y, z), MODE_NAVNEXTTARGET, 0, arrivalDistanceMin, sWaypointName, shipSpeedMax);
+//                        bGoOption = true;
+                    }
+                    else
+                    {
+                        _NavAddTarget(new Vector3D(x, y, z), MODE_NAVNEXTTARGET, 0, arrivalDistanceMin, sWaypointName, shipSpeedMax, false);
+//                        bGoOption = false;
+                    }
+//                    sStartupError += "\nW " + sWaypointName + ":" + wicoNavCommands.Count.ToString();
                     //                   setMode(MODE_GOINGTARGET);
 
                 }
                 else if (args[0] == "S")
                 { // S <mps>
+                    // TODO: Queue the command into NavCommands
                     if (args.Length < 1)
                     {
                         Echo("Invalid Command:(" + varArgs[iArg] + ")");
@@ -189,6 +199,7 @@ namespace IngameScript
                 }
                 else if (args[0] == "D")
                 { // D <meters>
+                    // TODO: Queue the command into NavCommands
                     if (args.Length < 1)
                     {
                         Echo("Invalid Command:(" + varArgs[iArg] + ")");
@@ -220,6 +231,32 @@ namespace IngameScript
                         Echo(varArgs[iArg]);
                     }
                 }
+                else if (args[0] == "L")
+                { // L launch
+                    bFoundNAVCommands = true;
+                    _NavQueueLaunch();
+                }
+                else if (args[0] == "launch")
+                { // L launch
+                    bFoundNAVCommands = true;
+                    _NavQueueLaunch();
+                }
+                else if (args[0] == "OL")
+                { // OL Orbital launch
+                    bFoundNAVCommands = true;
+                    _NavQueueOrbitalLaunch();
+                }
+                else if (args[0] == "orbitallaunch")
+                { // OL Orbital launch
+                    bFoundNAVCommands = true;
+                    _NavQueueOrbitalLaunch();
+                }
+                else if (args[0] == "dock")
+                { // dock
+                    bFoundNAVCommands = true;
+                    _NavQueueOrbitalLaunch();
+                }
+                // todo: add launch, dock, land, etc
                 else
                 {
                     int iDMode;
@@ -234,6 +271,11 @@ namespace IngameScript
                         sArgResults = "Unknown argument:" + args[0];
                     }
                 }
+            }
+            if(bFoundNAVCommands)
+            {
+//                sStartupError += "\nFound NAV Commands:" + wicoNavCommands.Count.ToString();
+                _NavStart();
             }
             return false; // keep processing in main
         }

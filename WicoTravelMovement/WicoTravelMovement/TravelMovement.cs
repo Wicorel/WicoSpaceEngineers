@@ -26,9 +26,11 @@ namespace IngameScript
          * 502918 Increased size of sensor to shipsize+2
          * 053x18 revert sensor size if forward cameras.  Do raycast of center + corners of ship bounding box
          * 
+         * 04102019 Check arrival 'above' target location in gravity
+         * 
          */
 
-            public bool bCollisionWasSensor=false;
+        public bool bCollisionWasSensor=false;
 
 
         double tmCameraElapsedMs = -1;
@@ -230,6 +232,7 @@ namespace IngameScript
         /// <param name="bAsteroidTarget">if True, target location is in/near an asteroid.  don't collision detect with it</param>
         void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState, bool bAsteroidTarget=false)
         {
+            bool bArrived = false;
             if (dTMDebug)
             {
                 Echo("dTM:" + current_state + "->" + arrivalState + "-C>" + colDetectState +" A:"+arrivalDistance);
@@ -239,6 +242,7 @@ namespace IngameScript
             //    shipOrientationBlock.CubeGrid.
             if (tmShipController == null)
             {
+                // first (for THIS target) time init
                 InitDoTravelMovement(vTargetLocation, shipSpeedMax, shipOrientationBlock);
             }
 
@@ -249,6 +253,21 @@ namespace IngameScript
 
             double distance = vVec.Length();
 
+            // TODO: Adjust targetlocation for gravity and min altitude.
+            if (NAVGravityMinElevation > 0 && dGravity > 0)
+            {
+                // Need some trig here to calculate angle/distance to ground and target above ground
+                // Have: our altitude. Angle to target. Distance to target.
+                // iff target is 'below' us, then raise effective target to maintain min alt
+                // iff target is 'above' us..  then raise up to it..
+
+
+                // cheat for now.
+                if (distance < (arrivalDistance+ NAVGravityMinElevation))
+                    bArrived = true;
+
+            }
+
             if (dTMDebug)
             {
                 Echo("dTM:distance=" + niceDoubleMeters(distance) + " ("+ arrivalDistance.ToString()+")");
@@ -256,6 +275,9 @@ namespace IngameScript
                 Echo("dTM:tmMaxSpeed=" + tmMaxSpeed.ToString("0.00"));
             }
             if (distance < arrivalDistance)
+                bArrived = true;
+
+            if (bArrived)
             {
                 ResetMotion(); // start the stopping
                 current_state = arrivalState; // we have arrived
@@ -664,7 +686,7 @@ namespace IngameScript
                     StatusLog("\"Precision\" distance from target\n Target Speed=" + dtmPrecisionSpeed.ToString("N0") + "m/s", textPanelReport);
                     if (!btmPrecision) minAngleRad = 0.005f;// aim tighter (next time)
                     btmPrecision = true;
-                    TmDoForward(dtmPrecisionSpeed, 55f);
+                    TmDoForward(dtmPrecisionSpeed, 100f);
                 }
                 else
                 {
@@ -674,7 +696,7 @@ namespace IngameScript
                     StatusLog("\"Close\" distance from target\n Target Speed=" + dtmCloseSpeed.ToString("N0") + "m/s", textPanelReport);
                     if (!btmClose) minAngleRad = 0.005f;// aim tighter (next time)
                    btmClose = true;
-                    TmDoForward(dtmCloseSpeed, 55f);
+                    TmDoForward(dtmCloseSpeed, 100f);
                 }
             }
             else

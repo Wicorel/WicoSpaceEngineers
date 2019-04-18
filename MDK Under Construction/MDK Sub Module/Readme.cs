@@ -32,6 +32,10 @@
  * 3.4C Current Source Apr 01 2018
  * MDK 1.1
  * 
+ * 3.4D June 23 2018 Start
+ * Add namecameras
+ * Intent: make this also an extruder controller
+ * 
  * NEED:  
  *  
  * WANTED: 

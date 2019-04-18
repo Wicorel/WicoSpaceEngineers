@@ -31,7 +31,12 @@ namespace IngameScript
             if (block is IMyBatteryBlock)
             {
                 IMyBatteryBlock myb = block as IMyBatteryBlock;
-                return myb.OnlyRecharge;// myb.GetValueBool("Recharge");
+                // ChargeMode.Auto; 0
+                // ChargeMode.Discharge; 2
+                // ChargeMode.Recharge; 1
+                // 1.189
+                return (myb.ChargeMode == ChargeMode.Recharge);
+//                return myb.OnlyRecharge;// myb.GetValueBool("Recharge");
             }
             else return false;
         }
@@ -40,7 +45,9 @@ namespace IngameScript
             if (block is IMyBatteryBlock)
             {
                 IMyBatteryBlock myb = block as IMyBatteryBlock;
-                return myb.OnlyDischarge;// GetValueBool("Discharge");
+                //V 1.189
+                return (myb.ChargeMode == ChargeMode.Discharge);
+//                return myb.OnlyDischarge;// GetValueBool("Discharge");
             }
             else return false;
         }
@@ -106,6 +113,7 @@ namespace IngameScript
                 float capacity = 0;
                 int percentthisbattery = 100;
                 IMyBatteryBlock b;
+
                 b = batteryList[ib] as IMyBatteryBlock;
                 f1 = b.MaxStoredPower;
                 capacity += f1;
@@ -152,14 +160,23 @@ namespace IngameScript
                     if (percentthisbattery < targetMax)
                         bFoundRecharging = true;
                     else if (percentthisbattery > 99)
-                        b.OnlyRecharge = false;
+                    {
+                        //V 1.189
+                        b.ChargeMode = ChargeMode.Recharge;
+//                        b.OnlyRecharge = false;
+                    }
                 }
-                if (!b.OnlyRecharge && percentthisbattery < targetMax && !bFoundRecharging)
+                //V 1.189
+//                if (!b.OnlyRecharge && percentthisbattery < targetMax && !bFoundRecharging)
+                if (!(b.ChargeMode==ChargeMode.Recharge) && percentthisbattery < targetMax && !bFoundRecharging)
                 {
-//                    Echo("Turning on Recharge for " + b.CustomName);
-                    b.OnlyDischarge = false;
-                    b.OnlyRecharge = true;
-                    b.SemiautoEnabled = false;
+                    //                    Echo("Turning on Recharge for " + b.CustomName);
+                    // V 1.189
+                    b.ChargeMode = ChargeMode.Recharge;
+//                    b.OnlyDischarge = false;
+//                    b.OnlyRecharge = true;
+//                    b.SemiautoEnabled = false;
+
                     bFoundRecharging = true;
                 }
             }
@@ -180,9 +197,14 @@ namespace IngameScript
             {
                 IMyBatteryBlock b;
                 b = batteryList[i] as IMyBatteryBlock;
+
+                //V1.189
+                b.ChargeMode = ChargeMode.Auto;
+                /*
                 b.OnlyRecharge = false;
                 b.OnlyDischarge = false;
                 b.SemiautoEnabled = false;
+                */
             }
         }
         // Set the state of the batteries and optionally display state of the batteries
@@ -194,17 +216,29 @@ namespace IngameScript
             {
                 IMyBatteryBlock b;
                 b = batteryList[i] as IMyBatteryBlock;
+
+                // V 1.189
+                if (bDischarge)
+                {
+                    b.ChargeMode = ChargeMode.Discharge;
+                }
+                else b.ChargeMode = ChargeMode.Recharge;
+                /*
                 b.OnlyRecharge = !bDischarge;
                 b.OnlyDischarge = bDischarge;
                 b.SemiautoEnabled = false;
-
+                */
                 s = b.CustomName + ": ";
-                if (b.OnlyRecharge)
+
+
+//                if (b.OnlyRecharge)
+                if (b.ChargeMode==ChargeMode.Recharge)
                 {
                     s += "RECHARGE/";
                 }
                 else s += "NOTRECHARGE/";
-                if (b.OnlyDischarge)
+//                if (b.OnlyDischarge)
+                if (b.ChargeMode == ChargeMode.Discharge)
                 {
                     s += "DISCHARGE";
                 }

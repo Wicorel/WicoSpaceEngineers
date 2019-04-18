@@ -46,6 +46,13 @@ namespace IngameScript
         //bool bOverTarget=false; 
         void doModeDescent()
         {
+            // todo: handle parachutes.  
+            // TODO: Check parachute orientation
+            // TODO: handle 'stop XX meters above surface' (then hover, next nav command)
+            // TODO: Arrived Target in gravity -> hover mode (should be in Nav, I guess)
+            // TODO: Calculate best orientation through descent.
+
+
             StatusLog("clear", textPanelReport);
             StatusLog(OurName + ":" + moduleName + ":Descent", textPanelReport);
             StatusLog("Gravity=" + dGravity.ToString(velocityFormat), textPanelReport);
@@ -92,9 +99,9 @@ namespace IngameScript
 
                 if (dGravity > 0)
                 {
-                    if (shipOrientationBlock is IMyRemoteControl)
+                    if (shipOrientationBlock is IMyShipController)
                     {
-                        Vector3D vNG = ((IMyRemoteControl)shipOrientationBlock).GetNaturalGravity();
+                        Vector3D vNG = ((IMyShipController)shipOrientationBlock).GetNaturalGravity();
 
                         //double Pitch,Yaw; 
                         Vector3D groundPosition;
@@ -115,7 +122,7 @@ namespace IngameScript
                 Echo("Blind Landing");
                 StatusLog("Blind Landing", textPanelReport);
 
-                ((IMyRemoteControl)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out alt);
+                ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out alt);
                 halt = 0;
                 minAltRotate = 39000;
             }
@@ -123,7 +130,7 @@ namespace IngameScript
             {
                 double elevation = 0;
 
-                ((IMyRemoteControl)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+                ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
                 StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textPanelReport);
                 Echo("Elevation: " + elevation.ToString("N0") + " Meters");
             }

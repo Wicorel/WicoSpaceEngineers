@@ -27,7 +27,7 @@ namespace IngameScript
         /// <summary>
         /// false means just orient (no motion)
         /// </summary>
-        bool bGoOption = true; // false means just orient.
+ //       bool bGoOption = true; // false means just orient.
 
         /// <summary>
         /// We are a sled. Default false
@@ -127,6 +127,7 @@ namespace IngameScript
 
                 GyroControl.SetRefBlock(shipOrientationBlock);
 
+                // TODO: Put a timer on this so it's not done Update1
                 double elevation = 0;
                 ((IMyShipController)shipOrientationBlock).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
 
@@ -307,24 +308,6 @@ namespace IngameScript
 
                     Echo("we have arrived");
                     bWantFast = true;
-                    /*
-                    if (NAVEmulateOld)
-                    {
-                        var tList = GetBlocksContains<IMyTerminalBlock>("NAV:");
-                        for (int i1 = 0; i1 < tList.Count(); i1++)
-                        {
-                            // don't want to get blocks that have "NAV:" in customdata..
-                            if (tList[i1].CustomName.StartsWith("NAV:"))
-                            {
-                                Echo("Found NAV: command:");
-                                tList[i1].CustomName = "NAV: C Arrived Target";
-                            }
-                        }
-                    }
-                    ResetMotion();
-                    bValidNavTarget = false; // we used this one up.
-                    setMode(MODE_ARRIVEDTARGET);
-                    */
                     return;
                 }
 
@@ -604,38 +587,55 @@ namespace IngameScript
             }
             else if(current_state==500)
             { // we have arrived at target
-                StatusLog("clear", sledReport);
-                StatusLog("Arrived at Target", sledReport);
-                StatusLog("Arrived at Target", textPanelReport);
-                sNavDebug += " ARRIVED!";
 
-                ResetMotion();
-                bValidNavTarget = false; // we used this one up.
-//                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
-                antennaMaxPower(false);
-                SensorsSleepAll();
-
-                // set to desired mode and state
-                setMode(NAVArrivalMode);
-                current_state = NAVArrivalState;
-
-                // set up defaults for next run (in case they had been changed)
-                NAVArrivalMode = MODE_ARRIVEDTARGET;
-                NAVArrivalState = 0;
-                NAVTargetName = "";
-                bGoOption = true; 
-
-//                setMode(MODE_ARRIVEDTARGET);
-                if(NAVEmulateOld)
+                /*
+                // check for more nav commands
+                if(wicoNavCommands.Count>0)
                 {
-                    var tList = GetBlocksContains<IMyTerminalBlock>("NAV:");
-                    for (int i1 = 0; i1 < tList.Count(); i1++)
+                    wicoNavCommands.RemoveAt(0);
+                }
+                if(wicoNavCommands.Count>0)
+                {
+                    // another command
+                    wicoNavCommandProcessNext();
+                }
+                else
+                */
+                {
+
+                    StatusLog("clear", sledReport);
+                    StatusLog("Arrived at Target", sledReport);
+                    StatusLog("Arrived at Target", textPanelReport);
+                    sNavDebug += " ARRIVED!";
+
+                    ResetMotion();
+                    bValidNavTarget = false; // we used this one up.
+                                             //                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;
+                    antennaMaxPower(false);
+                    SensorsSleepAll();
+//                    sStartupError += "Finish WP:" + wicoNavCommands.Count.ToString()+":"+NAVArrivalMode.ToString();
+                    // set to desired mode and state
+                    setMode(NAVArrivalMode);
+                    current_state = NAVArrivalState;
+
+                    // set up defaults for next run (in case they had been changed)
+                    NAVArrivalMode = MODE_ARRIVEDTARGET;
+                    NAVArrivalState = 0;
+                    NAVTargetName = "";
+                    bGoOption = true;
+
+                    //                setMode(MODE_ARRIVEDTARGET);
+                    if (NAVEmulateOld)
                     {
-                        // don't want to get blocks that have "NAV:" in customdata..
-                        if (tList[i1].CustomName.StartsWith("NAV:"))
+                        var tList = GetBlocksContains<IMyTerminalBlock>("NAV:");
+                        for (int i1 = 0; i1 < tList.Count(); i1++)
                         {
-                            Echo("Found NAV: command:");
-                            tList[i1].CustomName = "NAV: C Arrived Target";
+                            // don't want to get blocks that have "NAV:" in customdata..
+                            if (tList[i1].CustomName.StartsWith("NAV:"))
+                            {
+                                Echo("Found NAV: command:");
+                                tList[i1].CustomName = "NAV: C Arrived Target";
+                            }
                         }
                     }
                 }
@@ -702,5 +702,145 @@ namespace IngameScript
 
             }
         }
+
+        void wicoNavCommandProcessNext()
+        {
+//            sStartupError+="\nCommand Process:"+wicoNavCommands.Count.ToString();
+
+            if (wicoNavCommands.Count < 1)
+            {
+                setMode(NAVArrivalMode);
+                current_state = NAVArrivalState;
+                // reset to defaults.
+                NAVArrivalMode = MODE_ARRIVEDTARGET;
+                NAVArrivalState = 0;
+                return;
+            }
+            wicoNavCommands[0].ProcessCommand();
+            wicoNavCommands.RemoveAt(0);
+            // should serialize these so they can resume on reload
+        }
+
+        IMyBroadcastListener _AddNavListener;
+        IMyBroadcastListener _StartNavListener;
+        IMyBroadcastListener _ResetNavListener;
+        IMyBroadcastListener _LaunchNavListener;
+        IMyBroadcastListener _OrbitalNavListener;
+
+        void NavInitIGC()
+        {
+            _AddNavListener = IGC.RegisterBroadcastListener(WICOB_NAVADDTARGET); // What it listens for
+            _AddNavListener.SetMessageCallback(WICOB_NAVADDTARGET); // What it will run the PB with once it has a message
+
+            _StartNavListener = IGC.RegisterBroadcastListener(WICOB_NAVSTART); // What it listens for
+            _StartNavListener.SetMessageCallback(WICOB_NAVSTART); // What it will run the PB with once it has a message
+
+            _ResetNavListener = IGC.RegisterBroadcastListener(WICOB_NAVRESET); // What it listens for
+            _ResetNavListener.SetMessageCallback(WICOB_NAVRESET); // What it will run the PB with once it has a message
+
+            _LaunchNavListener = IGC.RegisterBroadcastListener(WICOB_NAVLAUNCH); // What it listens for
+            _LaunchNavListener.SetMessageCallback(WICOB_NAVLAUNCH); // What it will run the PB with once it has a message
+
+            _OrbitalNavListener = IGC.RegisterBroadcastListener(WICOB_NAVORBITALLAUNCH); // What it listens for
+            _OrbitalNavListener.SetMessageCallback(WICOB_NAVORBITALLAUNCH); // What it will run the PB with once it has a message
+
+        }
+
+        void _NavReset()
+        {
+            wicoNavCommands.Clear();
+        }
+
+        void _NavAddTarget(Vector3D vTarget, int modeArrival = MODE_NAVNEXTTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo=true)
+        {
+
+            if (maxSpeed > fMaxWorldMps)
+                maxSpeed = fMaxWorldMps;
+            WicoNavCommand wicoNavCommand = new WicoNavCommand
+            {
+                pg = this,
+                vNavTarget = vTarget,
+                bValidNavTarget = true,
+                NAVArrivalMode = modeArrival,
+                NAVArrivalState = stateArrival,
+                arrivalDistanceMin = DistanceMin,
+                shipSpeedMax=maxSpeed,
+                NAVTargetName = TargetName
+            };
+            if (bGo) wicoNavCommand.Command = CommandTypes.Waypoint;
+            else wicoNavCommand.Command = CommandTypes.Orientation;
+
+//            sStartupError += "Adding NAV Commnd:";
+//            sStartupError += " Name=:" + wicoNavCommand.NAVTargetName;
+//            sStartupError += " Loc=" + Vector3DToString(wicoNavCommand.vNavTarget);
+            wicoNavCommands.Add(wicoNavCommand);
+        }
+        void _NavQueueLaunch()
+        {
+            WicoNavCommand wicoNavCommand = new WicoNavCommand
+            {
+                pg = this,
+                Command = CommandTypes.Launch
+            };
+
+            wicoNavCommands.Add(wicoNavCommand);
+        }
+        void _NavQueueOrbitalLaunch()
+        {
+            WicoNavCommand wicoNavCommand = new WicoNavCommand
+            {
+                pg = this,
+                Command = CommandTypes.OrbitalLaunch
+            };
+
+            wicoNavCommands.Add(wicoNavCommand);
+        }
+        void _NavGoTarget(Vector3D vTarget, int modeArrival = MODE_ARRIVEDTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo=true)
+        {
+            _NavAddTarget(vTarget, modeArrival, stateArrival, DistanceMin, TargetName, maxSpeed, bGo);
+            _NavStart(); // setMode(MODE_STARTNAV);
+        }
+        void _NavQueueDock()
+        {
+            WicoNavCommand wicoNavCommand = new WicoNavCommand
+            {
+                pg = this,
+                Command = CommandTypes.Dock
+            };
+
+            wicoNavCommands.Add(wicoNavCommand);
+
+        }
+
+        void _NavStart()
+        {
+            if (wicoNavCommands.Count > 0)
+            {
+                setMode(MODE_STARTNAV);
+            }
+            else
+            {
+                setMode(MODE_ATTENTION);
+                Echo("No Nav to start");
+//                sStartupError+="\nError:No Nav to start";
+            }
+        }
+
+        void doModeStartNav()
+        {
+            Echo("Start Nav: state=" + current_state.ToString());
+//            sStartupError += "Start Nav.";
+            wicoNavCommandProcessNext();
+            bWantFast = true;
+        }
+        void doModeNavNext()
+        {
+//            sStartupError += "\nNAV NEXT" + wicoNavCommands.Count.ToString();
+            Echo("Next Nav: state=" + current_state.ToString());
+            wicoNavCommandProcessNext();
+            bWantFast = true;
+//            sStartupError += "\nENAV NEXT" + wicoNavCommands.Count.ToString() + " iMode="+iMode.ToString()+ ":"+NAVTargetName;
+        }
     }
+
 }

@@ -160,13 +160,25 @@ Set target name from GPS Waypointcommend
 June 15, 2018
 Renumber modes >150 to make room
 
+3.4O July 23, 2018 SE 1.187 MDK 1.1.16
+Start support for docking in gravity.
+(hiatus)
+
+3.4P Sep 08: check hollow asteroids
+
+3.5 Jan 21: SE 1.189
+IGC for nav commands
+Supports waypoint list
+added launch, orbital launch and dock commands
+
 TODO: 
     Do quadrant search for escape
-    Support multiple waypoints
     Support 'Loop' (patrol) command
     handle sides without cameras
     TEST: handle no cameras forward (slower min speed)
     Timer triggers on mode/state changes
+    get waypoint list from RC
+    Test Rocket ships waypoint nav in gravity
 
 */
 
@@ -175,7 +187,7 @@ TODO:
         string OurName = "Wico Craft";
 
         string moduleName = "NAV";
-        string sVersion = "3.4N";
+        string sVersion = "3.5";
 
     }
 }

@@ -43,6 +43,9 @@ namespace IngameScript
 
         void doModeLaunch()
         {
+
+            // todo: waypoint sequence for launch (complicated hangars)
+            // todo: test/make work in gravity
             StatusLog("clear", textPanelReport);
             StatusLog(moduleName + ":LAUNCH!", textPanelReport);
             bWantMedium = true;
@@ -50,13 +53,14 @@ namespace IngameScript
             {
                 StatusLog(DateTime.Now.ToString() + " ACTION: StartLaunch", textLongStatus, true);
                 StatusLog(moduleName + ":Start Launch", textPanelReport);
-/*
-                Echo("#LocalDock=" + localDockConnectors.Count);
-                for (int i = 0; i < localDockConnectors.Count; i++)
-                {
-                    Echo(i + ":" + localDockConnectors[i].CustomName);
-                }
-                */
+                doSubModuleTimerTriggers("[LAUNCH]");
+                /*
+                                Echo("#LocalDock=" + localDockConnectors.Count);
+                                for (int i = 0; i < localDockConnectors.Count; i++)
+                                {
+                                    Echo(i + ":" + localDockConnectors[i].CustomName);
+                                }
+                                */
                 if (!AnyConnectorIsConnected())
                 {
                     StatusLog("Can't perform action unless docked", textLongStatus, true);

@@ -150,7 +150,7 @@ namespace IngameScript
                         sInitResults += controllersInit();
                         break;
                     case 17:
-                        sInitResults += sensorInit(true);
+                        sInitResults += SensorInit(shipOrientationBlock);
                         break;
                     case 18:
                         sInitResults += ejectorsInit();
@@ -247,7 +247,7 @@ namespace IngameScript
                         }
                         else
                         {
-                            if (bSubModules)
+                            if (bSupportSubModules)
                             {
                                 bStartupError = true;
                                 sStartupError += "\nSubmodules Enabled, but no\n timer containing:" + sSubModuleTimer;

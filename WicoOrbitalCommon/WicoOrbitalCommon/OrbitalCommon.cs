@@ -54,7 +54,7 @@ namespace IngameScript
         /// </summary>
         /// <returns>true if the 'best' has changed. Modifies thrustOrbitalUpList, thrustObritalDownList, and sOrbitalDirection</returns>
         ///
-        bool calculateBestGravityThrust()
+        bool calculateBestGravityThrust(bool PerformChangeOver=true)
         {
             double upThrust = calculateTotalEffectiveThrust(thrustUpList, orbitalAtmoMult,orbitalIonMult, orbitalHydroMult);
             double fwThrust = calculateTotalEffectiveThrust(thrustForwardList, orbitalAtmoMult, orbitalIonMult, orbitalHydroMult);
@@ -64,22 +64,28 @@ namespace IngameScript
             {
                 if (sOrbitalUpDirection != "rocket")
                 {
-                    thrustOrbitalUpList = thrustForwardList;
-                    thrustOrbitalDownList = thrustBackwardList;
-                    sOrbitalUpDirection = "rocket";
+                    if (PerformChangeOver)
+                    {
+                        thrustOrbitalUpList = thrustForwardList;
+                        thrustOrbitalDownList = thrustBackwardList;
+                        sOrbitalUpDirection = "rocket";
+                        cameraOrbitalLandingList = cameraBackwardList;
+                    }
                     bChanged = true;
-                    cameraOrbitalLandingList = cameraBackwardList;
                 }
             }
             else
             {
                 if (sOrbitalUpDirection != "down")
                 {
-                    thrustOrbitalUpList = thrustUpList;
-                    thrustOrbitalDownList = thrustDownList;
-                    sOrbitalUpDirection = "down";
+                    if (PerformChangeOver)
+                    {
+                        thrustOrbitalUpList = thrustUpList;
+                        thrustOrbitalDownList = thrustDownList;
+                        sOrbitalUpDirection = "down";
+                        cameraOrbitalLandingList = cameraDownList;
+                    }
                     bChanged = true;
-                    cameraOrbitalLandingList = cameraDownList;
                 }
             }
             return bChanged;

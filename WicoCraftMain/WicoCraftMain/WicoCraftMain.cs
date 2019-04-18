@@ -13,6 +13,7 @@ using VRage.Game.ModAPI.Ingame;
 using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Game;
 using VRageMath;
+//using VRage.Game.Gui.TextPanel;
 
 namespace IngameScript
 {
@@ -98,6 +99,47 @@ namespace IngameScript
             {
                 Echo("I am turned OFF!");
             }
+
+            IMyTextSurface mesurface0=Me.GetSurface(0);
+            mesurface0.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+            mesurface0.WriteText("Wicorel\n"+ moduleName);
+            mesurface0.FontSize = 2;
+            mesurface0.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+
+            IMyTextSurface mesurface1 = Me.GetSurface(1);
+            mesurface1.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+            mesurface1.WriteText("Version:" + sVersion);
+            mesurface1.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+            mesurface1.TextPadding = 0.25f;
+            mesurface1.FontSize = 3.5f;
+
+            /*
+            using (var frame = mesurface0.DrawFrame())
+            {
+                MySprite sprite;
+                // Background
+                //                sprite = new MySprite(SpriteType.TEXTURE, "SquareSimple", color: new Color(50, 150, 255, 255), size: SIZE);
+                //                sprite.Position = surfaceSize * 0.5f + POS;
+                sprite = MySprite.CreateText("Wicorel", "Monospace", Color.Red, 1f, TextAlignment.LEFT);
+                sprite.Position = new Vector2(16, 16);
+                frame.Add(sprite);
+            }
+            */
+
+            /*
+            using (var frame = mesurface1.DrawFrame())
+            {
+                MySprite sprite;
+
+                // Background
+                //                sprite = new MySprite(SpriteType.TEXTURE, "SquareSimple", color: new Color(50, 150, 255, 255), size: SIZE);
+                //                sprite.Position = surfaceSize * 0.5f + POS;
+                sprite = MySprite.CreateText(moduleName, "Monospace", Color.Red, 1f, TextAlignment.LEFT);
+                sprite.Position = new Vector2(16, 16);
+                frame.Add(sprite);
+            }
+            */
+
         }
 
         bool bEchoOn = true;

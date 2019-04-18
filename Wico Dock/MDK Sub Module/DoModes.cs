@@ -64,6 +64,11 @@ namespace IngameScript
             StatusLog("Launched. Defalt handling", textPanelReport);
             StatusLog("Awaiting Commands", textPanelReport);
             bWantSlow = true;
+            if(current_state==0)
+            {
+                doSubModuleTimerTriggers("[LAUNCHED]");
+                current_state = 1;
+            }
         }
 
         #region modealways
