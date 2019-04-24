@@ -24,17 +24,34 @@ namespace IngameScript
         // the one and only unicast listener.  Must be shared amoung all interested parties
         IMyUnicastListener myUnicastListener;
 
+        /// <summary>
+        /// the list of unicast message handlers. All handlers will be called on pending messages
+        /// </summary>
+        List<Action<MyIGCMessage>> unicastMessageHandlers = new List<Action<MyIGCMessage>>();
 
-        IMyBroadcastListener _WicoMainTag;
-        string WicoMainTag="WicoTagMain";
-        //TODO: make list of listeners and the 'handlers' for those listeners
 
+        /// <summary>
+        /// List of 'registered' broadcst message handlers.  All handlers will be called on each message received
+        /// </summary>
+        List<Action<MyIGCMessage>> broadcastMessageHandlers = new List<Action<MyIGCMessage>>();
+        /// <summary>
+        /// List of broadcast channels.  All channels will be checked for incoming messages
+        /// </summary>
+        List<IMyBroadcastListener> broadcastChanels = new List<IMyBroadcastListener>();
 
         TransmissionDistance localConstructs = TransmissionDistance.CurrentConstruct;
         UpdateType utTriggers = UpdateType.Terminal | UpdateType.Trigger | UpdateType.Mod | UpdateType.Script;
         UpdateType utUpdates = UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100 | UpdateType.Once;
 
 
+
+        // WIco Main/Config stuff
+        IMyBroadcastListener _WicoMainTag;
+        string WicoMainTag = "WicoTagMain";
+
+        /// <summary>
+        /// List of Wico PB blocks on local construct
+        /// </summary>
         List<long> _WicoMainSubscribers = new List<long>();
 
         bool bIAmMain = true; // assume we are main
@@ -53,12 +70,21 @@ namespace IngameScript
             // IGC Init
             _WicoMainTag = IGC.RegisterBroadcastListener(WicoMainTag); // What it listens for
             _WicoMainTag.SetMessageCallback(WicoMainTag); // What it will run the PB with once it has a message
-            Runtime.UpdateFrequency = UpdateFrequency.Once;
+
+            // add broadcast message handlers
+            broadcastMessageHandlers.Add(WicoMainMessagehandler);
+            broadcastChanels.Add(_WicoMainTag);
+
+            Runtime.UpdateFrequency = UpdateFrequency.Once; // cause ourselves to run to continue initialization
+
+            // send a messge to all local 'Wico' PBs to get configuration.  This will be used to determine the 'master' PB
             IGC.SendBroadcastMessage(WicoMainTag, "Configure", localConstructs);
 
-            myUnicastListener=IGC.UnicastListener;
+            myUnicastListener = IGC.UnicastListener;
             myUnicastListener.SetMessageCallback();
 
+            // add unicast message handlers
+            unicastMessageHandlers.Add(WicoConfigUnicastListener);
 
             // Local PB Surface Init
             mesurface0 = Me.GetSurface(0);
@@ -82,17 +108,17 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
- //           Echo("I Am Main=" + bIAmMain.ToString());
+            //           Echo("I Am Main=" + bIAmMain.ToString());
             if ((updateSource & UpdateType.IGC) > 0)
             {
                 Echo("IGC");
                 ProcessIGCMessages();
-                if(bIAmMain)
+                if (bIAmMain)
                     mesurface1.WriteText("Master Module");
                 else
                     mesurface1.WriteText("Sub Module");
             }
-            if ((updateSource&(utTriggers)) >0 )
+            if ((updateSource & (utTriggers)) > 0)
             {
                 Echo("Triggers");
                 if (bIAmMain)
@@ -108,76 +134,122 @@ namespace IngameScript
                 Echo("Update");
             }
             Echo("I Am Main=" + bIAmMain.ToString());
-            /*
-            Echo(_WicoMainSubscribers.Count.ToString());
-            foreach(var subscriber in _WicoMainSubscribers)
-            {
-                Echo("  " + subscriber.ToString());
-            }
-            */
         }
 
+        /// <summary>
+        /// Process all pending ICG messages
+        /// </summary>
         void ProcessIGCMessages()
         {
-            // TODO: Make list of all broadcast listeners and 'handlers' for each
+            // TODO: make this a yield return thing if processing takes too long
+
+            bool bFoundMessages = false;
+            //            Echo(broadcastChanels.Count.ToString() + " broadcast channels");
+            //            Echo(broadcastMessageHandlers.Count.ToString() + " broadcast message handlers");
+            //            Echo(unicastMessageHandlers.Count.ToString() + " unicast message handlers");
             do
             {
-                if (_WicoMainTag.HasPendingMessage)
+                bFoundMessages = false;
+                foreach (var channel in broadcastChanels)
                 {
-                    var msg = _WicoMainTag.AcceptMessage();
-                    var src = msg.Source;
-                    string data = (string)msg.Data;
-                    var tag = msg.Tag;
-                    if(data=="Configure")
+                    if (channel.HasPendingMessage)
                     {
-                        IGC.SendUnicastMessage(src, UnicastAnnounce, "");
+                        bFoundMessages = true;
+                        var msg = channel.AcceptMessage();
+                        foreach (var handler in broadcastMessageHandlers)
+                        {
+                            handler(msg);
+                        }
                     }
-
                 }
-            } while (_WicoMainTag.HasPendingMessage); // Process all pending messages
+            } while (bFoundMessages); // Process all pending messages
+                                      //        } while (_WicoMainTag.HasPendingMessage); // Process all pending messages
 
             do
             {
+                // since there's only one channel, we could just use .HasPendingMessages directly.. but this keeps the code loops the same
+                bFoundMessages = false;
+
                 if (myUnicastListener.HasPendingMessage)
                 {
+                    bFoundMessages = true;
                     var msg = myUnicastListener.AcceptMessage();
-                    var tag = msg.Tag;
-                    var src = msg.Source;
-                    if(tag== YouAreSub)
+                    foreach (var handler in unicastMessageHandlers)
                     {
-                        bIAmMain = false;
-                    }
-                    else if (tag == UnicastAnnounce)
-                    {
-                        // another block announces themselves as one of our collective
-                        if (_WicoMainSubscribers.Contains(src))
-                        {
-                            // already in the list
-                        }
-                        else
-                        {
-                            // not in the list
-                            Echo("Adding new");
-                            _WicoMainSubscribers.Add(src);
-                        }
-                        bIAmMain = true;
-                        foreach(var other in _WicoMainSubscribers)
-                        {
-                            // if somebody as a lower ID, use them instead.
-                            if (other < Me.EntityId)
-                            {
-                                bIAmMain = false;
-                                Echo("Found somebody lower");
-                            }
-                        }
-                    }
-                    else if (tag == UnicastTagTrigger)
-                    {
-                        Echo("Trigger Received" + msg.Data);
+                        // Call each handler
+                        handler(msg);
                     }
                 }
-            } while (myUnicastListener.HasPendingMessage); // Process all pending messages
+            } while (bFoundMessages); // Process all pending messages
+                                      //            } while (myUnicastListener.HasPendingMessage); // Process all pending messages
 
         }
+
+        /// <summary>
+        /// Broadcast handler for Wico Main Messages
+        /// </summary>
+        /// <param name="msg"></param>
+        void WicoMainMessagehandler(MyIGCMessage msg)
+        {
+            var tag = msg.Tag;
+
+            //            Echo("WMMH:"+tag);
+
+            var src = msg.Source;
+            if (tag == WicoMainTag)
+            {
+                string data = (string)msg.Data;
+                if (data == "Configure")
+                {
+                    IGC.SendUnicastMessage(src, UnicastAnnounce, "");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Wico Unicast Handler for Wico Main
+        /// </summary>
+        /// <param name="msg"></param>
+        void WicoConfigUnicastListener(MyIGCMessage msg)
+        {
+            var tag = msg.Tag;
+            //`            Echo("WCUL:" + tag);
+            var src = msg.Source;
+            if (tag == YouAreSub)
+            {
+                bIAmMain = false;
+            }
+            else if (tag == UnicastAnnounce)
+            {
+                // another block announces themselves as one of our collective
+                if (_WicoMainSubscribers.Contains(src))
+                {
+                    // already in the list
+                }
+                else
+                {
+                    // not in the list
+                    Echo("Adding new");
+                    _WicoMainSubscribers.Add(src);
+                }
+                bIAmMain = true;
+                foreach (var other in _WicoMainSubscribers)
+                {
+                    // if somebody as a lower ID, use them instead.
+                    if (other < Me.EntityId)
+                    {
+                        bIAmMain = false;
+                        Echo("Found somebody lower");
+                    }
+                }
+            }
+            else if (tag == UnicastTagTrigger)
+            {
+                // we are being informed that we were wanted to run for some reason (misc)
+                Echo("Trigger Received" + msg.Data);
+            }
+            // TODO: add more messages for state changes, etc.
+        }
+
     }
 }
