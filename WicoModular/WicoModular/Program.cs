@@ -18,26 +18,11 @@ using VRageMath;
 
 namespace IngameScript
 {
+
     partial class Program : MyGridProgram
     {
 
-        // the one and only unicast listener.  Must be shared amoung all interested parties
-        IMyUnicastListener myUnicastListener;
-
-        /// <summary>
-        /// the list of unicast message handlers. All handlers will be called on pending messages
-        /// </summary>
-        List<Action<MyIGCMessage>> unicastMessageHandlers = new List<Action<MyIGCMessage>>();
-
-
-        /// <summary>
-        /// List of 'registered' broadcst message handlers.  All handlers will be called on each message received
-        /// </summary>
-        List<Action<MyIGCMessage>> broadcastMessageHandlers = new List<Action<MyIGCMessage>>();
-        /// <summary>
-        /// List of broadcast channels.  All channels will be checked for incoming messages
-        /// </summary>
-        List<IMyBroadcastListener> broadcastChanels = new List<IMyBroadcastListener>();
+        WicoIGC wicoIGC;
 
         TransmissionDistance localConstructs = TransmissionDistance.CurrentConstruct;
         UpdateType utTriggers = UpdateType.Terminal | UpdateType.Trigger | UpdateType.Mod | UpdateType.Script;
@@ -45,19 +30,7 @@ namespace IngameScript
 
 
 
-        // WIco Main/Config stuff
-        IMyBroadcastListener _WicoMainTag;
-        string WicoMainTag = "WicoTagMain";
 
-        /// <summary>
-        /// List of Wico PB blocks on local construct
-        /// </summary>
-        List<long> _WicoMainSubscribers = new List<long>();
-
-        bool bIAmMain = true; // assume we are main
-        string YouAreSub = "YOUARESUB";
-        string UnicastTagTrigger = "TRIGGER";
-        string UnicastAnnounce = "IAMWICO";
 
 
         // Surface stuff
@@ -67,24 +40,12 @@ namespace IngameScript
 
         public Program()
         {
-            // IGC Init
-            _WicoMainTag = IGC.RegisterBroadcastListener(WicoMainTag); // What it listens for
-            _WicoMainTag.SetMessageCallback(WicoMainTag); // What it will run the PB with once it has a message
 
-            // add broadcast message handlers
-            broadcastMessageHandlers.Add(WicoMainMessagehandler);
-            broadcastChanels.Add(_WicoMainTag);
+            wicoIGC = new WicoIGC(this);
 
-            Runtime.UpdateFrequency = UpdateFrequency.Once; // cause ourselves to run to continue initialization
+            Runtime.UpdateFrequency = UpdateFrequency.Once; // cause ourselves to run again to continue initialization
 
-            // send a messge to all local 'Wico' PBs to get configuration.  This will be used to determine the 'master' PB
-            IGC.SendBroadcastMessage(WicoMainTag, "Configure", localConstructs);
-
-            myUnicastListener = IGC.UnicastListener;
-            myUnicastListener.SetMessageCallback();
-
-            // add unicast message handlers
-            unicastMessageHandlers.Add(WicoConfigUnicastListener);
+            WicoConfigurationInit();
 
             // Local PB Surface Init
             mesurface0 = Me.GetSurface(0);
@@ -108,11 +69,10 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
-            //           Echo("I Am Main=" + bIAmMain.ToString());
             if ((updateSource & UpdateType.IGC) > 0)
             {
                 Echo("IGC");
-                ProcessIGCMessages();
+                wicoIGC.ProcessIGCMessages();
                 if (bIAmMain)
                     mesurface1.WriteText("Master Module");
                 else
@@ -136,53 +96,32 @@ namespace IngameScript
             Echo("I Am Main=" + bIAmMain.ToString());
         }
 
+
+        #region WicoConfiguration
         /// <summary>
-        /// Process all pending ICG messages
+        /// List of Wico PB blocks on local construct
         /// </summary>
-        void ProcessIGCMessages()
+        List<long> _WicoMainSubscribers = new List<long>();
+
+        // WIco Main/Config stuff
+        string WicoMainTag = "WicoTagMain";
+
+        bool bIAmMain = true; // assume we are main
+        string YouAreSub = "YOUARESUB";
+        string UnicastTagTrigger = "TRIGGER";
+        string UnicastAnnounce = "IAMWICO";
+
+        void WicoConfigurationInit()
         {
-            // TODO: make this a yield return thing if processing takes too long
+            // Wico Configuration system
 
-            bool bFoundMessages = false;
-            //            Echo(broadcastChanels.Count.ToString() + " broadcast channels");
-            //            Echo(broadcastMessageHandlers.Count.ToString() + " broadcast message handlers");
-            //            Echo(unicastMessageHandlers.Count.ToString() + " unicast message handlers");
-            do
-            {
-                bFoundMessages = false;
-                foreach (var channel in broadcastChanels)
-                {
-                    if (channel.HasPendingMessage)
-                    {
-                        bFoundMessages = true;
-                        var msg = channel.AcceptMessage();
-                        foreach (var handler in broadcastMessageHandlers)
-                        {
-                            handler(msg);
-                        }
-                    }
-                }
-            } while (bFoundMessages); // Process all pending messages
-                                      //        } while (_WicoMainTag.HasPendingMessage); // Process all pending messages
+            // send a messge to all local 'Wico' PBs to get configuration.  This will be used to determine the 'master' PB
+            IGC.SendBroadcastMessage(WicoMainTag, "Configure", localConstructs);
 
-            do
-            {
-                // since there's only one channel, we could just use .HasPendingMessages directly.. but this keeps the code loops the same
-                bFoundMessages = false;
+            _WicoMainSubscribers.Clear();
 
-                if (myUnicastListener.HasPendingMessage)
-                {
-                    bFoundMessages = true;
-                    var msg = myUnicastListener.AcceptMessage();
-                    foreach (var handler in unicastMessageHandlers)
-                    {
-                        // Call each handler
-                        handler(msg);
-                    }
-                }
-            } while (bFoundMessages); // Process all pending messages
-                                      //            } while (myUnicastListener.HasPendingMessage); // Process all pending messages
-
+            wicoIGC.AddPublicHandler(WicoMainTag, WicoMainMessagehandler);
+            wicoIGC.AddUnicastHandler(WicoConfigUnicastListener);
         }
 
         /// <summary>
@@ -250,6 +189,113 @@ namespace IngameScript
             }
             // TODO: add more messages for state changes, etc.
         }
+
+        #endregion
+
+        #region WicoIGC
+        class WicoIGC
+        {
+            // the one and only unicast listener.  Must be shared amoung all interested parties
+            IMyUnicastListener myUnicastListener;
+
+            /// <summary>
+            /// the list of unicast message handlers. All handlers will be called on pending messages
+            /// </summary>
+            List<Action<MyIGCMessage>> unicastMessageHandlers = new List<Action<MyIGCMessage>>();
+
+
+            /// <summary>
+            /// List of 'registered' broadcst message handlers.  All handlers will be called on each message received
+            /// </summary>
+            List<Action<MyIGCMessage>> broadcastMessageHandlers = new List<Action<MyIGCMessage>>();
+            /// <summary>
+            /// List of broadcast channels.  All channels will be checked for incoming messages
+            /// </summary>
+            List<IMyBroadcastListener> broadcastChanels = new List<IMyBroadcastListener>();
+
+            MyGridProgram gridProgram;
+
+            public WicoIGC(MyGridProgram myProgram)
+            {
+                gridProgram = myProgram;
+            }
+
+            public bool AddPublicHandler(string ChannelTag, Action<MyIGCMessage> handler, bool bCallBack = true)
+            {
+                IMyBroadcastListener _PublicChannel;
+                // IGC Init
+                _PublicChannel = gridProgram.IGC.RegisterBroadcastListener(ChannelTag); // What it listens for
+                if(bCallBack) _PublicChannel.SetMessageCallback(ChannelTag); // What it will run the PB with once it has a message
+
+                // add broadcast message handlers
+                broadcastMessageHandlers.Add(handler);
+
+                // add to list of channels to check
+                broadcastChanels.Add(_PublicChannel);
+                return true;
+            }
+
+            public bool AddUnicastHandler(Action<MyIGCMessage> handler)
+            {
+                myUnicastListener = gridProgram.IGC.UnicastListener;
+                myUnicastListener.SetMessageCallback();
+                unicastMessageHandlers.Add(handler);
+                return true;
+
+            }
+            /// <summary>
+            /// Process all pending IGC messages
+            /// </summary>
+            public void ProcessIGCMessages()
+            {
+                // TODO: make this a yield return thing if processing takes too long
+
+                bool bFoundMessages = false;
+                //            Echo(broadcastChanels.Count.ToString() + " broadcast channels");
+                //            Echo(broadcastMessageHandlers.Count.ToString() + " broadcast message handlers");
+                //            Echo(unicastMessageHandlers.Count.ToString() + " unicast message handlers");
+                do
+                {
+                    bFoundMessages = false;
+                    foreach (var channel in broadcastChanels)
+                    {
+                        if (channel.HasPendingMessage)
+                        {
+                            bFoundMessages = true;
+                            var msg = channel.AcceptMessage();
+                            foreach (var handler in broadcastMessageHandlers)
+                            {
+                                handler(msg);
+                            }
+                        }
+                    }
+                } while (bFoundMessages); // Process all pending messages
+
+                if (myUnicastListener != null)
+                {
+                    do
+                    {
+                        // since there's only one channel, we could just use .HasPendingMessages directly.. but this keeps the code loops the same
+                        bFoundMessages = false;
+
+                        if (myUnicastListener.HasPendingMessage)
+                        {
+                            bFoundMessages = true;
+                            var msg = myUnicastListener.AcceptMessage();
+                            foreach (var handler in unicastMessageHandlers)
+                            {
+                                // Call each handler
+                                handler(msg);
+                            }
+                        }
+                    } while (bFoundMessages); // Process all pending messages
+                }
+
+            }
+        }
+        #endregion
+
+
 
     }
 }
