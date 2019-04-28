@@ -28,6 +28,7 @@ namespace IngameScript
 
 
         WicoThrusters wicoThrusters;
+        WicoGyros wicoGyros;
 
         List<Action<string, UpdateType>> UpdateTriggerHandlers = new List<Action<string, UpdateType>>();
         List<Action<string, UpdateType>> UpdateHandlers = new List<Action<string, UpdateType>>();
@@ -55,7 +56,7 @@ namespace IngameScript
             wicoControl = new WicoControl(this);
 
             wicoThrusters = new WicoThrusters(this);
-            
+            wicoGyros = new WicoGyros(this,null);
 
             Runtime.UpdateFrequency |= UpdateFrequency.Once; // cause ourselves to run again to continue initialization
 
@@ -104,7 +105,7 @@ namespace IngameScript
             }
             if ((updateSource & (utTriggers)) > 0)
             {
-                Echo("Triggers");
+                Echo("Triggers:"+argument);
                 foreach(var handler in UpdateTriggerHandlers)
                 {
                     handler(argument, updateSource);
@@ -120,8 +121,14 @@ namespace IngameScript
                     handler(argument, updateSource);
                 }
             }
+
+            if(wicoGyros.gyroControl==null)
+                wicoGyros.SetController();
+
             Echo("I Am Main=" + wicoControl.IamMain().ToString());
             Echo(wicoThrusters.ThrusterCount() + " Thrusters Found");
+            Echo(wicoGyros.NumberAllGyros() + " Total Gyros Found");
+            Echo(wicoGyros.NumberUsedGyros() + " Used Gyros");
         }
 
         bool bInitDone = false;

@@ -43,6 +43,7 @@
     <AdditionalFiles Include="MDK\whitelist.cache" />
     <Compile Include="WicoBlockMaster.cs" />
     <Compile Include="WicoControl.cs" />
+    <Compile Include="WicoGyros.cs" />
     <Compile Include="WicoIGC.cs" />
     <Compile Include="WicoThrust.cs" />
   </ItemGroup>
