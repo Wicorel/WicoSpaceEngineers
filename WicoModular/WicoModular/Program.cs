@@ -122,11 +122,12 @@ namespace IngameScript
                 }
             }
 
-            if(wicoGyros.gyroControl==null)
-                wicoGyros.SetController();
 
             Echo("I Am Main=" + wicoControl.IamMain().ToString());
             Echo(wicoThrusters.ThrusterCount() + " Thrusters Found");
+
+            if (wicoGyros.gyroControl == null)
+                wicoGyros.SetController();
             Echo(wicoGyros.NumberAllGyros() + " Total Gyros Found");
             Echo(wicoGyros.NumberUsedGyros() + " Used Gyros");
         }

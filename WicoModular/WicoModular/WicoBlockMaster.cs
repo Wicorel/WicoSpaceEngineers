@@ -28,10 +28,17 @@ namespace IngameScript
         {
             Program thisProgram;
             IMyGridTerminalSystem GridTerminalSystem;
+
+            List<IMyShipController> shipControllers = new List<IMyShipController>();
+            private IMyShipController MainShipController;
+
+
             public WicoBlockMaster(Program program)
             {
                 thisProgram = program;
                 GridTerminalSystem = thisProgram.GridTerminalSystem;
+
+                AddLocalBlockHandler(BlockParseHandler);
             }
             List<IMyTerminalBlock> gtsLocalBlocks = new List<IMyTerminalBlock>();
             long localBlocksCount = 0;
@@ -41,6 +48,7 @@ namespace IngameScript
 
             List<Action<IMyTerminalBlock>> WicoLocalBlockParseHandlers = new List<Action<IMyTerminalBlock>>();
             List<Action<IMyTerminalBlock>> WicoRemoteBlockParseHandlers = new List<Action<IMyTerminalBlock>>();
+
 
             public bool AddLocalBlockHandler(Action<IMyTerminalBlock> handler)
             {
@@ -85,8 +93,62 @@ namespace IngameScript
                     }
                 }
             }
+            /// <summary>
+            /// gets called for every block on the local construct
+            /// </summary>
+            /// <param name="tb"></param>
+            public void BlockParseHandler(IMyTerminalBlock tb)
+            {
+                if (tb is IMyCryoChamber)
+                    return; // we don't want this.
+                if (tb is IMyShipController)
+                {
+                    // TODO: Check for other things for ignoring
+                    shipControllers.Add(tb as IMyShipController);
+                }
+            }
+
+            /// <summary>
+            /// Returns the main ship controller
+            /// </summary>
+            /// <returns></returns>
+            public IMyShipController GetMainController()
+            {
+                // TODO: check for occupied, etc.
+                if (MainShipController == null)
+                {
+                    // pick a controller
+                    foreach (var tb in shipControllers)
+                    {
+                        if (tb is IMyRemoteControl)
+                        {
+                            // found a good one
+                            MainShipController = tb;
+                            break;
+                        }
+                    }
+                    // we didn't find one
+                    if (MainShipController == null)
+                    {
+                        foreach (var tb in shipControllers)
+                        {
+                            if (tb is IMyShipController)
+                            {
+                                // found a good one
+                                MainShipController = tb;
+                                break;
+                            }
+                        }
+                    }
+                }
+                return MainShipController;
+
+            }
 
         }
+
+
+
         #endregion
     }
 }

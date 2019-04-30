@@ -24,7 +24,6 @@ namespace IngameScript
             List<IMyGyro> allLocalGyros = new List<IMyGyro>();
             List<IMyGyro> useGyros = new List<IMyGyro>();
 
-            List<IMyShipController> shipControllers = new List<IMyShipController>();
 
             Program myGridProgram;
 
@@ -77,13 +76,6 @@ namespace IngameScript
                     // TODO: Ignore cutters, etc
                     allLocalGyros.Add(tb as IMyGyro);
                 }
-                if (tb is IMyCryoChamber)
-                    return; // we don't want this.
-                if (tb is IMyShipController)
-                {
-                    // TODO: Ignore cryo, etc
-                    shipControllers.Add(tb as IMyShipController);
-                }
             }
             public void SetController(IMyShipController controller=null)
             {
@@ -102,29 +94,7 @@ namespace IngameScript
                 useGyros.Clear();
                 if(gyroControl==null)
                 {
-                    // pick a controller
-                    foreach(var tb in shipControllers)
-                    {
-                        if(tb is IMyRemoteControl)
-                        {
-                            // found a good one
-                            gyroControl = tb;
-                            break;
-                        }
-                    }
-                    // we didn't find one
-                    if(gyroControl==null)
-                    {
-                        foreach (var tb in shipControllers)
-                        {
-                            if (tb is IMyShipController)
-                            {
-                                // found a good one
-                                gyroControl = tb;
-                                break;
-                            }
-                        }
-                    }
+                    gyroControl = myGridProgram.wicoBlockMaster.GetMainController();
                 }
                 if(gyroControl==null)
                 {
