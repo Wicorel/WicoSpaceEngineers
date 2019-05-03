@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MDKVersion>1.2.2</MDKVersion>
+    <MDKVersion>1.2.14</MDKVersion>
     <MDKMinify>
-      <Enabled>no</Enabled>
+      <Enabled>yes</Enabled>
     </MDKMinify>
     <MDKTrimTypes>
       <Enabled>no</Enabled>

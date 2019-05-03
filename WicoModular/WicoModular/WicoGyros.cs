@@ -25,7 +25,7 @@ namespace IngameScript
             List<IMyGyro> useGyros = new List<IMyGyro>();
 
 
-            Program myGridProgram;
+            Program thisProgram;
 
             public IMyShipController gyroControl;
 
@@ -46,14 +46,20 @@ namespace IngameScript
 
             public WicoGyros(Program program, IMyShipController myShipController)
             {
-                myGridProgram = program;
+                thisProgram = program;
                 gyroControl = myShipController;
                 GyrosInit();
             }
 
+            string sGridSection = "GRIDS";
+
             public void GyrosInit()
             {
-                //TODO: Load defaults from CustomData
+                thisProgram._CustomDataIni.Get(sGridSection, "CTRL_COEFF").ToDouble(CTRL_COEFF);
+                thisProgram._CustomDataIni.Get(sGridSection, "LIMIT_GYROS").ToInt32(LIMIT_GYROS);
+
+                thisProgram._CustomDataIni.Set(sGridSection, "CTRL_COEFF",CTRL_COEFF);
+                thisProgram._CustomDataIni.Set(sGridSection, "LIMIT_GYROS",LIMIT_GYROS);
 
                 // Minimal init; just add handlers
                 allLocalGyros.Clear();
@@ -62,7 +68,7 @@ namespace IngameScript
                     gyro.GyroOverride = false;
                 }
                 useGyros.Clear();
-                myGridProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
             }
 
             /// <summary>
@@ -94,7 +100,7 @@ namespace IngameScript
                 useGyros.Clear();
                 if(gyroControl==null)
                 {
-                    gyroControl = myGridProgram.wicoBlockMaster.GetMainController();
+                    gyroControl = thisProgram.wicoBlockMaster.GetMainController();
                 }
                 if(gyroControl==null)
                 {
@@ -209,6 +215,20 @@ namespace IngameScript
             public int NumberUsedGyros()
             {
                 return useGyros.Count();
+            }
+            /// <summary>
+            /// Turns off all overrides on controlled Gyros
+            /// </summary>
+            public void gyrosOff()
+            {
+                if (useGyros != null)
+                {
+                    for (int i1 = 0; i1 < useGyros.Count; ++i1)
+                    {
+                        useGyros[i1].GyroOverride = false;
+                        useGyros[i1].Enabled = true;
+                    }
+                }
             }
         }
 

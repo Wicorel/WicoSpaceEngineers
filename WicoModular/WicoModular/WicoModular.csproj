@@ -35,16 +35,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cameras.cs" />
     <Compile Include="EndOfScript.cs" />
+    <Compile Include="LandingGears.cs" />
     <Compile Include="MDK\Bootstrapper.cs" />
+    <Compile Include="OrbitalLaunch.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Readme.cs" />
     <AdditionalFiles Include="thumb.png" />
     <AdditionalFiles Include="MDK\whitelist.cache" />
     <Compile Include="WicoBlockMaster.cs" />
+    <Compile Include="WicoConnectors.cs" />
     <Compile Include="WicoControl.cs" />
+    <Compile Include="WicoGasGens.cs" />
     <Compile Include="WicoGyros.cs" />
     <Compile Include="WicoIGC.cs" />
+    <Compile Include="WicoTanks.cs" />
     <Compile Include="WicoThrust.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

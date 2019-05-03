@@ -26,12 +26,30 @@ namespace IngameScript
         WicoControl wicoControl;
         WicoBlockMaster wicoBlockMaster;
 
-
         WicoThrusters wicoThrusters;
         WicoGyros wicoGyros;
+        GasTanks wicoGasTanks;
+        GasGens wicoGasGens;
+        Connectors wicoConnectors;
+        LandingGears wicoLandingGears;
+        Cameras wicoCameras;
 
-        List<Action<string, UpdateType>> UpdateTriggerHandlers = new List<Action<string, UpdateType>>();
-        List<Action<string, UpdateType>> UpdateHandlers = new List<Action<string, UpdateType>>();
+        OrbitalLaunch wicoOrbitalLaunch;
+
+
+        // Handlers
+        List<Action<MyCommandLine, UpdateType>> UpdateTriggerHandlers = new List<Action<MyCommandLine, UpdateType>>();
+        List<Action<UpdateType>> UpdateUpdateHandlers = new List<Action<UpdateType>>();
+
+        // https://github.com/malware-dev/MDK-SE/wiki/Handling-Script-Arguments
+        MyCommandLine myCommandLine = new MyCommandLine();
+
+
+        List<Action<MyIni>> SaveHandlers = new List<Action<MyIni>>();
+
+        // https://github.com/malware-dev/MDK-SE/wiki/Handling-configuration-and-storage
+        MyIni _SaveIni = new MyIni();
+        MyIni _CustomDataIni = new MyIni();
 
 
         /// <summary>
@@ -51,16 +69,27 @@ namespace IngameScript
 
         public Program()
         {
-            wicoIGC = new WicoIGC(this); // Must be first
+            MyIniParseResult result;
+            if (!_CustomDataIni.TryParse(Me.CustomData, out result))
+                throw new Exception(result.ToString());
+            if (!_SaveIni.TryParse(Storage, out result))
+                throw new Exception(result.ToString());
+
+            wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
             wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
             wicoControl = new WicoControl(this);
 
             wicoThrusters = new WicoThrusters(this);
             wicoGyros = new WicoGyros(this,null);
+            wicoGasTanks = new GasTanks(this);
+            wicoGasGens = new GasGens(this);
+            wicoConnectors = new Connectors(this);
+            wicoLandingGears = new LandingGears(this);
+            wicoCameras = new Cameras(this);
+
+            wicoOrbitalLaunch = new OrbitalLaunch(this);
 
             Runtime.UpdateFrequency |= UpdateFrequency.Once; // cause ourselves to run again to continue initialization
-
- //           wicoControl.WicoControlInit();
 
             // Local PB Surface Init
             mesurface0 = Me.GetSurface(0);
@@ -81,22 +110,28 @@ namespace IngameScript
                 Echo("I am turned OFF!");
             }
 
-
         }
 
         public void Save()
         {
+            foreach(var handler in SaveHandlers)
+            {
+                handler(_SaveIni);
+            }
+            Storage = _SaveIni.ToString();
+
         }
 
         public void Main(string argument, UpdateType updateSource)
         {
+            wicoControl.ResetUpdates();
             if (!WicoInit())
             {
                 Echo("Init");
             }
             if ((updateSource & UpdateType.IGC) > 0)
             {
-                Echo("IGC");
+//                Echo("IGC");
                 wicoIGC.ProcessIGCMessages();
                 if (wicoControl.IamMain())
                     mesurface1.WriteText("Master Module");
@@ -105,24 +140,26 @@ namespace IngameScript
             }
             if ((updateSource & (utTriggers)) > 0)
             {
-                Echo("Triggers:"+argument);
+//                Echo("Triggers:"+argument);
+                MyCommandLine useCommandLine = null;
+                if (myCommandLine.TryParse(argument))
+                    useCommandLine = myCommandLine;
                 foreach(var handler in UpdateTriggerHandlers)
                 {
-                    handler(argument, updateSource);
+                    handler(useCommandLine, updateSource);
                 }
-//                wicoControl.ProcessTrigger(argument, updateSource);
 
             }
             if ((updateSource & (utUpdates)) > 0)
             {
-                Echo("Update");
-                foreach (var handler in UpdateHandlers)
+//                Echo("Update");
+                foreach (var handler in UpdateUpdateHandlers)
                 {
-                    handler(argument, updateSource);
+                    handler(updateSource);
                 }
             }
 
-
+            /*
             Echo("I Am Main=" + wicoControl.IamMain().ToString());
             Echo(wicoThrusters.ThrusterCount() + " Thrusters Found");
 
@@ -130,6 +167,16 @@ namespace IngameScript
                 wicoGyros.SetController();
             Echo(wicoGyros.NumberAllGyros() + " Total Gyros Found");
             Echo(wicoGyros.NumberUsedGyros() + " Used Gyros");
+
+            var shipController= wicoBlockMaster.GetMainController();
+            if (shipController != null)
+                Echo("Controller = " + shipController.CustomName);
+            */
+            Echo("Mode=" + wicoControl.IMode.ToString());
+            Echo("State=" + wicoControl.IState.ToString());
+
+            Runtime.UpdateFrequency |= wicoControl.GenerateUpdate();
+
         }
 
         bool bInitDone = false;
@@ -141,6 +188,7 @@ namespace IngameScript
             // must come late as the above inits may add handlers
             wicoBlockMaster.LocalBlocksInit();
 
+            Me.CustomData = _CustomDataIni.ToString();
             bInitDone = true;
             return bInitDone;
         }

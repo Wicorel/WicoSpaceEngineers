@@ -114,6 +114,7 @@ namespace IngameScript
             /// <returns></returns>
             public IMyShipController GetMainController()
             {
+                thisProgram.Echo(shipControllers.Count.ToString() + " Ship Controllers");
                 // TODO: check for occupied, etc.
                 if (MainShipController == null)
                 {
@@ -143,6 +144,20 @@ namespace IngameScript
                 }
                 return MainShipController;
 
+            }
+            /// <summary>
+            /// Helper function.  Turn blocks in list on or off
+            /// </summary>
+            /// <param name="blocks"></param>
+            /// <param name="bOn"></param>
+            public void BlocksOnOff(List<IMyTerminalBlock> blocks, bool bOn = true)
+            {
+                foreach (var b in blocks)
+                {
+                    IMyFunctionalBlock f = b as IMyFunctionalBlock;
+                    if (f == null) continue;
+                    f.Enabled = bOn;
+                }
             }
 
         }

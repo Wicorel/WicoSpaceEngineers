@@ -27,7 +27,11 @@ namespace IngameScript
         {
             List<IMyTerminalBlock> thrustAllList = new List<IMyTerminalBlock>();
 
-            Program myGridProgram;
+            Program thisProgram;
+
+            string sThrusterSection = "THRUSTERS";
+
+            string sCutterThruster = "cutter";
 
             public int ThrusterCount()
             {
@@ -36,32 +40,35 @@ namespace IngameScript
 
             public WicoThrusters(Program program)
             {
-                myGridProgram = program;
+                thisProgram = program;
                 ThrustersInit();
             }
             public void ThrustersInit()
             {
-                //TODO: Load defaults from CustomData
+                thisProgram._CustomDataIni.Get(sThrusterSection, "CutterThruster").ToString(sCutterThruster);
+
+                thisProgram._CustomDataIni.Set(sThrusterSection, "CutterThruster", sCutterThruster);
 
                 // Minimal init; just add handlers
                 thrustAllList.Clear();
-                myGridProgram.wicoBlockMaster.AddLocalBlockHandler(ThrusterParseHandler);
+                thisProgram.wicoBlockMaster.AddLocalBlockHandler(ThrusterParseHandler);
             }
 
             public void ThrusterParseHandler(IMyTerminalBlock tb)
             {
                 if (tb is IMyThrust)
                 {
-                    // TODO: Ignore cutters, etc
+                    if (tb.CustomName.ToLower().Contains(sCutterThruster))
+                        return; // don't add it.
                     thrustAllList.Add(tb);
                 }
             }
 
-            const int thrustatmo = 1;
-            const int thrusthydro = 2;
-            const int thrustion = 4;
-            const int thrusthover = 8;
-            const int thrustAll = 0xff;
+            public const int thrustatmo = 1;
+            public const int thrusthydro = 2;
+            public const int thrustion = 4;
+            public const int thrusthover = 8;
+            public const int thrustAll = 0xff;
 
             readonly Matrix thrustIdentityMatrix = new Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
@@ -169,6 +176,11 @@ namespace IngameScript
                 }
                 return null;
             }
+
+            public int powerDownThrusters(int iTypes = thrustAll, bool bForceOff = false)
+            {
+                return powerDownThrusters(thrustAllList, iTypes, bForceOff);
+            }
             public int powerDownThrusters(List<IMyTerminalBlock> thrusters, int iTypes = thrustAll, bool bForceOff = false)
             {
                 int iCount = 0;
@@ -241,7 +253,7 @@ namespace IngameScript
             }
 
 
-            public bool calculateHoverThrust(IMyTerminalBlock ShipController, List<IMyTerminalBlock> thrusters, out float atmoPercent, out float hydroPercent, out float ionPercent)
+            public bool CalculateHoverThrust(IMyShipController ShipController, List<IMyTerminalBlock> thrusters, out float atmoPercent, out float hydroPercent, out float ionPercent)
             {
                 atmoPercent = 0;
                 hydroPercent = 0;
@@ -251,10 +263,10 @@ namespace IngameScript
                 double hydroThrust = calculateMaxThrust(thrusters, thrusthydro);
 
                 MyShipMass myMass;
-                myMass = ((IMyShipController)ShipController).CalculateShipMass();
-                Vector3D vGrav = ((IMyShipController)ShipController).GetNaturalGravity();
-                double dGravity = vGrav.Length();
-                double hoverthrust = hoverthrust = myMass.PhysicalMass * dGravity * 9.810;
+                myMass = ShipController.CalculateShipMass();
+                Vector3D vGrav = ShipController.GetNaturalGravity();
+                double dGravity = vGrav.Length() / 9.81;
+                double hoverthrust = myMass.PhysicalMass * dGravity * 9.810;
 
                 if (atmoThrust > 0)
                 {
@@ -329,6 +341,27 @@ namespace IngameScript
                 //            Echo("stoppingM=" + stoppingM.ToString("0.00"));
                 return stoppingM;
             }
+            public double CalculateTotalEffectiveThrust(List<IMyTerminalBlock> thrusters, float atmoMult = 5f, float ionMult = 2f, float hydroMult = 1f)
+            {
+                double totalThrust = 0;
+
+                foreach (var block in thrusters)
+                {
+                    var thruster = block as IMyThrust;
+                    if (thruster == null) continue;
+                    int thrusterType = ThrusterType(thruster);
+                    if (thrusterType == thrustatmo)
+                        totalThrust += thruster.MaxEffectiveThrust * atmoMult;
+                    else if (thrusterType == thrustion)
+                        totalThrust += thruster.MaxEffectiveThrust * ionMult;
+                    else if (thrusterType == thrusthydro)
+                        totalThrust += thruster.MaxEffectiveThrust * hydroMult;
+                    else
+                        totalThrust += thruster.MaxEffectiveThrust;
+                }
+                return totalThrust;
+            }
+
         }
         #endregion
 
