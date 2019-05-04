@@ -252,6 +252,142 @@ namespace IngameScript
                 return thrust;
             }
 
+            public void GetBestThrusters(Vector3 v1,
+                List<IMyTerminalBlock> thrustForwardList, List<IMyTerminalBlock> thrustBackwardList,
+                List<IMyTerminalBlock> thrustDownList, List<IMyTerminalBlock> thrustUpList,
+                List<IMyTerminalBlock> thrustLeftList, List<IMyTerminalBlock> thrustRightList,
+                out List<IMyTerminalBlock> thrustTowards, out List<IMyTerminalBlock> thrustAway
+                )
+            {
+                Matrix or1;
+                double angle;
+                Vector3D vThrustAim;
+                Vector3D vNGN = v1;
+                vNGN.Normalize();
+                double cos45 = MathHelper.Sqrt2 * 0.5;
+
+                // default selection to assign out parameters in main-line code
+                thrustTowards = thrustForwardList;
+                thrustAway = thrustBackwardList;
+
+                thrustForwardList[0].Orientation.GetMatrix(out or1);
+                vThrustAim = or1.Forward;
+                angle = vNGN.Dot(vThrustAim);
+                if (angle > cos45)
+                    return;
+
+                thrustUpList[0].Orientation.GetMatrix(out or1);
+                vThrustAim = or1.Forward;
+                angle = vNGN.Dot(vThrustAim);
+                if(angle>cos45)
+                {
+                    thrustTowards = thrustUpList;
+                    thrustAway = thrustDownList;
+                    return;
+                }
+
+                thrustBackwardList[0].Orientation.GetMatrix(out or1);
+                vThrustAim = or1.Forward;
+                angle = vNGN.Dot(vThrustAim);
+                if (angle > cos45)
+                {
+                    thrustTowards = thrustBackwardList;
+                    thrustAway = thrustForwardList;
+                    return;
+                }
+                thrustDownList[0].Orientation.GetMatrix(out or1);
+                vThrustAim = or1.Forward;
+                angle = vNGN.Dot(vThrustAim);
+                if (angle > cos45)
+                {
+                    thrustTowards = thrustDownList;
+                    thrustAway = thrustUpList;
+                    return;
+                }
+                thrustRightList[0].Orientation.GetMatrix(out or1);
+                vThrustAim = or1.Forward;
+                angle = vNGN.Dot(vThrustAim);
+                if (angle > cos45)
+                {
+                    thrustTowards = thrustRightList;
+                    thrustAway = thrustLeftList;
+                    return;
+                }
+                thrustLeftList[0].Orientation.GetMatrix(out or1);
+                vThrustAim = or1.Forward;
+                angle = vNGN.Dot(vThrustAim);
+                if (angle > cos45)
+                {
+                    thrustTowards = thrustLeftList;
+                    thrustAway = thrustRightList;
+                    return;
+                }
+
+            }
+            public void GetMaxScaledThrusters(
+                List<IMyTerminalBlock> thrustForwardList, List<IMyTerminalBlock> thrustBackwardList,
+                List<IMyTerminalBlock> thrustDownList, List<IMyTerminalBlock> thrustUpList,
+                List<IMyTerminalBlock> thrustLeftList, List<IMyTerminalBlock> thrustRightList,
+                out List<IMyTerminalBlock> bestThrust, out List<IMyTerminalBlock> reverseBestThrust,
+                float atmoMult = 5f, float ionMult = 2f, float hydroMult = 1f
+                )
+            {
+                double currentMaxThrust = 0;
+                double maxThrust = 0;
+                maxThrust = CalculateTotalEffectiveThrust(thrustForwardList, atmoMult,ionMult,hydroMult);
+                currentMaxThrust = maxThrust;
+                bestThrust = thrustForwardList;
+                reverseBestThrust = thrustBackwardList;
+                /*
+                if (maxThrust > currentMaxThrust)
+                {
+                    currentMaxThrust = maxThrust;
+                    tb = thrustForwardList[0];
+                }
+                */
+                maxThrust = CalculateTotalEffectiveThrust(thrustBackwardList, atmoMult, ionMult, hydroMult);
+                if (maxThrust > currentMaxThrust)
+                {
+                    currentMaxThrust = maxThrust;
+                    bestThrust = thrustBackwardList;
+                    reverseBestThrust = thrustForwardList;
+                }
+                maxThrust = CalculateTotalEffectiveThrust(thrustDownList, atmoMult, ionMult, hydroMult);
+                if (maxThrust > currentMaxThrust)
+                {
+                    currentMaxThrust = maxThrust;
+                    bestThrust = thrustDownList;
+                    reverseBestThrust = thrustUpList;
+                }
+                maxThrust = CalculateTotalEffectiveThrust(thrustUpList, atmoMult, ionMult, hydroMult);
+                if (maxThrust > currentMaxThrust)
+                {
+                    currentMaxThrust = maxThrust;
+                    bestThrust = thrustUpList;
+                    reverseBestThrust = thrustDownList;
+                }
+                maxThrust = CalculateTotalEffectiveThrust(thrustLeftList, atmoMult, ionMult, hydroMult);
+                if (maxThrust > currentMaxThrust)
+                {
+                    currentMaxThrust = maxThrust;
+                    bestThrust = thrustLeftList;
+                    reverseBestThrust = thrustRightList;
+                }
+                maxThrust = CalculateTotalEffectiveThrust(thrustRightList, atmoMult, ionMult, hydroMult);
+                if (maxThrust > currentMaxThrust)
+                {
+                    currentMaxThrust = maxThrust;
+                    bestThrust = thrustRightList;
+                    reverseBestThrust = thrustLeftList;
+                }
+
+                return;
+                /*
+                Matrix or1;
+                tb.Orientation.GetMatrix(out or1);
+                return or1.Down;
+                */
+            }
 
             public bool CalculateHoverThrust(IMyShipController ShipController, List<IMyTerminalBlock> thrusters, out float atmoPercent, out float hydroPercent, out float ionPercent)
             {

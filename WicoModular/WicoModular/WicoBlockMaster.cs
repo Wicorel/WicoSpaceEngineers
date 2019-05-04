@@ -114,7 +114,7 @@ namespace IngameScript
             /// <returns></returns>
             public IMyShipController GetMainController()
             {
-                thisProgram.Echo(shipControllers.Count.ToString() + " Ship Controllers");
+//                thisProgram.Echo(shipControllers.Count.ToString() + " Ship Controllers");
                 // TODO: check for occupied, etc.
                 if (MainShipController == null)
                 {
@@ -141,10 +141,86 @@ namespace IngameScript
                             }
                         }
                     }
+                    if(MainShipController!=null)
+                    {
+                        // we found one
+                        ShipDimensions(MainShipController);
+                    }
                 }
+                
                 return MainShipController;
 
             }
+            const float SMALL_BLOCK_VOLUME = 0.5f;
+            const float LARGE_BLOCK_VOLUME = 2.5f;
+            const double SMALL_BLOCK_LENGTH = 0.5;
+            const double LARGE_BLOCK_LENGTH = 2.5;
+
+            private float _length_blocks, _width_blocks, _height_blocks;
+            private double _length, _width, _height;
+            private double _block2metric;
+            private OrientedBoundingBoxFaces _obbf;
+
+            void ShipDimensions(IMyShipController orientationBlock)//BoundingBox bb, double BlockMetricConversion)
+            {
+                if (thisProgram.Me.CubeGrid.GridSizeEnum.ToString().ToLower().Contains("small"))
+                    _block2metric = SMALL_BLOCK_LENGTH;
+                else
+                    _block2metric = LARGE_BLOCK_LENGTH;
+
+                _obbf = new OrientedBoundingBoxFaces(orientationBlock);
+                Vector3D[] points = new Vector3D[4];
+                _obbf.GetFaceCorners(OrientedBoundingBoxFaces.LookupFront, points); // 5 = front
+                                                                                    // front output order is BL, BR, TL, TR
+                _width = (points[0] - points[1]).Length();
+                _height = (points[0] - points[2]).Length();
+                _obbf.GetFaceCorners(0, points);
+                // face 0=right output order is  BL, TL, BR, TR ???
+                _length = (points[0] - points[2]).Length();
+
+                _length_blocks = (float)(_length / _block2metric);
+                _width_blocks = (float)(_width / _block2metric);
+                _height_blocks = (float)(_height / _block2metric);
+
+                /*
+                                _length_blocks = bb.Size.GetDim(2) + 1;
+                                _width_blocks = bb.Size.GetDim(0) + 1;
+                                _height_blocks = bb.Size.GetDim(1) + 1;
+                                _block2metric = BlockMetricConversion;
+                                _length = Math.Round(_length_blocks * BlockMetricConversion, 2);
+                                _width = Math.Round(_width_blocks * BlockMetricConversion, 2);
+                                _height = Math.Round(_height_blocks * BlockMetricConversion, 2);
+                                */
+            }
+            public float LengthInBlocks()
+            {
+                return _length_blocks;
+            }
+            public double LengthInMeters()
+            {
+                return _length;
+            }
+            public float WidthInBlocks()
+            {
+                return _width_blocks;
+            }
+            public double WidthInMeters()
+            {
+                return _width;
+            }
+            public float HeightInBlocks()
+            {
+                return _height_blocks;
+            }
+            public double HeightInMeters()
+            {
+                return _height;
+            }
+            public double BlockMultiplier()
+            {
+                return _block2metric;
+            }
+
             /// <summary>
             /// Helper function.  Turn blocks in list on or off
             /// </summary>
@@ -162,6 +238,132 @@ namespace IngameScript
 
         }
 
+        // oriented bounding box from plaYer2k
+        // Fixes/testing by Wicorel
+        public struct OrientedBoundingBoxFaces
+        {
+            public Vector3D[] Corners;
+            Vector3D localMax;
+            Vector3D localMin;
+
+            public Vector3D Position;
+
+            static int[] PointsLookupRight = { 1, 3, 5, 7 };
+            static int[] PointsLookupLeft = { 0, 2, 4, 6 };
+
+            static int[] PointsLookupTop = { 2, 3, 6, 7 };
+            static int[] PointsLookupBottom = { 0, 1, 4, 5 };
+
+            static int[] PointsLookupBack = { 4, 5, 6, 7 };
+            static int[] PointsLookupFront = { 0, 1, 2, 3 };
+
+            static int[][] PointsLookup = {
+        PointsLookupRight, PointsLookupLeft,
+        PointsLookupTop, PointsLookupBottom,
+        PointsLookupBack, PointsLookupFront
+    };
+            public const int LookupRight = 0;
+            public const int LookupLeft = 1;
+            public const int LookupTop = 2;
+            public const int LookupBottom = 3;
+            public const int LookupBack = 4;
+            public const int LookupFront = 5;
+
+            public OrientedBoundingBoxFaces(IMyTerminalBlock block)
+            {
+                Corners = new Vector3D[8];
+                if (block == null)
+                {
+                    Position = new Vector3D();
+                    localMin = new Vector3D();
+                    localMax = new Vector3D();
+                    return;
+                }
+
+                // Reconstruct bounding box vectors in world dimensions
+                // For a 1x1x1 cube where Min = Max we still have the 1x1x1 cube as bounding box,
+                // hence half that gets added in each direction.
+                //		var localMin = new Vector3D(block.CubeGrid.Min) - new Vector3D(0.5, 0.5, 0.5);
+                localMin = new Vector3D(block.CubeGrid.Min) - new Vector3D(0.5, 0.5, 0.5);
+                localMin *= block.CubeGrid.GridSize;
+                //		var localMax = new Vector3D(block.CubeGrid.Max) + new Vector3D(0.5, 0.5, 0.5);
+                localMax = new Vector3D(block.CubeGrid.Max) + new Vector3D(0.5, 0.5, 0.5);
+                localMax *= block.CubeGrid.GridSize;
+
+
+
+                // The reference-blocks orientation.
+                var blockOrient = block.WorldMatrix.GetOrientation();
+
+                // Get the matrix that transforms from the cube grids orientation to the blocks orientation.
+                var matrix = block.CubeGrid.WorldMatrix.GetOrientation() * MatrixD.Transpose(blockOrient);
+
+                // Transform the cubegrid-relative min/max to block-relative min/max.
+                Vector3D.TransformNormal(ref localMin, ref matrix, out localMin);
+                Vector3D.TransformNormal(ref localMax, ref matrix, out localMax);
+
+                // Form clean min/max again.
+                var tmpMin = Vector3D.Min(localMin, localMax);
+                localMax = Vector3D.Max(localMin, localMax);
+                localMin = tmpMin;
+
+
+                // Get the center for the offset correction into worldspace.
+                var center = block.CubeGrid.GetPosition();
+
+                Vector3D tmp2;
+                Vector3D tmp3;
+                tmp2 = localMin;
+                Vector3D.TransformNormal(ref tmp2, ref blockOrient, out tmp2);
+                tmp2 += center;
+
+                tmp3 = localMax;
+                Vector3D.TransformNormal(ref tmp3, ref blockOrient, out tmp3);
+                tmp3 += center;
+
+                BoundingBox bb = new BoundingBox(tmp2, tmp3);
+                Position = bb.Center;
+
+
+                // Iterate over all edges and get them into world space.
+                Vector3D tmp;
+                for (int i = 0; i < 8; i++)
+                {
+                    tmp.X = ((i & 1) == 0 ? localMin : localMax).X;
+                    tmp.Y = ((i & 2) == 0 ? localMin : localMax).Y;
+                    tmp.Z = ((i & 4) == 0 ? localMin : localMax).Z;
+                    Vector3D.TransformNormal(ref tmp, ref blockOrient, out tmp);
+                    tmp += center;
+                    Corners[i] = tmp;
+                }
+            }
+            // face 0=right output order is  BL, TL, BR, TR
+            // face 1=left output order is BL, TL, BR, TR
+            // face 2=top output order is FTL, FR, BL, BR
+            // face 3=bottom output order is FL, FR, BL, BR
+            // face 4=back output order is BL, BR, TL, TR
+            // face 5=front output order is BL, BR, TL, TR
+
+            // Gets the points defining a face of the bounding box in world space.
+            // 0 = right, 1 = left, 2 = top, 3 = bottom, 4 = back, 5 = front
+            // alt: dir<<1 + sign with dir: 0 = X, 1 = Y, 2 = Z, sign: 0 = +, 1 = - (i.e. 3 = -Y (1<1+1))
+
+            /// <summary>
+            /// Get the corners for a specified face.
+            /// </summary>
+            /// <param name="face">0=right, 1=left, 2=top, 3=bottom, 4=back, 5=front</param>
+            /// <param name="points">array of points to return. See implementation source for corner order</param>
+            /// <param name="index">optional offset</param>
+            public void GetFaceCorners(int face, Vector3D[] points, int index = 0)
+            {
+                face %= PointsLookup.Length;
+                for (int i = 0; i < PointsLookup[face].Length; i++)
+                {
+                    points[index++] = Corners[PointsLookup[face][i]];
+                }
+            }
+
+        }
 
 
         #endregion

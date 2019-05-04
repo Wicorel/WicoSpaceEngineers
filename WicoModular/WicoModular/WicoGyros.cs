@@ -135,9 +135,6 @@ namespace IngameScript
             /// <returns>true if aligned. Meaning the angle of error is less than minAngleRad</returns>
             public bool AlignGyros(string argument, Vector3D vDirection, IMyTerminalBlock gyroControlPoint)
             {
-                bool bAligned = true;
-                if (gyroControl == null)
-                    GyroSetup();
                 Matrix or1;
                 gyroControlPoint.Orientation.GetMatrix(out or1);
 
@@ -158,7 +155,18 @@ namespace IngameScript
                 else
                     down = or1.Down;
 
+                 return AlignGyros(down, vDirection, gyroControlPoint);
+
+            }
+
+            public bool AlignGyros(Vector3D down, Vector3D vDirection, IMyTerminalBlock gyroControlPoint)
+            {
+                bool bAligned = true;
+                if (gyroControl == null)
+                    GyroSetup();
+
                 vDirection.Normalize();
+                Matrix or1;
 
                 for (int i1 = 0; i1 < useGyros.Count; ++i1)
                 {

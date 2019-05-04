@@ -34,7 +34,7 @@ namespace IngameScript
         LandingGears wicoLandingGears;
         Cameras wicoCameras;
 
-        OrbitalLaunch wicoOrbitalLaunch;
+        OrbitalModes wicoOrbitalLaunch;
 
 
         // Handlers
@@ -87,7 +87,7 @@ namespace IngameScript
             wicoLandingGears = new LandingGears(this);
             wicoCameras = new Cameras(this);
 
-            wicoOrbitalLaunch = new OrbitalLaunch(this);
+            wicoOrbitalLaunch = new OrbitalModes(this);
 
             Runtime.UpdateFrequency |= UpdateFrequency.Once; // cause ourselves to run again to continue initialization
 
@@ -129,6 +129,7 @@ namespace IngameScript
             {
                 Echo("Init");
             }
+            Echo(updateSource.ToString());
             if ((updateSource & UpdateType.IGC) > 0)
             {
 //                Echo("IGC");
@@ -175,7 +176,7 @@ namespace IngameScript
             Echo("Mode=" + wicoControl.IMode.ToString());
             Echo("State=" + wicoControl.IState.ToString());
 
-            Runtime.UpdateFrequency |= wicoControl.GenerateUpdate();
+            Runtime.UpdateFrequency = wicoControl.GenerateUpdate();
 
         }
 
