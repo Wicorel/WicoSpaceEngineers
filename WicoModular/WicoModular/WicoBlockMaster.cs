@@ -29,19 +29,16 @@ namespace IngameScript
             Program thisProgram;
             IMyGridTerminalSystem GridTerminalSystem;
 
-            List<IMyShipController> shipControllers = new List<IMyShipController>();
-            private IMyShipController MainShipController;
-
-
             public WicoBlockMaster(Program program)
             {
                 thisProgram = program;
                 GridTerminalSystem = thisProgram.GridTerminalSystem;
 
                 AddLocalBlockHandler(BlockParseHandler);
+                AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
             List<IMyTerminalBlock> gtsLocalBlocks = new List<IMyTerminalBlock>();
-            long localBlocksCount = 0;
+            public long localBlocksCount = 0;
 
             List<IMyTerminalBlock> gtsRemoteBlocks = new List<IMyTerminalBlock>();
             long remoteBlocksCount = 0;
@@ -49,6 +46,8 @@ namespace IngameScript
             List<Action<IMyTerminalBlock>> WicoLocalBlockParseHandlers = new List<Action<IMyTerminalBlock>>();
             List<Action<IMyTerminalBlock>> WicoRemoteBlockParseHandlers = new List<Action<IMyTerminalBlock>>();
 
+            List<Action> WicoLocalBlockChangedHandlers = new List<Action>();
+            List<Action> WicoRemoteBlockChangedHandlers = new List<Action>();
 
             public bool AddLocalBlockHandler(Action<IMyTerminalBlock> handler)
             {
@@ -56,12 +55,23 @@ namespace IngameScript
                     WicoLocalBlockParseHandlers.Add(handler);
                 return true;
             }
+            public void AddLocalBlockChangedHandler(Action handler)
+            {
+                if (!WicoLocalBlockChangedHandlers.Contains(handler))
+                    WicoLocalBlockChangedHandlers.Add(handler);
+            }
             public bool AddRemoteBlockHandler(Action<IMyTerminalBlock> handler)
             {
                 if (!WicoRemoteBlockParseHandlers.Contains(handler))
                     WicoRemoteBlockParseHandlers.Add(handler);
                 return true;
             }
+            public void AddRemoteBlocChangedHandler(Action handler)
+            {
+                if (!WicoRemoteBlockChangedHandlers.Contains(handler))
+                    WicoRemoteBlockChangedHandlers.Add(handler);
+            }
+
 
             public void LocalBlocksInit()
             {
@@ -79,6 +89,13 @@ namespace IngameScript
                     }
                 }
             }
+            void LocalBlocksChanged()
+            {
+                foreach (var handler in WicoLocalBlockChangedHandlers)
+                {
+                    handler();
+                }
+            }
 
             public void RemoteBlocksInit()
             {
@@ -93,6 +110,70 @@ namespace IngameScript
                     }
                 }
             }
+            void RemoteBlocksChanged()
+            {
+                foreach (var handler in WicoRemoteBlockChangedHandlers)
+                {
+                    handler();
+                }
+            }
+
+            List<IMyTerminalBlock> gtsTestBlocks = new List<IMyTerminalBlock>();
+            public bool CalcLocalGridChange(bool bForceUpdate=false)
+            {
+                gtsTestBlocks.Clear();
+                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => x1.IsSameConstructAs(thisProgram.Me) && ValidBlock(x1)));
+//                thisProgram.Echo("test block count=" + gtsTestBlocks.Count.ToString());
+                if (localBlocksCount != gtsTestBlocks.Count || bForceUpdate)
+                {
+                    LocalBlocksChanged(); // tell them something changed
+                    localBlocksCount = gtsTestBlocks.Count;
+                    gtsLocalBlocks = gtsTestBlocks;
+                    foreach (var tb in gtsLocalBlocks)
+                    {
+                        foreach (var handler in WicoLocalBlockParseHandlers)
+                        { // tell them about the new blocks
+                            handler(tb);
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+            bool ValidBlock(IMyTerminalBlock tb)
+            {
+                if (tb.GetPosition() == new Vector3D())
+                {
+                    return false;
+                }
+                else return true;
+            }
+
+            public bool CalcRemoteGridChange()
+            {
+                List<IMyTerminalBlock> gtsTestBlocks = new List<IMyTerminalBlock>();
+                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => !x1.IsSameConstructAs(thisProgram.Me)));
+                if (remoteBlocksCount != gtsTestBlocks.Count)
+                {
+                    RemoteBlocksChanged();
+                    remoteBlocksCount = gtsTestBlocks.Count;
+                    gtsRemoteBlocks = gtsTestBlocks;
+                    foreach (var tb in gtsRemoteBlocks)
+                    {
+                        foreach (var handler in WicoRemoteBlockParseHandlers)
+                        {
+                            handler(tb);
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+
+            #region SHIPCONTROLLER
+            List<IMyShipController> shipControllers = new List<IMyShipController>();
+            private IMyShipController MainShipController;
             /// <summary>
             /// gets called for every block on the local construct
             /// </summary>
@@ -104,8 +185,16 @@ namespace IngameScript
                 if (tb is IMyShipController)
                 {
                     // TODO: Check for other things for ignoring
+                    // like toilets, etc.
                     shipControllers.Add(tb as IMyShipController);
                 }
+            }
+
+            public void LocalGridChangedHandler()
+            {
+                // forget what we through we knew
+                MainShipController = null; 
+                shipControllers.Clear(); 
             }
 
             /// <summary>
@@ -116,6 +205,7 @@ namespace IngameScript
             {
 //                thisProgram.Echo(shipControllers.Count.ToString() + " Ship Controllers");
                 // TODO: check for occupied, etc.
+                // TODO: ignore stuff like cyro, toilets, etc.
                 if (MainShipController == null)
                 {
                     // pick a controller
@@ -151,22 +241,26 @@ namespace IngameScript
                 return MainShipController;
 
             }
+            #endregion
+
+
+            #region shipdim
             const float SMALL_BLOCK_VOLUME = 0.5f;
             const float LARGE_BLOCK_VOLUME = 2.5f;
-            const double SMALL_BLOCK_LENGTH = 0.5;
-            const double LARGE_BLOCK_LENGTH = 2.5;
+            const float SMALL_BLOCK_LENGTH = 0.5f;
+            const float LARGE_BLOCK_LENGTH = 2.5f;
 
             private float _length_blocks, _width_blocks, _height_blocks;
             private double _length, _width, _height;
-            private double _block2metric;
+            public float gridsize;
             private OrientedBoundingBoxFaces _obbf;
 
             void ShipDimensions(IMyShipController orientationBlock)//BoundingBox bb, double BlockMetricConversion)
             {
                 if (thisProgram.Me.CubeGrid.GridSizeEnum.ToString().ToLower().Contains("small"))
-                    _block2metric = SMALL_BLOCK_LENGTH;
+                    gridsize = SMALL_BLOCK_LENGTH;
                 else
-                    _block2metric = LARGE_BLOCK_LENGTH;
+                    gridsize = LARGE_BLOCK_LENGTH;
 
                 _obbf = new OrientedBoundingBoxFaces(orientationBlock);
                 Vector3D[] points = new Vector3D[4];
@@ -178,9 +272,9 @@ namespace IngameScript
                 // face 0=right output order is  BL, TL, BR, TR ???
                 _length = (points[0] - points[2]).Length();
 
-                _length_blocks = (float)(_length / _block2metric);
-                _width_blocks = (float)(_width / _block2metric);
-                _height_blocks = (float)(_height / _block2metric);
+                _length_blocks = (float)(_length / gridsize);
+                _width_blocks = (float)(_width / gridsize);
+                _height_blocks = (float)(_height / gridsize);
 
                 /*
                                 _length_blocks = bb.Size.GetDim(2) + 1;
@@ -218,8 +312,9 @@ namespace IngameScript
             }
             public double BlockMultiplier()
             {
-                return _block2metric;
+                return gridsize;
             }
+            #endregion
 
             /// <summary>
             /// Helper function.  Turn blocks in list on or off
