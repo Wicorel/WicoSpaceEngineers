@@ -33,24 +33,23 @@ namespace IngameScript
         Connectors wicoConnectors;
         LandingGears wicoLandingGears;
         Cameras wicoCameras;
+        Parachutes wicoParachutes;
 
         OrbitalModes wicoOrbitalLaunch;
 
 
         // Handlers
-        List<Action<MyCommandLine, UpdateType>> UpdateTriggerHandlers = new List<Action<MyCommandLine, UpdateType>>();
-        List<Action<UpdateType>> UpdateUpdateHandlers = new List<Action<UpdateType>>();
+        private List<Action<MyCommandLine, UpdateType>> UpdateTriggerHandlers = new List<Action<MyCommandLine, UpdateType>>();
+        private List<Action<UpdateType>> UpdateUpdateHandlers = new List<Action<UpdateType>>();
 
         // https://github.com/malware-dev/MDK-SE/wiki/Handling-Script-Arguments
-        MyCommandLine myCommandLine = new MyCommandLine();
+        private MyCommandLine myCommandLine = new MyCommandLine();
 
-
-        List<Action<MyIni>> SaveHandlers = new List<Action<MyIni>>();
+        private List<Action<MyIni>> SaveHandlers = new List<Action<MyIni>>();
 
         // https://github.com/malware-dev/MDK-SE/wiki/Handling-configuration-and-storage
-        MyIni _SaveIni = new MyIni();
-        MyIni _CustomDataIni = new MyIni();
-
+        private MyIni _SaveIni = new MyIni();
+        private MyIni _CustomDataIni = new MyIni();
 
         /// <summary>
         /// The combined set of UpdateTypes that count as a 'trigger'
@@ -65,6 +64,10 @@ namespace IngameScript
         // Surface stuff
         IMyTextSurface mesurface0;
         IMyTextSurface mesurface1;
+
+
+        double tmGridCheckElapsedMs = -1;
+        double tmGridCheckWaitMs = 3.0*1000;
 
 
         public Program()
@@ -86,6 +89,7 @@ namespace IngameScript
             wicoConnectors = new Connectors(this);
             wicoLandingGears = new LandingGears(this);
             wicoCameras = new Cameras(this);
+            wicoParachutes = new Parachutes(this);
 
             wicoOrbitalLaunch = new OrbitalModes(this);
 
@@ -122,12 +126,58 @@ namespace IngameScript
 
         }
 
+        void AddSaveHandler(Action<MyIni> handler)
+        {
+            if (!SaveHandlers.Contains(handler))
+                SaveHandlers.Add(handler);
+        }
+
+        void AddUpdateHandler(Action<UpdateType> handler)
+        {
+            if (!UpdateUpdateHandlers.Contains(handler))
+                UpdateUpdateHandlers.Add(handler);
+        }
+
+        void AddTriggerHandler(Action<MyCommandLine, UpdateType> handler)
+        {
+            if (!UpdateTriggerHandlers.Contains(handler))
+                UpdateTriggerHandlers.Add(handler);
+        }
+
         public void Main(string argument, UpdateType updateSource)
         {
             wicoControl.ResetUpdates();
-            if (!WicoInit())
+            if (tmGridCheckElapsedMs >= 0) tmGridCheckElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
+            if (!WicoLocalInit())
             {
                 Echo("Init");
+            }
+            else
+            {
+                // only do this on update, not triggers
+                if ((updateSource & utUpdates) > 0)
+                {
+//                    Echo("Init and update. Elapsed:" +tmGridCheckElapsedMs.ToString("0.00"));
+//                    Echo("Local:" + wicoBlockMaster.localBlocksCount.ToString() + " blocks");
+                    if (tmGridCheckElapsedMs > tmGridCheckWaitMs || tmGridCheckElapsedMs < 0) // it is time to scan..
+                    {
+  //                      Echo("time to check");
+                        tmGridCheckElapsedMs = 0;
+                        if (wicoBlockMaster.CalcLocalGridChange())
+                        {
+//                            mesurface0.WriteText("GRID check!");
+//                            Echo("GRID CHANGED!");
+//                            mesurface0.WriteText("GRID CHANGED!", true);
+                            bInitDone = false;
+                            tmGridCheckElapsedMs = -1;
+                            Runtime.UpdateFrequency |= UpdateFrequency.Once; // cause ourselves to run again to continue initialization
+                            return;
+                        }
+//                        else Echo("No Grid Change");
+                    }
+                    //else Echo("Not Timeto check");
+                }
+//                else Echo("Init and NOTE update");
             }
             Echo(updateSource.ToString());
             if ((updateSource & UpdateType.IGC) > 0)
@@ -176,21 +226,28 @@ namespace IngameScript
             Echo("Mode=" + wicoControl.IMode.ToString());
             Echo("State=" + wicoControl.IState.ToString());
 
-            Runtime.UpdateFrequency = wicoControl.GenerateUpdate();
+            Runtime.UpdateFrequency = wicoControl.GenerateUpdate() 
+                | UpdateFrequency.Update100
+                ;
 
         }
 
         bool bInitDone = false;
-        bool WicoInit()
+        bool WicoLocalInit()
         {
             if (bInitDone) return true;
-
 
             // must come late as the above inits may add handlers
             wicoBlockMaster.LocalBlocksInit();
 
-            Me.CustomData = _CustomDataIni.ToString();
             bInitDone = true;
+
+            // last thing after init is done
+            wicoControl.ModeAfterInit(_SaveIni);
+
+            // Save it now so that any defaults are set after an initial run
+            Me.CustomData = _CustomDataIni.ToString();
+
             return bInitDone;
         }
 
