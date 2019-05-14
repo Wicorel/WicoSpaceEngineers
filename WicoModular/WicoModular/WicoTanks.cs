@@ -35,6 +35,7 @@ namespace IngameScript
                 thisProgram = program;
 
                 thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             /// <summary>
@@ -63,6 +64,15 @@ namespace IngameScript
                     }
                 }
             }
+
+            void LocalGridChangedHandler()
+            {
+                tankList.Clear();
+                isolatedoxytankList.Clear();
+                oxytankList.Clear();
+                hydrotankList.Clear();
+            }
+
             public double TanksFill(List<IMyTerminalBlock> tankList)
             {
                 double totalPercent = 0;

@@ -69,6 +69,7 @@ namespace IngameScript
                 }
                 useGyros.Clear();
                 thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             /// <summary>
@@ -82,6 +83,13 @@ namespace IngameScript
                     // TODO: Ignore cutters, etc
                     allLocalGyros.Add(tb as IMyGyro);
                 }
+            }
+            void LocalGridChangedHandler()
+            {
+                gyrosOff();
+                gyroControl = null;
+                useGyros.Clear();
+                allLocalGyros.Clear();
             }
             public void SetController(IMyShipController controller=null)
             {

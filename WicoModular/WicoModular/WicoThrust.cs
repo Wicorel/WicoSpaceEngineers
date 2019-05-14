@@ -52,6 +52,7 @@ namespace IngameScript
                 // Minimal init; just add handlers
                 thrustAllList.Clear();
                 thisProgram.wicoBlockMaster.AddLocalBlockHandler(ThrusterParseHandler);
+                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             public void ThrusterParseHandler(IMyTerminalBlock tb)
@@ -62,6 +63,11 @@ namespace IngameScript
                         return; // don't add it.
                     thrustAllList.Add(tb);
                 }
+            }
+
+            void LocalGridChangedHandler()
+            {
+                thrustAllList.Clear();
             }
 
             public const int thrustatmo = 1;
@@ -270,57 +276,78 @@ namespace IngameScript
                 thrustTowards = thrustForwardList;
                 thrustAway = thrustBackwardList;
 
-                thrustForwardList[0].Orientation.GetMatrix(out or1);
-                vThrustAim = or1.Forward;
-                angle = vNGN.Dot(vThrustAim);
-                if (angle > cos45)
-                    return;
-
-                thrustUpList[0].Orientation.GetMatrix(out or1);
-                vThrustAim = or1.Forward;
-                angle = vNGN.Dot(vThrustAim);
-                if(angle>cos45)
+                if (thrustForwardList.Count > 0)
                 {
-                    thrustTowards = thrustUpList;
-                    thrustAway = thrustDownList;
-                    return;
+                    thrustForwardList[0].Orientation.GetMatrix(out or1);
+                    vThrustAim = or1.Forward;
+                    angle = vNGN.Dot(vThrustAim);
+                    if (angle > cos45)
+                        return;
                 }
 
-                thrustBackwardList[0].Orientation.GetMatrix(out or1);
-                vThrustAim = or1.Forward;
-                angle = vNGN.Dot(vThrustAim);
-                if (angle > cos45)
+                if (thrustUpList.Count > 0)
                 {
-                    thrustTowards = thrustBackwardList;
-                    thrustAway = thrustForwardList;
-                    return;
+                    thrustUpList[0].Orientation.GetMatrix(out or1);
+                    vThrustAim = or1.Forward;
+                    angle = vNGN.Dot(vThrustAim);
+                    if (angle > cos45)
+                    {
+                        thrustTowards = thrustUpList;
+                        thrustAway = thrustDownList;
+                        return;
+                    }
                 }
-                thrustDownList[0].Orientation.GetMatrix(out or1);
-                vThrustAim = or1.Forward;
-                angle = vNGN.Dot(vThrustAim);
-                if (angle > cos45)
+
+                if (thrustBackwardList.Count > 0)
                 {
-                    thrustTowards = thrustDownList;
-                    thrustAway = thrustUpList;
-                    return;
+                    thrustBackwardList[0].Orientation.GetMatrix(out or1);
+                    vThrustAim = or1.Forward;
+                    angle = vNGN.Dot(vThrustAim);
+                    if (angle > cos45)
+                    {
+                        thrustTowards = thrustBackwardList;
+                        thrustAway = thrustForwardList;
+                        return;
+                    }
                 }
-                thrustRightList[0].Orientation.GetMatrix(out or1);
-                vThrustAim = or1.Forward;
-                angle = vNGN.Dot(vThrustAim);
-                if (angle > cos45)
+
+                if (thrustDownList.Count > 0)
                 {
-                    thrustTowards = thrustRightList;
-                    thrustAway = thrustLeftList;
-                    return;
+                    thrustDownList[0].Orientation.GetMatrix(out or1);
+                    vThrustAim = or1.Forward;
+                    angle = vNGN.Dot(vThrustAim);
+                    if (angle > cos45)
+                    {
+                        thrustTowards = thrustDownList;
+                        thrustAway = thrustUpList;
+                        return;
+                    }
                 }
-                thrustLeftList[0].Orientation.GetMatrix(out or1);
-                vThrustAim = or1.Forward;
-                angle = vNGN.Dot(vThrustAim);
-                if (angle > cos45)
+
+                if (thrustRightList.Count > 0)
                 {
-                    thrustTowards = thrustLeftList;
-                    thrustAway = thrustRightList;
-                    return;
+                    thrustRightList[0].Orientation.GetMatrix(out or1);
+                    vThrustAim = or1.Forward;
+                    angle = vNGN.Dot(vThrustAim);
+                    if (angle > cos45)
+                    {
+                        thrustTowards = thrustRightList;
+                        thrustAway = thrustLeftList;
+                        return;
+                    }
+                }
+
+                if (thrustLeftList.Count > 0)
+                {
+                    thrustLeftList[0].Orientation.GetMatrix(out or1);
+                    vThrustAim = or1.Forward;
+                    angle = vNGN.Dot(vThrustAim);
+                    if (angle > cos45)
+                    {
+                        thrustTowards = thrustLeftList;
+                        thrustAway = thrustRightList;
+                        return;
+                    }
                 }
 
             }
@@ -465,18 +492,25 @@ namespace IngameScript
             /// <param name="currentV">velocity to calculage</param>
             /// <param name="dGrav">optional gravity factor</param>
             /// <returns>stopping distance in meters</returns>
-            public double calculateStoppingDistance(IMyTerminalBlock ShipController, List<IMyTerminalBlock> thrustStopList, double currentV, double dGrav)
+            public double calculateStoppingDistance(float physicalMass, List<IMyTerminalBlock> thrustStopList, double currentV, double dGrav)
             {
-                var myMass = ((IMyShipController)ShipController).CalculateShipMass();
-                double hoverthrust = myMass.PhysicalMass * dGrav * 9.810;
+                double hoverthrust = physicalMass * dGrav * 9.810;
                 double maxThrust = calculateMaxThrust(thrustStopList);
-                double maxDeltaV = (maxThrust - hoverthrust) / myMass.PhysicalMass;
+                double maxDeltaV = (maxThrust - hoverthrust) / physicalMass;
                 double secondstozero = currentV / maxDeltaV;
                 //            Echo("secondstozero=" + secondstozero.ToString("0.00"));
                 double stoppingM = currentV / 2 * secondstozero;
                 //            Echo("stoppingM=" + stoppingM.ToString("0.00"));
                 return stoppingM;
             }
+
+//            [Obsolete]
+            public double calculateStoppingDistance(IMyTerminalBlock ShipController, List<IMyTerminalBlock> thrustStopList, double currentV, double dGrav)
+            {
+                var myMass = ((IMyShipController)ShipController).CalculateShipMass();
+                return calculateStoppingDistance(myMass.PhysicalMass, thrustStopList, currentV, dGrav);
+            }
+
             public double CalculateTotalEffectiveThrust(List<IMyTerminalBlock> thrusters, float atmoMult = 5f, float ionMult = 2f, float hydroMult = 1f)
             {
                 double totalThrust = 0;
