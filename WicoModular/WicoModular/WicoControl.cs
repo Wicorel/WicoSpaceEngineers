@@ -25,6 +25,7 @@ namespace IngameScript
 
         class WicoControl
         {
+            public float fMaxWorldMps = 100f;
             #region MODES
             const string MODECHANGETAG = "[WICOMODECHANGE]";
             int _iMode = -1;
@@ -58,6 +59,7 @@ namespace IngameScript
             }
 
             List<Action<int, int, int, int>> ControlChangeHandlers = new List<Action<int, int, int, int>>();
+            List<Action> ModeAfterInitHandlers = new List<Action>();
 
             public const int MODE_IDLE = 0;
 
@@ -67,7 +69,8 @@ namespace IngameScript
 
             public const int MODE_LAUNCHPREP = 100; // oribital launch prep
             public const int MODE_ORBITALLAUNCH = 120;
-            public const int MODE_DESCENT = 150;
+            public const int MODE_DESCENT = 150; // descend into space and stop NN meters above surface
+            public const int MODE_ORBITALLAND = 151; // land from orbit
             public const int MODE_HOVER = 170;
             public const int MODE_LANDED = 180;
 
@@ -79,7 +82,6 @@ namespace IngameScript
             public const int MODE_NAVNEXTTARGET = 670; // go to the next target
             public const int MODE_ARRIVEDTARGET = 699; // we have arrived at target
 
-            public float fMaxWorldMps = 100f;
 
             public void SetMode(int theNewMode, int theNewState = 0)
             {
@@ -116,6 +118,29 @@ namespace IngameScript
                 {
                     handler(fromMode, fromState, toMode, toState);
                 }
+            }
+
+            public bool AddModeInitHandler(Action handler)
+            {
+                if (!ModeAfterInitHandlers.Contains(handler))
+                    ModeAfterInitHandlers.Add(handler);
+                return true;
+            }
+            public void ModeAfterInit(MyIni theIni)
+            {
+                _iState = theIni.Get("WicoControl", "State").ToInt32(_iState);
+                _iMode = theIni.Get("WicoControl", "Mode").ToInt32(_iMode);
+
+                foreach (var handler in ModeAfterInitHandlers)
+                {
+                    handler();
+                }
+            }
+
+            void SaveHandler(MyIni theIni)
+            {
+                theIni.Set("WicoControl", "Mode", _iMode);
+                theIni.Set("WicoControl", "State", _iState);
             }
 
             #endregion
@@ -202,6 +227,7 @@ namespace IngameScript
                 thisProgram.wicoIGC.AddUnicastHandler(WicoConfigUnicastListener);
 
                 thisProgram.UpdateTriggerHandlers.Add(ProcessTrigger);
+                thisProgram.AddSaveHandler(SaveHandler);
 
             }
             public bool IamMain()
