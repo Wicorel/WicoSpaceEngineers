@@ -50,6 +50,7 @@
     <Compile Include="WicoGasGens.cs" />
     <Compile Include="WicoGyros.cs" />
     <Compile Include="WicoIGC.cs" />
+    <Compile Include="WicoParachutes.cs" />
     <Compile Include="WicoTanks.cs" />
     <Compile Include="WicoThrust.cs" />
   </ItemGroup>
