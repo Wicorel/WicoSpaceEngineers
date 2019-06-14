@@ -477,7 +477,7 @@ namespace IngameScript
                 case 35:
                     { // active mining
                       //
-                        int eoicount = 0;
+//                        int eoicount = 0;
 //                        echoInstructions("S=" + current_state + " " + eoicount++);
                         bool bAimed = false;
                         Echo("Mining forward");
@@ -1033,8 +1033,8 @@ namespace IngameScript
                                 {
                                     // we have scanned all of the areas and not hit anyhing..  skip this borehole
                                     AsteroidDoNextBore();
-                                    return;
                                     BoreHoleScanMode = 0;
+                                    return;
                                 }
                                 Vector3D vScanVector = (vAsteroidBoreEnd - vAsteroidBoreStart);
                                 vScanVector.Normalize();
