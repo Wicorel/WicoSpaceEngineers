@@ -180,10 +180,9 @@ namespace IngameScript
                         sOrientation = "rocket";
                     */
                     bool bAimed = GyroMain(sOrbitalUpDirection);
-                    if (bAimed)
+//                    if (bAimed)
                         bWantMedium = true;
-                    else
-                        bWantFast = true;
+//                    else  bWantFast = true;
                 }
             }
 

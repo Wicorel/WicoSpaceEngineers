@@ -89,11 +89,6 @@
       <HintPath>c:\program files (x86)\steam\SteamApps\common\SpaceEngineers\Bin64\VRage.Scripting.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="MDKUtilities">
-      <HintPath>c:\users\saett\appdata\local\microsoft\visualstudio\15.0_ce59efb3\extensions\cfkblpfy.3rw\MDKUtilities.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Analyzer Include="c:\users\saett\appdata\local\microsoft\visualstudio\15.0_ce59efb3\extensions\cfkblpfy.3rw\Analyzers\MDKAnalyzer.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DoModes.cs" />

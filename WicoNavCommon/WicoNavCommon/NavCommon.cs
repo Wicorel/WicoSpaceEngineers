@@ -35,6 +35,7 @@ namespace IngameScript
             public int NAVArrivalMode = MODE_ARRIVEDTARGET;
             public int NAVArrivalState = 0;
 
+            /// <summary>
             /// Set maximum speed of ship. 
             /// Set this using S command for NAV
             /// </summary>
