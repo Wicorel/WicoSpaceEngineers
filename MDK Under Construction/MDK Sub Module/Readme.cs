@@ -36,6 +36,9 @@
  * Add namecameras
  * Intent: make this also an extruder controller
  * 
+ * 3.7 05292019 SE 1.190
+ * Current source
+ * 
  * NEED:  
  *  
  * WANTED: 

@@ -156,6 +156,11 @@ namespace IngameScript
             return false;
         }
 
+        bool moduleProcessIGCMessage(string sArgument)
+        {
+            return false;
+        }
+
 
     }
 }
