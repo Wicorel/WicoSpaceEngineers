@@ -171,6 +171,10 @@ IGC for nav commands
 Supports waypoint list
 added launch, orbital launch and dock commands
 
+3.7 May 28 2019 SE 1.190
+Current source.  
+Don't set gyro if it's already set.
+
 TODO: 
     Do quadrant search for escape
     Support 'Loop' (patrol) command
@@ -187,7 +191,7 @@ TODO:
         string OurName = "Wico Craft";
 
         string moduleName = "NAV";
-        string sVersion = "3.5";
+        string sVersion = "3.7";
 
     }
 }
