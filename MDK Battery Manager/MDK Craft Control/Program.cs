@@ -23,9 +23,9 @@ namespace IngameScript
 
         // shouldn't need to change anything below this line
 
-        string OurName = "Battery Manager";
-        string moduleName = "MDK";
-        string sVersion = "3.1";
+        string OurName = "Battery";
+        string moduleName = "Manager";
+        string sVersion = "3.5 May 2019";
 
         const string sGPSCenter = "Craft Remote Control";
         int iMode = 0;
@@ -36,7 +36,7 @@ namespace IngameScript
 
         const string velocityFormat = "0.00";
 
-        IMyTerminalBlock anchorPosition;
+//        IMyTerminalBlock anchorPosition;
 
         class OurException : Exception
         {
@@ -153,7 +153,8 @@ namespace IngameScript
                 // we are the miner, but must be attached to a ship through connector 
                 if (batteryList.Count > 1)
                 {
-                    if (!batteryCheck(10,false,getTextStatusBlock())) 
+                    //                    if (!batteryCheck(10,false,getTextStatusBlock())) 
+                    if (!batteryCheck(10, false))
                         if (!batteryCheck(40,false))
                             if (!batteryCheck(75,false))
                                 batteryCheck(98,false);

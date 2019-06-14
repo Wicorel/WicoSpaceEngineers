@@ -24,7 +24,7 @@ namespace IngameScript
         // multi-arg
         #region arguments
 
-        bool processArguments(string sArgument)
+        bool moduleProcessArguments(string sArgument)
         {
             string[] varArgs = sArgument.Trim().Split(';');
 
@@ -43,6 +43,10 @@ namespace IngameScript
             return false; // keep processing in main
         }
         #endregion
+        bool moduleProcessAntennaMessage(string sArgument)
+        {
+            return false;
+        }
 
 
     }

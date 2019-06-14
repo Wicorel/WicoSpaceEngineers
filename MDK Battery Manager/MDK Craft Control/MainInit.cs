@@ -24,15 +24,16 @@ namespace IngameScript
         void doModuleConstructor()
         {
             // called from main constructor.
-            bSubModules = false;
+            //            bSubModules = false;
+            bSupportSubModules = false;
             bCraftOperation = false;
             bLogMeansEcho = true;
         }
 
         #region maininit
 
-        string sInitResults = "";
-        int currentInit = 0;
+//        string sInitResults = "";
+//        int currentInit = 0;
 
         double gridBaseMass = 0;
 
@@ -155,7 +156,7 @@ namespace IngameScript
             return sInitResults;
         }
 
-        IMyTextPanel gpsPanel = null;
+ //       IMyTextPanel gpsPanel = null;
 
         string BlockInit()
         {
@@ -206,12 +207,12 @@ namespace IngameScript
             }
             if (centerSearch.Count > 0)
                 gpsCenter = centerSearch[0];
-
+/*
             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
             blocks = GetBlocksContains<IMyTextPanel>("[GPS]");
             if (blocks.Count > 0)
                 gpsPanel = blocks[0] as IMyTextPanel;
-
+                */
             return sInitResults;
         }
 
@@ -220,6 +221,17 @@ namespace IngameScript
             return ">";
         }
 
+        void ModuleInitCustomData(INIHolder iniCustom)
+        {
+
+        }
+        void ModuleDeserialize(INIHolder iNIHolder)
+        {
+        }
+
+        void ModuleSerialize(INIHolder iNIHolder)
+        {
+        }
 
         #endregion
 
