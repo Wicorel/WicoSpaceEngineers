@@ -55,12 +55,15 @@ namespace IngameScript
             // TODO: time-out for docking selection.  So can choose 'next' if base says 'no room', etc.
 
         }
+        IMyBroadcastListener _BASEIGCChannel;
 
         void BaseInitInfo()
         {
             baseList.Clear();
             // load from text panel
             BaseDeserialize();
+            _BASEIGCChannel = IGC.RegisterBroadcastListener("BASE");
+            _BASEIGCChannel.SetMessageCallback(_BASEIGCChannel.Tag);
         }
 
         void BaseSerialize()
@@ -189,7 +192,8 @@ namespace IngameScript
             if (dBaseRequestLastTransmit > dBaseRequestTransmitWait || bForceRequest)
             {
                 dBaseRequestLastTransmit = 0;
-                antSend("WICO:BASE?:" + sName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(vPosition));
+                antSend("BASE?", sName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(vPosition));
+//                antSend("WICO:BASE?:" + sName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(vPosition));
             }
             else
             {
@@ -259,6 +263,34 @@ namespace IngameScript
                 if (baseList[i1].baseId == baseId)
                     return baseList[i1].position;
             return vPos;
+        }
+
+        bool BaseProcessIGCMessage()
+        {
+            if (!_BASEIGCChannel.HasPendingMessage)
+                return false;
+            Echo("Base Response");
+            var igcMessage = _BASEIGCChannel.AcceptMessage();
+            string sMessage = (string)igcMessage.Data;
+            string[] aMessage = sMessage.Trim().Split(':');
+
+            double x1, y1, z1;
+            int iOffset = 0;
+            string sName = aMessage[iOffset++];
+
+            long id = 0;
+            long.TryParse(aMessage[iOffset++], out id);
+
+            x1 = Convert.ToDouble(aMessage[iOffset++]);
+            y1 = Convert.ToDouble(aMessage[iOffset++]);
+            z1 = Convert.ToDouble(aMessage[iOffset++]);
+            Vector3D vPosition = new Vector3D(x1, y1, z1);
+
+            bool bJumpCapable = stringToBool(aMessage[iOffset++]);
+
+            BaseAdd(id, sName, vPosition, bJumpCapable);
+
+            return false;
         }
 
         bool BaseProcessMessages(string sMessage)

@@ -45,7 +45,8 @@ namespace IngameScript
                         sname = shipOrientationBlock.CubeGrid.CustomName;
 //                        vPosition = shipOrientationBlock.GetPosition();
                     }
-                    antSend("WICO:BASE:" + gpsName("",sname) + ":" + SaveFile.EntityId.ToString() + 
+//                    antSend("WICO:BASE:" + gpsName("", sname) + ":" + SaveFile.EntityId.ToString() +
+                    antSend("BASE", gpsName("", sname) + ":" + SaveFile.EntityId.ToString() +
                         ":" + Vector3DToString(vPosition) + ":" + bJumpCapable.ToString());
                     //                   antSend("WICO:MOM:" + gpsName("", shipOrientationBlock.CubeGrid.CustomName) + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(((IMyShipController)shipOrientationBlock).CenterOfMass));
                 }

@@ -256,7 +256,17 @@ namespace IngameScript
                     UpdateAllPanels();
                     return;
                 }
-                else
+                else if ((ut & (UpdateType.IGC)) > 0)
+                {
+                    // IGC message
+                    if (!moduleProcessIGCMessage(sArgument))
+                    {
+                    }
+                    SetUpdateFrequency();
+                    Serialize();
+                    UpdateAllPanels();
+                }
+//                else
                 {
                     // it should be one of the update types...
                     //            if ((ut & (UpdateType.Once | UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100)) > 0)

@@ -153,6 +153,9 @@ Performance Pass
 
 3.5 Jan 25 2019 SE 1.189 
 
+3.7 May 28 2018 SE 1.190  
+IGC Support for Intergrid communication
+
 
 TODO:
 forget known bases when new grid (DONE by craft control)

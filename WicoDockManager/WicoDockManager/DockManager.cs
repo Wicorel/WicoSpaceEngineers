@@ -41,10 +41,22 @@ namespace IngameScript
         }
 
         List<IMyTerminalBlock> dockingAlllights = new List<IMyTerminalBlock>();
+        IMyBroadcastListener _CON_IGCChannel;
+        IMyBroadcastListener _COND_IGCChannel;
+        IMyBroadcastListener _BASE_IGCChannel;
 
         string initDockingInfo()
         {
             string s = "";
+
+            _BASE_IGCChannel = IGC.RegisterBroadcastListener("BASE?");
+            _BASE_IGCChannel.SetMessageCallback(_BASE_IGCChannel.Tag);
+
+            _CON_IGCChannel = IGC.RegisterBroadcastListener("CON?");
+            _CON_IGCChannel.SetMessageCallback(_CON_IGCChannel.Tag);
+
+            _COND_IGCChannel = IGC.RegisterBroadcastListener("COND?");
+            _COND_IGCChannel.SetMessageCallback(_COND_IGCChannel.Tag);
 
             dockingInfo.Clear();
             dockingAlllights = GetBlocksContains<IMyLightingBlock>(sBaseConnector);
@@ -304,17 +316,20 @@ namespace IngameScript
             if (bApproach)
             {
                 Vector3D vApproach = vPosition + vVec * 30;
-                 antSend("WICO:CONA:" + incomingID + ":" + connector.EntityId + ":" + Vector3DToString(vApproach));
+//                antSend("WICO:CONA:" + incomingID + ":" + connector.EntityId + ":" + Vector3DToString(vApproach));
+                antSend("CONA", incomingID + ":" + connector.EntityId + ":" + Vector3DToString(vApproach));
             }
             else
             {
                 if (dockingInfo[iDock].lAlign < 0)
                 {
-                    antSend("WICO:COND:" + incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName) + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
+//                    antSend("WICO:COND:" + incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName) + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
+                    antSend("COND", incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName) + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
                 }
                 else
                 {
-                    antSend("WICO:ACOND:" + incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName)
+//                    antSend("WICO:ACOND:" + incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName)
+                    antSend("ACOND", incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName)
                     + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec) + ":" + Vector3DToString(vAlign));
                 }
             }
@@ -337,14 +352,14 @@ namespace IngameScript
 
         //antSend("WICO:MOM:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition()));
 
-            // TODO:
-            //
-            // NEW
-            //
-            // drone request base info
+        // TODO:
+        //
+        // NEW
+        //
+        // drone request base info
         //antSend("WICO:BASE?:" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
 
-            // base reponds with BASE information
+        // base reponds with BASE information
         //antSend("WICO:BASE:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition())XXX
 
         // name, ID, position, velocity, Jump Capable, Source, Sink
@@ -352,9 +367,9 @@ namespace IngameScript
         //
         // 
 
-            // Request docking connector
-            // 
-            // give: base ID for request, drone ship size/type?, source wanted, sink wanted
+        // Request docking connector
+        // 
+        // give: base ID for request, drone ship size/type?, source wanted, sink wanted
 
         //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ shipOrientationBlock.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition() +
         // ship width, height, length
@@ -367,41 +382,156 @@ namespace IngameScript
                         sMessage += SaveFile.EntityId.ToString() + ":";
                         sMessage += Vector3DToString(shipOrientationBlock.GetPosition());
                         */
-            // NACK response to request
-            // approach GPS?
-            // Reason:  
-            // no available connectors
-            // source temp not available
-            // no room for sink
-            // CONF=CONnector Fail
+        // NACK response to request
+        // approach GPS?
+        // Reason:  
+        // no available connectors
+        // source temp not available
+        // no room for sink
+        // CONF=CONnector Fail
         //antSend("WICO:CONF:" + droneId +":" + SaveFile.EntityId.ToString(), +":"+ ":"+Vector3DToString(vApproachPosition))
 
 
-            // ACK response to request
-            // approach gps for hold
+        // ACK response to request
+        // approach gps for hold
 
-            // base replies to drone with CONnector Approach
+        // base replies to drone with CONnector Approach
         //antSend("WICO:CONA:" + droneId +":" + SaveFile.EntityId.ToString(), +":"+ ":"+Vector3DToString(vApproachPosition))
 
-            // NOTE: Updates can be send to drone with updated approach position...
+        // NOTE: Updates can be send to drone with updated approach position...
 
-            // Drone arrives at dock position
-            // then drone asks for docking
+        // Drone arrives at dock position
+        // then drone asks for docking
         //antSend("WICO:COND?:" + baseId +":" + SaveFile.EntityId.ToString(), +":"+ ":"+Vector3DToString(shipOrientationBlock.GetPosition())
         //antSend("WICO:COND?:" + base.baseID, +":"+ "mini"+ ":"+ shipOrientationBlock.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition() +
 
 
-            // base delays for full stop, opening hangar, etc
-            // then sends: CONnector Dock : connector + vector [+ align]  
+        // base delays for full stop, opening hangar, etc
+        // then sends: CONnector Dock : connector + vector [+ align]  
         //antSend("WICO:COND:" + droneId + ":" + SaveFile.EntityId.ToString() + ":" + connector.EntityId + ":" + connector.CustomName + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
         //antSend("WICO:ACOND:" + droneId + ":" + SaveFile.EntityId.ToString() + ":" + connector.EntityId + ":" + connector.CustomName 	+ ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec)+":" + Vector3DToString(vAlign));
 
-            // Recover All Command
-            // all drones should attempt to return to base with jump capability
-            
-            // Recover Specific Command
-            // base asks drone to return
+        // Recover All Command
+        // all drones should attempt to return to base with jump capability
 
+        // Recover Specific Command
+        // base asks drone to return
+
+        bool DockProcessIGCMessage()
+        {
+            if(_BASE_IGCChannel.HasPendingMessage)
+            {
+                Echo("Base Request");
+                var igcMessage = _BASE_IGCChannel.AcceptMessage();
+                string sMessage = (string)igcMessage.Data;
+                string[] aMessage = sMessage.Trim().Split(':');
+                long incomingID = 0;
+                bool pOK = false;
+                pOK = long.TryParse(aMessage[0], out incomingID);
+                doBaseAnnounce(true);
+            }
+            if(_CON_IGCChannel.HasPendingMessage)
+            {
+                Echo("Connector Approach Request!");
+                var igcMessage = _CON_IGCChannel.AcceptMessage();
+                string sMessage = (string)igcMessage.Data;
+                string[] aMessage = sMessage.Trim().Split(':');
+                //antSend("WICO:CON?:" + base.baseID, +":"+ "mini"+ ":"+ shipOrientationBlock.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition() +
+                int iOffset = 0;
+                bool pOK = false;
+                long baseID = 0;
+                pOK = long.TryParse(aMessage[iOffset++], out baseID);
+                if (baseID != SaveFile.EntityId)
+                {
+                    // not our message.  Not Jenny's boat
+                    return false;
+                }
+                string sType = aMessage[iOffset++];
+                double height = -1;
+                double width = -1;
+                double length = -1;
+                string[] aSize = sType.Trim().Split(',');
+                if (aSize.Length > 2)
+                {
+                    pOK = double.TryParse(aSize[0], out height);
+                    pOK = double.TryParse(aSize[1], out width);
+                    pOK = double.TryParse(aSize[2], out length);
+
+                }
+
+                string sDroneName = aMessage[iOffset++];
+
+                sReceivedMessage = ""; // we processed it.
+                int i = -1;
+                long incomingID = 0;
+                pOK = long.TryParse(aMessage[iOffset++], out incomingID);
+
+                i = getAvailableDock(incomingID, sType, height, width, length);
+                if (i >= 0 && pOK)
+                {
+                    sendDockInfo(i, incomingID, sDroneName, true);
+                }
+                else
+                {
+                    // docking request failed
+                    // need to have 'target' for message based on request message.
+                    //                           antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
+                    antSend("CONF", incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
+                }
+
+            }
+            if(_COND_IGCChannel.HasPendingMessage)
+            {
+                Echo("Connector Dock Request!");
+                var igcMessage = _COND_IGCChannel.AcceptMessage();
+                string sMessage = (string)igcMessage.Data;
+                string[] aMessage = sMessage.Trim().Split(':');
+
+                int iOffset = 0;
+
+                bool pOK = false;
+                long baseID = 0;
+                pOK = long.TryParse(aMessage[iOffset++], out baseID);
+                if (baseID != SaveFile.EntityId)
+                {
+                    // not our message.  Not Jenny's boat
+                    return false;
+                }
+
+                sReceivedMessage = ""; // we processed it.
+
+                string sType = aMessage[iOffset++];
+                double height = -1;
+                double width = -1;
+                double length = -1;
+                string[] aSize = sType.Trim().Split(',');
+                if (aSize.Length > 2)
+                {
+                    pOK = double.TryParse(aSize[0], out height);
+                    pOK = double.TryParse(aSize[1], out width);
+                    pOK = double.TryParse(aSize[2], out length);
+
+                }
+
+                string sDroneName = aMessage[iOffset++];
+                int i = -1;
+                long incomingID = 0;
+                pOK = long.TryParse(aMessage[iOffset++], out incomingID);
+                i = getAvailableDock(incomingID, sType, height, width, length);
+                if (i >= 0 && pOK)
+                {
+                    sendDockInfo(i, incomingID, sDroneName);
+                }
+                else
+                {
+                    // docking request failed
+                    //                            antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(antennaPosition()));
+                    antSend("CONF", incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(antennaPosition()));
+                }
+            }
+
+            return false;
+        }
 
         // return true if message processed, else false.
         bool DockProcessMessage(string sReceivedMessage)
@@ -484,7 +614,8 @@ namespace IngameScript
                         {
                             // docking request failed
                             // need to have 'target' for message based on request message.
-                            antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
+ //                           antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
+                            antSend("CONF", incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
                         }
                         return true;
                     }
@@ -529,7 +660,8 @@ namespace IngameScript
                         else
                         {
                             // docking request failed
-                            antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(antennaPosition()));
+//                            antSend("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(antennaPosition()));
+                            antSend("CONF", incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(antennaPosition()));
                         }
                         return true;
                     }

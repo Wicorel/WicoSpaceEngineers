@@ -257,6 +257,8 @@ namespace IngameScript
         /// </summary>
         void processPendingSends()
         {
+            // IGC has no pending sends
+            /*
             if (lPendingMessages.Count > 0)
             {
                 AntennaSetDesiredPower(); // another sub-module may have turned it down.
@@ -278,8 +280,30 @@ namespace IngameScript
                     antennaLowPower(true);
                 }
             }
+            */
         }
 
+        /// <summary>
+        /// IGC broadcast send a message
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="message"></param>
+        void antSend(string tag, string message)
+        {
+            IGC.SendBroadcastMessage(tag, message);
+        }
+
+        /// <summary>
+        /// IGC Unicast send a message
+        /// </summary>
+        /// <param name="targetID"></param>
+        /// <param name="tag"></param>
+        /// <param name="message"></param>
+        void antSend(long targetID, string tag, string message)
+        {
+            IGC.SendUnicastMessage(targetID, tag, message);
+        }
+        /*
         /// <summary>
         /// Send a message. Queues messages if it cannot be sent immediately
         /// </summary>
@@ -288,6 +312,7 @@ namespace IngameScript
         void antSend(string message, bool bQueue = true)
         {
             //TODO: Update to IGC system
+            // OBSOLETE.  Use antSend(tag,message);
 //            Echo("Sending:\n" + message);
             bool bSent = false;
             if (antennaList.Count < 1) antennaInit();
@@ -297,14 +322,6 @@ namespace IngameScript
 
                 // queue if we are in silent mode or this is not immediate send
                 //                if (!bQueue || CommunicationsStealth)
-                /*
-                if (bQueue || CommunicationsStealth)
-                {
-                    // request antenna powerup
-                    AntennaSetDesiredPower();
-                }
-                else
-                */
                 if(!bQueue)
                 {
                     // TODO: Update to IGC system
@@ -334,6 +351,8 @@ namespace IngameScript
                 }
             }
         }
+
+    */
         #endregion
 
         #region AntennaReceive

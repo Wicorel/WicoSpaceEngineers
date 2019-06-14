@@ -99,10 +99,11 @@ void saveDockableConnectors()
 		sb.Append(Vector3DToString(dockableConnectors[i].vVector));
 		sb.Append("\n");
 	}
-	mytp.WritePublicText(sb.ToString(), false);
-}
+        //    mytp.WritePublicText(sb.ToString(), false);
+            mytp.WriteText(sb.ToString(), false);
+        }
 
-void addDockableConnector(IMyTerminalBlock connector)
+        void addDockableConnector(IMyTerminalBlock connector)
 {
 	if (connector == null) return;
 	Vector3D vPosition = connector.GetPosition();

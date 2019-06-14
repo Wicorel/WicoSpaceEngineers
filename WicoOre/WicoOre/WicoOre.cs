@@ -113,10 +113,11 @@ namespace IngameScript
             //TODO:
             // search by position and only add if NOT 'near' another entry
             oreLocs.Add(oli);
-//should be done by caller            OreSerialize();
+            //should be done by caller            OreSerialize();
             // transmit found location...
-            antSend("WICO:ORE:" + Me.CubeGrid.EntityId.ToString() + ":" + asteroidId + ":" + OreID + ":" + Vector3DToString(Position) + ":" + Vector3DToString(vVec) + ":" + detectionType.ToString());
-//            sInitResults += "\nAdded Ore id=" + OreID + " count=" + oreLocs.Count();
+//            antSend("WICO:ORE:" + Me.CubeGrid.EntityId.ToString() + ":" + asteroidId + ":" + OreID + ":" + Vector3DToString(Position) + ":" + Vector3DToString(vVec) + ":" + detectionType.ToString());
+            antSend("ORE", Me.CubeGrid.EntityId.ToString() + ":" + asteroidId + ":" + OreID + ":" + Vector3DToString(Position) + ":" + Vector3DToString(vVec) + ":" + detectionType.ToString());
+            //            sInitResults += "\nAdded Ore id=" + OreID + " count=" + oreLocs.Count();
         }
 
         void OreDumpLocs()

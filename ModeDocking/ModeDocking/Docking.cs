@@ -92,6 +92,10 @@ namespace IngameScript
         List<IMyTerminalBlock> thrustDockUpList = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> thrustDockDownList = new List<IMyTerminalBlock>();
 
+        IMyBroadcastListener _CONAIGCChannel;
+        IMyBroadcastListener _CONDIGCChannel;
+        IMyBroadcastListener _ACONDIGCChannel;
+
         void doModeDocking()
         {
             StatusLog("clear", textPanelReport);
@@ -117,6 +121,13 @@ namespace IngameScript
                     setMode(MODE_DOCKED);
                     return;
                 }
+                _CONDIGCChannel = IGC.RegisterBroadcastListener("COND"); // What it listens for
+                _CONDIGCChannel.SetMessageCallback("COND"); // What it will run the PB with once it has a message
+                _ACONDIGCChannel = IGC.RegisterBroadcastListener("ACOND"); // What it listens for
+                _ACONDIGCChannel.SetMessageCallback("ACOND"); // What it will run the PB with once it has a message
+                _CONAIGCChannel = IGC.RegisterBroadcastListener("CONA"); // What it listens for
+                _CONAIGCChannel.SetMessageCallback("CONA"); // What it will run the PB with once it has a message
+
                 doSubModuleTimerTriggers("[DOCKING]");
                 dockingConnector = getDockingConnector();
                 if (dockingConnector == null)// || getAvailableRemoteConnector(out targetConnector))
@@ -124,6 +135,7 @@ namespace IngameScript
                     Echo("No local connector for docking");
                     StatusLog(moduleName + ":No local Docking Connector Available!", textLongStatus, true);
                     // we could check for merge blocks.. or landing gears..
+                    sStartupError += "\nNo local Docking Connector Available!";
                     setMode(MODE_ATTENTION);
                     bWantFast = false;
                     return;
@@ -182,7 +194,8 @@ namespace IngameScript
                         // face 0=right output order is  BL, TL, BR, TR ???
                         double length = (points[0] - points[2]).Length();
 
-                        string sMessage = "WICO:CON?:";
+                        string sMessage="";// = "WICO:CON?:";
+                        string sTag = "CON?";
                         sMessage += lTargetBase.ToString() + ":";
                         //$"{height:N1},{width:N1},{length:N1}:";
                         sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
@@ -190,8 +203,8 @@ namespace IngameScript
                         sMessage += shipOrientationBlock.CubeGrid.CustomName + ":";
                         sMessage += SaveFile.EntityId.ToString() + ":";
                         sMessage += Vector3DToString(shipOrientationBlock.GetPosition());
-                        antSend(sMessage);
-                        //                        antSend("WICO:CON?:" + baseIdOf(iTargetBase).ToString() + ":" + "mini" + ":" + shipOrientationBlock.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
+                        antSend(sTag, sMessage);// antSend(sMessage);
+                                                //                        antSend("WICO:CON?:" + baseIdOf(iTargetBase).ToString() + ":" + "mini" + ":" + shipOrientationBlock.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
                         current_state = 120;
                     }
                     else // No available base
@@ -214,18 +227,23 @@ namespace IngameScript
                 DateTime dtNow = DateTime.Now;
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                 {
+                    sStartupError += "\nTime out awaiting CONA";
                     current_state = 125;
                     return;
                 }
-                if (sReceivedMessage != "")
+                //                if (sReceivedMessage != "")
+                if (_CONAIGCChannel.HasPendingMessage)
                 {
-                    Echo("Received Message=\n" + sReceivedMessage);
-                    string[] aMessage = sReceivedMessage.Trim().Split(':');
+                    var igcMessage=_CONAIGCChannel.AcceptMessage();
+                    string sMessage = (string)igcMessage.Data;
+//                    Echo("Received Message=\n" + sMessage);
+                    string[] aMessage = sMessage.Trim().Split(':');
                     Echo(aMessage.Length + ": Length");
                     for (int i = 0; i < aMessage.Length; i++)
                         Echo(i + ":" + aMessage[i]);
                     if (aMessage.Length > 1)
                     {
+                        /*
                         if (aMessage[0] != "WICO")
                         {
                             Echo("not wico system message");
@@ -235,21 +253,23 @@ namespace IngameScript
                         {
                             if (aMessage[1] == "CONA")
                             {
+                            */
                                 Echo("Approach answer!");
-                                //antSend("WICO:CONA:" + droneId +":" + SaveFile.EntityId.ToString(), +":"+Vector3DToString(vApproachPosition))
+                        //antSend("WICO:CONA:" + droneId +":" + SaveFile.EntityId.ToString(), +":"+Vector3DToString(vApproachPosition))
+                        int iOffset = 0;
 
                                 long id = 0;
-                                long.TryParse(aMessage[2], out id);
+                                long.TryParse(aMessage[iOffset++], out id);
                                 if (id == SaveFile.EntityId)
                                 {
                                     // it's a message for us.
                                     sReceivedMessage = ""; // we processed it.
-                                    long.TryParse(aMessage[3], out id);
+                                    long.TryParse(aMessage[iOffset++], out id);
                                     double x, y, z;
-                                    int iOff = 4;
-                                    x = Convert.ToDouble(aMessage[iOff++]);
-                                    y = Convert.ToDouble(aMessage[iOff++]);
-                                    z = Convert.ToDouble(aMessage[iOff++]);
+//                                    int iOff = iOffset++;
+                                    x = Convert.ToDouble(aMessage[iOffset++]);
+                                    y = Convert.ToDouble(aMessage[iOffset++]);
+                                    z = Convert.ToDouble(aMessage[iOffset++]);
                                     Vector3D vPosition = new Vector3D(x, y, z);
 
                                     vHome = vPosition;
@@ -261,8 +281,10 @@ namespace IngameScript
                                 }
                             }
                             // TODO: need to process CONF
+                            /*
                         }
                     }
+                    */
                 }
                 else
                 { // uses timeout from above
@@ -275,6 +297,7 @@ namespace IngameScript
                 if (lTargetBase <= 0)
                 {
                     // TODO: remove base from list and try again.  ATTENTION if no remaining bases
+                    sStartupError += "\nNo Base in range";
                     setMode(MODE_ATTENTION);
                     return;
                 }
@@ -282,7 +305,7 @@ namespace IngameScript
                 {
                     // we think we are close enough
                     // force recheck
-                    sStartupError += "\nForce Recheck";
+//                    sStartupError += "\nForce Recheck";
                     lTargetBase = -1;
                     checkBases(true);
                     current_state = 110;
@@ -290,7 +313,7 @@ namespace IngameScript
                 else
                 {
                     // get closer
-                    sStartupError += "\nGet Closer";
+//                    sStartupError += "\nGet Closer";
                     NavGoTarget(BasePositionOf(lTargetBase), iMode, 110, 3100, "DOCK Base Proximity");
                     current_state = 126;
                 }
@@ -310,6 +333,7 @@ namespace IngameScript
                 DateTime dtNow = DateTime.Now;
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                 {
+                    sStartupError += "\nTimeout finding base";
                     setMode(MODE_ATTENTION);
                     return;
                 }
@@ -360,14 +384,15 @@ namespace IngameScript
                     // face 0=right output order is  BL, TL, BR, TR ???
                     double length = (points[0] - points[2]).Length();
 
-                    string sMessage = "WICO:COND?:";
+                    string sMessage = "";// "WICO:COND?:";
+                    string sTag = "COND?";
                     sMessage += lTargetBase.ToString() + ":";
                     sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
                     //                    sMessage += shipDim.HeightInMeters() + "," + shipDim.WidthInMeters() + "," + shipDim.LengthInMeters() + ":";
                     sMessage += shipOrientationBlock.CubeGrid.CustomName + ":";
                     sMessage += SaveFile.EntityId.ToString() + ":";
                     sMessage += Vector3DToString(shipOrientationBlock.GetPosition());
-                    antSend(sMessage);
+                    antSend(sTag, sMessage);// antSend(sMessage);
 
                     //                    antSend("WICO:COND?:" + baseIdOf(iTargetBase) + ":" + "mini" + ":" + shipOrientationBlock.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
                     {
@@ -379,12 +404,13 @@ namespace IngameScript
             }
             else if (current_state == 210)
             { //210	wait for available connector
-                StatusLog("Awating reply with Docking Connector", textPanelReport);
+                StatusLog("Awaiting reply with Docking Connector", textPanelReport);
                 bWantFast = false;
                 DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
                 DateTime dtNow = DateTime.Now;
                 if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                 {
+                    sStartupError += "\nTime out awaiting COND";
                     current_state = 100;
                     return;
                 }
@@ -394,13 +420,30 @@ namespace IngameScript
                 }
                 else
                 {
-                    if (sReceivedMessage != "")
+                    if (_CONDIGCChannel.HasPendingMessage || _ACONDIGCChannel.HasPendingMessage)
+//                        if (sReceivedMessage != "")
                     {
-                        Echo("Received Message=\n" + sReceivedMessage);
-                        string[] aMessage = sReceivedMessage.Trim().Split(':');
+//                        sStartupError += "\nCOND received:";
+                        string sMessage="";
+                        bool bAlignMessage = false;
+                        if (_CONDIGCChannel.HasPendingMessage)
+                        {
+                            var igcMessage = _CONDIGCChannel.AcceptMessage();
+                            sMessage = (string)igcMessage.Data;
+                        }
+                        else
+                        {
+                            var igcMessage = _ACONDIGCChannel.AcceptMessage();
+                            sMessage = (string)igcMessage.Data;
+                            bAlignMessage = true;
+                        }
+ //                       Echo("Received Message=\n" + sReceivedMessage);
+                        string[] aMessage = sMessage.Trim().Split(':');
                         Echo(aMessage.Length + ": Length");
                         for (int i = 0; i < aMessage.Length; i++)
                             Echo(i + ":" + aMessage[i]);
+                        int iOffset = 0;
+                        /*
                         if (aMessage.Length > 1)
                         {
                             if (aMessage[0] != "WICO")
@@ -410,60 +453,64 @@ namespace IngameScript
                             }
                             if (aMessage.Length > 2)
                             {
+                            */
                                 //                                if (aMessage[1] == "DOCK" || aMessage[1] == "ADOCK")
-                                if (aMessage[1] == "COND" || aMessage[1] == "ACOND")
+ //                               if (aMessage[1] == "COND" || aMessage[1] == "ACOND")
                                 {
                                     Echo("Docking answer!");
                                     // FORMAT:	antSend("WICO:DOCK:" + aMessage[3] + ":" + connector.EntityId + ":" + connector.CustomName + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
                                     //	antSend("WICO:ADOCK:" + incomingID + ":" + connector.EntityId + ":" + connector.CustomName 	+ ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec)+":" + Vector3DToString(vAlign));
 
                                     long id = 0;
-                                    long.TryParse(aMessage[2], out id);
-                                    if (id == SaveFile.EntityId)
-                                    {
-                                        // it's a message for us.
-                                        sReceivedMessage = ""; // we processed it.
-                                        long.TryParse(aMessage[3], out id);
-                                        string sName = aMessage[4];
-                                        double x, y, z;
-                                        int iOff = 5;
-                                        x = Convert.ToDouble(aMessage[iOff++]);
-                                        y = Convert.ToDouble(aMessage[iOff++]);
-                                        z = Convert.ToDouble(aMessage[iOff++]);
-                                        Vector3D vPosition = new Vector3D(x, y, z);
+                                    long.TryParse(aMessage[iOffset++], out id);
+                            if (id == SaveFile.EntityId)
+                            {
+                                // it's a message for us.
+                                sReceivedMessage = ""; // we processed it.
+                                long.TryParse(aMessage[iOffset++], out id);
+                                string sName = aMessage[iOffset++];
+                                double x, y, z;
+                                //                                        int iOff = 5;
+                                x = Convert.ToDouble(aMessage[iOffset++]);
+                                y = Convert.ToDouble(aMessage[iOffset++]);
+                                z = Convert.ToDouble(aMessage[iOffset++]);
+                                Vector3D vPosition = new Vector3D(x, y, z);
 
-                                        x = Convert.ToDouble(aMessage[iOff++]);
-                                        y = Convert.ToDouble(aMessage[iOff++]);
-                                        z = Convert.ToDouble(aMessage[iOff++]);
-                                        Vector3D vVec = new Vector3D(x, y, z);
+                                x = Convert.ToDouble(aMessage[iOffset++]);
+                                y = Convert.ToDouble(aMessage[iOffset++]);
+                                z = Convert.ToDouble(aMessage[iOffset++]);
+                                Vector3D vVec = new Vector3D(x, y, z);
 
-                                        if (aMessage[1] == "ACOND")
-                                        {
-                                            x = Convert.ToDouble(aMessage[iOff++]);
-                                            y = Convert.ToDouble(aMessage[iOff++]);
-                                            z = Convert.ToDouble(aMessage[iOff++]);
-                                            vDockAlign = new Vector3D(x, y, z);
-                                            bDoDockAlign = true;
-                                        }
-                                        vDock = vPosition;
-                                        vLaunch1 = vDock + vVec *(shipDim.LengthInMeters() * 1.5);
-                                        vHome = vDock + vVec * (shipDim.LengthInMeters() * 3);
-                                        bValidDock = true;
-                                        bValidLaunch1 = true;
-                                        bValidHome = true;
-                                        StatusLog("clear", gpsPanel);
-                                        debugGPSOutput("dock", vDock);
-                                        debugGPSOutput("launch1", vLaunch1);
-                                        debugGPSOutput("Home", vHome);
+                                //                                        if (aMessage[1] == "ACOND")
+                                if (bAlignMessage)
+                                {
+                                    x = Convert.ToDouble(aMessage[iOffset++]);
+                                    y = Convert.ToDouble(aMessage[iOffset++]);
+                                    z = Convert.ToDouble(aMessage[iOffset++]);
+                                    vDockAlign = new Vector3D(x, y, z);
+                                    bDoDockAlign = true;
+                                }
+                                vDock = vPosition;
+                                vLaunch1 = vDock + vVec * (shipDim.LengthInMeters() * 1.5);
+                                vHome = vDock + vVec * (shipDim.LengthInMeters() * 3);
+                                bValidDock = true;
+                                bValidLaunch1 = true;
+                                bValidHome = true;
+                                StatusLog("clear", gpsPanel);
+                                debugGPSOutput("dock", vDock);
+                                debugGPSOutput("launch1", vLaunch1);
+                                debugGPSOutput("Home", vHome);
 
-                                        current_state = 300;
+                                current_state = 300;
 
-                                    }
+                            }
+//                            else sStartupError += "\nCOND, but not my boat";
                                 }
                                 // TODO handle CONF
+                                /*
                             }
                         }
-
+                        */
                     }
                     else
                     { // uses timeout from above
