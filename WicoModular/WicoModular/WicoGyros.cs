@@ -39,11 +39,6 @@ namespace IngameScript
             /// </summary>
             int LIMIT_GYROS = 1;
 
-            /// <summary>
-            /// GYRO:leave this many gyros free for user. less than 0 means none. (not fully tested)
-            /// </summary>
-//            int LEAVE_GYROS = -1;
-
             public WicoGyros(Program program, IMyShipController myShipController)
             {
                 thisProgram = program;
@@ -134,6 +129,21 @@ namespace IngameScript
             /// </summary>
             float minAngleRad = 0.01f;
 
+            public void SetMinAngle(float angleRad=0.01f)
+            {
+                minAngleRad = angleRad;
+            }
+
+            public float GetMinAngle()
+            {
+                return minAngleRad;
+            }
+
+            public int GyrosAvailable()
+            {
+                return useGyros.Count;
+            }
+
             /// <summary>
             /// Try to align the ship/grid with the given vector. Returns true if the ship is within minAngleRad of being aligned
             /// </summary>
@@ -209,13 +219,16 @@ namespace IngameScript
                     rot *= ctrl_vel;
 
                     float pitch = -(float)rot.X;
+                    if(Math.Abs(g1.Pitch-pitch)>0.01)
                     g1.Pitch = pitch;
 
                     float yaw = -(float)rot.Y;
-                    g1.Yaw = yaw;
+                    if (Math.Abs(g1.Yaw - yaw) > 0.01)
+                        g1.Yaw = yaw;
 
                     float roll = -(float)rot.Z;
-                    g1.Roll = roll;
+                    if (Math.Abs(g1.Roll - roll) > 0.01)
+                        g1.Roll = roll;
 
                     //		g.SetValueFloat("Power", 1.0f); 
                     g1.GyroOverride = true;
@@ -245,6 +258,152 @@ namespace IngameScript
                         useGyros[i1].Enabled = true;
                     }
                 }
+            }
+
+            // FROM: http://steamcommunity.com/sharedfiles/filedetails/?id=498780349  
+            // IMyGyroControl class v1.0  
+            // Developed by Lynnux  
+            // The Avionics:IMyGyroControl is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.  
+            // To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/.   
+            public const Base6Directions.Direction Forward = Base6Directions.Direction.Forward;
+            public const Base6Directions.Direction Backward = Base6Directions.Direction.Backward;
+            public const Base6Directions.Direction Left = Base6Directions.Direction.Left;
+            public const Base6Directions.Direction Right = Base6Directions.Direction.Right;
+            public const Base6Directions.Direction Up = Base6Directions.Direction.Up;
+            public const Base6Directions.Direction Down = Base6Directions.Direction.Down;
+
+            public float MaxYPR = 30.0f;
+            //            public List<IMyTerminalBlock> Gyros = new List<IMyTerminalBlock>();
+//            public List<IMyGyro> Gyros = new List<IMyGyro>();
+
+            Base6Directions.Direction YawAxisDir = Up;
+            Base6Directions.Direction PitchAxisDir = Left;
+            Base6Directions.Direction RollAxisDir = Forward;
+            Base6Directions.Direction RefUp = Up;
+            Base6Directions.Direction RefLeft = Left;
+            Base6Directions.Direction RefForward = Forward;
+
+            void GetAxisAndDir(Base6Directions.Direction RefDir, out string Axis, out float sign)
+            {
+                Axis = "Yaw";
+                sign = -1.0f;
+                if (Base6Directions.GetAxis(YawAxisDir) == Base6Directions.GetAxis(RefDir))
+                {
+                    if (YawAxisDir == RefDir) sign = 1.0f;
+                }
+                if (Base6Directions.GetAxis(PitchAxisDir) == Base6Directions.GetAxis(RefDir))
+                {
+                    Axis = "Pitch";
+                    if (PitchAxisDir == RefDir) sign = 1.0f;
+                }
+                if (Base6Directions.GetAxis(RollAxisDir) == Base6Directions.GetAxis(RefDir))
+                {
+                    Axis = "Roll";
+                    if (RollAxisDir == RefDir) { } else sign = 1.0f;
+                }
+            }
+            public void SetAxis(IMyGyro gyro, string Axis, float value)
+            {
+                if (Axis == "Yaw")
+                {
+                    gyro.Yaw = value;
+                }
+                else if (Axis == "Pitch")
+                {
+                    gyro.Pitch = value;
+
+                }
+                else //roll
+                {
+                    gyro.Roll = value;
+                }
+
+            }
+            public void SetYaw(float yaw)
+            {
+                //                for (int i = 0; i < Gyros.Count; i++)
+                foreach(var gyro in useGyros)
+                {
+                    string Axis;
+                    float sign;
+                    Vector3 RotatedVector = Base6Directions.GetVector(Up);
+                    Vector3.TransformNormal(ref RotatedVector, gyro.Orientation, out RotatedVector);
+                    YawAxisDir = Base6Directions.GetDirection(ref RotatedVector);
+                    GetAxisAndDir(RefUp, out Axis, out sign);
+                    //                    Echo("Set axis=" + Azis + " yaw="+yaw.ToString("0.00")+" sign=" + sign);
+
+                    SetAxis(gyro, Axis, sign * yaw);
+
+                    gyro.Enabled = true;
+                    gyro.GyroOverride = true;
+                }
+            }
+            public bool DoRotate(double rollAngle, string sPlane = "Roll", float maxYPR = -1, float facingFactor = 1f)
+            {
+                //            Echo("DR:angle=" + rollAngle.ToString("0.00"));
+                float targetNewSetting = 0;
+
+
+                //            float maxRoll = (float)(2 * Math.PI);  this SHOULD be the new constant.. but code must use old constant
+                // TODO: this constant is no longer reasonable..  The adjustments are just magic calculations and should be redone.
+                float maxRoll = 60f;
+
+                //                       IMyGyro gyro = gyros[0] as IMyGyro;
+                //           float maxRoll = gyro.GetMaximum<float>(sPlane);
+                //            Echo("MAXROLL=" + maxRoll);
+
+                if (maxYPR > 0) maxRoll = maxYPR;
+
+                //           float minRoll = gyro.GetMinimum<float>(sPlane);
+
+                if (Math.Abs(rollAngle) > 1.0)
+                {
+                    //                Echo("MAx gyro");
+                    targetNewSetting = maxRoll * (float)(rollAngle) * facingFactor;
+                }
+                else if (Math.Abs(rollAngle) > .7)
+                {
+                    // need to dampen 
+                    //                 Echo(".7 gyro");
+                    targetNewSetting = maxRoll * (float)(rollAngle) / 4;
+                }
+                else if (Math.Abs(rollAngle) > 0.5)
+                {
+                    //                 Echo(".5 gyro");
+                    targetNewSetting = 0.11f * Math.Sign(rollAngle);
+                }
+                else if (Math.Abs(rollAngle) > 0.1)
+                {
+                    //                 Echo(".1 gyro");
+                    targetNewSetting = 0.11f * Math.Sign(rollAngle);
+                }
+                else if (Math.Abs(rollAngle) > 0.01)
+                {
+                    //                 Echo(".01 gyro");
+                    targetNewSetting = 0.11f * Math.Sign(rollAngle);
+                }
+                else if (Math.Abs(rollAngle) > 0.001)
+                {
+                    //                 Echo(".001 gyro");
+                    targetNewSetting = 0.09f * Math.Sign(rollAngle);
+                }
+                else targetNewSetting = 0;
+
+                SetYaw(targetNewSetting);
+                if (Math.Abs(rollAngle) < minAngleRad)
+                {
+                    gyrosOff(); //SetOverride(false);
+                    //                GyroControl.RequestEnable(true);
+                }
+                else
+                {
+                    // now done in the routines
+//                    SetOverride(true);
+//                    RequestEnable(true);
+                    return false;
+                }
+
+                return true;
             }
         }
 

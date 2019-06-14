@@ -49,6 +49,7 @@ namespace IngameScript
                 thisProgram = program;
 
                 thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             /// <summary>
@@ -63,7 +64,17 @@ namespace IngameScript
                         return; // don't add it to our list.
 
                     cameraAllList.Add(tb);
-               }
+                }
+            }
+            void LocalGridChangedHandler()
+            {
+                cameraAllList.Clear();
+                cameraLeftList.Clear();
+                cameraRightList.Clear();
+                cameraUpList.Clear();
+                cameraDownList.Clear();
+                cameraUpList.Clear();
+                bCamerasInit = false;
             }
 
             void CamerasInit()
@@ -107,7 +118,7 @@ namespace IngameScript
                     }
                     else if (ViewnDirection == cameraidentityMatrix.Up)
                     {
-                        cameraUpList.Add(tb );
+                        cameraUpList.Add(tb);
                     }
                     else if (ViewnDirection == cameraidentityMatrix.Down)
                     {
@@ -115,7 +126,23 @@ namespace IngameScript
                     }
                 }
             }
-            public bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
+
+            public bool HasForwardCameras()
+            {
+                CamerasInit();
+                if (cameraForwardList.Count > 0) return true;
+                return false;
+            }
+            public bool CameraForwardScan(double scandistance = 100, float pitch = 0, float yaw = 0)
+            {
+                return doCameraScan(cameraForwardList, scandistance, pitch, yaw);
+            }
+            public bool CameraBackwardScan(double scandistance = 100, float pitch = 0, float yaw = 0)
+            {
+                return doCameraScan(cameraBackwardList, scandistance, pitch, yaw);
+            }
+
+            bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
             {
                 CamerasInit();
                 double foundmax = 0;
@@ -159,7 +186,12 @@ namespace IngameScript
 
             }
 
-            public bool doCameraScan(List<IMyTerminalBlock> cameraList, Vector3D targetPos)
+            public bool CameraForwardScan(Vector3D targetPos)
+            {
+                return doCameraScan(cameraForwardList, targetPos);
+            }
+
+            bool doCameraScan(List<IMyTerminalBlock> cameraList, Vector3D targetPos)
             {
                 CamerasInit();
                 //           Echo("target Scan");

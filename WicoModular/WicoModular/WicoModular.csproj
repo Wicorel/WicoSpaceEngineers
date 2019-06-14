@@ -25,6 +25,7 @@
     <LangVersion>6</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -35,24 +36,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cameras.cs" />
     <Compile Include="EndOfScript.cs" />
-    <Compile Include="LandingGears.cs" />
     <Compile Include="MDK\Bootstrapper.cs" />
-    <Compile Include="OrbitalLaunch.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="MDK\ObritalModesMain.cs" />
     <Compile Include="Readme.cs" />
     <AdditionalFiles Include="thumb.png" />
     <AdditionalFiles Include="MDK\whitelist.cache" />
-    <Compile Include="WicoBlockMaster.cs" />
-    <Compile Include="WicoConnectors.cs" />
-    <Compile Include="WicoControl.cs" />
-    <Compile Include="WicoGasGens.cs" />
-    <Compile Include="WicoGyros.cs" />
-    <Compile Include="WicoIGC.cs" />
-    <Compile Include="WicoParachutes.cs" />
-    <Compile Include="WicoTanks.cs" />
-    <Compile Include="WicoThrust.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild" />
@@ -64,6 +53,23 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
   </ItemGroup>
+  <Import Project="..\..\Modular\WicoThrust\WicoThrust\WicoThrust.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\Parachutes\Parachutes\Parachutes.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\Tanks\Tanks\Tanks.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\BlockMaster\BlockMaster\BlockMaster.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\Cameras\Cameras\Cameras.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\Connectors\Connectors\Connectors.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\GasGens\GasGens\GasGens.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\Gyros\Gyros\Gyros.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\IGC\IGC\IGC.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\LandingGears\LandingGears\LandingGears.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\ModeOrbitalLaunch\ModeOrbitalLaunch\ModeOrbitalLaunch.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\Sensors\Sensors\Sensors.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\Wheels\Wheels\Wheels.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\WicoControl\WicoControl\WicoControl.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\Antennas\Antennas\Antennas.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\NAVRotors\NAVRotors\NAVRotors.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\ModularMain\ModularMain\ModularMain.projitems" Label="Shared" />
   <Import Project="MDK/MDK.options.props" />
   <Import Project="MDK/MDK.paths.props" />
   <Target Name="AfterBuild">

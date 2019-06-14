@@ -26,6 +26,7 @@ namespace IngameScript
         class WicoControl
         {
             public float fMaxWorldMps = 100f;
+
             #region MODES
             const string MODECHANGETAG = "[WICOMODECHANGE]";
             int _iMode = -1;
@@ -82,6 +83,7 @@ namespace IngameScript
             public const int MODE_NAVNEXTTARGET = 670; // go to the next target
             public const int MODE_ARRIVEDTARGET = 699; // we have arrived at target
 
+            public const int MODE_ATTENTION =9999;
 
             public void SetMode(int theNewMode, int theNewState = 0)
             {

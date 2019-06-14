@@ -142,6 +142,7 @@ namespace IngameScript
                 }
                 else if (iMode == WicoControl.MODE_HOVER)
                 {
+                    thisProgram.wicoControl.SetState(0);
                     thisProgram.wicoControl.WantFast();
 
                 }
@@ -722,6 +723,13 @@ namespace IngameScript
 
             }
 
+
+            // states
+            // 0 = init
+            // 10 = powered hovering. No connections
+            // 20 = landing gear locked. 
+            // 
+
             void ModeHover(UpdateType updateSource)
             {
                 int iMode = thisProgram.wicoControl.IMode;
@@ -761,6 +769,11 @@ namespace IngameScript
                     if (fAtmoPower > 0) thisProgram.wicoThrusters.powerDownThrusters(WicoThrusters.thrustatmo);
                     if (fHydroPower > 0) thisProgram.wicoThrusters.powerDownThrusters(WicoThrusters.thrusthydro);
                     if (fIonPower > 0) thisProgram.wicoThrusters.powerDownThrusters(WicoThrusters.thrustion);
+
+                    if(thrustOrbitalUpList.Count<1)
+                    {
+                        vBestThrustOrientation = shipController.WorldMatrix.Down;
+                    }
                     thisProgram.wicoControl.SetState(10);
                     //iState = 10;
                     //                powerDownThrusters(thrustAllList, thrustAll); // turns ON thrusters
@@ -889,14 +902,15 @@ namespace IngameScript
                     else
                     */
                     {
-//                       StatusLog("Gravity Alignment Operational", textPanelReport);
+                        //                       StatusLog("Gravity Alignment Operational", textPanelReport);
 
                         /*
                         string sOrientation = "";
                         if ((craft_operation & CRAFT_MODE_ROCKET) > 0)
                             sOrientation = "rocket";
                         */
-//                        bool bAimed = GyroMain(sOrbitalUpDirection);
+                        //                        bool bAimed = GyroMain(sOrbitalUpDirection);
+                        thisProgram.Echo("Aligning:");
                         bool bAimed = thisProgram.wicoGyros.AlignGyros(vBestThrustOrientation, vNG, shipController);
                         if (bAimed) thisProgram.wicoControl.WantMedium(); //                            bWantMedium = true;
                         else

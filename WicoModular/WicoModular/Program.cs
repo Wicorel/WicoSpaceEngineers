@@ -25,6 +25,7 @@ namespace IngameScript
         WicoIGC wicoIGC;
         WicoControl wicoControl;
         WicoBlockMaster wicoBlockMaster;
+//        TravelMovement wicoTravelMovement;
 
         WicoThrusters wicoThrusters;
         WicoGyros wicoGyros;
@@ -34,8 +35,13 @@ namespace IngameScript
         LandingGears wicoLandingGears;
         Cameras wicoCameras;
         Parachutes wicoParachutes;
+        NavRotors wicoNavRotors;
+        Antennas wicoAntennas;
+        Sensors wicoSensors;
+        Wheels wicoWheels;
 
         OrbitalModes wicoOrbitalLaunch;
+//        Navigation wicoNavigation;
 
 
         // Handlers
@@ -46,6 +52,7 @@ namespace IngameScript
         private MyCommandLine myCommandLine = new MyCommandLine();
 
         private List<Action<MyIni>> SaveHandlers = new List<Action<MyIni>>();
+        private List<Action<MyIni>> LoadHandlers = new List<Action<MyIni>>();
 
         // https://github.com/malware-dev/MDK-SE/wiki/Handling-configuration-and-storage
         private MyIni _SaveIni = new MyIni();
@@ -74,13 +81,25 @@ namespace IngameScript
         {
             MyIniParseResult result;
             if (!_CustomDataIni.TryParse(Me.CustomData, out result))
-                throw new Exception(result.ToString());
+            {
+                Me.CustomData = "";
+                _CustomDataIni.Clear();
+                Echo(result.ToString());
+                //throw new Exception(result.ToString());
+            }
             if (!_SaveIni.TryParse(Storage, out result))
-                throw new Exception(result.ToString());
+            {
+                Storage = "";
+                _SaveIni.Clear();
+                Echo(result.ToString());
+                //                throw new Exception(result.ToString());
+            }
 
             wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
             wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
             wicoControl = new WicoControl(this);
+
+//            wicoTravelMovement = new TravelMovement(this);
 
             wicoThrusters = new WicoThrusters(this);
             wicoGyros = new WicoGyros(this,null);
@@ -90,8 +109,13 @@ namespace IngameScript
             wicoLandingGears = new LandingGears(this);
             wicoCameras = new Cameras(this);
             wicoParachutes = new Parachutes(this);
+            wicoNavRotors = new NavRotors(this);
+            wicoAntennas = new Antennas(this);
+            wicoSensors = new Sensors(this,wicoBlockMaster.GetMainController());
+            wicoWheels = new Wheels(this);
 
             wicoOrbitalLaunch = new OrbitalModes(this);
+//            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
 
             Runtime.UpdateFrequency |= UpdateFrequency.Once; // cause ourselves to run again to continue initialization
 
@@ -113,7 +137,6 @@ namespace IngameScript
             {
                 Echo("I am turned OFF!");
             }
-
         }
 
         public void Save()
@@ -123,13 +146,26 @@ namespace IngameScript
                 handler(_SaveIni);
             }
             Storage = _SaveIni.ToString();
-
         }
 
         void AddSaveHandler(Action<MyIni> handler)
         {
             if (!SaveHandlers.Contains(handler))
                 SaveHandlers.Add(handler);
+        }
+
+        void AddLoadHandler(Action<MyIni> handler)
+        {
+            if (!LoadHandlers.Contains(handler))
+                LoadHandlers.Add(handler);
+        }
+
+        void LoadHandle(MyIni theIni)
+        {
+            foreach (var handler in LoadHandlers)
+            {
+                handler(_SaveIni);
+            }
         }
 
         void AddUpdateHandler(Action<UpdateType> handler)

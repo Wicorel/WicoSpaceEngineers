@@ -24,7 +24,7 @@ namespace IngameScript
 
         #region WicoBlockMaster
 
-        class WicoBlockMaster
+        class WicoBlockMaster //really "ship" master
         {
             Program thisProgram;
             IMyGridTerminalSystem GridTerminalSystem;
@@ -36,7 +36,103 @@ namespace IngameScript
 
                 AddLocalBlockHandler(BlockParseHandler);
                 AddLocalBlockChangedHandler(LocalGridChangedHandler);
+
+                thisProgram.AddLoadHandler(LoadHandler);
+                thisProgram.AddSaveHandler(SaveHandler);
             }
+            void LoadHandler(MyIni theINI)
+            {
+                DesiredMinTravelElevation = (float)theINI.Get("Ship", "MinTravelElevation").ToDouble(DesiredMinTravelElevation);
+            }
+            void SaveHandler(MyIni theINI)
+            {
+                theINI.Set("Ship", "MinTravelElevation", DesiredMinTravelElevation);
+            }
+            #region SHIPCONTROLLER
+            List<IMyShipController> shipControllers = new List<IMyShipController>();
+            private IMyShipController MainShipController;
+            /// <summary>
+            /// gets called for every block on the local construct
+            /// </summary>
+            /// <param name="tb"></param>
+            public void BlockParseHandler(IMyTerminalBlock tb)
+            {
+                if (tb is IMyShipController)
+                {
+                    // TODO: Check for other things for ignoring
+                    // like toilets, etc.
+                    shipControllers.Add(tb as IMyShipController);
+                }
+            }
+
+            public void LocalGridChangedHandler()
+            {
+                // forget what we through we knew
+                MainShipController = null;
+                shipControllers.Clear();
+            }
+
+            /// <summary>
+            /// Returns the main ship controller
+            /// </summary>
+            /// <returns></returns>
+            public IMyShipController GetMainController()
+            {
+                //                thisProgram.Echo(shipControllers.Count.ToString() + " Ship Controllers");
+                // TODO: check for occupied, etc.
+                // TODO: ignore stuff like cyro, toilets, etc.
+                if (MainShipController == null)
+                {
+                    // check in order of preference
+
+                    foreach (var tb in shipControllers)
+                    {
+                        if (tb is IMyRemoteControl)
+                        {
+                            // found a good one
+                            MainShipController = tb;
+                            break;
+                        }
+                    }
+                    // we didn't find one
+                    if (MainShipController == null)
+                    {
+                        foreach (var tb in shipControllers)
+                        {
+                            if (tb is IMyCockpit)
+                            {
+                                // found a good one
+                                MainShipController = tb;
+                                break;
+                            }
+                        }
+                    }
+                    // we didn't find one
+                    if (MainShipController == null)
+                    {
+                        foreach (var tb in shipControllers)
+                        {
+                            if (tb is IMyShipController)
+                            {
+                                // found a good one
+                                MainShipController = tb;
+                                break;
+                            }
+                        }
+                    }
+                    if (MainShipController != null)
+                    {
+                        // we found one
+                        ShipDimensions(MainShipController);
+                    }
+                }
+
+                return MainShipController;
+
+            }
+            #endregion
+
+            #region BLOCKHANDLING
             List<IMyTerminalBlock> gtsLocalBlocks = new List<IMyTerminalBlock>();
             public long localBlocksCount = 0;
 
@@ -48,6 +144,7 @@ namespace IngameScript
 
             List<Action> WicoLocalBlockChangedHandlers = new List<Action>();
             List<Action> WicoRemoteBlockChangedHandlers = new List<Action>();
+
 
             public bool AddLocalBlockHandler(Action<IMyTerminalBlock> handler)
             {
@@ -72,7 +169,9 @@ namespace IngameScript
                     WicoRemoteBlockChangedHandlers.Add(handler);
             }
 
-
+            /// <summary>
+            /// Call to initialize the local blocks and all subscribers
+            /// </summary>
             public void LocalBlocksInit()
             {
                 //TODO: Load defaults from CustomData
@@ -97,6 +196,9 @@ namespace IngameScript
                 }
             }
 
+            /// <summary>
+            /// Call to initialize all remote blocks and their handlers
+            /// </summary>
             public void RemoteBlocksInit()
             {
                 gtsRemoteBlocks.Clear();
@@ -119,6 +221,11 @@ namespace IngameScript
             }
 
             List<IMyTerminalBlock> gtsTestBlocks = new List<IMyTerminalBlock>();
+            /// <summary>
+            /// Call to check if the local grid needs to be re-initialized.
+            /// </summary>
+            /// <param name="bForceUpdate"></param>
+            /// <returns></returns>
             public bool CalcLocalGridChange(bool bForceUpdate=false)
             {
                 gtsTestBlocks.Clear();
@@ -140,6 +247,7 @@ namespace IngameScript
                 }
                 return false;
             }
+
             bool ValidBlock(IMyTerminalBlock tb)
             {
                 if (tb.GetPosition() == new Vector3D())
@@ -149,6 +257,10 @@ namespace IngameScript
                 else return true;
             }
 
+            /// <summary>
+            /// Calculate if the remote blocks have changed and recalculate
+            /// </summary>
+            /// <returns></returns>
             public bool CalcRemoteGridChange()
             {
                 List<IMyTerminalBlock> gtsTestBlocks = new List<IMyTerminalBlock>();
@@ -169,80 +281,7 @@ namespace IngameScript
                 }
                 return false;
             }
-
-
-            #region SHIPCONTROLLER
-            List<IMyShipController> shipControllers = new List<IMyShipController>();
-            private IMyShipController MainShipController;
-            /// <summary>
-            /// gets called for every block on the local construct
-            /// </summary>
-            /// <param name="tb"></param>
-            public void BlockParseHandler(IMyTerminalBlock tb)
-            {
-                if (tb is IMyCryoChamber)
-                    return; // we don't want this.
-                if (tb is IMyShipController)
-                {
-                    // TODO: Check for other things for ignoring
-                    // like toilets, etc.
-                    shipControllers.Add(tb as IMyShipController);
-                }
-            }
-
-            public void LocalGridChangedHandler()
-            {
-                // forget what we through we knew
-                MainShipController = null; 
-                shipControllers.Clear(); 
-            }
-
-            /// <summary>
-            /// Returns the main ship controller
-            /// </summary>
-            /// <returns></returns>
-            public IMyShipController GetMainController()
-            {
-//                thisProgram.Echo(shipControllers.Count.ToString() + " Ship Controllers");
-                // TODO: check for occupied, etc.
-                // TODO: ignore stuff like cyro, toilets, etc.
-                if (MainShipController == null)
-                {
-                    // pick a controller
-                    foreach (var tb in shipControllers)
-                    {
-                        if (tb is IMyRemoteControl)
-                        {
-                            // found a good one
-                            MainShipController = tb;
-                            break;
-                        }
-                    }
-                    // we didn't find one
-                    if (MainShipController == null)
-                    {
-                        foreach (var tb in shipControllers)
-                        {
-                            if (tb is IMyShipController)
-                            {
-                                // found a good one
-                                MainShipController = tb;
-                                break;
-                            }
-                        }
-                    }
-                    if(MainShipController!=null)
-                    {
-                        // we found one
-                        ShipDimensions(MainShipController);
-                    }
-                }
-                
-                return MainShipController;
-
-            }
             #endregion
-
 
             #region shipdim
             const float SMALL_BLOCK_VOLUME = 0.5f;
@@ -330,6 +369,7 @@ namespace IngameScript
                     f.Enabled = bOn;
                 }
             }
+            public float DesiredMinTravelElevation = -1; // OLD: float NAVGravityMinElevation = -1;
 
         }
 
@@ -384,8 +424,6 @@ namespace IngameScript
                 //		var localMax = new Vector3D(block.CubeGrid.Max) + new Vector3D(0.5, 0.5, 0.5);
                 localMax = new Vector3D(block.CubeGrid.Max) + new Vector3D(0.5, 0.5, 0.5);
                 localMax *= block.CubeGrid.GridSize;
-
-
 
                 // The reference-blocks orientation.
                 var blockOrient = block.WorldMatrix.GetOrientation();
@@ -460,6 +498,73 @@ namespace IngameScript
 
         }
 
+        double CalculateYaw(Vector3D destination, IMyTerminalBlock Origin)
+        {
+            double yawAngle = 0;
+            bool facingTarget = false;
+
+            MatrixD refOrientation = GetBlock2WorldTransform(Origin);
+
+            Vector3D vCenter = Origin.GetPosition();
+            Vector3D vBack = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Backward);
+            //            Vector3D vUp = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Up);
+            Vector3D vRight = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Right);
+            Vector3D vLeft = vCenter - 1.0 * Vector3D.Normalize(refOrientation.Right);
+
+            //           debugGPSOutput("vCenter", vCenter);
+            //          debugGPSOutput("vBack", vBack);
+            //           debugGPSOutput("vUp", vUp);
+            //           debugGPSOutput("vRight", vRight);
+
+
+            //          double centerTargetDistance = calculateDistance(vCenter, destination);
+            //          double upTargetDistance = calculateDistance(vUp, destination);
+            //          double backTargetDistance = calculateDistance(vBack, destination);
+            //          double rightLocalDistance = calculateDistance(vRight, vCenter);
+            double rightTargetDistance = calculateDistance(vRight, destination);
+
+            double leftTargetDistance = calculateDistance(vLeft, destination);
+
+            double yawLocalDistance = calculateDistance(vRight, vLeft);
+
+
+            double centerTargetDistance = Vector3D.DistanceSquared(vCenter, destination);
+            double backTargetDistance = Vector3D.DistanceSquared(vBack, destination);
+            /*
+            double upTargetDistance = Vector3D.DistanceSquared(vUp, destination);
+            double rightLocalDistance = Vector3D.DistanceSquared(vRight, vCenter);
+            double rightTargetDistance = Vector3D.DistanceSquared(vRight, destination);
+
+            double leftTargetDistance = Vector3D.DistanceSquared(vLeft, destination);
+
+            double yawLocalDistance = Vector3D.DistanceSquared(vRight, vLeft);
+            */
+            facingTarget = centerTargetDistance < backTargetDistance;
+
+            yawAngle = (leftTargetDistance - rightTargetDistance) / yawLocalDistance;
+            //            Echo("calc Angle=" + Math.Round(yawAngle, 5));
+
+            if (!facingTarget)
+            {
+                //Echo("YAW:NOT FACING!"); 
+                yawAngle += (yawAngle < 0) ? -1 : 1;
+            }
+            //	Echo("yawangle=" + Math.Round(yawAngle,5)); 
+            return yawAngle;
+        }
+
+        double calculateDistance(Vector3D a, Vector3D b)
+        {
+            return Vector3D.Distance(a, b);
+        }
+
+        #region Grid2World
+        // from http://forums.keenswh.com/threads/library-grid-to-world-coordinates.7284828/
+        MatrixD GetGrid2WorldTransform(IMyCubeGrid grid)
+        { Vector3D origin = grid.GridIntegerToWorld(new Vector3I(0, 0, 0)); Vector3D plusY = grid.GridIntegerToWorld(new Vector3I(0, 1, 0)) - origin; Vector3D plusZ = grid.GridIntegerToWorld(new Vector3I(0, 0, 1)) - origin; return MatrixD.CreateScale(grid.GridSize) * MatrixD.CreateWorld(origin, -plusZ, plusY); }
+        MatrixD GetBlock2WorldTransform(IMyCubeBlock blk)
+        { Matrix blk2grid; blk.Orientation.GetMatrix(out blk2grid); return blk2grid * MatrixD.CreateTranslation(((Vector3D)new Vector3D(blk.Min + blk.Max)) / 2.0) * GetGrid2WorldTransform(blk.CubeGrid); }
+        #endregion
 
         #endregion
     }
