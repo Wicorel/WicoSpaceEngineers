@@ -168,13 +168,16 @@ namespace IngameScript
                 rot *= ctrl_vel;
 
                 float pitch = -(float)rot.X;
-                g1.Pitch = pitch;
+                if (Math.Abs(g1.Pitch - pitch) > 0.01)
+                    g1.Pitch = pitch;
 
                 float yaw = -(float)rot.Y;
-                g1.Yaw = yaw;
+                if (Math.Abs(g1.Yaw - yaw) > 0.01)
+                    g1.Yaw = yaw;
 
                 float roll = -(float)rot.Z;
-                g1.Roll = roll;
+                if (Math.Abs(g1.Roll - roll) > 0.01)
+                    g1.Roll = roll;
 
                 //		g.SetValueFloat("Power", 1.0f); 
                 g1.GyroOverride = true;
