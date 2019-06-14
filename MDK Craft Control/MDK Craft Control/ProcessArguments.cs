@@ -156,6 +156,7 @@ namespace IngameScript
                         bool fOK = double.TryParse(args[2].Trim(), out height);
                     }
                     string sCmd = "WICO:PATROL:";
+                    sCmd = "";
                     Vector3D vTarget;
                     Vector3D vUp = shipOrientationBlock.WorldMatrix.Up;
                     if (shipOrientationBlock is IMyShipController)
@@ -182,7 +183,7 @@ namespace IngameScript
                     debugGPSOutput("Patrol3", vTarget);
                     sCmd += Vector3DToString(vTarget) + ":";
 
-                    antSend(sCmd);
+                    antSend("PATROL", sCmd);//        antSend(sCmd);
                     sStartupError += "PATROL:\n" + sCmd;
                 }
                 /*
