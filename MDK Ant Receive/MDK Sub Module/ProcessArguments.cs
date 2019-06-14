@@ -52,7 +52,7 @@ namespace IngameScript
                 {
                     string sCmd = "WICO:TRIGGER:";
                     sCmd += args[1].Trim();
-                    antSend(sCmd);
+                    antSend("TRIGGER", args[1].Trim());//antSend(sCmd);
                 }
                 else Echo("Incomplete command");
 
@@ -102,6 +102,14 @@ namespace IngameScript
                 return true;
             if (ProcessTriggerMessage(sArgument))
                 return true;
+            return false;
+        }
+
+        bool moduleProcessIGCMessage(string sArgument)
+        {
+            sStartupError += "IGC:" + sArgument;
+            DockProcessIGCMessage();
+
             return false;
         }
 
