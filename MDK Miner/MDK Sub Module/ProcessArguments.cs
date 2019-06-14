@@ -99,6 +99,11 @@ namespace IngameScript
             // we directly received an antenna message
             return false;
         }
+        bool moduleProcessIGCMessage(string sArgument)
+        {
+            // we directly received an IGC message
+            return false;
+        }
 
     }
 }

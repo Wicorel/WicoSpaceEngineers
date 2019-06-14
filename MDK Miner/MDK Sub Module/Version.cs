@@ -84,6 +84,9 @@ namespace IngameScript
         3.5 Jan 25 2019 SE 1.189 
         Mar 29, 2019
 
+            3.7 May 29 2019 SE1.190
+            Current Source
+
         TODO:
             check for complete destruction of asteroid like MK3 did
             announce 'asteroid removed'
@@ -123,7 +126,7 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "MINER";
-        string sVersion = "3.5";
+        string sVersion = "3.7";
 
     }
 }
