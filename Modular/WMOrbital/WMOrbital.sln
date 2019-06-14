@@ -1,0 +1,98 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WMOrbital", "WMOrbital\WMOrbital.csproj", "{E014C024-523D-4491-B4C8-00435BFA0089}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Antennas", "..\Antennas\Antennas\Antennas.shproj", "{14FD351B-B99B-4E0F-9128-250FB3532F36}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BlockMaster", "..\BlockMaster\BlockMaster\BlockMaster.shproj", "{6242F17F-6F6A-4721-8475-03A861445DEC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Cameras", "..\Cameras\Cameras\Cameras.shproj", "{8FB811E0-76F1-499F-B6D2-360EE94C5961}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Connectors", "..\Connectors\Connectors\Connectors.shproj", "{5D612757-2295-45B9-BF2F-F056F3343151}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "GasGens", "..\GasGens\GasGens\GasGens.shproj", "{121CBF09-CA3F-465E-BEB0-E14C8E22CD35}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Gyros", "..\Gyros\Gyros\Gyros.shproj", "{39D1BDA2-1F2E-45EF-B3A6-17215CA7EF6B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "IGC", "..\IGC\IGC\IGC.shproj", "{D641AA70-4A98-4D1B-B594-F38F66938D65}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "LandingGears", "..\LandingGears\LandingGears\LandingGears.shproj", "{C4F99BC9-88C1-474D-B515-3ED79C14225D}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeOrbital", "..\ModeOrbitalLaunch\ModeOrbitalLaunch\ModeOrbital.shproj", "{4ECDCF2B-31D0-4B7A-A6CC-719BCB1BF8F0}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModularMain", "..\ModularMain\ModularMain\ModularMain.shproj", "{2C75AB60-AE98-4544-B151-13769A76C6C4}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "NAVRotors", "..\NAVRotors\NAVRotors\NAVRotors.shproj", "{8F6CBB54-6529-43A9-8641-32AF99460465}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Parachutes", "..\Parachutes\Parachutes\Parachutes.shproj", "{9245AE35-2C7C-4B74-9F1A-D82CE464B562}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sensors", "..\Sensors\Sensors\Sensors.shproj", "{22CB2A2B-7DA5-4E54-955B-668721F0C414}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Tanks", "..\Tanks\Tanks\Tanks.shproj", "{3C377B47-C3D2-487D-BBCD-D9F49ADF2208}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Wheels", "..\Wheels\Wheels\Wheels.shproj", "{16185A11-AB01-459F-B25F-61436D5E4023}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoControl", "..\WicoControl\WicoControl\WicoControl.shproj", "{E1083276-87DA-415B-AB5F-0D24ED85B0E5}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoThrust", "..\WicoThrust\WicoThrust\WicoThrust.shproj", "{61EBA249-19F3-48B6-A25B-A4CEE90168BA}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Navigation", "..\Navigation\Navigation\Navigation.shproj", "{88E62142-15B2-40D2-944B-9FD1B0E42EF5}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "TravelMovement", "..\TravelMovement\TravelMovement\TravelMovement.shproj", "{41371B34-D471-4372-91EB-8406BD7F1652}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\GasGens\GasGens\GasGens.projitems*{121cbf09-ca3f-465e-beb0-e14c8e22cd35}*SharedItemsImports = 13
+		..\Antennas\Antennas\Antennas.projitems*{14fd351b-b99b-4e0f-9128-250fb3532f36}*SharedItemsImports = 13
+		..\Wheels\Wheels\Wheels.projitems*{16185a11-ab01-459f-b25f-61436d5e4023}*SharedItemsImports = 13
+		..\Sensors\Sensors\Sensors.projitems*{22cb2a2b-7da5-4e54-955b-668721f0c414}*SharedItemsImports = 13
+		..\ModularMain\ModularMain\ModularMain.projitems*{2c75ab60-ae98-4544-b151-13769a76c6c4}*SharedItemsImports = 13
+		..\Gyros\Gyros\Gyros.projitems*{39d1bda2-1f2e-45ef-b3a6-17215ca7ef6b}*SharedItemsImports = 13
+		..\Tanks\Tanks\Tanks.projitems*{3c377b47-c3d2-487d-bbcd-d9f49adf2208}*SharedItemsImports = 13
+		..\TravelMovement\TravelMovement\TravelMovement.projitems*{41371b34-d471-4372-91eb-8406bd7f1652}*SharedItemsImports = 13
+		..\ModeOrbitalLaunch\ModeOrbitalLaunch\ModeOrbitalLaunch.projitems*{4ecdcf2b-31d0-4b7a-a6cc-719bcb1bf8f0}*SharedItemsImports = 13
+		..\Connectors\Connectors\Connectors.projitems*{5d612757-2295-45b9-bf2f-f056f3343151}*SharedItemsImports = 13
+		..\WicoThrust\WicoThrust\WicoThrust.projitems*{61eba249-19f3-48b6-a25b-a4cee90168ba}*SharedItemsImports = 13
+		..\BlockMaster\BlockMaster\BlockMaster.projitems*{6242f17f-6f6a-4721-8475-03a861445dec}*SharedItemsImports = 13
+		..\Navigation\Navigation\Navigation.projitems*{88e62142-15b2-40d2-944b-9fd1b0e42ef5}*SharedItemsImports = 13
+		..\NAVRotors\NAVRotors\NAVRotors.projitems*{8f6cbb54-6529-43a9-8641-32af99460465}*SharedItemsImports = 13
+		..\Cameras\Cameras\Cameras.projitems*{8fb811e0-76f1-499f-b6d2-360ee94c5961}*SharedItemsImports = 13
+		..\Parachutes\Parachutes\Parachutes.projitems*{9245ae35-2c7c-4b74-9f1a-d82ce464b562}*SharedItemsImports = 13
+		..\LandingGears\LandingGears\LandingGears.projitems*{c4f99bc9-88c1-474d-b515-3ed79c14225d}*SharedItemsImports = 13
+		..\IGC\IGC\IGC.projitems*{d641aa70-4a98-4d1b-b594-f38f66938d65}*SharedItemsImports = 13
+		..\Antennas\Antennas\Antennas.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\BlockMaster\BlockMaster\BlockMaster.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Cameras\Cameras\Cameras.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Connectors\Connectors\Connectors.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\GasGens\GasGens\GasGens.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Gyros\Gyros\Gyros.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\IGC\IGC\IGC.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\LandingGears\LandingGears\LandingGears.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\ModeOrbitalLaunch\ModeOrbitalLaunch\ModeOrbitalLaunch.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\ModularMain\ModularMain\ModularMain.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\NAVRotors\NAVRotors\NAVRotors.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Parachutes\Parachutes\Parachutes.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Sensors\Sensors\Sensors.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Tanks\Tanks\Tanks.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Wheels\Wheels\Wheels.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\WicoControl\WicoControl\WicoControl.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\WicoThrust\WicoThrust\WicoThrust.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\WicoControl\WicoControl\WicoControl.projitems*{e1083276-87da-415b-ab5f-0d24ed85b0e5}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E014C024-523D-4491-B4C8-00435BFA0089}.Debug|x64.ActiveCfg = Debug|x64
+		{E014C024-523D-4491-B4C8-00435BFA0089}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {98192BF9-35EB-425D-A43A-D3E33D9020F9}
+	EndGlobalSection
+EndGlobal
