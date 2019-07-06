@@ -2,7 +2,7 @@
  * 
  * http://steamcommunity.com/sharedfiles/filedetails/?id=864963505
  * 
- * Version 3.1
+ * Version 3.2
  * 
  * 2.1 : 
  * Gimbal system with sub-rotors.
@@ -38,10 +38,12 @@
  * 
  * 3.1C Set upper/lower to constrain movement during rotor movement
  * 
+ * 3.2 Get gravity from ShipController; not just Remote Control
+ * 
  * 
  */
 
-string sVersion = "3.1C";
+string sVersion = "3.2";
 string OurName = "Wico Gimbal";
 string moduleName = "Gimbal Control";
 
@@ -119,9 +121,9 @@ void Main(string sArgument)
 
 		vCurrentPos = gpsCenter.GetPosition();
 
-		if (gpsCenter is IMyRemoteControl)
+		if (gpsCenter is IMyShipController)
 		{
-			Vector3D vNG = ((IMyRemoteControl)gpsCenter).GetNaturalGravity();
+			Vector3D vNG = ((IMyShipController)gpsCenter).GetNaturalGravity();
 			double dLength = vNG.Length();
 			dGravity = dLength / 9.81;
 
@@ -753,20 +755,20 @@ void StatusLog(string text, IMyTextPanel block, bool bReverse = false)
     if (block == null) return;
     if (text.Equals("clear"))
     {
-        block.WritePublicText("");
+        block.WriteText("");
     }
     else
     {
         if (bReverse)
         {
-            string oldtext = block.GetPublicText();
-            block.WritePublicText(text + "\n" + oldtext);
+            string oldtext = block.GetText();
+            block.WriteText(text + "\n" + oldtext);
         }
-        else block.WritePublicText(text + "\n", true);
+        else block.WriteText(text + "\n", true);
         // block.WritePublicTitle(DateTime.Now.ToString());
     }
-    block.ShowTextureOnScreen();
-    block.ShowPublicTextOnScreen();
+//    block.ShowTextureOnScreen();
+//    block.ShowPublicTextOnScreen();
 }
 
 void Log(string text)
