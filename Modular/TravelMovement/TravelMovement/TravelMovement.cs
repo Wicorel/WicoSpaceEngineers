@@ -30,6 +30,8 @@ namespace IngameScript
 
             double tmScanElapsedMs = -1;
 
+            public Vector3D vAvoid;
+
             // below are private
             IMyShipController tmShipController = null;
             double tmMaxSpeed = 85; // calculated max speed.
@@ -121,6 +123,7 @@ namespace IngameScript
                     tmMaxSpeed = thisProgram.wicoControl.fMaxWorldMps;
 
                 tmShipController = myShipController as IMyShipController;
+                double velocityShip = tmShipController.GetShipSpeed();
 
                 //TODO: add grav gen support
                 if (thisProgram.wicoWheels.HasSledWheels())
@@ -267,6 +270,9 @@ namespace IngameScript
                     // first (for THIS target) time init
                     InitDoTravelMovement(vTargetLocation, thisProgram.wicoControl.fMaxWorldMps, thisProgram.wicoBlockMaster.GetMainController());
                 }
+                Vector3D vg= tmShipController.GetNaturalGravity();
+                double dGravity = vg.Length();
+                double velocityShip = tmShipController.GetShipSpeed();
 
                 if (tmCameraElapsedMs >= 0) tmCameraElapsedMs += thisProgram.Runtime.TimeSinceLastRun.TotalMilliseconds;
                 if (tmScanElapsedMs >= 0) tmScanElapsedMs += thisProgram.Runtime.TimeSinceLastRun.TotalMilliseconds;
@@ -293,7 +299,7 @@ namespace IngameScript
 
                 if (dTMDebug)
                 {
-                    thisProgram.Echo("dTM:distance=" + niceDoubleMeters(distance) + " (" + arrivalDistance.ToString() + ")");
+                    thisProgram.Echo("dTM:distance=" + thisProgram.niceDoubleMeters(distance) + " (" + arrivalDistance.ToString() + ")");
                     thisProgram.Echo("dTM:velocity=" + velocityShip.ToString("0.00"));
                     thisProgram.Echo("dTM:tmMaxSpeed=" + tmMaxSpeed.ToString("0.00"));
                 }
@@ -343,7 +349,7 @@ namespace IngameScript
                 {
 
                     double yawangle = -999;
-                    yawangle = CalculateYaw(vTargetLocation, tmShipController);
+                    yawangle = thisProgram.wicoGyros.CalculateYaw(vTargetLocation, tmShipController);
                     thisProgram.Echo("yawangle=" + yawangle.ToString());
                     if (btmSled)
                     {
@@ -361,7 +367,7 @@ namespace IngameScript
                 {
                     thisProgram.Echo("Wheels W/ Gyro");
                     double yawangle = -999;
-                    yawangle = CalculateYaw(vTargetLocation, shipOrientationBlock);
+                    yawangle = CalculateYaw(vTargetLocation, tmShipController);
                     thisProgram.Echo("yawangle=" + yawangle.ToString());
                     bAimed = Math.Abs(yawangle) < .05;
                     if (!bAimed)
@@ -388,17 +394,17 @@ namespace IngameScript
                 {
                     if (grav.Length() > 0)
                     { // in gravity. try to stay aligned to gravity, but change yaw to aim at location.
-                        bool bGravAligned = GyroMain("", grav, shipOrientationBlock);
+                        bool bGravAligned = GyroMain("", grav, tmShipController);
                         //                    if (bGravAligned)
                         {
-                            double yawangle = CalculateYaw(vTargetLocation, shipOrientationBlock);
+                            double yawangle = CalculateYaw(vTargetLocation, tmShipController);
                             thisProgram.wicoGyros.DoRotate(yawangle, "Yaw");
                             bAimed = Math.Abs(yawangle) < .05;
                         }
                     }
                     else
                     {
-                        bAimed = GyroMain("forward", vVec, shipOrientationBlock);
+                        bAimed = GyroMain("forward", vVec, tmShipController);
                     }
                 }
 
@@ -516,7 +522,7 @@ namespace IngameScript
                         )
                     {
 
-                        OrientedBoundingBoxFaces orientedBoundingBox = new OrientedBoundingBoxFaces(shipOrientationBlock);
+                        OrientedBoundingBoxFaces orientedBoundingBox = new OrientedBoundingBoxFaces(tmShipController);
                         Vector3D[] points = new Vector3D[4];
                         orientedBoundingBox.GetFaceCorners(OrientedBoundingBoxFaces.LookupFront, points); // front output order is BL, BR, TL, TR
 
@@ -616,7 +622,7 @@ namespace IngameScript
                                         { // if the target is inside the BB of the target, ignore the collision
                                             bValidCollision = false;
                                             // check to see if we are close enough to surface of asteroid
-                                            double astDistance = ((Vector3D)lastDetectedInfo.HitPosition - shipOrientationBlock.GetPosition()).Length();
+                                            double astDistance = ((Vector3D)lastDetectedInfo.HitPosition - tmShipController.GetPosition()).Length();
                                             if ((astDistance - stoppingDistance) < arrivalDistance)
                                             {
                                                 ResetMotion();
@@ -676,11 +682,11 @@ namespace IngameScript
                     else thisProgram.Echo("Raycast delay");
 
                     if (dTMDebug)
-                        thisProgram.Echo("dtmFar=" + niceDoubleMeters(dtmFar));
+                        thisProgram.Echo("dtmFar=" + thisProgram.niceDoubleMeters(dtmFar));
                     if (dTMDebug)
-                        thisProgram.Echo("dtmApproach=" + niceDoubleMeters(dtmApproach));
+                        thisProgram.Echo("dtmApproach=" + thisProgram.niceDoubleMeters(dtmApproach));
                     if (dTMDebug)
-                        thisProgram.Echo("dtmPrecision=" + niceDoubleMeters(dtmPrecision));
+                        thisProgram.Echo("dtmPrecision=" + thisProgram.niceDoubleMeters(dtmPrecision));
 
                     if (distance > dtmFar && !btmApproach)
                     {
@@ -834,6 +840,443 @@ namespace IngameScript
                 //            debugGPSOutput("vAvoid", vAvoid);
             }
 
+
+            // pathfinding routines.  Try to escape from inside an asteroid.
+
+            bool bScanLeft = true;
+            bool bScanRight = true;
+            bool bScanUp = true;
+            bool bScanDown = true;
+            bool bScanBackward = true;
+            bool bScanForward = true;
+
+            MyDetectedEntityInfo lastDetectedInfo;
+
+            MyDetectedEntityInfo leftDetectedInfo = new MyDetectedEntityInfo();
+            MyDetectedEntityInfo rightDetectedInfo = new MyDetectedEntityInfo();
+            MyDetectedEntityInfo upDetectedInfo = new MyDetectedEntityInfo();
+            MyDetectedEntityInfo downDetectedInfo = new MyDetectedEntityInfo();
+            MyDetectedEntityInfo backwardDetectedInfo = new MyDetectedEntityInfo();
+            MyDetectedEntityInfo forwardDetectedInfo = new MyDetectedEntityInfo();
+
+            //        bool bEscapeGrid = false;
+
+            QuadrantCameraScanner ScanEscapeFrontScanner;
+            QuadrantCameraScanner ScanEscapeBackScanner;
+            QuadrantCameraScanner ScanEscapeLeftScanner;
+            QuadrantCameraScanner ScanEscapeRightScanner;
+            QuadrantCameraScanner ScanEscapeTopScanner;
+            QuadrantCameraScanner ScanEscapeBottomScanner;
+
+            /// <summary>
+            /// Initialize the escape scanning (mini-pathfinding)
+            /// Call once to setup
+            /// </summary>
+            public void initEscapeScan(bool bWantBack = false, bool bWantForward = true)
+            {
+                if (tmCameraElapsedMs >= 0) tmCameraElapsedMs += thisProgram.Runtime.TimeSinceLastRun.TotalMilliseconds;
+                if (tmScanElapsedMs >= 0) tmScanElapsedMs += thisProgram.Runtime.TimeSinceLastRun.TotalMilliseconds;
+
+                bScanLeft = true;
+                bScanRight = true;
+                bScanUp = true;
+                bScanDown = true;
+                bScanBackward = bWantBack;// don't rescan where we just came from..
+                bScanForward = bWantForward;
+
+                leftDetectedInfo = new MyDetectedEntityInfo();
+                rightDetectedInfo = new MyDetectedEntityInfo();
+                upDetectedInfo = new MyDetectedEntityInfo();
+                downDetectedInfo = new MyDetectedEntityInfo();
+                backwardDetectedInfo = new MyDetectedEntityInfo();
+                forwardDetectedInfo = new MyDetectedEntityInfo();
+
+                //            bEscapeGrid = false;
+                if (lastDetectedInfo.Type == MyDetectedEntityType.LargeGrid
+                    || lastDetectedInfo.Type == MyDetectedEntityType.SmallGrid
+                    )
+                {
+                    //               bEscapeGrid = true;
+                }
+
+                // don't assume all drones have all cameras..
+                if (cameraLeftList.Count < 1) bScanLeft = false;
+                if (cameraRightList.Count < 1) bScanRight = false;
+                if (cameraUpList.Count < 1) bScanUp = false;
+                if (cameraDownList.Count < 1) bScanDown = false;
+                if (cameraForwardList.Count < 1) bScanForward = false;
+                if (cameraBackwardList.Count < 1) bScanBackward = false;
+                ScanEscapeFrontScanner = new QuadrantCameraScanner(thisProgram, cameraForwardList, 200, 45, 45, 2, 1, 5, 200, true);
+                ScanEscapeBackScanner = new QuadrantCameraScanner(thisProgram, cameraBackwardList, 200, 45, 45, 2, 1, 5, 200, true);
+                ScanEscapeLeftScanner = new QuadrantCameraScanner(thisProgram, cameraLeftList, 200, 45, 45, 2, 1, 5, 200, true);
+                ScanEscapeRightScanner = new QuadrantCameraScanner(thisProgram, cameraRightList, 200, 45, 45, 2, 1, 5, 200, true);
+                ScanEscapeTopScanner = new QuadrantCameraScanner(thisProgram, cameraUpList, 200, 45, 45, 2, 1, 5, 200, true);
+                ScanEscapeBottomScanner = new QuadrantCameraScanner(thisProgram, cameraDownList, 200, 45, 45, 2, 1, 5, 200, true);
+
+            }
+            /// <summary>
+            /// Perform the pathfinding. Call this until it returns true
+            /// </summary>
+            /// <returns>true if vAvoid now contains the location to go to to (try to) escape</returns>
+            public bool scanEscape()
+            {
+                if (tmCameraElapsedMs >= 0) tmCameraElapsedMs += thisProgram.Runtime.TimeSinceLastRun.TotalMilliseconds;
+                if (tmScanElapsedMs >= 0) tmScanElapsedMs += thisProgram.Runtime.TimeSinceLastRun.TotalMilliseconds;
+
+                MatrixD worldtb = tmShipController.WorldMatrix;
+                Vector3D vVec = worldtb.Forward;
+                thisProgram.Echo("ScanEscape()");
+                if (bScanLeft)
+                {
+                    //                sStartupError+="\nLeft";
+                    if (doCameraScan(cameraLeftList, 200))
+                    {
+                        bScanLeft = false;
+                        leftDetectedInfo = lastDetectedInfo;
+                        if (lastDetectedInfo.IsEmpty())
+                        {
+                            //                        sStartupError += "\n Straight Camera HIT!";
+                            vVec = worldtb.Left;
+                            vVec.Normalize();
+                            vAvoid = tmShipController.GetPosition() + vVec * 200;
+                            return true;
+                        }
+                    }
+                    bScanLeft = ScanEscapeLeftScanner.DoScans();
+                    if (ScanEscapeLeftScanner.bFoundExit)
+                    {
+                        //                    sStartupError += "\n Quadrant Camera HIT!";
+                        leftDetectedInfo = lastDetectedInfo;
+                        vAvoid = tmShipController.GetPosition() + ScanEscapeLeftScanner.vEscapeTarget * 200;
+                        return true;
+                    }
+                }
+                if (bScanRight)
+                {
+                    //                sStartupError += "\nRight";
+                    if (doCameraScan(cameraRightList, 200))
+                    {
+                        bScanRight = false;
+                        rightDetectedInfo = lastDetectedInfo;
+                        if (lastDetectedInfo.IsEmpty())
+                        {
+                            //                        sStartupError += "\n Straight Camera HIT!";
+                            vVec = worldtb.Right;
+                            vVec.Normalize();
+                            vAvoid = tmShipController.GetPosition() + vVec * 200;
+                            return true;
+                        }
+                    }
+                    bScanRight = ScanEscapeRightScanner.DoScans();
+                    if (ScanEscapeRightScanner.bFoundExit)
+                    {
+                        //                    sStartupError += "\n Quadrant Camera HIT!";
+                        rightDetectedInfo = lastDetectedInfo;
+                        vAvoid = tmShipController.GetPosition() + ScanEscapeRightScanner.vEscapeTarget * 200;
+                        return true;
+                    }
+                }
+                if (bScanUp)
+                {
+                    //                sStartupError += "\nUp";
+                    if (doCameraScan(cameraUpList, 200))
+                    {
+                        //                  upDetectedInfo = lastDetectedInfo;
+                        bScanUp = false;
+                        if (lastDetectedInfo.IsEmpty())
+                        {
+                            sStartupError += "\n Straight Camera HIT!";
+                            vVec = worldtb.Up;
+                            vVec.Normalize();
+                            vAvoid = tmShipController.GetPosition() + vVec * 200;
+                            return true;
+                        }
+                    }
+                    bScanUp = ScanEscapeTopScanner.DoScans();
+                    if (ScanEscapeTopScanner.bFoundExit)
+                    {
+                        //                    sStartupError += "\n Quadrant Camera HIT!";
+                        upDetectedInfo = lastDetectedInfo;
+                        vAvoid = tmShipController.GetPosition() + ScanEscapeTopScanner.vEscapeTarget * 200;
+                        return true;
+                    }
+                }
+                if (bScanDown)
+                {
+                    //                sStartupError += "\nDown";
+                    if (doCameraScan(cameraDownList, 200))
+                    {
+                        //                    sStartupError += "\n Straight Camera HIT!";
+                        downDetectedInfo = lastDetectedInfo;
+                        bScanDown = false;
+                        if (lastDetectedInfo.IsEmpty())
+                        {
+                            vVec = worldtb.Down;
+                            vVec.Normalize();
+                            vAvoid = tmShipController.GetPosition() + vVec * 200;
+                            return true;
+                        }
+                    }
+                    bScanDown = ScanEscapeBottomScanner.DoScans();
+                    if (ScanEscapeBottomScanner.bFoundExit)
+                    {
+                        //                    sStartupError += "\n Quadrant Camera HIT!";
+                        downDetectedInfo = lastDetectedInfo;
+                        vAvoid = tmShipController.GetPosition() + ScanEscapeBottomScanner.vEscapeTarget * 200;
+                        return true;
+                    }
+                }
+                if (bScanBackward)
+                {
+                    //                sStartupError += "\nBack";
+                    if (doCameraScan(cameraBackwardList, 200))
+                    {
+                        //                    sStartupError += "\n Straight Camera HIT!";
+                        backwardDetectedInfo = lastDetectedInfo;
+                        bScanBackward = false;
+                        if (lastDetectedInfo.IsEmpty())
+                        {
+                            vVec = worldtb.Backward;
+                            vVec.Normalize();
+                            vAvoid = tmShipController.GetPosition() + vVec * 200;
+                            return true;
+                        }
+                    }
+                    bScanBackward = ScanEscapeBackScanner.DoScans();
+                    if (ScanEscapeBackScanner.bFoundExit)
+                    {
+                        //                    sStartupError += "\n Quadrant Camera HIT!";
+                        backwardDetectedInfo = lastDetectedInfo;
+                        vAvoid = tmShipController.GetPosition() + ScanEscapeBackScanner.vEscapeTarget * 200;
+                        return true;
+                    }
+                }
+                if (bScanForward)
+                {
+                    //                sStartupError += "\nForward";
+                    if (doCameraScan(cameraForwardList, 200))
+                    {
+                        bScanForward = false;
+                        forwardDetectedInfo = lastDetectedInfo;
+                        if (lastDetectedInfo.IsEmpty())
+                        {
+                            //                        sStartupError += "\n Straight Camera HIT!";
+                            vVec = worldtb.Forward;
+                            vVec.Normalize();
+                            vAvoid = tmShipController.GetPosition() + vVec * 200;
+                            return true;
+                        }
+                    }
+                    bScanForward = ScanEscapeFrontScanner.DoScans();
+                    if (ScanEscapeFrontScanner.bFoundExit)
+                    {
+                        //                    sStartupError += "\n Quadrant Camera HIT!";
+                        forwardDetectedInfo = lastDetectedInfo;
+                        vAvoid = ScanEscapeFrontScanner.vEscapeTarget * 200;
+                        vAvoid = tmShipController.GetPosition() + ScanEscapeFrontScanner.vEscapeTarget * 200;
+                        return true;
+                    }
+                }
+
+                if (bScanForward || bScanBackward || bScanUp || bScanDown || bScanLeft || bScanRight)
+                {
+                    Echo("More scans");
+                    return false; // still more scans to go
+                }
+
+                // nothing was 'clear'.  find longest vector and try to go that direction
+                Echo("Scans done. Choose longest");
+                MyDetectedEntityInfo furthest = backwardDetectedInfo;
+                Vector3D currentpos = tmShipController.GetPosition();
+                vVec = worldtb.Backward;
+                if (furthest.HitPosition == null || leftDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)leftDetectedInfo.HitPosition))
+                {
+                    vVec = worldtb.Left;
+                    furthest = leftDetectedInfo;
+                }
+                if (furthest.HitPosition == null || rightDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)rightDetectedInfo.HitPosition))
+                {
+                    vVec = worldtb.Right;
+                    furthest = rightDetectedInfo;
+                }
+                if (furthest.HitPosition == null || upDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)upDetectedInfo.HitPosition))
+                {
+                    vVec = worldtb.Up;
+                    furthest = upDetectedInfo;
+                }
+                if (furthest.HitPosition == null || downDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)downDetectedInfo.HitPosition))
+                {
+                    vVec = worldtb.Down;
+                    furthest = downDetectedInfo;
+                }
+                if (furthest.HitPosition == null || forwardDetectedInfo.HitPosition != null && Vector3D.DistanceSquared(currentpos, (Vector3D)furthest.HitPosition) < Vector3D.DistanceSquared(currentpos, (Vector3D)forwardDetectedInfo.HitPosition))
+                {
+                    vVec = worldtb.Forward;
+                    furthest = forwardDetectedInfo;
+                }
+                if (furthest.HitPosition == null) return false;
+
+                double distance = Vector3D.Distance(currentpos, (Vector3D)furthest.HitPosition);
+                Echo("Distance=" + thisProgram.niceDoubleMeters(distance));
+                vVec.Normalize();
+                vAvoid = tmShipController.GetPosition() + vVec * distance / 2;
+                /*
+                            if (distance<15)
+                            {
+                                if (doCameraScan(cameraForwardList, 20,35,35))
+                                {
+                                    vVec = lastCamera.GetPosition() - (Vector3D)lastDetectedInfo.HitPosition;
+                                    if (distance < vVec.Length())
+                                    {
+                                    Echo("35,35");
+                                        distance = vVec.Length();
+                                        vVec.Normalize();
+                                        vAvoid = lastCamera.GetPosition() + vVec * 5;
+                                    }
+
+                                }
+                                if (doCameraScan(cameraForwardList, 20,-35,-35))
+                                {
+                                    vVec = lastCamera.GetPosition() - (Vector3D)lastDetectedInfo.HitPosition;
+                                    if (distance < vVec.Length())
+                                    {
+                                    Echo("-35,-35");
+                                        distance = vVec.Length();
+                                        vVec.Normalize();
+                                        vAvoid = lastCamera.GetPosition() + vVec * 5;
+                                    }
+
+                                }
+                                if (doCameraScan(cameraForwardList, 20,35,-35))
+                                {
+                                    vVec = lastCamera.GetPosition() - (Vector3D)lastDetectedInfo.HitPosition;
+                                    if (distance < vVec.Length())
+                                    {
+                                    Echo("35,-35");
+                                        distance = vVec.Length();
+                                        vVec.Normalize();
+                                        vAvoid = lastCamera.GetPosition() + vVec * 5;
+                                    }
+
+                                }
+                                if (doCameraScan(cameraForwardList, 20,-35,35))
+                                {
+                                    vVec = lastCamera.GetPosition() - (Vector3D)lastDetectedInfo.HitPosition;
+                                    if (distance < vVec.Length())
+                                    {
+                                    Echo("-35,35");
+                                        distance = vVec.Length();
+                                        vVec.Normalize();
+                                        vAvoid = lastCamera.GetPosition() + vVec * 5;
+                                    }
+                                }
+
+                            }
+                */
+                //            if (distance > 15)
+                if (distance > 4)
+                {
+                    return true;
+                }
+
+                thisProgram.Echo("not FAR enough: ERROR!");
+                return false;
+            }
+
+            void TmPowerForward(float fPower)
+            {
+                if (btmRotor)
+                {
+                    /*
+                    // need to ramp up/down rotor power or they will flip small vehicles and spin a lot
+                    float maxVelocity = rotorNavLeftList[0].GetMaximum<float>("Velocity");
+                    float currentVelocity = rotorNavLeftList[0].GetValueFloat("Velocity");
+                    float cPower = (currentVelocity / maxVelocity * 100);
+                    cPower = Math.Abs(cPower);
+                    if (fPower > (cPower + 5f))
+                        fPower = cPower + 5;
+                    if (fPower < (cPower - 5))
+                        fPower = cPower - 5;
+
+                    if (fPower < 0f) fPower = 0f;
+                    if (fPower > 100f) fPower = 100f;
+                    */
+                    thisProgram.wicoNavRotors.powerUpRotors(fPower);
+                }
+                else
+                    thisProgram.wicoThrusters.powerUpThrusters(thrustTmForwardList, fPower);
+            }
+
+            void TmDoForward(double maxSpeed, float maxThrust)
+            {
+                double velocityShip = tmShipController.GetShipSpeed();
+                if (btmWheels)
+                {
+                    if (velocityShip < 1)
+                    {
+                        // full power, captain!
+                        thisProgram.wicoWheels.WheelsPowerUp(maxThrust);
+                    }
+                    // if we need to go much faster or we are FAR and not near max speed
+                    else if (velocityShip < maxSpeed * .75 || (!btmApproach && velocityShip < maxSpeed * .98))
+                    {
+                        float delta = (float)maxSpeed / thisProgram.wicoControl.fMaxWorldMps * maxThrust;
+                        thisProgram.wicoWheels.WheelsPowerUp(maxThrust);
+                    }
+                    else if (velocityShip < maxSpeed * .85)
+                        thisProgram.wicoWheels.WheelsPowerUp(maxThrust);
+                    else if (velocityShip <= maxSpeed * .98)
+                    {
+                        thisProgram.wicoWheels.WheelsPowerUp(maxThrust);
+                    }
+                    else if (velocityShip >= maxSpeed * 1.02)
+                    {
+                        // TOO FAST
+                        thisProgram.wicoWheels.WheelsPowerUp(0);
+                    }
+                    else // sweet spot
+                    {
+                        thisProgram.wicoWheels.WheelsPowerUp(1);
+                    }
+
+                }
+                else if (!btmRotor)
+                {
+                    if (velocityShip < 1)
+                    {
+                        // full power, captain!
+                        thisProgram.wicoThrusters.powerUpThrusters(thrustTmForwardList, maxThrust);
+                    }
+                    // if we need to go much faster or we are FAR and not near max speed
+                    else if (velocityShip < maxSpeed * .75 || (!btmApproach && velocityShip < maxSpeed * .98))
+                    {
+                        float delta = (float)maxSpeed / fMaxWorldMps * maxThrust;
+                        thisProgram.wicoThrusters.powerUpThrusters(thrustTmForwardList, delta);
+                    }
+                    else if (velocityShip < maxSpeed * .85)
+                        thisProgram.wicoThrusters.powerUpThrusters(thrustTmForwardList, 15f);
+                    else if (velocityShip <= maxSpeed * .98)
+                    {
+                        thisProgram.wicoThrusters.powerUpThrusters(thrustTmForwardList, 1f);
+                    }
+                    else if (velocityShip >= maxSpeed * 1.02)
+                    {
+                        thisProgram.wicoThrusters.powerDownThrusters(thrustAllList);
+                    }
+                    else // sweet spot
+                    {
+                        thisProgram.wicoThrusters.powerDownThrusters(thrustAllList); // turns ON all thrusters
+                                                                                     // turns off the 'backward' thrusters... so we don't slow down
+                        thisProgram.wicoThrusters.powerDownThrusters(thrustTmBackwardList, WicoThrusters.thrustAll, true);
+                        //                 tmShipController.DampenersOverride = false; // this would also work, but then we don't get ship moving towards aim point as we correct
+                    }
+                }
+                else
+                { // rotor control
+                    TmPowerForward(maxThrust);
+                }
+
+            }
         }
     }
 }

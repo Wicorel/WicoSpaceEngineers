@@ -192,7 +192,7 @@ namespace IngameScript
                 }
                 //                else Echo("Init and NOTE update");
             }
-            Echo(updateSource.ToString());
+//            Echo(updateSource.ToString());
             if ((updateSource & UpdateType.IGC) > 0)
             {
                 //                Echo("IGC");
@@ -236,8 +236,7 @@ namespace IngameScript
             if (shipController != null)
                 Echo("Controller = " + shipController.CustomName);
             */
-            Echo("Mode=" + wicoControl.IMode.ToString());
-            Echo("State=" + wicoControl.IState.ToString());
+            Echo("Mode=" + wicoControl.IMode.ToString() + " State=" + wicoControl.IState.ToString());
 
             ModulePostMain();
             Runtime.UpdateFrequency = wicoControl.GenerateUpdate()
@@ -269,6 +268,30 @@ namespace IngameScript
         {
             bInitDone = false;
         }
+
+
+        string niceDoubleMeters(double thed)
+        {
+            string nice = "";
+            if (thed > 1000)
+            {
+                nice = thed.ToString("N0") + "km";
+            }
+            else if (thed > 100)
+            {
+                nice = thed.ToString("0") + "m";
+            }
+            else if (thed > 10)
+            {
+                nice = thed.ToString("0.0") + "m";
+            }
+            else
+            {
+                nice = thed.ToString("0.000") + "m";
+            }
+            return nice;
+        }
+
 
     }
 }

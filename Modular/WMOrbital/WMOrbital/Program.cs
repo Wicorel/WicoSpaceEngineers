@@ -33,6 +33,8 @@ namespace IngameScript
         Antennas wicoAntennas;
         Sensors wicoSensors;
         Wheels wicoWheels;
+        HydrogenEngines wicoEngines;
+        PowerProduction wicoPower;
 
         OrbitalModes wicoOrbitalLaunch;
         //        Navigation wicoNavigation;
@@ -57,6 +59,8 @@ namespace IngameScript
             wicoAntennas = new Antennas(this);
             wicoSensors = new Sensors(this, wicoBlockMaster.GetMainController());
             wicoWheels = new Wheels(this);
+            wicoEngines = new HydrogenEngines(this);
+            wicoPower = new PowerProduction(this);
 
             wicoOrbitalLaunch = new OrbitalModes(this);
             //            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
@@ -64,10 +68,42 @@ namespace IngameScript
         }
         public void ModulePreMain(string argument, UpdateType updateSource)
         {
+            Echo("Commands:");
+            Echo(" hover: start hover mode");
+            Echo(" orbitallaunch: Start launch mode");
+            Echo(" descend [#]: descend to land or # meters");
+            Echo(" orbitalland: land on planet in front of ship");
+            Echo("");
         }
 
         public void ModulePostMain()
         {
+            if(bInitDone)
+            {
+                int engines = 0;
+                /* Testing hydrogen engine processing
+                double currentoutput = 0;
+                double maxoutput = 0;
+                engines = wicoEngines.CurrentOutput(ref currentoutput, ref maxoutput);
+                Echo("Engines: " + engines.ToString());
+                if(engines>0)
+                {
+                    Echo("XMaxoutput=" + maxoutput.ToString() + " Current=" + currentoutput.ToString());
+                    Echo("Tank Filled=" + (wicoEngines.tanksFill()*100).ToString() + "%");
+                }
+                */
+
+                wicoPower.CalcPower();
+                engines = wicoPower.EnginesCount();
+                Echo("H Engines: " + engines.ToString());
+                if (engines > 0)
+                {
+ //                   Echo("Maxoutput=" + wicoPower.maxHydrogenPower.ToString() + " Current=" + wicoPower.currentEngineOutput.ToString());
+                    var tanksfill = wicoPower.EnginesTanksFill();
+                    Echo(" Tanks Filled=" + (tanksfill * 100).ToString() + "%");
+                }
+                
+            }
         }
 
     }

@@ -109,7 +109,7 @@ namespace IngameScript
                     {
                         IMyGasTank tank = tankList[i] as IMyGasTank;
                         if (tank == null) continue; // not a tank
-                        float tankLevel = (float)tank.FilledRatio;
+                        var tankLevel = tank.FilledRatio;
                         totalLevel += tankLevel;
                         iTanksCount++;
                     }

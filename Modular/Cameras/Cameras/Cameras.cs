@@ -37,9 +37,9 @@ namespace IngameScript
 
             List<IMyTerminalBlock> cameraAllList = new List<IMyTerminalBlock>();
 
-            IMyTerminalBlock lastCamera = null;
+            public IMyTerminalBlock lastCamera = null;
 
-            private MyDetectedEntityInfo lastDetectedInfo;
+            public MyDetectedEntityInfo lastDetectedInfo;
             IMyShipController ShipControl;
             Matrix fromGridToReference;
 

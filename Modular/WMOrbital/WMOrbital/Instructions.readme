@@ -1,5 +1,14 @@
-﻿R e a d m e
------------
+﻿Wico Modular
+Orbital Modes
 
-In this file you can include any instructions or other comments you want to have injected onto the 
-top of your final script. You can safely delete this file if you do not want any such comments.
+August 2019
+
+Commands:
+ hover: start hover mode
+ orbitallaunch: Start launch mode
+ descend [#]: descend to land or # meters
+ orbitalland: land on planet in front of ship
+
+
+https://steamcommunity.com/sharedfiles/filedetails/?id=1825127324
+

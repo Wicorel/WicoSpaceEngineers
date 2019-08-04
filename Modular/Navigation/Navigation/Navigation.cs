@@ -34,6 +34,9 @@ namespace IngameScript
                 thisProgram = program;
                 shipController = myShipController;
 
+                thisProgram.moduleName += " Navigation";
+                thisProgram.moduleList += "\nNavigation V4";
+
                 thisProgram.AddUpdateHandler(UpdateHandler);
                 thisProgram.AddTriggerHandler(ProcessTrigger);
                 thisProgram.wicoControl.AddModeInitHandler(ModeInitHandler);
@@ -159,12 +162,18 @@ namespace IngameScript
             bool btmWheels = false;
             bool btmHasGyros = false;
             // else it's gyros and thrusters
+            List<IMyTerminalBlock> thrustForwardList = new List<IMyTerminalBlock>();
+            List<IMyTerminalBlock> thrustBackwardList = new List<IMyTerminalBlock>();
+            List<IMyTerminalBlock> thrustDownList = new List<IMyTerminalBlock>();
+            List<IMyTerminalBlock> thrustUpList = new List<IMyTerminalBlock>();
+            List<IMyTerminalBlock> thrustLeftList = new List<IMyTerminalBlock>();
+            List<IMyTerminalBlock> thrustRightList = new List<IMyTerminalBlock>();
             /*
             States:
             0 -- Master Init
 
 
-                150. (spawn) initialize command in gravity. first align to gravity
+                150. (spawn) initialize command in gravity. first align to gravity (created for EFM)
 
             160 Main Travel to target
 
@@ -258,6 +267,15 @@ namespace IngameScript
                 IMyShipController shipController = thisProgram.wicoBlockMaster.GetMainController();
                 Vector3D vNG = shipController.GetNaturalGravity();
                 double dGravity = vNG.Length();
+
+                if(thrustForwardList.Count<1)
+                {
+                    thisProgram.wicoThrusters.ThrustersCalculateOrientation(shipController,
+                        ref thrustForwardList, ref thrustBackwardList,
+                        ref thrustDownList, ref thrustUpList,
+                        ref thrustLeftList, ref thrustRightList
+                        );
+                }
 
                 if (iState == 0)
                 {
@@ -354,7 +372,7 @@ namespace IngameScript
                         float fSaveAngle = thisProgram.wicoGyros.GetMinAngle();// minAngleRad;
                         thisProgram.wicoGyros.SetMinAngle(0.1f);// minAngleRad = 0.1f;
 
-                        bool bAligned = GyroMain("", vNG, shipOrientationBlock);
+                        bool bAligned = GyroMain("", vNG, shipController);
                         sNavDebug += " Aligned=" + bAligned.ToString();
 
                         thisProgram.Echo("bAligned=" + bAligned.ToString());
@@ -433,7 +451,7 @@ namespace IngameScript
                 {
                     // realign gravity
                     thisProgram.wicoControl.WantFast();// bWantFast = true;
-                    bool bAimed = GyroMain("", grav, shipOrientationBlock);
+                    bool bAimed = GyroMain("", grav, shipController);
                     if (bAimed)
                     {
                         thisProgram.wicoGyros.gyrosOff();
@@ -448,7 +466,7 @@ namespace IngameScript
 
                     Vector3D vVec = vTargetLocation - shipController.GetPosition();
                     double distance = vVec.Length();
-                    thisProgram.Echo("distance=" + niceDoubleMeters(distance));
+                    thisProgram.Echo("distance=" + thisProgram.niceDoubleMeters(distance));
                     thisProgram.Echo("velocity=" + velocityShip.ToString("0.00"));
 
                     //                    StatusLog("clear", sledReport);
@@ -498,14 +516,14 @@ namespace IngameScript
                         double stopD = 0;
                         if (vertVel < 0)
                         {
-                            stopD = thisProgram.wicoThrusters.calculateStoppingDistance(thrustUpList, Math.Abs(vertVel), dGravity);
+                            stopD = thisProgram.wicoThrusters.calculateStoppingDistance(shipController, thrustUpList, Math.Abs(vertVel), dGravity);
                         }
-                        double maxStopD = thisProgram.wicoThrusters.calculateStoppingDistance(thrustUpList, thisProgram.wicoControl.fMaxWorldMps, dGravity);
+                        double maxStopD = thisProgram.wicoThrusters.calculateStoppingDistance(shipController, thrustUpList, thisProgram.wicoControl.fMaxWorldMps, dGravity);
 
                         float atmo;
                         float hydro;
                         float ion;
-                        thisProgram.wicoThrusters.CalculateHoverThrust(thrustUpList, out atmo, out hydro, out ion);
+                        thisProgram.wicoThrusters.CalculateHoverThrust(shipController, thrustUpList, out atmo, out hydro, out ion);
 
                         //                    sNavDebug += " SD=" + stopD.ToString("0");
 
@@ -520,7 +538,7 @@ namespace IngameScript
                               // Emergency thrust
                                 sNavDebug += " EM UP!";
 
-                                bool bAligned = GyroMain("", grav, shipOrientationBlock);
+                                bool bAligned = GyroMain("", grav, shipController);
 
                                 thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, 100);
                                 bDoTravel = false;
@@ -534,9 +552,9 @@ namespace IngameScript
                                 ion += Math.Min(5f, (float)shipSpeedMax);
                                 sNavDebug += " UP! A" + atmo.ToString("0.00");// + " H"+hydro.ToString("0.00") + " I"+ion.ToString("0.00");
                                                                               //powerUpThrusters(thrustUpList, 100);
-                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, atmo, thrustatmo);
-                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, hydro, thrusthydro);
-                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, ion, thrustion);
+                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, atmo, WicoThrusters.thrustatmo);
+                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, hydro, WicoThrusters.thrusthydro);
+                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, ion, WicoThrusters.thrustion);
 
                             }
                             else if (elevation > (maxStopD + thisProgram.wicoBlockMaster.DesiredMinTravelElevation * 1.25))
@@ -548,7 +566,7 @@ namespace IngameScript
                                 //                            bool bAligned = GyroMain("", grav, shipOrientationBlock);
 
                                 thisProgram.wicoThrusters.powerDownThrusters(thrustUpList, thrustAll, true);
-                                bool bAligned = GyroMain("", grav, shipOrientationBlock);
+                                bool bAligned = GyroMain("", grav, shipController);
                                 if (!bAligned)
                                 {
                                     thisProgram.wicoControl.WantFast();// bWantFast = true;
@@ -591,7 +609,7 @@ namespace IngameScript
                                         hydro += Math.Max(100f, Math.Min(5f, (float)velocityShip / 2));
                                         ion += Math.Max(100f, Math.Min(5f, (float)velocityShip / 2));
                                         sNavDebug += " 2FAST! A" + atmo.ToString("0.00");// + " H" + hydro.ToString("0.00") + " I" + ion.ToString("0.00");
-                                        bool bAligned = GyroMain("", grav, shipOrientationBlock);
+                                        bool bAligned = GyroMain("", grav, shipController);
                                         if (!bAligned)
                                         {
                                             thisProgram.wicoControl.WantFast();// bWantFast = true;
@@ -609,9 +627,9 @@ namespace IngameScript
                                     ion -= 5;
                                 }
 
-                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, atmo, thrustatmo);
-                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, hydro, thrusthydro);
-                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, ion, thrustion);
+                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, atmo, WicoThrusters.thrustatmo);
+                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, hydro, WicoThrusters.thrusthydro);
+                                thisProgram.wicoThrusters.powerUpThrusters(thrustUpList, ion, WicoThrusters.thrustion);
 
                             }
                             else
@@ -692,7 +710,7 @@ namespace IngameScript
                 else if (iState == 348)
                 {
                     thisProgram.wicoControl.WantFast();// bWantFast = true;
-                    if (GyroMain("up", GridUpVector, shipOrientationBlock))
+                    if (GyroMain("up", GridUpVector, shipController))
                     {
                         iState = 349;
                     }
@@ -700,7 +718,7 @@ namespace IngameScript
                 else if (iState == 349)
                 {
                     thisProgram.wicoControl.WantFast();// bWantFast = true;
-                    if (GyroMain("right", GridRightVector, shipOrientationBlock))
+                    if (GyroMain("right", GridRightVector, shipController))
                     {
                         iState = 350;
                     }
@@ -708,7 +726,7 @@ namespace IngameScript
                 else if (iState == 350)
                 {
                     //                initEscapeScan(bCollisionWasSensor, !bCollisionWasSensor);
-                    initEscapeScan(bCollisionWasSensor);
+                    thisProgram.wicoTravelMovement.initEscapeScan(bCollisionWasSensor);
                     thisProgram.wicoTravelMovement.ResetTravelMovement();
                     dtNavStartShip = DateTime.Now;
                     iState = 360;
@@ -725,7 +743,7 @@ namespace IngameScript
                         //                        doTriggerMain();
                         return;
                     }
-                    if (scanEscape())
+                    if (thisProgram.wicoTravelMovement.scanEscape())
                     {
                         thisProgram.Echo("ESCAPE!");
                         iState = 380;

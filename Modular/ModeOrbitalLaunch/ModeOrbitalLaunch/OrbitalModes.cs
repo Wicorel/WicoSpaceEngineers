@@ -129,6 +129,12 @@ namespace IngameScript
             {
                 int iMode = thisProgram.wicoControl.IMode;
                 int iState = thisProgram.wicoControl.IState;
+
+
+                if (iMode < 0)
+                {
+                    thisProgram.wicoControl.SetMode(WicoControl.MODE_HOVER);
+                }
                 if (iMode == WicoControl.MODE_ORBITALLAUNCH)
                 {
                     thisProgram.wicoControl.WantFast();
@@ -925,8 +931,8 @@ namespace IngameScript
                             sOrientation = "rocket";
                         */
                         //                        bool bAimed = GyroMain(sOrbitalUpDirection);
-                        thisProgram.Echo("Aligning:");
-                        thisProgram.Echo("bestThrust:" + vBestThrustOrientation.ToString()+"\nvNG="+vNG.ToString());
+                        thisProgram.Echo("Aligning to gravity");
+//                        thisProgram.Echo("bestThrust:" + vBestThrustOrientation.ToString()+"\nvNG="+vNG.ToString());
                         bool bAimed = thisProgram.wicoGyros.AlignGyros(vBestThrustOrientation, vNG, shipController);
                         if (bAimed) thisProgram.wicoControl.WantMedium(); //                            bWantMedium = true;
                         else

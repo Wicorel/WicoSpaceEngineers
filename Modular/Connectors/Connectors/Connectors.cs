@@ -33,6 +33,7 @@ namespace IngameScript
                 thisProgram = program;
 
                 thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             /// <summary>
@@ -49,6 +50,12 @@ namespace IngameScript
                     if (tb.CustomName.Contains("[BASE]") || tb.CustomData.Contains("[BASE]"))
                         localBaseConnectors.Add(tb);
                 }
+            }
+            void LocalGridChangedHandler()
+            {
+                localConnectors.Clear();
+                localDockConnectors.Clear();
+                localBaseConnectors.Clear();
             }
             public bool AnyConnectorIsLocked()
             {
