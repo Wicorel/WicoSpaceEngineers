@@ -66,6 +66,9 @@ namespace IngameScript
         string moduleList = "";
         string sVersion = " 4";
 
+
+        string sMasterReporting = "";
+
         public Program()
         {
             MyIniParseResult result;
@@ -237,6 +240,7 @@ namespace IngameScript
                 Echo("Controller = " + shipController.CustomName);
             */
             Echo("Mode=" + wicoControl.IMode.ToString() + " State=" + wicoControl.IState.ToString());
+            Echo(sMasterReporting);
 
             ModulePostMain();
             Runtime.UpdateFrequency = wicoControl.GenerateUpdate()

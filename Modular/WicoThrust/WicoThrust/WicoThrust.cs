@@ -94,10 +94,11 @@ namespace IngameScript
                 orientationBlock.Orientation.GetMatrix(out fromGridToReference);
                 Matrix.Transpose(ref fromGridToReference, out fromGridToReference);
 
+                Matrix fromThrusterToGrid;
+
                 for (int i = 0; i < thrustAllList.Count; ++i)
                 {
                     var thruster = thrustAllList[i] as IMyThrust;
-                    Matrix fromThrusterToGrid;
                     thruster.Orientation.GetMatrix(out fromThrusterToGrid);
                     Vector3 accelerationDirection = Vector3.Transform(fromThrusterToGrid.Backward, fromGridToReference);
                     if (accelerationDirection == thrustIdentityMatrix.Left)
@@ -258,40 +259,107 @@ namespace IngameScript
                 return thrust;
             }
 
-            public void GetBestThrusters(Vector3 v1,
+            public void GetBestThrusters(Vector3D v1,
                 List<IMyTerminalBlock> thrustForwardList, List<IMyTerminalBlock> thrustBackwardList,
                 List<IMyTerminalBlock> thrustDownList, List<IMyTerminalBlock> thrustUpList,
                 List<IMyTerminalBlock> thrustLeftList, List<IMyTerminalBlock> thrustRightList,
                 out List<IMyTerminalBlock> thrustTowards, out List<IMyTerminalBlock> thrustAway
                 )
             {
-                Matrix or1;
+//                Matrix or1;
                 double angle;
                 Vector3D vThrustAim;
                 Vector3D vNGN = v1;
                 vNGN.Normalize();
                 double cos45 = MathHelper.Sqrt2 * 0.5;
+//                thisProgram.sMasterReporting += "GBT: Checking cos45=" + cos45.ToString("0.00")+"\n";
 
                 // default selection to assign out parameters in main-line code
                 thrustTowards = thrustForwardList;
                 thrustAway = thrustBackwardList;
 
+//                thrustForwardList[0].Orientation.GetMatrix(out or1);
+                
+                vThrustAim = thrustForwardList[0].WorldMatrix.Forward;
+                angle = vNGN.Dot(vThrustAim);
+//                thisProgram.sMasterReporting += "GBT:T F:Angle=" + angle.ToString("0.00") + "\n";
+
+//                thrustUpList[0].Orientation.GetMatrix(out or1);
+//                vThrustAim = or1.Forward;
+                vThrustAim = thrustUpList[0].WorldMatrix.Forward;
+                angle = vNGN.Dot(vThrustAim);
+//                thisProgram.sMasterReporting += "GBT:T U:Angle=" + angle.ToString("0.00") + "\n";
+
+//                thrustBackwardList[0].Orientation.GetMatrix(out or1);
+//                vThrustAim = or1.Forward;
+                vThrustAim = thrustBackwardList[0].WorldMatrix.Forward;
+                angle = vNGN.Dot(vThrustAim);
+//                thisProgram.sMasterReporting += "GBT:T B:Angle=" + angle.ToString("0.00") + "\n";
+
+//                thrustDownList[0].Orientation.GetMatrix(out or1);
+//                vThrustAim = or1.Forward;
+                vThrustAim = thrustDownList[0].WorldMatrix.Forward;
+                angle = vNGN.Dot(vThrustAim);
+//                thisProgram.sMasterReporting += "GBT:T D:Angle=" + angle.ToString("0.00") + "\n";
+
+//                thrustRightList[0].Orientation.GetMatrix(out or1);
+//                vThrustAim = or1.Forward;
+                vThrustAim = thrustRightList[0].WorldMatrix.Forward;
+                angle = vNGN.Dot(vThrustAim);
+//                thisProgram.sMasterReporting += "GBT:T R:Angle=" + angle.ToString("0.00") + "\n";
+
+//                thrustLeftList[0].Orientation.GetMatrix(out or1);
+//                vThrustAim = or1.Forward;
+                vThrustAim = thrustLeftList[0].WorldMatrix.Forward;
+                angle = vNGN.Dot(vThrustAim);
+//                thisProgram.sMasterReporting += "GBT:T L:Angle=" + angle.ToString("0.00") + "\n";
+
+                /*
+                thrustDownList[0].CustomName = "thrust DN";
+                thrustDownList[0].ShowOnHUD = true;
+                thrustDownList[0].ShowInTerminal= true;
+                thrustForwardList[0].CustomName = "thrust FW";
+                thrustForwardList[0].ShowOnHUD = true;
+                thrustForwardList[0].ShowInTerminal = true;
+                thrustUpList[0].CustomName = "thrust Up";
+                thrustUpList[0].ShowOnHUD = true;
+                thrustUpList[0].ShowInTerminal = true;
+                thrustBackwardList[0].CustomName = "thrust BK";
+                thrustBackwardList[0].ShowOnHUD = true;
+                thrustBackwardList[0].ShowInTerminal = true;
+                thrustRightList[0].CustomName = "thrust RT";
+                thrustRightList[0].ShowOnHUD = true;
+                thrustRightList[0].ShowInTerminal = true;
+                thrustLeftList[0].CustomName = "thrust LF";
+                thrustLeftList[0].ShowOnHUD = true;
+                thrustLeftList[0].ShowInTerminal = true;
+                */
+
                 if (thrustForwardList.Count > 0)
                 {
-                    thrustForwardList[0].Orientation.GetMatrix(out or1);
-                    vThrustAim = or1.Forward;
-                    angle = vNGN.Dot(vThrustAim);
+  //                  thrustForwardList[0].Orientation.GetMatrix(out or1);
+//                    vThrustAim = or1.Forward;
+                    vThrustAim = thrustForwardList[0].WorldMatrix.Forward;
+                    angle = Math.Abs(vNGN.Dot(vThrustAim));
+//                    thisProgram.sMasterReporting += "GBT: F:Angle="+angle.ToString("0.00") + "\n";
                     if (angle > cos45)
+                    {
+//                        thisProgram.Echo("GBT: Thrust fowrard");
+                        thisProgram.sMasterReporting += "GBT: Thrust fowrard\n";
                         return;
+                    }
                 }
 
                 if (thrustUpList.Count > 0)
                 {
-                    thrustUpList[0].Orientation.GetMatrix(out or1);
-                    vThrustAim = or1.Forward;
-                    angle = vNGN.Dot(vThrustAim);
+  //                  thrustUpList[0].Orientation.GetMatrix(out or1);
+//                    vThrustAim = or1.Forward;
+                    vThrustAim = thrustUpList[0].WorldMatrix.Forward;
+                    angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
+                        thisProgram.sMasterReporting += "GBT: Thrust UP\n";
+//                        thisProgram.Echo("GBT: Thrust UP");
                         thrustTowards = thrustUpList;
                         thrustAway = thrustDownList;
                         return;
@@ -300,11 +368,14 @@ namespace IngameScript
 
                 if (thrustBackwardList.Count > 0)
                 {
-                    thrustBackwardList[0].Orientation.GetMatrix(out or1);
-                    vThrustAim = or1.Forward;
-                    angle = vNGN.Dot(vThrustAim);
+//                    thrustBackwardList[0].Orientation.GetMatrix(out or1);
+//                    vThrustAim = or1.Forward;
+                    vThrustAim = thrustBackwardList[0].WorldMatrix.Forward;
+                    angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
+                        //                      thisProgram.Echo("GBT: Thrust BACKWARD");
+//                        thisProgram.sMasterReporting += "GBT: Thrust BACKWARD\n";
                         thrustTowards = thrustBackwardList;
                         thrustAway = thrustForwardList;
                         return;
@@ -313,11 +384,14 @@ namespace IngameScript
 
                 if (thrustDownList.Count > 0)
                 {
-                    thrustDownList[0].Orientation.GetMatrix(out or1);
-                    vThrustAim = or1.Forward;
-                    angle = vNGN.Dot(vThrustAim);
+//                    thrustDownList[0].Orientation.GetMatrix(out or1);
+//                    vThrustAim = or1.Forward;
+                    vThrustAim = thrustDownList[0].WorldMatrix.Forward;
+                    angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
+                        //                        thisProgram.Echo("GBT: Thrust DOWN");
+//                        thisProgram.sMasterReporting += "GBT: Thrust DOWN\n";
                         thrustTowards = thrustDownList;
                         thrustAway = thrustUpList;
                         return;
@@ -326,11 +400,14 @@ namespace IngameScript
 
                 if (thrustRightList.Count > 0)
                 {
-                    thrustRightList[0].Orientation.GetMatrix(out or1);
-                    vThrustAim = or1.Forward;
-                    angle = vNGN.Dot(vThrustAim);
+//                    thrustRightList[0].Orientation.GetMatrix(out or1);
+//                    vThrustAim = or1.Forward;
+                    vThrustAim = thrustRightList[0].WorldMatrix.Forward;
+                    angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
+                        //                        thisProgram.Echo("GBT: Thrust RIGHT");
+//                        thisProgram.sMasterReporting += "GBT: Thrust RIGHT\n";
                         thrustTowards = thrustRightList;
                         thrustAway = thrustLeftList;
                         return;
@@ -339,18 +416,24 @@ namespace IngameScript
 
                 if (thrustLeftList.Count > 0)
                 {
-                    thrustLeftList[0].Orientation.GetMatrix(out or1);
-                    vThrustAim = or1.Forward;
-                    angle = vNGN.Dot(vThrustAim);
+//                    thrustLeftList[0].Orientation.GetMatrix(out or1);
+//                    vThrustAim = or1.Forward;
+                    vThrustAim = thrustLeftList[0].WorldMatrix.Forward;
+                    angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
+                        //                        thisProgram.Echo("GBT: Thrust LEFT");
+//                        thisProgram.sMasterReporting += "GBT: Thrust LEFT\n";
                         thrustTowards = thrustLeftList;
                         thrustAway = thrustRightList;
                         return;
                     }
                 }
+//                thisProgram.Echo("GBT: Thrust DEFAULT");
+                thisProgram.sMasterReporting += "GBT: Thrust DEFAULT\n";
 
             }
+
             public void GetMaxScaledThrusters(
                 List<IMyTerminalBlock> thrustForwardList, List<IMyTerminalBlock> thrustBackwardList,
                 List<IMyTerminalBlock> thrustDownList, List<IMyTerminalBlock> thrustUpList,

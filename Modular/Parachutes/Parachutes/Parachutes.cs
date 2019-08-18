@@ -103,8 +103,9 @@ namespace IngameScript
                 if (parachuteList.Count > 1)
                 {
                     Matrix or1;
-                    parachuteList[0].Orientation.GetMatrix(out or1);
-                    orientation = or1.Forward;
+                    //                    parachuteList[0].Orientation.GetMatrix(out or1);
+                    //                    orientation = or1.Forward;
+                    orientation = parachuteList[0].WorldMatrix.Forward;
                 }
                 return orientation;
             }

@@ -30,7 +30,7 @@ namespace IngameScript
 
             int descentTargetAlt = 100;
 
-            float orbitalAtmoMult = 55;
+            float orbitalAtmoMult = 5;
             float orbitalIonMult = 2;
             float orbitalHydroMult = 1;
 
@@ -68,7 +68,7 @@ namespace IngameScript
                 thisProgram = program;
 
                 thisProgram.moduleName += " Orbital";
-                thisProgram.moduleList += "\nOrbital V4";
+                thisProgram.moduleList += "\nOrbital V4.1";
 
                 thisProgram.AddUpdateHandler(UpdateHandler);
                 thisProgram.AddTriggerHandler(ProcessTrigger);
@@ -281,13 +281,16 @@ namespace IngameScript
                     Matrix or1;
                     if (thrustOrbitalUpList.Count > 0)
                     {
+
                         thrustOrbitalUpList[0].Orientation.GetMatrix(out or1);
                         vBestThrustOrientation = or1.Forward; // start out aiming at whatever the up thrusters are aiming at..
+//                        vBestThrustOrientation = thrustOrbitalUpList[0].WorldMatrix.Forward;
                     }
                     else
                     {
                         shipController.Orientation.GetMatrix(out or1);
                         vBestThrustOrientation = or1.Down; // assumes forward facing cockpit
+//                        vBestThrustOrientation = shipController.WorldMatrix.Down;
                     }
 
 
@@ -764,11 +767,14 @@ namespace IngameScript
 
                 if (iState == 0)
                 {
+//                    thisProgram.sMasterReporting += "H0:Controller=" + shipController.CustomName+"\n";
                     thisProgram.wicoThrusters.ThrustersCalculateOrientation(shipController,
                         ref thrustForwardList, ref thrustBackwardList,
                         ref thrustDownList, ref thrustUpList,
                         ref thrustLeftList, ref thrustRightList
                         );
+
+
                     Vector3D vNGN = vNG;
                     vNGN.Normalize();
                     thisProgram.wicoThrusters.GetBestThrusters(vNGN,
@@ -777,6 +783,11 @@ namespace IngameScript
                         thrustLeftList, thrustRightList,
                         out thrustOrbitalUpList, out thrustOrbitalDownList
                         );
+
+//                    thisProgram.sMasterReporting += "FW thrust0=" + thrustForwardList[0].CustomName + "\n";
+//                    thisProgram.sMasterReporting += "UP thrust0=" + thrustUpList[0].CustomName + "\n";
+//                    thisProgram.sMasterReporting += "OUP thrust0=" + thrustOrbitalUpList[0].CustomName + "\n";
+//                    thisProgram.sMasterReporting += "OBACK thrust0=" + thrustOrbitalDownList[0].CustomName + "\n";
 
                     float fAtmoPower, fHydroPower, fIonPower;
                     thisProgram.wicoThrusters.CalculateHoverThrust(shipController, thrustOrbitalUpList, out fAtmoPower, out fHydroPower, out fIonPower);
@@ -789,11 +800,15 @@ namespace IngameScript
                     {
                         thrustOrbitalUpList[0].Orientation.GetMatrix(out or1);
                         vBestThrustOrientation = or1.Forward; // start out aiming at whatever the up thrusters are aiming at..
+//                        vBestThrustOrientation = thrustOrbitalUpList[0].WorldMatrix.Forward; // start out aiming at whatever the up thrusters are aiming at..
+//                        thisProgram.sMasterReporting += " H0:Force Uplist forward";
+//                        thisProgram.sMasterReporting += " H0:Up=" + thrustOrbitalUpList[0].CustomName;
                     }
                     else
                     {
                         shipController.Orientation.GetMatrix(out or1);
                         vBestThrustOrientation = or1.Down; // assumes forward facing cockpit
+                        //vBestThrustOrientation = shipController.WorldMatrix.Down;
                     }
                     thisProgram.wicoControl.SetState(10);
                     //iState = 10;
@@ -932,7 +947,8 @@ namespace IngameScript
                         */
                         //                        bool bAimed = GyroMain(sOrbitalUpDirection);
                         thisProgram.Echo("Aligning to gravity");
-//                        thisProgram.Echo("bestThrust:" + vBestThrustOrientation.ToString()+"\nvNG="+vNG.ToString());
+//                        vBestThrustOrientation = thrustOrbitalUpList[0].WorldMatrix.Forward;
+                        thisProgram.Echo("bestThrust:" + vBestThrustOrientation.ToString()+"\nvNG="+vNG.ToString());
                         bool bAimed = thisProgram.wicoGyros.AlignGyros(vBestThrustOrientation, vNG, shipController);
                         if (bAimed) thisProgram.wicoControl.WantMedium(); //                            bWantMedium = true;
                         else
@@ -1252,8 +1268,7 @@ namespace IngameScript
                     Matrix or1;
                     if (vNG == Vector3D.Zero)
                     {
-                        shipController.Orientation.GetMatrix(out or1);
-                        vNGN = or1.Forward;
+                        vNGN=shipController.WorldMatrix.Forward; 
                     }
 
                     vNGN.Normalize();
@@ -1265,6 +1280,7 @@ namespace IngameScript
                         );
                     shipController.Orientation.GetMatrix(out or1);
                     vBestThrustOrientation = or1.Forward; // start out aiming at whatever the ship is aiming at..
+//                    vBestThrustOrientation = shipController.WorldMatrix.Forward;
                 }
                 //               calculateBestGravityThrust();
                 /*
@@ -1923,6 +1939,7 @@ namespace IngameScript
 
             bool CheckAttitudeChange(bool bForceCalc = false)
             {
+                thisProgram.Echo("CAC");
                 List<IMyTerminalBlock> oldup = thrustOrbitalUpList;
                 List<IMyTerminalBlock> olddown = thrustOrbitalDownList;
 
@@ -1936,7 +1953,7 @@ namespace IngameScript
 
                 if (thrustOrbitalUpList != oldup || bForceCalc) // something changed
                 {
-                    //                    thisProgram.Echo("Change in attitude needed");
+                    thisProgram.Echo("CAC:Change in attitude needed");
                     thisProgram.wicoThrusters.powerDownThrusters(olddown);
                     thisProgram.wicoThrusters.powerDownThrusters(oldup);
                     thisProgram.wicoThrusters.powerDownThrusters(thrustOrbitalDownList, WicoThrusters.thrustAll, true);
@@ -1946,6 +1963,7 @@ namespace IngameScript
                         //                        thisProgram.Echo("Using up thrust[0]");
                         thrustOrbitalUpList[0].Orientation.GetMatrix(out or1);
                         vBestThrustOrientation = or1.Forward;
+//                        vBestThrustOrientation = thrustOrbitalUpList[0].WorldMatrix.Forward;
                     }
                     else
                     {
@@ -1953,6 +1971,7 @@ namespace IngameScript
                         IMyShipController shipcontroller = thisProgram.wicoBlockMaster.GetMainController();
                         shipcontroller.Orientation.GetMatrix(out or1);
                         vBestThrustOrientation = or1.Forward;
+                        //vBestThrustOrientation=shipcontroller.WorldMatrix.Forward;
                     }
                     return true;
                 }

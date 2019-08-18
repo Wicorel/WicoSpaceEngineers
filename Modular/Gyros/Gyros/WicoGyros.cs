@@ -179,13 +179,20 @@ namespace IngameScript
 
             }
 
-            public bool AlignGyros(Vector3D down, Vector3D vDirection, IMyTerminalBlock gyroControlPoint)
+            /// <summary>
+            /// Align the direction of the ship to the aim at the target
+            /// </summary>
+            /// <param name="vDirection"></param>
+            /// <param name="vTarget"></param>
+            /// <param name="gyroControlPoint"></param>
+            /// <returns></returns>
+            public bool AlignGyros(Vector3D vDirection, Vector3D vTarget, IMyTerminalBlock gyroControlPoint)
             {
                 bool bAligned = true;
                 if (gyroControl == null)
                     GyroSetup();
 
-                vDirection.Normalize();
+                vTarget.Normalize();
                 Matrix or1;
 
                 for (int i1 = 0; i1 < useGyros.Count; ++i1)
@@ -193,8 +200,8 @@ namespace IngameScript
                     var g1 = useGyros[i1];
                     g1.Orientation.GetMatrix(out or1);
 
-                    var localCurrent = Vector3D.Transform(down, MatrixD.Transpose(or1));
-                    var localTarget = Vector3D.Transform(vDirection, MatrixD.Transpose(g1.WorldMatrix.GetOrientation()));
+                    var localCurrent = Vector3D.Transform(vDirection, MatrixD.Transpose(or1));
+                    var localTarget = Vector3D.Transform(vTarget, MatrixD.Transpose(g1.WorldMatrix.GetOrientation()));
 
                     //Since the gyro ui lies, we are not trying to control yaw,pitch,roll but rather we 
                     //need a rotation vector (axis around which to rotate) 
