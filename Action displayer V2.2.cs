@@ -45,10 +45,11 @@ void Main(string sArgument)
         else
             values.Append("No Blocks Found");
 
-        screen.SetValue("FontSize", 0.8f);
-        screen.ShowTextureOnScreen();
-        screen.WritePublicText(values.ToString());
-        screen.ShowPublicTextOnScreen();
+        //        screen.SetValue("FontSize", 0.8f);
+        //      screen.ShowTextureOnScreen();
+        //        screen.WritePublicText(values.ToString());
+        //        screen.ShowPublicTextOnScreen();
+        screen.WriteText(values.ToString());
     }
     else Echo("No Screen Found");
 }
@@ -149,7 +150,6 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
             }
             else
             {
-                https://steamcommunity.com/sharedfiles/filedetails/?id=907384096
                 values.Append(" (" + hsInfo.Count + " Entries)");
             //						if (hsInfo.Count > 0) values.AppendLine();
             foreach (var myDei in hsInfo)//int i2=0;i2<hsInfo.Count; i2++)
@@ -206,44 +206,62 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n");
     }
 
-    /* Old PowerProducer
-    if(unit is IMyPowerProducer)
+    if(unit is IMyTextSurfaceProvider)
     {
-        IMyPowerProducer ipp=unit as IMyPowerProducer;
-        values.Append("\nIMyPowerProducer");
-        values.Append("\n CurrentPowerOutput="+ipp.CurrentPowerOutput.ToString());
-        values.Append("\n DefinedPowerOutput="+ipp.DefinedPowerOutput.ToString());
-        values.Append("\n MaxPowerOutput="+ipp.MaxPowerOutput.ToString());
-        values.Append("\n ProductionEnabled="+ipp.ProductionEnabled.ToString());	
-        values.Append("\n");
-    }
-    */
-    /* Handled by HasInventory now
-               if(unit is IMyCargoContainer)
-               {
-                   IMyCargoContainer ipp=unit as IMyCargoContainer;
+            IMyTextSurfaceProvider ipp = unit as IMyTextSurfaceProvider;
+            values.Append("\nIMyTextSurfaceProvider");
+            values.Append("\n SurfaceCount=" + ipp.SurfaceCount.ToString());
+            for(int i=0;i<ipp.SurfaceCount;i++)
+            {
+                IMyTextSurface ts = ipp.GetSurface(i);
+                values.Append("\n Surface "+i.ToString());
+                values.Append("\n  DisplayName=" + ts.DisplayName.ToString());
+                values.Append("\n  Name=" + ts.Name.ToString());
+                values.Append("\n  SurfaceSize=" + ts.SurfaceSize.ToString());
+                values.Append("\n  TextureSize=" + ts.TextureSize.ToString());
 
-                   values.Append("\nIMyCargoContainer");
+            }
+            values.Append("\n");
 
-                   var count = ipp.InventoryCount; // GetInventoryCount(); // Multiple inventories in Refineriers, Assemblers, Arc Furnances.
-                   values.Append("\n InventoryCount="+count.ToString());
-
-                   for (var invcount = 0; invcount < count; invcount++)
+        }
+        /* Old PowerProducer
+        if(unit is IMyPowerProducer)
+        {
+            IMyPowerProducer ipp=unit as IMyPowerProducer;
+            values.Append("\nIMyPowerProducer");
+            values.Append("\n CurrentPowerOutput="+ipp.CurrentPowerOutput.ToString());
+            values.Append("\n DefinedPowerOutput="+ipp.DefinedPowerOutput.ToString());
+            values.Append("\n MaxPowerOutput="+ipp.MaxPowerOutput.ToString());
+            values.Append("\n ProductionEnabled="+ipp.ProductionEnabled.ToString());	
+            values.Append("\n");
+        }
+        */
+        /* Handled by HasInventory now
+                   if(unit is IMyCargoContainer)
                    {
-                       values.Append("\n Inventory Item=="+invcount.ToString());
+                       IMyCargoContainer ipp=unit as IMyCargoContainer;
 
-                       IMyInventory inv = unit.GetInventory(invcount);
+                       values.Append("\nIMyCargoContainer");
 
-                       if (inv != null) // null means, no items in inventory.
+                       var count = ipp.InventoryCount; // GetInventoryCount(); // Multiple inventories in Refineriers, Assemblers, Arc Furnances.
+                       values.Append("\n InventoryCount="+count.ToString());
+
+                       for (var invcount = 0; invcount < count; invcount++)
                        {
-                           values.Append("\n MaxVolume="+inv.MaxVolume.ToString());
-                       }
-                   }
+                           values.Append("\n Inventory Item=="+invcount.ToString());
 
-                   values.Append("\n");
-               }
-           */
-    if (unit is IMyBatteryBlock)
+                           IMyInventory inv = unit.GetInventory(invcount);
+
+                           if (inv != null) // null means, no items in inventory.
+                           {
+                               values.Append("\n MaxVolume="+inv.MaxVolume.ToString());
+                           }
+                       }
+
+                       values.Append("\n");
+                   }
+               */
+        if (unit is IMyBatteryBlock)
     {
         IMyBatteryBlock ipp = unit as IMyBatteryBlock;
         values.Append("\nIMyBatteryBlock");
@@ -367,7 +385,36 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n DampenersOverride =" + ipp.DampenersOverride.ToString());
         values.Append("\n HandBrake =" + ipp.HandBrake.ToString());
         values.Append("\n IsUnderControl =" + ipp.IsUnderControl.ToString());
+        // lots more things available...
         values.Append("\n");
+    }
+    if (unit is IMyCockpit)
+    {
+        values.Append("\nIMyCockpit");
+        IMyCockpit io = unit as IMyCockpit;
+        MyShipMass myMass = io.CalculateShipMass();
+        values.Append("\n OxygenCapacity=" + io.OxygenCapacity.ToString());
+        values.Append("\n OxygenFilledRatio=" + io.OxygenFilledRatio.ToString());
+        values.Append("\n");
+    }
+    if (unit is IMyCryoChamber)
+    {
+        values.Append("\nIMyCryoChamber");
+        values.Append("\n");
+    }
+
+    if(unit is IMyRemoteControl)
+    {
+        values.Append("\nIMyRemoteControl");
+        IMyRemoteControl rc = unit as IMyRemoteControl;
+//        MyWaypointInfo wpi = rc.CurrentWaypoint;
+//        values.Append("\n CurrentWaypoint=" + wpi.ToString());
+        values.Append("\n FlightMode=" + rc.FlightMode.ToString());
+        values.Append("\n IsAutoPilotEnabled=" + rc.IsAutoPilotEnabled.ToString());
+        values.Append("\n SpeedLimit=" + rc.SpeedLimit.ToString());
+
+        values.Append("\n");
+
     }
     if (unit is IMyAssembler)
     {
@@ -501,8 +548,12 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
             currentInput=sink.CurrentInputByType(list[j]);
             isPoweredBy=sink.IsPoweredByType(list[j]);
             maxRequiredInput=sink.MaxRequiredInputByType(list[j]);
+//            float available = sink.ResourceAvailableByType(list[j]); // Prohibited
 
-            values.Append("\n Current=" + currentInput.ToString() + " Max=" + maxRequiredInput.ToString() + " PoweredBy=" + isPoweredBy.ToString());
+
+            values.Append("\n Current=" + currentInput.ToString() + " Max=" + maxRequiredInput.ToString() + " PoweredBy=" + isPoweredBy.ToString()
+//                + " Available=" +available.ToString()
+                );
 
         }
     }
@@ -547,3 +598,18 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
 
     values.Append("\n-------------\n");
 }
+
+
+// 1.192 
+/*
+ * 
+ * LG ONLY
+TyepID=MyObjectBuilder_StoreBlock
+SubtyepID=StoreBlock
+
+TyepID=MyObjectBuilder_SafeZoneBlock
+SubtyepID=SafeZoneBlock
+
+TyepID=MyObjectBuilder_ContractBlock
+SubtyepID=ContractBlock
+*/
