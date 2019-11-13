@@ -33,6 +33,7 @@ namespace IngameScript
             List<IMyTerminalBlock> cameraUpList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> cameraLeftList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> cameraRightList = new List<IMyTerminalBlock>();
+
             bool bCamerasInit = false;
 
             List<IMyTerminalBlock> cameraAllList = new List<IMyTerminalBlock>();
@@ -127,12 +128,6 @@ namespace IngameScript
                 }
             }
 
-            public bool HasForwardCameras()
-            {
-                CamerasInit();
-                if (cameraForwardList.Count > 0) return true;
-                return false;
-            }
             public bool CameraForwardScan(double scandistance = 100, float pitch = 0, float yaw = 0)
             {
                 return doCameraScan(cameraForwardList, scandistance, pitch, yaw);
@@ -141,8 +136,24 @@ namespace IngameScript
             {
                 return doCameraScan(cameraBackwardList, scandistance, pitch, yaw);
             }
+            public bool CameraRightScan(double scandistance = 100, float pitch = 0, float yaw = 0)
+            {
+                return doCameraScan(cameraRightList, scandistance, pitch, yaw);
+            }
+            public bool CameraLeftScan(double scandistance = 100, float pitch = 0, float yaw = 0)
+            {
+                return doCameraScan(cameraLeftList, scandistance, pitch, yaw);
+            }
+            public bool CameraDownScan(double scandistance = 100, float pitch = 0, float yaw = 0)
+            {
+                return doCameraScan(cameraDownList, scandistance, pitch, yaw);
+            }
+            public bool CameraUpScan(double scandistance = 100, float pitch = 0, float yaw = 0)
+            {
+                return doCameraScan(cameraUpList, scandistance, pitch, yaw);
+            }
 
-            bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
+            public bool doCameraScan(List<IMyTerminalBlock> cameraList, double scandistance = 100, float pitch = 0, float yaw = 0)
             {
                 CamerasInit();
                 double foundmax = 0;
@@ -191,6 +202,27 @@ namespace IngameScript
                 return doCameraScan(cameraForwardList, targetPos);
             }
 
+            public bool CameraBackScan(Vector3D targetPos)
+            {
+                return doCameraScan(cameraBackwardList, targetPos);
+            }
+            public bool CameraRightScan(Vector3D targetPos)
+            {
+                return doCameraScan(cameraRightList, targetPos);
+            }
+            public bool CameraLeftScan(Vector3D targetPos)
+            {
+                return doCameraScan(cameraLeftList, targetPos);
+            }
+            public bool CameraUpScan(Vector3D targetPos)
+            {
+                return doCameraScan(cameraUpList, targetPos);
+            }
+            public bool CameraDownScan(Vector3D targetPos)
+            {
+                return doCameraScan(cameraDownList, targetPos);
+            }
+
             bool doCameraScan(List<IMyTerminalBlock> cameraList, Vector3D targetPos)
             {
                 CamerasInit();
@@ -233,15 +265,66 @@ namespace IngameScript
                     */
             }
 
+            public bool HasForwardCameras()
+            {
+                CamerasInit();
+                return cameraForwardList.Count > 0;
+            }
+            public bool HasBackCameras()
+            {
+                CamerasInit();
+                return cameraBackwardList.Count > 0;
+            }
+            public bool HasDownCameras()
+            {
+                CamerasInit();
+                return cameraDownList.Count > 0;
+            }
+            public bool HasUpCameras()
+            {
+                CamerasInit();
+                return cameraUpList.Count > 0;
+            }
+            public bool HasLeftCameras()
+            {
+                CamerasInit();
+                return cameraLeftList.Count > 0;
+            }
+            public bool HasRightCameras()
+            {
+                CamerasInit();
+                return cameraRightList.Count > 0;
+            }
+
             public List<IMyTerminalBlock> GetBackwardCameras()
             {
                 CamerasInit();
                 return cameraBackwardList;
             }
+            public List<IMyTerminalBlock> GetForwardCameras()
+            {
+                CamerasInit();
+                return cameraForwardList;
+            }
             public List<IMyTerminalBlock> GetDownwardCameras()
             {
                 CamerasInit();
                 return cameraDownList;
+            }
+            public List<IMyTerminalBlock> GetUpCameras()
+            {
+                CamerasInit();
+                return cameraUpList;
+            }
+            public List<IMyTerminalBlock> GetLeftCameras()
+            {
+                CamerasInit();
+                return cameraLeftList;
+            }
+            public List<IMyTerminalBlock> GetRightCameras()
+            {
+                CamerasInit();
+                return cameraRightList;
             }
 
         }
