@@ -29,7 +29,8 @@ namespace IngameScript
                 if (!AnyConnectorIsConnected())
                 {
                     StatusLog("Can't perform action unless docked", textLongStatus, true);
-                    ResetMotion(); setMode(MODE_IDLE);// ResetToIdle();
+                    ResetMotion();
+                    setMode(MODE_IDLE);// ResetToIdle();
                     return;
                 }
                 doSubModuleTimerTriggers("[RELAUNCH]");
