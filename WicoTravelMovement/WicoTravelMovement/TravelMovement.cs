@@ -183,7 +183,7 @@ namespace IngameScript
             double optimalV = tmMaxSpeed;
 
             // need to check other propulsion flags..
-            if(!btmSled && !btmRotor) optimalV=CalculateOptimalSpeed( thrustTmBackwardList, distance);
+            if(!btmSled && !btmRotor) optimalV=CalculateOptimalSpeed( thrustTmBackwardList, distance, tmMaxSpeed);
             if (optimalV < tmMaxSpeed)
                 tmMaxSpeed = optimalV;
 
@@ -726,7 +726,7 @@ namespace IngameScript
         /// <param name="thrustList">Thrusters to use</param>
         /// <param name="distance">current distance to target location</param>
         /// <returns>optimal max speed (may be game max speed)</returns>
-        double CalculateOptimalSpeed(List<IMyTerminalBlock> thrustList, double distance)
+        double CalculateOptimalSpeed(List<IMyTerminalBlock> thrustList, double distance, double maxSpeed)
         {
             //
 //            Echo("#thrusters=" + thrustList.Count.ToString());
@@ -738,20 +738,27 @@ namespace IngameScript
             double maxDeltaV = maxThrust / myMass.PhysicalMass;
             // Magic..
             double optimalV, secondstozero, stoppingM;
-            optimalV = ((distance * .75) / 2) / (maxDeltaV); // determined by experimentation and black magic
+            optimalV = maxSpeed;
+//            secondstozero = optimalV / maxDeltaV;
+//            stoppingM = optimalV / 2 * secondstozero;
+            double aDistance = distance / 2;  // accelerate and decel
+
+//            optimalV = ((distance * .75) / 2) / (maxDeltaV); // determined by experimentation and black magic
+            if(dTMDebug) sInitResults +="COS OptimalV="+niceDoubleMeters(optimalV);
 //            Echo("COS");
             do
             {
 //                Echo("COS:DO");
                 secondstozero = optimalV / maxDeltaV;
                 stoppingM = optimalV / 2 * secondstozero;
-                if (stoppingM > distance)
+                if (stoppingM > aDistance)
                 {
-                    optimalV *=0.85;
+                    optimalV *=0.85; // reduce by 15% and try again
                 }
-//                Echo("stoppingM=" + stoppingM.ToString("F1") + " distance=" + distance.ToString("N1"));
+                //                Echo("stoppingM=" + stoppingM.ToString("F1") + " distance=" + distance.ToString("N1"));
+                if(dTMDebug) sInitResults+="stoppingM=" + niceDoubleMeters(stoppingM) + " distance=" + niceDoubleMeters(distance);
             }
-            while (stoppingM > distance);
+            while (stoppingM > aDistance);
 //            Echo("COS:X");
             return optimalV;
         }
@@ -1225,6 +1232,7 @@ namespace IngameScript
             }
             else if (!btmRotor)
             {
+                powerDownThrusters(thrustTmBackwardList, thrustAll, true);
                 if (velocityShip < 1)
                 {
                     // full power, captain!
@@ -1242,9 +1250,20 @@ namespace IngameScript
                 {
                     powerUpThrusters(thrustTmForwardList, 1f);
                 }
+                else if (velocityShip >= maxSpeed * 1.2)
+                {
+                    // WAY too fast..
+                    powerDownThrusters(thrustAllList);
+                }
+                else if (velocityShip >= maxSpeed * 1.1)
+                {
+                    powerUpThrusters(thrustTmBackwardList, 15f);
+                    //                    powerDownThrusters(thrustAllList);
+                }
                 else if (velocityShip >= maxSpeed * 1.02)
                 {
-                    powerDownThrusters(thrustAllList);
+                    powerUpThrusters(thrustTmBackwardList, 1f);
+//                    powerDownThrusters(thrustAllList);
                 }
                 else // sweet spot
                 {
