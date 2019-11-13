@@ -565,8 +565,9 @@ namespace IngameScript
 //                                echoInstructions("S=" + current_state + "ODCC " + eoicount++);
 //                                OreDoCargoCheck(); redundant
 //                                echoInstructions("S=" + current_state + "EDOCC " + eoicount++);
-                                double currStone = currentStoneAmount();
-                                if (currStone < 15 && (maxDeltaV < fMiningMinThrust || cargopcent > MiningCargopctlowwater))
+
+                                double currUndesireable = currentUndesireableAmount();
+                                if (currUndesireable < 15 && (maxDeltaV < fMiningMinThrust || cargopcent > MiningCargopctlowwater))
                                 {
                                     // we are full and not much stone ore in us...
                                     ResetMotion();
@@ -577,7 +578,7 @@ namespace IngameScript
                                 // TODO: Needs time-out
                                 StatusLog("Waiting for cargo and thrust to be available", textPanelReport);
                                 Echo("Cargo above low water: Waiting");
-                                if (maxDeltaV > fMiningMinThrust && cargopcent < MiningCargopctlowwater && currStone<1000)
+                                if (maxDeltaV > fMiningMinThrust && cargopcent < MiningCargopctlowwater && currUndesireable<1000)
                                     bMiningWaitingCargo = false; // can now move.
                             }
                             else
