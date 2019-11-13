@@ -40,10 +40,12 @@
  * 
  * 3.2 Get gravity from ShipController; not just Remote Control
  * 
+ * 3.2a was still a cast left for RemoteControl
+ * 
  * 
  */
 
-string sVersion = "3.2";
+string sVersion = "3.2a";
 string OurName = "Wico Gimbal";
 string moduleName = "Gimbal Control";
 
@@ -131,11 +133,11 @@ void Main(string sArgument)
 			{
 				double elevation = 0;
 
-				((IMyRemoteControl)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
+				((IMyShipController)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
 				Echo("Elevation=" + elevation.ToString("0.00"));
 
 				double altitude = 0;
-				((IMyRemoteControl)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Sealevel, out altitude);
+				((IMyShipController)gpsCenter).TryGetPlanetElevation(MyPlanetElevation.Sealevel, out altitude);
 				Echo("Sea Level=" + altitude.ToString("0.00"));
 			}
 
