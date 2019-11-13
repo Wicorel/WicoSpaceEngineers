@@ -112,7 +112,7 @@ namespace IngameScript
         }
         double airworthyChecksElapsedMs = -1;
 
-        bool DockAirWorthy(bool bForceCheck = false, bool bLaunchCheck = true, int cargohighwater=80)
+        bool DockAirWorthy(bool bForceCheck = false, bool bLaunchCheck = true, int cargohighwater=1)
         {
             bool BatteryGo = true;
             bool TanksGo = true;
@@ -122,7 +122,7 @@ namespace IngameScript
             if (airworthyChecksElapsedMs >= 0)
                 airworthyChecksElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
             bool bDoChecks = bForceCheck;
-            if(airworthyChecksElapsedMs>0.5*1000)
+            if(airworthyChecksElapsedMs<0 || airworthyChecksElapsedMs > 0.5*1000)
             {
                 airworthyChecksElapsedMs = 0;
                 bDoChecks = true;
