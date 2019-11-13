@@ -184,6 +184,12 @@ TODO:
     get waypoint list from RC
     Test Rocket ships waypoint nav in gravity
 
+3.71 June 21 2019. SE 1.191.
+tmDoFormard for HUGE thrust ratios (hydrogen)
+
+3.7b July 17 2019. 
+EFM envoy staying high altitude
+
 */
 
         #endregion
@@ -191,7 +197,7 @@ TODO:
         string OurName = "Wico Craft";
 
         string moduleName = "NAV";
-        string sVersion = "3.7";
+        string sVersion = "3.7a";
 
     }
 }
