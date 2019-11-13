@@ -34,6 +34,9 @@ void Main(string sArgument)
             GridTerminalSystem.SearchBlocksOfName(sArgument, blocks);
         }
 
+        values.Append("\n" + Me.CubeGrid.CustomName + ":" + Me.CubeGrid.EntityId.ToString());
+        values.Append(Me.GetPosition().ToString());
+
         Echo("Found :" + blocks.Count.ToString());
         if (blocks.Count > 0)
         {
@@ -205,8 +208,13 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
 //        values.Append("\n ProductionEnabled=" + ipp.ProductionEnabled.ToString());
         values.Append("\n");
     }
+    if (unit is IMyTextPanel)
+    {
+        values.Append("\nIMyTextPanel");
+        values.Append("\n");
+    }
 
-    if(unit is IMyTextSurfaceProvider)
+    if (unit is IMyTextSurfaceProvider)
     {
             IMyTextSurfaceProvider ipp = unit as IMyTextSurfaceProvider;
             values.Append("\nIMyTextSurfaceProvider");
