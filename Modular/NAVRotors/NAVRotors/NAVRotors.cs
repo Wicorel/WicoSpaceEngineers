@@ -35,13 +35,19 @@ namespace IngameScript
 
                 thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
                 thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                thisProgram.AddResetMotionHandler(ResetMotionHandler);
             }
 
-            /// <summary>
-            /// gets called for every block on the local construct
-            /// </summary>
-            /// <param name="tb"></param>
-            public void BlockParseHandler(IMyTerminalBlock tb)
+            void ResetMotionHandler(bool bNoDrills = false)
+            {
+                powerDownRotors();
+            }
+
+        /// <summary>
+        /// gets called for every block on the local construct
+        /// </summary>
+        /// <param name="tb"></param>
+        public void BlockParseHandler(IMyTerminalBlock tb)
             {
                 if (tb is IMyMotorStator)
                 {

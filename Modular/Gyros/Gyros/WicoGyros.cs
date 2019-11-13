@@ -67,6 +67,13 @@ namespace IngameScript
                 // Minimal init; just add handlers
                 thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
                 thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+
+                thisProgram.AddResetMotionHandler(ResetMotionHandler);
+            }
+
+            void ResetMotionHandler(bool bNoDrills=false)
+            {
+                gyrosOff();
             }
 
             /// <summary>
@@ -175,22 +182,24 @@ namespace IngameScript
                 else
                     down = or1.Down;
 
-                return AlignGyros(down, vDirection, gyroControlPoint);
+                return AlignGyros(down, vDirection);
 
             }
 
             /// <summary>
             /// Align the direction of the ship to the aim at the target
             /// </summary>
-            /// <param name="vDirection"></param>
-            /// <param name="vTarget"></param>
+            /// <param name="vDirection">GRID orientation to use for aiming</param>
+            /// <param name="vTarget">VECTOR to aim the grid</param>
             /// <param name="gyroControlPoint"></param>
             /// <returns></returns>
-            public bool AlignGyros(Vector3D vDirection, Vector3D vTarget, IMyTerminalBlock gyroControlPoint)
+            public bool AlignGyros(Vector3D vDirection, Vector3D vTarget )//, IMyTerminalBlock gyroControlPoint)
             {
                 bool bAligned = true;
                 if (gyroControl == null)
                     GyroSetup();
+                thisProgram.Echo("vDirection= " + vDirection.ToString());
+                thisProgram.Echo("vTarget= " + vTarget.ToString());
 
                 vTarget.Normalize();
                 Matrix or1;
@@ -202,6 +211,7 @@ namespace IngameScript
 
                     var localCurrent = Vector3D.Transform(vDirection, MatrixD.Transpose(or1));
                     var localTarget = Vector3D.Transform(vTarget, MatrixD.Transpose(g1.WorldMatrix.GetOrientation()));
+
 
                     //Since the gyro ui lies, we are not trying to control yaw,pitch,roll but rather we 
                     //need a rotation vector (axis around which to rotate) 
@@ -216,8 +226,7 @@ namespace IngameScript
                         g1.GyroOverride = false;
                         continue;
                     }
-                    //		Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
-                    thisProgram.Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
+                      thisProgram.Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
 
                     float yawMax = (float)(2 * Math.PI);
 
@@ -415,6 +424,78 @@ namespace IngameScript
 
                 return true;
             }
+
+            /// <summary>
+            /// Returns desired Yaw to have Origin block face destination
+            /// </summary>
+            /// <param name="destination">World coordinates point to aim at</param>
+            /// <param name="Origin">block to face forward</param>
+            /// <returns></returns>
+            public double CalculateYaw(Vector3D destination, IMyTerminalBlock Origin)
+            {
+                double yawAngle = 0;
+                bool facingTarget = false;
+
+                MatrixD refOrientation = GetBlock2WorldTransform(Origin);
+
+                Vector3D vCenter = Origin.GetPosition();
+                Vector3D vBack = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Backward);
+                //            Vector3D vUp = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Up);
+                Vector3D vRight = vCenter + 1.0 * Vector3D.Normalize(refOrientation.Right);
+                Vector3D vLeft = vCenter - 1.0 * Vector3D.Normalize(refOrientation.Right);
+
+                //           debugGPSOutput("vCenter", vCenter);
+                //          debugGPSOutput("vBack", vBack);
+                //           debugGPSOutput("vUp", vUp);
+                //           debugGPSOutput("vRight", vRight);
+
+
+                //          double centerTargetDistance = calculateDistance(vCenter, destination);
+                //          double upTargetDistance = calculateDistance(vUp, destination);
+                //          double backTargetDistance = calculateDistance(vBack, destination);
+                //          double rightLocalDistance = calculateDistance(vRight, vCenter);
+                double rightTargetDistance = calculateDistance(vRight, destination);
+
+                double leftTargetDistance = calculateDistance(vLeft, destination);
+
+                double yawLocalDistance = calculateDistance(vRight, vLeft);
+
+
+                double centerTargetDistance = Vector3D.DistanceSquared(vCenter, destination);
+                double backTargetDistance = Vector3D.DistanceSquared(vBack, destination);
+                /*
+                double upTargetDistance = Vector3D.DistanceSquared(vUp, destination);
+                double rightLocalDistance = Vector3D.DistanceSquared(vRight, vCenter);
+                double rightTargetDistance = Vector3D.DistanceSquared(vRight, destination);
+
+                double leftTargetDistance = Vector3D.DistanceSquared(vLeft, destination);
+
+                double yawLocalDistance = Vector3D.DistanceSquared(vRight, vLeft);
+                */
+                facingTarget = centerTargetDistance < backTargetDistance;
+
+                yawAngle = (leftTargetDistance - rightTargetDistance) / yawLocalDistance;
+                //            Echo("calc Angle=" + Math.Round(yawAngle, 5));
+
+                if (!facingTarget)
+                {
+                    //Echo("YAW:NOT FACING!"); 
+                    yawAngle += (yawAngle < 0) ? -1 : 1;
+                }
+                //	Echo("yawangle=" + Math.Round(yawAngle,5)); 
+                return yawAngle;
+            }
+            double calculateDistance(Vector3D a, Vector3D b)
+            {
+                return Vector3D.Distance(a, b);
+            }
+            #region Grid2World
+            // from http://forums.keenswh.com/threads/library-grid-to-world-coordinates.7284828/
+            MatrixD GetGrid2WorldTransform(IMyCubeGrid grid)
+            { Vector3D origin = grid.GridIntegerToWorld(new Vector3I(0, 0, 0)); Vector3D plusY = grid.GridIntegerToWorld(new Vector3I(0, 1, 0)) - origin; Vector3D plusZ = grid.GridIntegerToWorld(new Vector3I(0, 0, 1)) - origin; return MatrixD.CreateScale(grid.GridSize) * MatrixD.CreateWorld(origin, -plusZ, plusY); }
+            MatrixD GetBlock2WorldTransform(IMyCubeBlock blk)
+            { Matrix blk2grid; blk.Orientation.GetMatrix(out blk2grid); return blk2grid * MatrixD.CreateTranslation(((Vector3D)new Vector3D(blk.Min + blk.Max)) / 2.0) * GetGrid2WorldTransform(blk.CubeGrid); }
+            #endregion
         }
 
         #endregion

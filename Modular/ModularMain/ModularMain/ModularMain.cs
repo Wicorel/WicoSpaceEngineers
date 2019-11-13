@@ -30,7 +30,7 @@ namespace IngameScript
 
 
         // Handlers
-        private List<Action<MyCommandLine, UpdateType>> UpdateTriggerHandlers = new List<Action<MyCommandLine, UpdateType>>();
+        private List<Action<string,MyCommandLine, UpdateType>> UpdateTriggerHandlers = new List<Action<string,MyCommandLine, UpdateType>>();
         private List<Action<UpdateType>> UpdateUpdateHandlers = new List<Action<UpdateType>>();
 
         // https://github.com/malware-dev/MDK-SE/wiki/Handling-Script-Arguments
@@ -52,6 +52,8 @@ namespace IngameScript
         /// </summary>
         UpdateType utUpdates = UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100 | UpdateType.Once;
 
+        // reset motion handlers
+        private List<Action<bool>> ResetMotionHandlers = new List<Action<bool>>();
 
         // Surface stuff
         IMyTextSurface mesurface0;
@@ -96,18 +98,24 @@ namespace IngameScript
             Runtime.UpdateFrequency |= UpdateFrequency.Once; // cause ourselves to run again to continue initialization
 
             // Local PB Surface Init
-            mesurface0 = Me.GetSurface(0);
-            mesurface1 = Me.GetSurface(1);
-            mesurface0.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
-            mesurface0.WriteText(OurName+sVersion+ moduleList);
-            mesurface0.FontSize = 2;
-            mesurface0.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+            if (Me.SurfaceCount > 1)
+            {
+                mesurface0 = Me.GetSurface(0);
+                mesurface0.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                mesurface0.WriteText(OurName + sVersion + moduleList);
+                mesurface0.FontSize = 2;
+                mesurface0.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+            }
 
-            mesurface1.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
-            mesurface1.WriteText("Version: "+sVersion);
-            mesurface1.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
-            mesurface1.TextPadding = 0.25f;
-            mesurface1.FontSize = 3.5f;
+            if (Me.SurfaceCount > 2)
+            {
+                mesurface1 = Me.GetSurface(1);
+                mesurface1.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                mesurface1.WriteText("Version: " + sVersion);
+                mesurface1.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                mesurface1.TextPadding = 0.25f;
+                mesurface1.FontSize = 3.5f;
+            }
 
             if (!Me.CustomName.Contains(moduleName))
                 Me.CustomName = "PB" +moduleName;
@@ -153,11 +161,26 @@ namespace IngameScript
                 UpdateUpdateHandlers.Add(handler);
         }
 
-        void AddTriggerHandler(Action<MyCommandLine, UpdateType> handler)
+        void AddTriggerHandler(Action<string,MyCommandLine, UpdateType> handler)
         {
             if (!UpdateTriggerHandlers.Contains(handler))
                 UpdateTriggerHandlers.Add(handler);
         }
+
+        void AddResetMotionHandler(Action<bool> handler)
+        {
+            if (!ResetMotionHandlers.Contains(handler))
+                ResetMotionHandlers.Add(handler);
+        }
+
+        void ResetMotion(bool bNoDrills=false)
+        {
+            foreach (var handler in ResetMotionHandlers)
+            {
+                handler(bNoDrills);
+            }
+        }
+
 
         public void Main(string argument, UpdateType updateSource)
         {
@@ -170,6 +193,8 @@ namespace IngameScript
             }
             else
             {
+                if (wicoControl.IamMain()) Echo("MAIN MODULE");
+                else Echo("SUB MODULE");
                 // only do this on update, not triggers
                 if ((updateSource & utUpdates) > 0)
                 {
@@ -207,15 +232,33 @@ namespace IngameScript
             }
             if ((updateSource & (utTriggers)) > 0)
             {
-                //                Echo("Triggers:"+argument);
+                                Echo("Triggers:"+argument);
                 MyCommandLine useCommandLine = null;
                 if (myCommandLine.TryParse(argument))
-                    useCommandLine = myCommandLine;
-                foreach (var handler in UpdateTriggerHandlers)
                 {
-                    handler(useCommandLine, updateSource);
+                    useCommandLine = myCommandLine;
                 }
-
+                bool bProcessed = false;
+                if(myCommandLine.ArgumentCount>1)
+                {
+                    if(myCommandLine.Argument(0)=="setmode")
+                    {
+                        int toMode = 0;
+                        bool bOK = int.TryParse(myCommandLine.Argument(1), out toMode);
+                        if (bOK)
+                        {
+                            wicoControl.SetMode(toMode);
+                            bProcessed = true;
+                        }
+                    }
+                }
+                if (!bProcessed)
+                {
+                    foreach (var handler in UpdateTriggerHandlers)
+                    {
+                        handler(argument, useCommandLine, updateSource);
+                    }
+                }
             }
             if ((updateSource & (utUpdates)) > 0)
             {
@@ -240,7 +283,8 @@ namespace IngameScript
                 Echo("Controller = " + shipController.CustomName);
             */
             Echo("Mode=" + wicoControl.IMode.ToString() + " State=" + wicoControl.IState.ToString());
-            Echo(sMasterReporting);
+
+            Echo("Reporting:\n"+sMasterReporting);
 
             ModulePostMain();
             Runtime.UpdateFrequency = wicoControl.GenerateUpdate()

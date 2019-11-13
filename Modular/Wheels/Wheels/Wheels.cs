@@ -43,6 +43,12 @@ namespace IngameScript
 
                 thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
                 thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                thisProgram.AddResetMotionHandler(ResetMotionHandler);
+            }
+
+            void ResetMotionHandler(bool bNoDrills = false)
+            {
+                WheelsPowerUp(0, 75);
             }
 
             /// <summary>

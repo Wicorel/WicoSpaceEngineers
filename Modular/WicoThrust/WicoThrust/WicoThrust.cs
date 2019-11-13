@@ -46,16 +46,21 @@ namespace IngameScript
             public void ThrustersInit()
             {
                 thisProgram._CustomDataIni.Get(sThrusterSection, "CutterThruster").ToString(sCutterThruster);
-
                 thisProgram._CustomDataIni.Set(sThrusterSection, "CutterThruster", sCutterThruster);
 
                 // Minimal init; just add handlers
                 thrustAllList.Clear();
                 thisProgram.wicoBlockMaster.AddLocalBlockHandler(ThrusterParseHandler);
                 thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                thisProgram.AddResetMotionHandler(ResetMotionHandler);
             }
 
-            public void ThrusterParseHandler(IMyTerminalBlock tb)
+            void ResetMotionHandler(bool bNoDrills = false)
+            {
+                powerDownThrusters();
+            }
+
+        public void ThrusterParseHandler(IMyTerminalBlock tb)
             {
                 if (tb is IMyThrust)
                 {

@@ -169,7 +169,7 @@ namespace IngameScript
             /// </summary>
             /// <param name="argument"></param>
             /// <param name="updateSource"></param>
-            public void ProcessTrigger(MyCommandLine myCommandLine, UpdateType updateSource)
+            public void ProcessTrigger(string sArgument, MyCommandLine myCommandLine, UpdateType updateSource)
             {
                 if (myCommandLine != null)
                 {
