@@ -153,8 +153,11 @@ Performance Pass
 
 3.5 Jan 25 2019 SE 1.189 
 
-3.7 May 28 2018 SE 1.190  
+3.7 May 28 2019 SE 1.190  
 IGC Support for Intergrid communication
+
+3.71 June 22 2019 SE 1.191
+Cargo check for relaunch defaults to 1% max cargo (from 80% !!!!!)
 
 
 TODO:
