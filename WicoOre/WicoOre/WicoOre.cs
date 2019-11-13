@@ -20,6 +20,7 @@ namespace IngameScript
     {
 
         const string sOreSection = "ORE";
+        const string sOreDesirabilitySection = "OREDESIREABILITY";
         List<OreLocInfo> oreLocs = new List<OreLocInfo>();
 
 
@@ -157,20 +158,78 @@ namespace IngameScript
         void OreInitInfo()
         {
             oreInfos.Clear();
+            bool bInfoChanged = false;
+            bool bInforead = false;
             // read from text panel..
 
-            //iff empty text panel, init
-            for (int l1 = 0; l1 < aOres.Length; l1++)
+            if (iniWicoCraftSave != null)
             {
-                OreInfo oi = new OreInfo();
-                oi.oreID = l1;
-                oi.oreName = aOres[l1];
-                oi.desireability = lOreDesirability[l1];
-                oi.bFound = false;
-                oi.localAmount = 0;
-                oreInfos.Add(oi);
+                int iCount = 0;
+                iniWicoCraftSave.GetValue(sOreDesirabilitySection, "count", ref iCount);
+                if(iCount>=lOreDesirability.Length)
+                {
+                    bInforead = true;
+                    for (int j1 = 0; j1 < iCount; j1++)
+                    {
+                        int oreID = 0;
+                        string oreName = "";
+                        long desireability = -1;
+                        bool bFound = false;
+                        double localAmount = 0;
+                        iniWicoCraftSave.GetValue(sOreDesirabilitySection, "oreId" + j1.ToString(), ref oreID);
+                        iniWicoCraftSave.GetValue(sOreDesirabilitySection, "oreName" + j1.ToString(), ref oreName);
+                        iniWicoCraftSave.GetValue(sOreDesirabilitySection, "desireability" + j1.ToString(), ref desireability);
+                        iniWicoCraftSave.GetValue(sOreDesirabilitySection, "bFound" + j1.ToString(), ref bFound);
+                        iniWicoCraftSave.GetValue(sOreDesirabilitySection, "localAmount" + j1.ToString(), ref localAmount);
+
+                        OreInfo oi = new OreInfo();
+                        oi.oreID = oreID;
+                        oi.oreName = oreName;
+                        oi.desireability = desireability;
+                        oi.bFound = bFound;
+                        oi.localAmount = localAmount;
+                        oreInfos.Add(oi);
+                    }
+
+                }
+            }
+
+            if(!bInforead)
+            {
+                //iff empty text panel, init
+                bInfoChanged = true;
+                for (int l1 = 0; l1 < aOres.Length; l1++)
+                {
+                    OreInfo oi = new OreInfo();
+                    oi.oreID = l1;
+                    oi.oreName = aOres[l1];
+                    oi.desireability = lOreDesirability[l1];
+                    oi.bFound = false;
+                    oi.localAmount = 0;
+                    oreInfos.Add(oi);
+                }
+
             }
             // write data back to text panel if changed.
+            if(bInfoChanged)
+            {
+                // we need to write it back out
+                if (iniWicoCraftSave == null)
+                {
+                    sStartupError += "\nNo INI for saving on OreInit()";
+                    return;
+                }
+                var count = oreInfos.Count;
+                iniWicoCraftSave.SetValue(sOreDesirabilitySection, "count", count);
+                for (int i1 = 0; i1 < oreInfos.Count; i1++)
+                {
+                    iniWicoCraftSave.SetValue(sOreDesirabilitySection, "oreId" + i1.ToString(), oreInfos[i1].oreID);
+                    iniWicoCraftSave.SetValue(sOreDesirabilitySection, "oreName" + i1.ToString(), oreInfos[i1].oreName);
+                    iniWicoCraftSave.SetValue(sOreDesirabilitySection, "desireability" + i1.ToString(), oreInfos[i1].desireability);
+                    iniWicoCraftSave.SetValue(sOreDesirabilitySection, "bFound" + i1.ToString(), oreInfos[i1].bFound);
+                    iniWicoCraftSave.SetValue(sOreDesirabilitySection, "localAmount" + i1.ToString(), oreInfos[i1].localAmount);
+                }
+            }
         }
 
         string OreName(int oreId)
@@ -217,27 +276,25 @@ namespace IngameScript
                         OreFound(oreInfos[i].oreID);
 //                        OreFound(oreInfos[i]);
                     }
+                    return;
                     //                    else Echo("already 'found'");
                 }
             }
+            sStartupError += "\nOre :'" + sOre + "' Not found";
         }
 
-        int iStoneOreId = -1;
-        double currentStoneAmount()
+        double currentUndesireableAmount()
         {
-            if(iStoneOreId<0)
+            double undesireableAmount = 0;
+
+            for(int i=0;i<oreInfos.Count;i++)
             {
-                for(int i=0;i<oreInfos.Count;i++)
+                if(oreInfos[i].desireability<0)
                 {
-                    if(oreInfos[i].oreName=="Stone")
-                    {
-                        iStoneOreId = i;
-                        break;
-                    }
+                    undesireableAmount += oreInfos[i].localAmount;
                 }
             }
-            if (iStoneOreId < 0) return 0;
-            return oreInfos[iStoneOreId].localAmount;
+            return undesireableAmount;
         }
 
         void OreFound(int oreIndex)
