@@ -124,10 +124,11 @@ namespace IngameScript
                     case 18:
                         initAsteroidsInfo();
                         break;
-                    case 19: initOreLocInfo();
+                    case 19:
+//                        Deserialize(); 
                         break;
                     case 20:
-                        Deserialize();
+                        initOreLocInfo();
                         break;
                     case 21:
                         initPower();
@@ -151,6 +152,7 @@ namespace IngameScript
                         }
                         break;
                     case 25:
+                        Serialize();
                         init = true;
                         break;
 
