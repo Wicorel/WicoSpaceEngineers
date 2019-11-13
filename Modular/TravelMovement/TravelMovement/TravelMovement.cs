@@ -42,6 +42,13 @@ namespace IngameScript
             List<IMyTerminalBlock> thrustTmRightList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> thrustTmUpList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> thrustTmDownList = new List<IMyTerminalBlock>();
+            /// <summary>
+            ///  GRID orientation to aim ship
+            /// </summary>
+            Vector3D vBestThrustOrientation;
+
+            List<IMyTerminalBlock> thrustGravityUpList = new List<IMyTerminalBlock>();
+            List<IMyTerminalBlock> thrustGravityDownList = new List<IMyTerminalBlock>();
 
             IMySensorBlock tmSB = null;
 
@@ -73,12 +80,21 @@ namespace IngameScript
             bool dTMUseCameraCollision = true;
             bool dTMUseSensorCollision = true;
 
+            string sSection = "Travel Movement";
 
             Program thisProgram;
 
             public TravelMovement(Program program)
             {
                 thisProgram = program;
+                thisProgram._CustomDataIni.Get(sSection, "Debug").ToBoolean(dTMDebug);
+                thisProgram._CustomDataIni.Set(sSection, "Debug", dTMDebug);
+
+                thisProgram._CustomDataIni.Get(sSection, "UseCameraCollision").ToBoolean(dTMUseCameraCollision);
+                thisProgram._CustomDataIni.Set(sSection, "UseCameraCollision", dTMUseCameraCollision);
+
+                thisProgram._CustomDataIni.Get(sSection, "UseSensorCollision").ToBoolean(dTMUseSensorCollision);
+                thisProgram._CustomDataIni.Set(sSection, "UseSensorCollision", dTMUseSensorCollision);
 
                 //                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
                 //                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
@@ -129,7 +145,7 @@ namespace IngameScript
                 if (thisProgram.wicoWheels.HasSledWheels())
                 {
                     btmSled = true;
-                    //                if (shipSpeedMax > 45) shipSpeedMax = 45;
+                    //                if (_shipSpeedMax > 45) _shipSpeedMax = 45;
                     //                    sStartupError += "\nI am a SLED!";
                     thisProgram.wicoWheels.PrepareSledTravel();
                 }
@@ -152,11 +168,10 @@ namespace IngameScript
                 if (thisProgram.wicoNavRotors.NavRotorCount() > 0)
                 {
                     btmRotor = true;
-                    //                if (shipSpeedMax > 15) shipSpeedMax = 15;
+                    //                if (_shipSpeedMax > 15) _shipSpeedMax = 15;
                 }
                 else btmRotor = false;
 
-                tmShipController = myShipController as IMyShipController;
                 Vector3D vVec = vTargetLocation - tmShipController.CenterOfMass;
                 double distance = vVec.Length();
 
@@ -244,6 +259,27 @@ namespace IngameScript
                 dtmRayCastQuadrant = 0;
 
                 thisProgram.wicoGyros.SetMinAngle(0.01f);// minAngleRad = 0.01f; // reset Gyro aim tolerance to default
+
+                Vector3D vNG = tmShipController.GetNaturalGravity();
+
+                if (vNG.Length() > 0) // we have gravity
+                {
+                    Vector3D vNGN = vNG;
+                    vNGN.Normalize();
+                    thisProgram.wicoThrusters.GetBestThrusters(vNGN,
+                        thrustTmForwardList, thrustTmBackwardList,
+                        thrustTmDownList, thrustTmUpList,
+                        thrustTmLeftList, thrustTmRightList,
+                        out thrustGravityUpList, out thrustGravityDownList
+                        );
+                }
+                else
+                {
+                    // TODO: Could also choose 'best thrust' instead of assuming 'forward'
+                    Matrix or1;
+                    tmShipController.Orientation.GetMatrix(out or1);
+                    vBestThrustOrientation = or1.Forward;
+                }
             }
 
             /// <summary>
@@ -308,7 +344,7 @@ namespace IngameScript
 
                 if (bArrived)
                 {
-                    ResetMotion(); // start the stopping
+                    thisProgram.ResetMotion(); // start the stopping
                     thisProgram.wicoControl.SetState(arrivalState);// current_state = arrivalState; // we have arrived
                     ResetTravelMovement(); // reset our brain so we re-calculate for the next time we're called
                                            // TODO: Turn brakes ON (if not done in ResetMotion())
@@ -324,7 +360,9 @@ namespace IngameScript
                 {
                     //                if (dTMDebug) Echo("CalcStopD()");
 
-                    stoppingDistance = thisProgram.wicoThrusters.calculateStoppingDistance(thrustTmBackwardList, velocityShip, 0);
+                    var myMass = tmShipController.CalculateShipMass();
+                    
+                    stoppingDistance = thisProgram.wicoThrusters.calculateStoppingDistance(myMass.PhysicalMass,thrustTmBackwardList, velocityShip, 0);
                 }
                 // TODO: calculate stopping D for wheels
 
@@ -334,8 +372,10 @@ namespace IngameScript
                 {
                     //                    float fScanDist = Math.Min(1f, (float)stoppingDistance * 1.5f);
                     float fScanDist = Math.Min(tmMaxSensorM, (float)stoppingDistance * 1.5f);
+                    /* SKIP SENSOR FOR NOW
                     if (!dTMUseCameraCollision) thisProgram.wicoSensors.SensorSetToShip(tmSB, 1, 1, 1, 1, fScanDist, 0);
                     else thisProgram.wicoSensors.SensorSetToShip(tmSB, 0, 0, 0, 0, fScanDist, 0);
+                    */
 
                 }
                 //            else Echo("No Sensor for Travel movement");
@@ -367,7 +407,7 @@ namespace IngameScript
                 {
                     thisProgram.Echo("Wheels W/ Gyro");
                     double yawangle = -999;
-                    yawangle = CalculateYaw(vTargetLocation, tmShipController);
+                    yawangle = thisProgram.wicoGyros.CalculateYaw(vTargetLocation, tmShipController);
                     thisProgram.Echo("yawangle=" + yawangle.ToString());
                     bAimed = Math.Abs(yawangle) < .05;
                     if (!bAimed)
@@ -394,20 +434,22 @@ namespace IngameScript
                 {
                     if (grav.Length() > 0)
                     { // in gravity. try to stay aligned to gravity, but change yaw to aim at location.
-                        bool bGravAligned = GyroMain("", grav, tmShipController);
+                        if (thisProgram.wicoGyros.AlignGyros(vBestThrustOrientation, grav))
+//                            bool bGravAligned = GyroMain("", grav, tmShipController);
                         //                    if (bGravAligned)
                         {
-                            double yawangle = CalculateYaw(vTargetLocation, tmShipController);
+                            double yawangle = thisProgram.wicoGyros.CalculateYaw(vTargetLocation, tmShipController);
                             thisProgram.wicoGyros.DoRotate(yawangle, "Yaw");
                             bAimed = Math.Abs(yawangle) < .05;
                         }
                     }
                     else
                     {
-                        bAimed = GyroMain("forward", vVec, tmShipController);
+                        Matrix or1;
+                        tmShipController.Orientation.GetMatrix(out or1);
+                        bAimed=thisProgram.wicoGyros.AlignGyros(or1.Forward, vVec);// bAimed = GyroMain("forward", vVec, tmShipController);
                     }
                 }
-
                 tmShipController.DampenersOverride = true;
 
                 if ((distance - stoppingDistance) < arrivalDistance)
@@ -416,7 +458,7 @@ namespace IngameScript
                                                                //                    StatusLog("\"Arriving at target.  Slowing", textPanelReport);
                     thisProgram.Echo("Waiting for stop");
                     if (!bAimed) thisProgram.wicoControl.WantFast();// bWantFast = true;
-                    ResetMotion();
+                    thisProgram.ResetMotion();
                     return;
                 }
                 if (bAimed)
@@ -428,7 +470,7 @@ namespace IngameScript
                     if (btmWheels) thisProgram.wicoWheels.WheelsSetFriction(50);
                     if (
                         dTMUseSensorCollision
-                        && (tmScanElapsedMs > dSensorSettleWaitMS || tmScanElapsedMs < 0)
+//                        && (tmScanElapsedMs > dSensorSettleWaitMS || tmScanElapsedMs < 0)
                         )
                     {
                         tmScanElapsedMs = 0;
@@ -488,7 +530,7 @@ namespace IngameScript
                                     thisProgram.wicoControl.SetState(colDetectState);// current_state = colDetectState; // set the collision detetected state
                                     bCollisionWasSensor = true;
                                     thisProgram.wicoControl.WantFast();// bWantFast = true; // process next state quickly
-                                    ResetMotion(); // start stopping
+                                    thisProgram.ResetMotion(); // start stopping
                                     return;
                                 }
                             }
@@ -625,7 +667,7 @@ namespace IngameScript
                                             double astDistance = ((Vector3D)lastDetectedInfo.HitPosition - tmShipController.GetPosition()).Length();
                                             if ((astDistance - stoppingDistance) < arrivalDistance)
                                             {
-                                                ResetMotion();
+                                                thisProgram.ResetMotion();
                                                 thisProgram.wicoControl.SetState(arrivalState);// current_state = arrivalState;
                                                 ResetTravelMovement();
                                                 // don't need 'fast'...
@@ -647,7 +689,7 @@ namespace IngameScript
                                 {
                                     //                            Echo(s);
                                     thisProgram.Echo("raycast hit:" + lastDetectedInfo.Type.ToString());
-                                    StatusLog("Camera Trigger collision", textPanelReport);
+//                                    StatusLog("Camera Trigger collision", textPanelReport);
                                 }
                                 if (bValidCollision)
                                 {
@@ -657,7 +699,7 @@ namespace IngameScript
                                     thisProgram.wicoControl.SetState(colDetectState);// current_state = colDetectState; // set the detetected state
                                     bCollisionWasSensor = false;
                                     thisProgram.wicoControl.WantFast();// bWantFast = true; // process next state quickly
-                                    ResetMotion(); // start stopping
+                                    thisProgram.ResetMotion(); // start stopping
                                     return;
                                 }
                             }
@@ -868,6 +910,19 @@ namespace IngameScript
             QuadrantCameraScanner ScanEscapeTopScanner;
             QuadrantCameraScanner ScanEscapeBottomScanner;
 
+            public MyDetectedEntityInfo LastDetectedInfo
+            {
+                get
+                {
+                    return lastDetectedInfo;
+                }
+
+                set
+                {
+                    lastDetectedInfo = value;
+                }
+            }
+
             /// <summary>
             /// Initialize the escape scanning (mini-pathfinding)
             /// Call once to setup
@@ -898,20 +953,20 @@ namespace IngameScript
                 {
                     //               bEscapeGrid = true;
                 }
-
+                
                 // don't assume all drones have all cameras..
-                if (cameraLeftList.Count < 1) bScanLeft = false;
-                if (cameraRightList.Count < 1) bScanRight = false;
-                if (cameraUpList.Count < 1) bScanUp = false;
-                if (cameraDownList.Count < 1) bScanDown = false;
-                if (cameraForwardList.Count < 1) bScanForward = false;
-                if (cameraBackwardList.Count < 1) bScanBackward = false;
-                ScanEscapeFrontScanner = new QuadrantCameraScanner(thisProgram, cameraForwardList, 200, 45, 45, 2, 1, 5, 200, true);
-                ScanEscapeBackScanner = new QuadrantCameraScanner(thisProgram, cameraBackwardList, 200, 45, 45, 2, 1, 5, 200, true);
-                ScanEscapeLeftScanner = new QuadrantCameraScanner(thisProgram, cameraLeftList, 200, 45, 45, 2, 1, 5, 200, true);
-                ScanEscapeRightScanner = new QuadrantCameraScanner(thisProgram, cameraRightList, 200, 45, 45, 2, 1, 5, 200, true);
-                ScanEscapeTopScanner = new QuadrantCameraScanner(thisProgram, cameraUpList, 200, 45, 45, 2, 1, 5, 200, true);
-                ScanEscapeBottomScanner = new QuadrantCameraScanner(thisProgram, cameraDownList, 200, 45, 45, 2, 1, 5, 200, true);
+                if (thisProgram.wicoCameras.HasLeftCameras()) bScanLeft = false;
+                if (thisProgram.wicoCameras.HasRightCameras()) bScanRight = false;
+                if (thisProgram.wicoCameras.HasUpCameras()) bScanUp = false;
+                if (thisProgram.wicoCameras.HasDownCameras()) bScanDown = false;
+                if (thisProgram.wicoCameras.HasForwardCameras()) bScanForward = false;
+                if (thisProgram.wicoCameras.HasBackCameras()) bScanBackward = false;
+                ScanEscapeFrontScanner = new QuadrantCameraScanner(thisProgram, thisProgram.wicoCameras.GetForwardCameras(), 200, 45, 45, 2, 1, 5, 200, true);
+                ScanEscapeBackScanner = new QuadrantCameraScanner(thisProgram, thisProgram.wicoCameras.GetBackwardCameras(), 200, 45, 45, 2, 1, 5, 200, true);
+                ScanEscapeLeftScanner = new QuadrantCameraScanner(thisProgram, thisProgram.wicoCameras.GetLeftCameras(), 200, 45, 45, 2, 1, 5, 200, true);
+                ScanEscapeRightScanner = new QuadrantCameraScanner(thisProgram, thisProgram.wicoCameras.GetRightCameras(), 200, 45, 45, 2, 1, 5, 200, true);
+                ScanEscapeTopScanner = new QuadrantCameraScanner(thisProgram, thisProgram.wicoCameras.GetUpCameras(), 200, 45, 45, 2, 1, 5, 200, true);
+                ScanEscapeBottomScanner = new QuadrantCameraScanner(thisProgram, thisProgram.wicoCameras.GetDownwardCameras(), 200, 45, 45, 2, 1, 5, 200, true);
 
             }
             /// <summary>
@@ -929,7 +984,7 @@ namespace IngameScript
                 if (bScanLeft)
                 {
                     //                sStartupError+="\nLeft";
-                    if (doCameraScan(cameraLeftList, 200))
+                    if (thisProgram.wicoCameras.CameraLeftScan(200))//   doCameraScan(thisProgram.wicoCameras.cameraLeftList, 200))
                     {
                         bScanLeft = false;
                         leftDetectedInfo = lastDetectedInfo;
@@ -954,7 +1009,7 @@ namespace IngameScript
                 if (bScanRight)
                 {
                     //                sStartupError += "\nRight";
-                    if (doCameraScan(cameraRightList, 200))
+                    if (thisProgram.wicoCameras.CameraRightScan(200))// if (doCameraScan(cameraRightList, 200))
                     {
                         bScanRight = false;
                         rightDetectedInfo = lastDetectedInfo;
@@ -979,13 +1034,13 @@ namespace IngameScript
                 if (bScanUp)
                 {
                     //                sStartupError += "\nUp";
-                    if (doCameraScan(cameraUpList, 200))
+                    if (thisProgram.wicoCameras.CameraUpScan(200))// if (doCameraScan(cameraUpList, 200))
                     {
                         //                  upDetectedInfo = lastDetectedInfo;
                         bScanUp = false;
                         if (lastDetectedInfo.IsEmpty())
                         {
-                            sStartupError += "\n Straight Camera HIT!";
+//                            sStartupError += "\n Straight Camera HIT!";
                             vVec = worldtb.Up;
                             vVec.Normalize();
                             vAvoid = tmShipController.GetPosition() + vVec * 200;
@@ -1004,7 +1059,7 @@ namespace IngameScript
                 if (bScanDown)
                 {
                     //                sStartupError += "\nDown";
-                    if (doCameraScan(cameraDownList, 200))
+                    if (thisProgram.wicoCameras.CameraDownScan(200))// if (doCameraScan(cameraDownList, 200))
                     {
                         //                    sStartupError += "\n Straight Camera HIT!";
                         downDetectedInfo = lastDetectedInfo;
@@ -1029,7 +1084,7 @@ namespace IngameScript
                 if (bScanBackward)
                 {
                     //                sStartupError += "\nBack";
-                    if (doCameraScan(cameraBackwardList, 200))
+                    if (thisProgram.wicoCameras.CameraBackwardScan(200))// if (doCameraScan(cameraBackwardList, 200))
                     {
                         //                    sStartupError += "\n Straight Camera HIT!";
                         backwardDetectedInfo = lastDetectedInfo;
@@ -1054,7 +1109,7 @@ namespace IngameScript
                 if (bScanForward)
                 {
                     //                sStartupError += "\nForward";
-                    if (doCameraScan(cameraForwardList, 200))
+                    if (thisProgram.wicoCameras.CameraForwardScan(200))// if (doCameraScan(cameraForwardList, 200))
                     {
                         bScanForward = false;
                         forwardDetectedInfo = lastDetectedInfo;
@@ -1080,12 +1135,12 @@ namespace IngameScript
 
                 if (bScanForward || bScanBackward || bScanUp || bScanDown || bScanLeft || bScanRight)
                 {
-                    Echo("More scans");
+                    thisProgram.Echo("More scans");
                     return false; // still more scans to go
                 }
 
                 // nothing was 'clear'.  find longest vector and try to go that direction
-                Echo("Scans done. Choose longest");
+                thisProgram.Echo("Scans done. Choose longest");
                 MyDetectedEntityInfo furthest = backwardDetectedInfo;
                 Vector3D currentpos = tmShipController.GetPosition();
                 vVec = worldtb.Backward;
@@ -1117,7 +1172,7 @@ namespace IngameScript
                 if (furthest.HitPosition == null) return false;
 
                 double distance = Vector3D.Distance(currentpos, (Vector3D)furthest.HitPosition);
-                Echo("Distance=" + thisProgram.niceDoubleMeters(distance));
+                thisProgram.Echo("Distance=" + thisProgram.niceDoubleMeters(distance));
                 vVec.Normalize();
                 vAvoid = tmShipController.GetPosition() + vVec * distance / 2;
                 /*
@@ -1250,7 +1305,7 @@ namespace IngameScript
                     // if we need to go much faster or we are FAR and not near max speed
                     else if (velocityShip < maxSpeed * .75 || (!btmApproach && velocityShip < maxSpeed * .98))
                     {
-                        float delta = (float)maxSpeed / fMaxWorldMps * maxThrust;
+                        float delta = (float)maxSpeed / thisProgram.wicoControl.fMaxWorldMps * maxThrust;
                         thisProgram.wicoThrusters.powerUpThrusters(thrustTmForwardList, delta);
                     }
                     else if (velocityShip < maxSpeed * .85)
@@ -1261,11 +1316,11 @@ namespace IngameScript
                     }
                     else if (velocityShip >= maxSpeed * 1.02)
                     {
-                        thisProgram.wicoThrusters.powerDownThrusters(thrustAllList);
+                        thisProgram.wicoThrusters.powerDownThrusters();
                     }
                     else // sweet spot
                     {
-                        thisProgram.wicoThrusters.powerDownThrusters(thrustAllList); // turns ON all thrusters
+                        thisProgram.wicoThrusters.powerDownThrusters(); // turns ON all thrusters
                                                                                      // turns off the 'backward' thrusters... so we don't slow down
                         thisProgram.wicoThrusters.powerDownThrusters(thrustTmBackwardList, WicoThrusters.thrustAll, true);
                         //                 tmShipController.DampenersOverride = false; // this would also work, but then we don't get ship moving towards aim point as we correct
