@@ -219,6 +219,23 @@ namespace IngameScript
                     handler();
                 }
             }
+            public List<IMyTerminalBlock> GetBlocksContains<T>(string Keyword = null) where T : class
+            {
+                var Output = new List<IMyTerminalBlock>();
+                if (gtsLocalBlocks.Count < 1) LocalBlocksInit();
+
+                for (int e1 = 0; e1 < gtsLocalBlocks.Count; e1++)
+                //                for (int e1 = 0; e1 < gtsAllBlocks.Count; e1++)
+                {
+                    if (gtsLocalBlocks[e1] is T
+                        && Keyword != null && (gtsLocalBlocks[e1].CustomName.Contains(Keyword) || gtsLocalBlocks[e1].CustomData.Contains(Keyword))
+                        )
+                    {
+                        Output.Add(gtsLocalBlocks[e1]);
+                    }
+                }
+                return Output;
+            }
 
             List<IMyTerminalBlock> gtsTestBlocks = new List<IMyTerminalBlock>();
             /// <summary>
