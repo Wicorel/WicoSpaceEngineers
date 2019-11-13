@@ -78,12 +78,13 @@ namespace IngameScript
 
         void turnEjectorsOn()
         {
-            foreach(IMyFunctionalBlock b in ejectorList)
+            if (ejectorList.Count < 1) ejectorsInit();
+
+            foreach (IMyFunctionalBlock b in ejectorList)
             {
                 if(!b.Enabled)
                     b.Enabled = true;
             }
-//                            blockApplyAction(ejectorList, "OnOff_On");
 
         }
 
