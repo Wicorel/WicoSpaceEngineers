@@ -71,11 +71,12 @@ namespace IngameScript
             // use if not setting callbacks for any of the desired channels
             //            if (bInit) wicoIGC.ProcessIGCMessages(); 
 
+            // always check for IGC messages in case some aren't using callbacks
+            wicoIGC.ProcessIGCMessages();
             if ((updateSource & UpdateType.IGC) > 0)
             {
                 // we got a callback for an IGC message.  
-                // There might be multiple incoming IGC messages
-                wicoIGC.ProcessIGCMessages();
+                // but we already processed them.
             }
             else if((updateSource & utTriggers) > 0)
             {
@@ -88,6 +89,11 @@ namespace IngameScript
             }
         }
 
+        /// <summary>
+        /// This is our unique ID for our message.  We've defined the format for the message data (it's just a string)
+        /// </summary>
+        string sBroadCastTag = "TESTBROADCAST999";
+
         void InitMessageHandlers()
         {
             wicoIGC.AddPublicHandler(sBroadCastTag, TestBroadcastHandler);
@@ -96,14 +102,14 @@ namespace IngameScript
 
         // Handler for the test brodcast messages.
 
-        string sBroadCastTag = "TESTBROADCAST999";
-
         void TestBroadcastHandler(MyIGCMessage msg)
         {
 
             // NOTE: called on ALL received messages; not just 'our' tag
-
+           
             // if (msg.Tag!=sBroadCastTag) return; // not our message
+
+
             Echo("Received Test Message");
             var src = msg.Source;
             Echo(" Source=" + src.ToString("X"));
