@@ -1,5 +1,7 @@
-﻿R e a d m e
------------
+﻿
+Go to:
+ https://github.com/malware-dev/MDK-SE/wiki/Quick-Introduction-to-Space-Engineers-Ingame-Scripts
+ to learn more about ingame scripts.
 
-In this file you can include any instructions or other comments you want to have injected onto the 
-top of your final script. You can safely delete this file if you do not want any such comments.
+This Example source: 
+ https://github.com/Wicorel/WicoSpaceEngineers/tree/master/Modular/IGC%20Echo

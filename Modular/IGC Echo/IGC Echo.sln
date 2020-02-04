@@ -9,7 +9,6 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "IGC", "..\IGC\IGC\IGC.shpro
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		..\IGC\IGC\IGC.projitems*{d008b44c-593f-4bd4-964b-94beed094887}*SharedItemsImports = 4
 		..\IGC\IGC\IGC.projitems*{d641aa70-4a98-4d1b-b594-f38f66938d65}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
