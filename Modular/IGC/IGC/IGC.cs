@@ -22,11 +22,10 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
 
-        #region WicoIGC
         class WicoIGC
         {
             // the one and only unicast listener.  Must be shared amoung all interested parties
-            IMyUnicastListener _UnicastListener;
+            IMyUnicastListener _unicastListener;
 
             /// <summary>
             /// the list of unicast message handlers. All handlers will be called on pending messages
@@ -43,8 +42,8 @@ namespace IngameScript
             List<IMyBroadcastListener> _broadcastChannels = new List<IMyBroadcastListener>();
 
             MyGridProgram _gridProgram;
-            bool _Debug = false;
-            IMyTextPanel _DebugTextPanel;
+            bool _debug = false;
+            IMyTextPanel _debugTextPanel;
 
             /// <summary>
             /// Constructor.
@@ -54,42 +53,42 @@ namespace IngameScript
             public WicoIGC(MyGridProgram myProgram, bool debug = false)
             {
                 _gridProgram = myProgram;
-                _Debug = debug;
-                _DebugTextPanel = _gridProgram.GridTerminalSystem.GetBlockWithName("IGC Report") as IMyTextPanel;
-                if (_Debug) _DebugTextPanel?.WriteText("");
+                _debug = debug;
+                _debugTextPanel = _gridProgram.GridTerminalSystem.GetBlockWithName("IGC Report") as IMyTextPanel;
+                if (_debug) _debugTextPanel?.WriteText("");
             }
 
             /// <summary>
             /// Call to add a handler for public messages.  Also registers the tag with IGC for reception.
             /// </summary>
-            /// <param name="ChannelTag">The tag for the channel.  This should be unique to the use of the channel.</param>
+            /// <param name="channelTag">The tag for the channel.  This should be unique to the use of the channel.</param>
             /// <param name="handler">The handler for messages when received. Note that this handler will be called with ALL broadcast messages; not just the one from ChannelTag</param>
-            /// <param name="bCallBack">Should a callback be set on the channel. The system will call Main() when the IGC message is received.</param>
+            /// <param name="setCallback">Should a callback be set on the channel. The system will call Main() when the IGC message is received.</param>
             /// <returns></returns>
-            public bool AddPublicHandler(string ChannelTag, Action<MyIGCMessage> handler, bool bCallBack = true)
+            public bool AddPublicHandler(string channelTag, Action<MyIGCMessage> handler, bool setCallback = true)
             {
-                IMyBroadcastListener _PublicChannel;
+                IMyBroadcastListener publicChannel;
                 // IGC Init
-                _PublicChannel = _gridProgram.IGC.RegisterBroadcastListener(ChannelTag); // What it listens for
-                if (bCallBack) _PublicChannel.SetMessageCallback(ChannelTag); // What it will run the PB with once it has a message
+                publicChannel = _gridProgram.IGC.RegisterBroadcastListener(channelTag); // What it listens for
+                if (setCallback) publicChannel.SetMessageCallback(channelTag); // What it will run the PB with once it has a message
 
                 // add broadcast message handlers
                 _broadcastMessageHandlers.Add(handler);
 
                 // add to list of channels to check
-                _broadcastChannels.Add(_PublicChannel);
+                _broadcastChannels.Add(publicChannel);
                 return true;
             }
 
             /// <summary>
             /// Add a unicast handler.
             /// </summary>
-            /// <param name="handler">The handler for messages when received. Note that this handler will be called with ALL Unicast messages.</param>
+            /// <param name="handler">The handler for messages when received. Note that this handler will be called with ALL Unicast messages. Always sets a callback handler</param>
             /// <returns></returns>
             public bool AddUnicastHandler(Action<MyIGCMessage> handler)
             {
-                _UnicastListener = _gridProgram.IGC.UnicastListener;
-                _UnicastListener.SetMessageCallback();
+                _unicastListener = _gridProgram.IGC.UnicastListener;
+                _unicastListener.SetMessageCallback();
                 _unicastMessageHandlers.Add(handler);
                 return true;
 
@@ -99,11 +98,10 @@ namespace IngameScript
             /// </summary>
             public void ProcessIGCMessages()
             {
-
                 bool bFoundMessages = false;
-                if (_Debug) _gridProgram.Echo(_broadcastChannels.Count.ToString() + " broadcast channels");
-                if (_Debug) _gridProgram.Echo(_broadcastMessageHandlers.Count.ToString() + " broadcast message handlers");
-                if (_Debug) _gridProgram.Echo(_unicastMessageHandlers.Count.ToString() + " unicast message handlers");
+                if (_debug) _gridProgram.Echo(_broadcastChannels.Count.ToString() + " broadcast channels");
+                if (_debug) _gridProgram.Echo(_broadcastMessageHandlers.Count.ToString() + " broadcast message handlers");
+                if (_debug) _gridProgram.Echo(_unicastMessageHandlers.Count.ToString() + " unicast message handlers");
                 // TODO: make this a yield return thing if processing takes too long
                 do
                 {
@@ -114,10 +112,10 @@ namespace IngameScript
                         {
                             bFoundMessages = true;
                             var msg = channel.AcceptMessage();
-                            if (_Debug)
+                            if (_debug)
                             {
                                 _gridProgram.Echo("Broadcast received. TAG:" + msg.Tag);
-                                _DebugTextPanel?.WriteText("IGC:" +msg.Tag+" SRC:"+msg.Source.ToString("X")+"\n",true);
+                                _debugTextPanel?.WriteText("IGC:" +msg.Tag+" SRC:"+msg.Source.ToString("X")+"\n",true);
                             }
                             foreach (var handler in _broadcastMessageHandlers)
                             {
@@ -127,7 +125,7 @@ namespace IngameScript
                     }
                 } while (bFoundMessages); // Process all pending messages
 
-                if (_UnicastListener != null)
+                if (_unicastListener != null)
                 {
                     // TODO: make this a yield return thing if processing takes too long
                     do
@@ -135,11 +133,11 @@ namespace IngameScript
                         // since there's only one channel, we could just use .HasPendingMessages directly.. but this keeps the code loops the same
                         bFoundMessages = false;
 
-                        if (_UnicastListener.HasPendingMessage)
+                        if (_unicastListener.HasPendingMessage)
                         {
                             bFoundMessages = true;
-                            var msg = _UnicastListener.AcceptMessage();
-                            if (_Debug) _gridProgram.Echo("Unicast received. TAG:" + msg.Tag);
+                            var msg = _unicastListener.AcceptMessage();
+                            if (_debug) _gridProgram.Echo("Unicast received. TAG:" + msg.Tag);
                             foreach (var handler in _unicastMessageHandlers)
                             {
                                 // Call each handler
@@ -151,7 +149,5 @@ namespace IngameScript
 
             }
         }
-        #endregion
-
     }
 }
