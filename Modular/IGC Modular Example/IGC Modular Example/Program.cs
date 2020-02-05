@@ -21,20 +21,20 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        WicoIGC wicoIGC;
+        WicoIGC _wicoIGC;
 
         /// <summary>
         /// The combined set of UpdateTypes that count as a 'trigger'
         /// </summary>
-        UpdateType utTriggers = UpdateType.Terminal | UpdateType.Trigger | UpdateType.Mod | UpdateType.Script;
+        UpdateType _utTriggers = UpdateType.Terminal | UpdateType.Trigger | UpdateType.Mod | UpdateType.Script;
         /// <summary>
         /// the combined set of UpdateTypes and count as an 'Update'
         /// </summary>
-        UpdateType utUpdates = UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100 | UpdateType.Once;
+        UpdateType _utUpdates = UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100 | UpdateType.Once;
 
         public Program()
         {
-            wicoIGC = new WicoIGC(this); 
+            _wicoIGC = new WicoIGC(this); 
 
             // cause ourselves to run again so we can do the init
             Runtime.UpdateFrequency = UpdateFrequency.Once;
@@ -53,7 +53,7 @@ namespace IngameScript
         /// <summary>
         /// Has everything been initialized?
         /// </summary>
-        bool bInit=false;
+        bool areWeInited=false;
 
         public void Main(string argument, UpdateType updateSource)
         {
@@ -62,59 +62,61 @@ namespace IngameScript
             Echo("Me=" + Me.EntityId.ToString("X"));
             Echo(Me.CubeGrid.CustomName);
 
-            if (!bInit)
+            if (!areWeInited)
             {
                 InitMessageHandlers();
-                bInit = true;
+                areWeInited = true;
             }
 
             // use if not setting callbacks for any of the desired channels
             //            if (bInit) wicoIGC.ProcessIGCMessages(); 
 
             // always check for IGC messages in case some aren't using callbacks
-            wicoIGC.ProcessIGCMessages();
+            _wicoIGC.ProcessIGCMessages();
             if ((updateSource & UpdateType.IGC) > 0)
             {
                 // we got a callback for an IGC message.  
                 // but we already processed them.
             }
-            else if((updateSource & utTriggers) > 0)
+            else if((updateSource & _utTriggers) > 0)
             {
                 // if we got a 'trigger' source, send out the received argument
-                IGC.SendBroadcastMessage(sBroadCastTag, argument);
+                IGC.SendBroadcastMessage(_broadCastTag, argument);
+                Echo("Sending Message:\n" + argument);
             }
-            else if((updateSource & utUpdates) > 0)
+            else if((updateSource & _utUpdates) > 0)
             {
                 // it was an automatic update
+
+                // this script doens't have anything to do
             }
         }
 
         /// <summary>
         /// This is our unique ID for our message.  We've defined the format for the message data (it's just a string)
         /// </summary>
-        string sBroadCastTag = "TESTBROADCAST999";
+        string _broadCastTag = "MDK IGC Example 3";
 
         void InitMessageHandlers()
         {
-            wicoIGC.AddPublicHandler(sBroadCastTag, TestBroadcastHandler);
+            _wicoIGC.AddPublicHandler(_broadCastTag, TestBroadcastHandler);
         }
 
-
-        // Handler for the test brodcast messages.
-
+        // Handler for the test broadcast messages.
         void TestBroadcastHandler(MyIGCMessage msg)
         {
-
             // NOTE: called on ALL received messages; not just 'our' tag
            
-            // if (msg.Tag!=sBroadCastTag) return; // not our message
+            if (msg.Tag!= _broadCastTag)
+                return; // not our message
 
-
-            Echo("Received Test Message");
-            var src = msg.Source;
-            Echo(" Source=" + src.ToString("X"));
-            Echo(" Data=\"" + msg.Data + "\"");
-            Echo(" Tag=" + msg.Tag);
+            if (msg.Data is string)
+            {
+                Echo("Received Test Message");
+                Echo(" Source=" + msg.Source.ToString("X"));
+                Echo(" Data=\"" + msg.Data + "\"");
+                Echo(" Tag=" + msg.Tag);
+            }
         }
     }
 }
