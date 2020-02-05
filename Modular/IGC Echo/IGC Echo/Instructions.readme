@@ -1,4 +1,9 @@
-﻿
+﻿This is MDK IGC Example 1 by wicorel
+
+This does a simple echo of a received broadcast message. 
+It sends out any arguments received on the broadcast channel.
+
+
 Go to:
  https://github.com/malware-dev/MDK-SE/wiki/Quick-Introduction-to-Space-Engineers-Ingame-Scripts
  to learn more about ingame scripts.
