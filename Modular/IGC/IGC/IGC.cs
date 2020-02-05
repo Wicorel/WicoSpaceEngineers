@@ -21,7 +21,7 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-
+        // Source is available from: https://github.com/Wicorel/WicoSpaceEngineers/tree/master/Modular/IGC
         class WicoIGC
         {
             // the one and only unicast listener.  Must be shared amoung all interested parties
