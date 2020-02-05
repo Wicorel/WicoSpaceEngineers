@@ -1,4 +1,7 @@
-﻿
+﻿This is MDK IGC Example 2 by wicorel
+
+Takes the first example script of toggling a light and makes it work via IGC.
+
 Go to:
  https://github.com/malware-dev/MDK-SE/wiki/Quick-Introduction-to-Space-Engineers-Ingame-Scripts
  to learn more about ingame scripts.
