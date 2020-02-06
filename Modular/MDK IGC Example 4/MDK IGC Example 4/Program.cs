@@ -27,6 +27,7 @@ namespace IngameScript
         /// The combined set of UpdateTypes that count as a 'trigger'
         /// </summary>
         UpdateType _utTriggers = UpdateType.Terminal | UpdateType.Trigger | UpdateType.Mod | UpdateType.Script;
+
         /// <summary>
         /// the combined set of UpdateTypes and count as an 'Update'
         /// </summary>
@@ -90,8 +91,7 @@ namespace IngameScript
         /// This is our unique ID for our message.  We've defined the format for the message data (it's just a string)
         /// </summary>
         string _broadCastTag = "MDK IGC Example 4";
-        string _unicastTag = "4Ack";
-//        string _unicastTag = "MDK IGC Example 4 Ack";
+        string _unicastTag   = "MDK IGC Example 4 Ack";
 
         void InitMessageHandlers()
         {
