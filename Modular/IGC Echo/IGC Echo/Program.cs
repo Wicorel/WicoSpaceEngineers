@@ -77,7 +77,7 @@ namespace IngameScript
             { // script was run because of incoming IGC message
                 if (_myBroadcastListener.HasPendingMessage)
                 {
-                    var myIGCMessage = _myBroadcastListener.AcceptMessage();
+                    MyIGCMessage myIGCMessage = _myBroadcastListener.AcceptMessage();
                     if(myIGCMessage.Tag==_broadCastTag)
                     { // This is our tag
                         if(myIGCMessage.Data is string)
