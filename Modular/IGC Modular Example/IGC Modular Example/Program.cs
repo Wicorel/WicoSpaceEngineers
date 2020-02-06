@@ -42,18 +42,12 @@ namespace IngameScript
 
         public void Save()
         {
-            // Called when the program needs to save its state. Use
-            // this method to save your state to the Storage field
-            // or some other means. 
-            // 
-            // This method is optional and can be removed if not
-            // needed.
         }
 
         /// <summary>
         /// Has everything been initialized?
         /// </summary>
-        bool areWeInited=false;
+        bool _areWeInited=false;
 
         public void Main(string argument, UpdateType updateSource)
         {
@@ -62,10 +56,10 @@ namespace IngameScript
             Echo("Me=" + Me.EntityId.ToString("X"));
             Echo(Me.CubeGrid.CustomName);
 
-            if (!areWeInited)
+            if (!_areWeInited)
             {
                 InitMessageHandlers();
-                areWeInited = true;
+                _areWeInited = true;
             }
 
             // use if not setting callbacks for any of the desired channels
@@ -99,6 +93,7 @@ namespace IngameScript
 
         void InitMessageHandlers()
         {
+            // creates a broadcast channel with the specified tag and calls the handler when messages are processed
             _wicoIGC.AddPublicHandler(_broadCastTag, TestBroadcastHandler);
         }
 
