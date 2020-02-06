@@ -1,0 +1,13 @@
+﻿This is MDK IGC Example 4 by wicorel
+
+This does a simple echo of a received BROADCAST message. 
+It sends out any arguments received on the broadcast channel.
+
+It then responds with a UNICAST message back to the sending script.
+
+Go to:
+ https://github.com/malware-dev/MDK-SE/wiki/Quick-Introduction-to-Space-Engineers-Ingame-Scripts
+ to learn more about ingame scripts.
+
+This Example source: 
+ https://github.com/Wicorel/WicoSpaceEngineers/tree/master/Modular/XXXX
