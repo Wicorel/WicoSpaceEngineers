@@ -88,7 +88,7 @@ namespace IngameScript
             public bool AddUnicastHandler(Action<MyIGCMessage> handler)
             {
                 _unicastListener = _gridProgram.IGC.UnicastListener;
-                _unicastListener.SetMessageCallback();
+                _unicastListener.SetMessageCallback("UNICAST");
                 _unicastMessageHandlers.Add(handler);
                 return true;
 
