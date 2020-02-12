@@ -118,7 +118,6 @@ namespace IngameScript
                 Echo(" Tag=" + msg.Tag);
 
                 // Now reply to the sender and let them know we received the message
-                // NOTE: We are re-using the broadcast
                 IGC.SendUnicastMessage(msg.Source, _unicastTag, "Acknowledge by:"+Me.CustomName);
                 Echo(" Reply Sent");
             }

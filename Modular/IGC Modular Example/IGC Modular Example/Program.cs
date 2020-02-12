@@ -51,7 +51,7 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
-            // Echo some information aboue 'me' and why we were run
+            // Echo some information about 'me' and why we were run
             Echo("Source=" + updateSource.ToString());
             Echo("Me=" + Me.EntityId.ToString("X"));
             Echo(Me.CubeGrid.CustomName);
@@ -61,9 +61,6 @@ namespace IngameScript
                 InitMessageHandlers();
                 _areWeInited = true;
             }
-
-            // use if not setting callbacks for any of the desired channels
-            //            if (bInit) wicoIGC.ProcessIGCMessages(); 
 
             // always check for IGC messages in case some aren't using callbacks
             _wicoIGC.ProcessIGCMessages();
@@ -82,7 +79,7 @@ namespace IngameScript
             {
                 // it was an automatic update
 
-                // this script doens't have anything to do
+                // this script doesn't have anything to do in this section
             }
         }
 
