@@ -121,6 +121,8 @@ namespace IngameScript
                     setMode(MODE_DOCKED);
                     return;
                 }
+
+                // these will replace any existing channel
                 _CONDIGCChannel = IGC.RegisterBroadcastListener("COND"); // What it listens for
                 _CONDIGCChannel.SetMessageCallback("COND"); // What it will run the PB with once it has a message
                 _ACONDIGCChannel = IGC.RegisterBroadcastListener("ACOND"); // What it listens for
@@ -263,7 +265,7 @@ namespace IngameScript
                                 if (id == SaveFile.EntityId)
                                 {
                                     // it's a message for us.
-                                    sReceivedMessage = ""; // we processed it.
+//                                    sReceivedMessage = ""; // we processed it.
                                     long.TryParse(aMessage[iOffset++], out id);
                                     double x, y, z;
 //                                    int iOff = iOffset++;
@@ -466,7 +468,7 @@ namespace IngameScript
                             if (id == SaveFile.EntityId)
                             {
                                 // it's a message for us.
-                                sReceivedMessage = ""; // we processed it.
+//                                sReceivedMessage = ""; // we processed it.
                                 long.TryParse(aMessage[iOffset++], out id);
                                 string sName = aMessage[iOffset++];
                                 double x, y, z;

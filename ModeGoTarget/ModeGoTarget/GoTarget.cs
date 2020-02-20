@@ -234,7 +234,7 @@ namespace IngameScript
                     bool bAimed = Math.Abs(yawangle) < 0.1; // NOTE: 2x allowance
                     Echo("yawangle=" + yawangle.ToString());
                     sNavDebug+=" Yaw=" + yawangle.ToString("0.00");
-
+                    Echo("bAimed=" + bAimed.ToString() + " bAligned=" + bAligned.ToString());
                     if (!bAimed)
                     {
                         if (btmRotor)
