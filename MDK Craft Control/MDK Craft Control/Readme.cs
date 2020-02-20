@@ -201,4 +201,12 @@
 * 3.7 05292019 SE 1.190
 * Current source (no antenna send)
 * 
+* 3.7a 11242019 
+* Current source
+* 
+* 3.8 12222019
+* Old IGC removal in SE 1.193.100.  Remove references to old IGC.
+* 
+* 3.8a 12232019
+* MyIni error reporting removed
 */

@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MDKVersion>1.2.14</MDKVersion>
+    <MDKVersion>1.2.22</MDKVersion>
     <MDKGameBinPath>c:\program files (x86)\steam\SteamApps\common\SpaceEngineers\Bin64</MDKGameBinPath>
-    <MDKInstallPath>c:\users\saett\appdata\local\microsoft\visualstudio\15.0_ce59efb3\extensions\rt4xldnn.3sg</MDKInstallPath>
+    <MDKInstallPath>c:\users\saett\appdata\local\microsoft\visualstudio\15.0_ce59efb3\extensions\v00u5glb.xog</MDKInstallPath>
     <MDKOutputPath>C:\Users\saett\AppData\Roaming\SpaceEngineers\IngameScripts\local</MDKOutputPath>
   </PropertyGroup>
   <ItemGroup>

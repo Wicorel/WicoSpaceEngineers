@@ -26,6 +26,7 @@ namespace IngameScript
         #region arguments
         bool moduleProcessArguments(string sArgument)
         {
+            if (bDebugUpdate) Echo("moduleProcessArguments("+sArgument+")");
             sArgResults = "";
             // string output="";
             if (sArgument == "" || sArgument == "timer" || sArgument == "wccs" || sArgument == "wcct")
@@ -40,6 +41,8 @@ namespace IngameScript
                 // SPECIAL to emulate old Nav
                 if (NAVEmulateOld)
                 {
+                    if (bDebugUpdate) Echo("NAVEmulateOld");
+
                     var tList = GetBlocksContains<IMyTerminalBlock>("NAV:");
                     for (int i1 = 0; i1 < tList.Count(); i1++)
                     {
@@ -47,8 +50,11 @@ namespace IngameScript
                         if (tList[i1].CustomName.StartsWith("NAV:"))
                         {
                             Echo("Found NAV: command:");
+                            // remove NAV: from start.
                             sArgument = tList[i1].CustomName.Substring("NAV:".Length);
-//                            sStartupError += "Found OLDNAV:" + sArgument;
+                            tList[i1].CustomName = sArgument; // remove the NAV: so we don't keep processing
+
+                            sStartupError += "Found OLDNAV:\n" + sArgument;
                             break;
                         }
                     }
@@ -143,6 +149,8 @@ namespace IngameScript
                             return false;
                         }
                     }
+                    // ELSE: W X:Y:Z
+
                         
                     double x, y, z;
                     bool xOk = double.TryParse(coordinates[iCoordinate++].Trim(), out x);

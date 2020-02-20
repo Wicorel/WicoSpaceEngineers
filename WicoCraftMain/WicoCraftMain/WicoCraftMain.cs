@@ -384,7 +384,7 @@ namespace IngameScript
                     }
 
                 }
-                else if ((ut & (UpdateType.Antenna)) > 0)
+                else if ((ut & (UpdateType.IGC)) > 0)
                 {
                     // antenna message
                     if (!moduleProcessAntennaMessage(sArgument))

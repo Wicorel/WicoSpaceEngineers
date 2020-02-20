@@ -84,6 +84,9 @@ Add PATROL antenna message processing
 
 3.7IGC Use IGC for intergrid communication
 
+3.8 SE 1.193.100 
+Remove last old IGC
+
 TODO: Choose closest connector as 'best'
 TODO: Process size info to select connectors
 TODO: drones may take up more than one connector depending on height, width.

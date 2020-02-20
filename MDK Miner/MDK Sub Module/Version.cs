@@ -90,6 +90,9 @@ namespace IngameScript
     3.71 June 22,2019 SE 1.191
     Set desireabilty of ores in CustomData.  This allows keeping stone.
 
+3.8 Dec 26, 2019 SE 1.193.100
+Remove last of old IGC antennas
+
         TODO:
             check for complete destruction of asteroid like MK3 did
             announce 'asteroid removed'
@@ -129,7 +132,7 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "MINER";
-        string sVersion = "3.71";
+        string sVersion = "3.8";
 
     }
 }

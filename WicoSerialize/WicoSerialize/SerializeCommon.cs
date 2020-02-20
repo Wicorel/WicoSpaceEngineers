@@ -125,7 +125,7 @@ namespace IngameScript
             /// <summary>
             /// Serliazed across modules: Currently received message.  "" for none.
             /// </summary>
-        string sReceivedMessage = "";
+// No longer needed with IGC        string sReceivedMessage = "";
 
         string SerializeInit()
         {

@@ -367,6 +367,7 @@ namespace IngameScript
 //            Echo("DR:angle=" + rollAngle.ToString("0.00"));
             float targetNewSetting = 0;
 
+            if(GyroControl.Gyros.Count<1) Echo("NO GYROS!!!");
 
             //            float maxRoll = (float)(2 * Math.PI);  this SHOULD be the new constant.. but code must use old constant
             // TODO: this constant is no longer reasonable..  The adjustments are just magic calculations and should be redone.
@@ -416,6 +417,7 @@ namespace IngameScript
             GyroControl.SetYaw(targetNewSetting);
             if (Math.Abs(rollAngle) < minAngleRad)
             {
+                Echo("DR():Aimed");
                 GyroControl.SetOverride(false);
 //                GyroControl.RequestEnable(true);
             }

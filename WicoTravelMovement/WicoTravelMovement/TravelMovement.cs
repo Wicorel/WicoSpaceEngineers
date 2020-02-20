@@ -107,7 +107,7 @@ namespace IngameScript
             {
                 btmSled = true;
                 //                if (shipSpeedMax > 45) shipSpeedMax = 45;
-                sStartupError += "\nI am a SLED!";
+//                sStartupError += "\nI am a SLED!";
                 PrepareSledTravel();
             }
             else btmSled = false;
@@ -187,7 +187,7 @@ namespace IngameScript
             if (optimalV < tmMaxSpeed)
                 tmMaxSpeed = optimalV;
 
-            if (dTMDebug) sInitResults += "\nDistance="+niceDoubleMeters(distance)+" OptimalV=" + niceDoubleMeters(optimalV);
+            if (dTMDebug) sStartupError += "\nDistance="+niceDoubleMeters(distance)+" OptimalV=" + niceDoubleMeters(optimalV);
 
             dtmFarSpeed = tmMaxSpeed;
             dtmApproachSpeed = tmMaxSpeed * 0.50;
@@ -210,9 +210,9 @@ namespace IngameScript
 
                 dtmFar = calculateStoppingDistance(thrustTmBackwardList, dtmFarSpeed, 0); // calculate maximum stopping distance at full speed
             }
-            if (dTMDebug) sInitResults += "\nFarSpeed=="+niceDoubleMeters(dtmFarSpeed)+" ASpeed=" + niceDoubleMeters(dtmApproachSpeed);
+            if (dTMDebug) sStartupError += "\nFarSpeed=="+niceDoubleMeters(dtmFarSpeed)+" ASpeed=" + niceDoubleMeters(dtmApproachSpeed);
 
-            if (dTMDebug) sInitResults += "\nFar=="+niceDoubleMeters(dtmFar)+" A=" + niceDoubleMeters(dtmApproach) + " P="+niceDoubleMeters(dtmPrecision);
+            if (dTMDebug) sStartupError += "\nFar=="+niceDoubleMeters(dtmFar)+" A=" + niceDoubleMeters(dtmApproach) + " P="+niceDoubleMeters(dtmPrecision);
 
             bCollisionWasSensor = false;
             tmCameraElapsedMs = -1; // no delay for next check  
@@ -365,6 +365,7 @@ namespace IngameScript
             {
                 if (grav.Length() > 0)
                 { // in gravity. try to stay aligned to gravity, but change yaw to aim at location.
+                    Echo("DTM: In Gravity using:"+shipOrientationBlock.CustomName);
                     bool bGravAligned = GyroMain("", grav, shipOrientationBlock);
 //                    if (bGravAligned)
                     {
@@ -744,7 +745,7 @@ namespace IngameScript
             double aDistance = distance / 2;  // accelerate and decel
 
 //            optimalV = ((distance * .75) / 2) / (maxDeltaV); // determined by experimentation and black magic
-            if(dTMDebug) sInitResults +="COS OptimalV="+niceDoubleMeters(optimalV);
+            if(dTMDebug) sStartupError += "COS OptimalV="+niceDoubleMeters(optimalV);
 //            Echo("COS");
             do
             {
@@ -756,7 +757,7 @@ namespace IngameScript
                     optimalV *=0.85; // reduce by 15% and try again
                 }
                 //                Echo("stoppingM=" + stoppingM.ToString("F1") + " distance=" + distance.ToString("N1"));
-                if(dTMDebug) sInitResults+="stoppingM=" + niceDoubleMeters(stoppingM) + " distance=" + niceDoubleMeters(distance);
+                if(dTMDebug) sStartupError += "stoppingM=" + niceDoubleMeters(stoppingM) + " distance=" + niceDoubleMeters(distance);
             }
             while (stoppingM > aDistance);
 //            Echo("COS:X");

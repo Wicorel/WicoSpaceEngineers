@@ -63,6 +63,7 @@ namespace IngameScript
             MyIniParseResult result;
             if (!_SaveInit.TryParse(sLoad, out result))
             {
+                /*
                 Echo("MyIni:Error parsing INI:" + result.ToString());
 
                 // walk through all of the lines
@@ -72,8 +73,7 @@ namespace IngameScript
                 {
                     Echo(iLine + 1 + ":" + aLines[iLine]);
                 }
-
-                // TODO: use MyIni here:
+                */
 
 //                Echo("str=\n" + sLoad);
 //                return;
@@ -96,8 +96,7 @@ namespace IngameScript
             iniWicoCraftSave.GetValue(sSerializeSection, "PassedArgument", ref sPassedArgument, true);
             iniWicoCraftSave.GetValue(sSerializeSection, "AlertStates", ref iAlertStates, true);
             iniWicoCraftSave.GetValue(sSerializeSection, "craft_operation", ref craft_operation, true);
-            iniWicoCraftSave.GetValue(sSerializeSection, "PassedArgument", ref sPassedArgument);
-            iniWicoCraftSave.GetValue(sSerializeSection, "ReceivedMessage", ref sReceivedMessage);
+//            iniWicoCraftSave.GetValue(sSerializeSection, "ReceivedMessage", ref sReceivedMessage);
 
             //            Echo("Received Msg='" + sReceivedMessage + "'");
         }

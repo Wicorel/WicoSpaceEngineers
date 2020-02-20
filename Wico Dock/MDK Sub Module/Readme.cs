@@ -159,6 +159,9 @@ IGC Support for Intergrid communication
 3.71 June 22 2019 SE 1.191
 Cargo check for relaunch defaults to 1% max cargo (from 80% !!!!!)
 
+3.8 Dec 26 2019 SE 1.193.100
+Removal of old IGC/Antenna
+
 
 TODO:
 forget known bases when new grid (DONE by craft control)

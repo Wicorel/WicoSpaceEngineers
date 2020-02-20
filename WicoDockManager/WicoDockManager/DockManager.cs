@@ -461,7 +461,7 @@ namespace IngameScript
 
                 string sDroneName = aMessage[iOffset++];
 
-                sReceivedMessage = ""; // we processed it.
+//                sReceivedMessage = ""; // we processed it.
                 int i = -1;
                 long incomingID = 0;
                 pOK = long.TryParse(aMessage[iOffset++], out incomingID);
@@ -498,7 +498,7 @@ namespace IngameScript
                     return false;
                 }
 
-                sReceivedMessage = ""; // we processed it.
+//                sReceivedMessage = ""; // we processed it.
 
                 string sType = aMessage[iOffset++];
                 double height = -1;

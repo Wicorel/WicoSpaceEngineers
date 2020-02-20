@@ -84,8 +84,8 @@ namespace IngameScript
                 float range = RangeToNearestBase() + 100f + (float)velocityShip * 15f;
                 antennaMaxPower(false, range);
             }
-            processPendingSends();
-            processReceives();
+//            processPendingSends();
+//            processReceives();
             if (AnyConnectorIsConnected() && (iMode != MODE_LAUNCH) && iMode != MODE_DOCKED && iMode!=MODE_RELAUNCH)
             {
                 Echo("Force to DOCKED");
@@ -99,6 +99,7 @@ namespace IngameScript
 
         void processReceives()
         {
+            /*
             if (sReceivedMessage != "")
             {
                 Echo("Received Message=\n" + sReceivedMessage);
@@ -123,7 +124,7 @@ sInitResults += "Received Message=\n" + sReceivedMessage;
                     {
                         if (aMessage[1] == "MOM")
                         {
-                            /* OBSOLETE
+                             OBSOLETE
                                 Echo("MOM says hello!");
                                 // FORMAT:			antSend("WICO:MOM:" + Me.CubeGrid.CustomName+":"+SaveFile.EntityId.ToString()+":"+Vector3DToString(shipOrientationBlock.GetPosition()));
                                 int iOffset = 2;
@@ -156,13 +157,14 @@ sInitResults += "Received Message=\n" + sReceivedMessage;
                                         vMomPosition = vPosition;
                                     }
                                 }
-                            */
+                            
                         }
 
                     }
                 }
             }
             else Echo("No pending incoming message");
+*/
         }
 
         #region logstate

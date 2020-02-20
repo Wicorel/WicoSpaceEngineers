@@ -326,5 +326,21 @@ namespace IngameScript
         }
         */
 
+        /*
+         * jTurp 
+        public Dictionary<string, float> _cornerLCDs = new Dictionary<string, float>()
+        {
+        { "LargeBlockCorner_LCD_1", 80.64f },
+        { "LargeBlockCorner_LCD_2", 80.64f },
+        { "LargeBlockCorner_LCD_Flat_1", 93.6f },
+        { "LargeBlockCorner_LCD_Flat_2", 93.6f },
+        { "SmallBlockCorner_LCD_1", 142.56f },
+        { "SmallBlockCorner_LCD_2", 142.56f },
+        { "SmallBlockCorner_LCD_Flat_1", 165.92f },
+        { "SmallBlockCorner_LCD_Flat_2", 165.92f }
+        };
+        Those are the Y values that I've found work well
+        */
     }
 }
+ 

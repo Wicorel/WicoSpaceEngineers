@@ -22,7 +22,7 @@ namespace IngameScript
 
         string OurName = "Wico Craft";
         string moduleName = "Dock";
-        string sVersion = "3.71";
+        string sVersion = "3.8";
 
         const string velocityFormat = "0.00";
 

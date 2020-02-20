@@ -30,8 +30,7 @@ namespace IngameScript
             iniWicoCraftSave.SetValue(sSerializeSection, "PassedArgument", sPassedArgument);
             iniWicoCraftSave.SetValue(sSerializeSection, "AlertStates", iAlertStates.ToString());
             iniWicoCraftSave.SetValue(sSerializeSection, "craft_operation", craft_operation.ToString());
-//            iniWicoCraftSave.SetValue(sSerializeSection, "PassedArgument", sPassedArgument);
-            iniWicoCraftSave.SetValue(sSerializeSection, "ReceivedMessage", sReceivedMessage);
+//            iniWicoCraftSave.SetValue(sSerializeSection, "ReceivedMessage", sReceivedMessage);
             long SaveID = 0;
             if (SaveFile != null) SaveID = SaveFile.EntityId;
             iniWicoCraftSave.SetValue(sSerializeSection, "SaveID", (long)SaveID);

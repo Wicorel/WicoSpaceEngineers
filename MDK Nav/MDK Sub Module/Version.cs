@@ -190,6 +190,15 @@ tmDoFormard for HUGE thrust ratios (hydrogen)
 3.7b July 17 2019. 
 EFM envoy staying high altitude
 
+3.8 Dec 22 2019
+Removal of old IGC system due to 1.193.100
+
+3.8a Dec 23 2019
+Stop spamming "I am sled"
+
+3.8b Dec 24 2019
+Why not activating NAV?
+
 */
 
         #endregion
@@ -197,7 +206,7 @@ EFM envoy staying high altitude
         string OurName = "Wico Craft";
 
         string moduleName = "NAV";
-        string sVersion = "3.7a";
+        string sVersion = "3.8b";
 
     }
 }

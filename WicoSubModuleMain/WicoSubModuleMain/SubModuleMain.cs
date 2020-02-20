@@ -129,12 +129,16 @@ namespace IngameScript
         double velocityShip = -1;
         double dGravity = -2;
 
+        int RunCount = 0;
+
         //       void Main(string sArgument)
         void Main(string sArgument, UpdateType ut)
         {
+            RunCount++;
+
 //            _commandLine.
             Echo(sBanner + tick());
-            if (bDebugUpdate) Echo(ut.ToString());
+            if (bDebugUpdate) Echo(ut.ToString() + ":"+RunCount.ToString());
 
 //            ProfilerGraph();
 
@@ -225,8 +229,10 @@ namespace IngameScript
                     || (ut & (UpdateType.Script)) > 0 // this pb run by another script (PB)
                     )
                 {
+                    if (bDebugUpdate) Echo("Argument=" + sArgument);
+
                     // pay attention to argument
-                    if(sArgument.ToLower()=="profilerreset")
+                    if (sArgument.ToLower()=="profilerreset")
                     {
                         ProfilerReset();
                         bWantFast = true;
@@ -243,7 +249,8 @@ namespace IngameScript
 //                    echoInstructions("T:B");
 
                 }
-                else if ((ut & (UpdateType.Antenna)) > 0)
+                /*
+                else if ((ut & (UpdateType.IGC)) > 0)
                 {
                     // antenna message
                     if (!moduleProcessAntennaMessage(sArgument))
@@ -256,6 +263,7 @@ namespace IngameScript
                     UpdateAllPanels();
                     return;
                 }
+                */
                 else if ((ut & (UpdateType.IGC)) > 0)
                 {
                     // IGC message
@@ -280,8 +288,8 @@ namespace IngameScript
                     }
                 }
 //                echoInstructions("E");
-                processPendingReceives();
-                processPendingSends();
+//                processPendingReceives();
+//                processPendingSends();
 //                echoInstructions("F");
 
                 moduleDoPreModes();

@@ -65,7 +65,9 @@ namespace IngameScript
 
                             pg.bGoOption = true;
 
-//                            pg.sStartupError += "Going to:" + pg.NAVTargetName;
+                            pg.sStartupError += "Going to:" + pg.NAVTargetName;
+                            pg.sStartupError += " arrivald=" + pg.arrivalDistanceMin.ToString();
+
                             pg.setMode(MODE_GOINGTARGET);
 //                            pg.current_state = 0; redundant with setmode
                         }
@@ -163,15 +165,14 @@ namespace IngameScript
         //        bool bValidNavLaunch = false;
         //        Vector3D vNavHome;
         //        bool bValidNavHome = false;
-        bool dTMDebug = false;
+        bool dTMDebug = true;
         bool dTMUseCameraCollision = true;
         bool dTMUseSensorCollision = true;
-        bool NAVEmulateOld = false;
+        bool NAVEmulateOld = true;
         bool AllowBlindNav = false;
         float NAVGravityMinElevation = -1;
 
         bool bNavBeaconDebug = false;
-
 
         string sNavSection = "NAV";
 
