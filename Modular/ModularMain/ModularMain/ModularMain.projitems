@@ -9,6 +9,7 @@
     <Import_RootNamespace>IngameScript</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BulidInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ModularMain.cs" />
   </ItemGroup>
 </Project>
