@@ -21,7 +21,7 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-        class GasTanks
+        public class GasTanks
         {
             List<IMyTerminalBlock> tankList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> oxytankList = new List<IMyTerminalBlock>();
@@ -30,12 +30,15 @@ namespace IngameScript
             List<IMyTerminalBlock> isolatedoxytankList = new List<IMyTerminalBlock>();
 
             Program thisProgram;
-            public GasTanks(Program program)
+            WicoBlockMaster wbm;
+
+            public GasTanks(Program program, WicoBlockMaster wicoBlockMaster)
             {
                 thisProgram = program;
+                wbm = wicoBlockMaster;
 
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                wbm.AddLocalBlockHandler(BlockParseHandler);
+                wbm.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             /// <summary>
@@ -71,6 +74,16 @@ namespace IngameScript
                 isolatedoxytankList.Clear();
                 oxytankList.Clear();
                 hydrotankList.Clear();
+            }
+
+            //
+            // Start custom functions
+            public double hydroPercent = -1;
+            public double oxyPercent = -1;
+            public void TanksCalculate()
+            {
+                hydroPercent = tanksFill(iTankHydro);
+                oxyPercent = tanksFill(iTankOxygen);
             }
 
             public double TanksFill(List<IMyTerminalBlock> tankList)
@@ -155,6 +168,19 @@ namespace IngameScript
                     }
                 }
 
+            }
+
+            public bool HasHydroTanks()
+            {
+                for (int i = 0; i < tankList.Count; ++i)
+                {
+                    int iTankType = TankType(tankList[i]);
+                    if (iTankType==iTankHydro)
+                    {
+                        return true;
+                    }
+                }
+                return false;
             }
 
         }
