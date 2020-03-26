@@ -1,19 +1,6 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
+﻿using Sandbox.ModAPI.Ingame;
 using System;
-using VRage;
-using VRage.Collections;
-using VRage.Game.Components;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ModAPI.Ingame.Utilities;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Game;
+using System.Collections.Generic;
 using VRageMath;
 
 namespace IngameScript
@@ -21,12 +8,11 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-        class Sensors
+        public class Sensors
         {
-            string sSensorUse = "[WICO]";
-            double dSensorSettleWaitMS = 0.175;
+//            string sSensorUse = "[WICO]";
+//            double dSensorSettleWaitMS = 0.175;
             const string sSensorSection = "SENSORS";
-
 
             List<IMySensorBlock> sensorsList = new List<IMySensorBlock>();
             public struct SensorInfo
@@ -45,14 +31,16 @@ namespace IngameScript
 
             Program thisProgram;
             IMyShipController shipController;
+            WicoBlockMaster WicoBlockMaster;
 
-            public Sensors(Program program, IMyShipController myShipController)
+            public Sensors(Program program,WicoBlockMaster wicoBlockMaster)
             {
                 thisProgram = program;
-                shipController = myShipController;
-
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                WicoBlockMaster = wicoBlockMaster;
+                
+                WicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                WicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                thisProgram.AddPostInitHandler(PostInitHandler);
             }
 
             /// <summary>
@@ -63,6 +51,7 @@ namespace IngameScript
             {
                 if (tb is IMySensorBlock)
                 {
+                    // TODO: Only use sSensorUse sensors...
                     sensorsList.Add(tb as IMySensorBlock);
                 }
             }
@@ -72,6 +61,11 @@ namespace IngameScript
                 sensorInfos.Clear();
                 shipController = null;
 
+            }
+
+            void PostInitHandler()
+            {
+                shipController = WicoBlockMaster.GetMainController();
             }
 
             public string SensorInit(IMyShipController orientationBlock, bool bSleep = false)
@@ -148,11 +142,12 @@ namespace IngameScript
                 return sensorsList.Count;
             }
 
-            public IMySensorBlock GetForwardSensor()
+            public IMySensorBlock GetForwardSensor(int iOffset=0)
             {
+                // Todo: chose the sensor closest to 'forward' on the ship
                 IMySensorBlock sb = null;
-                if (sensorsList.Count > 0)
-                    sb = sensorsList[0];
+                if (sensorsList.Count > iOffset)
+                    sb = sensorsList[iOffset];
 
                 return sb;
             }
@@ -235,49 +230,49 @@ namespace IngameScript
                 vPlanePerp.Normalize();
                 return vPlanePerp;
             }
+            float fMinSensorSetting = 0.1f; //was 1.0f before 1.193.100
 
             public void SensorSetToShip(IMySensorBlock sb1, float fLeft, float fRight, float fUp, float fDown, float fFront, float fBack)
             {
                 // need to use world matrix to get orientation correctly
                 //                IMySensorBlock sb1 = tb1 as IMySensorBlock;
 
-                //           Echo("SensorSetShip()");
+//                _program.Echo("SensorSetShip()");
 
-
-                int i1 = 0;
-                for (; i1 < sensorInfos.Count; i1++)
+                int iSensor = 0;
+                for (; iSensor < sensorInfos.Count; iSensor++)
                 {
-                    if (sensorInfos[i1].EntityId == sb1.EntityId)
+                    if (sensorInfos[iSensor].EntityId == sb1.EntityId)
                         break;
                 }
-                if (i1 < sensorInfos.Count)
+                if (iSensor < sensorInfos.Count)
                 {
                     //                Echo("Using cached location information");
                     // we found cached info
                     float fSet = 0;
                     if (fLeft < 0) fSet = -fLeft;
-                    else fSet = (float)Math.Abs(fLeft + Math.Abs(sensorInfos[i1].DistanceLeft));
-                    sb1.LeftExtend = Math.Max(fSet, 1.0f);
+                    else fSet = (float)Math.Abs(fLeft + Math.Abs(sensorInfos[iSensor].DistanceLeft));
+                    sb1.LeftExtend = Math.Max(fSet, fMinSensorSetting);
 
                     if (fRight < 0) fSet = -fRight;
-                    else fSet = (float)Math.Abs(fRight + Math.Abs(sensorInfos[i1].DistanceRight));
-                    sb1.RightExtend = Math.Max(fSet, 1.0f);
+                    else fSet = (float)Math.Abs(fRight + Math.Abs(sensorInfos[iSensor].DistanceRight));
+                    sb1.RightExtend = Math.Max(fSet, fMinSensorSetting);
 
                     if (fUp < 0) fSet = -fUp;
-                    else fSet = (float)Math.Abs(fUp + Math.Abs(sensorInfos[i1].DistanceUp));
-                    sb1.TopExtend = Math.Max(fSet, 1.0f);
+                    else fSet = (float)Math.Abs(fUp + Math.Abs(sensorInfos[iSensor].DistanceUp));
+                    sb1.TopExtend = Math.Max(fSet, fMinSensorSetting);
 
                     if (fDown < 0) fSet = -fDown;
-                    else fSet = (float)Math.Abs(fDown + Math.Abs(sensorInfos[i1].DistanceDown));
-                    sb1.BottomExtend = Math.Max(fSet, 1.0f);
+                    else fSet = (float)Math.Abs(fDown + Math.Abs(sensorInfos[iSensor].DistanceDown));
+                    sb1.BottomExtend = Math.Max(fSet, fMinSensorSetting);
 
                     if (fFront < 0) fSet = -fFront;
-                    else fSet = (float)Math.Abs(fFront + Math.Abs(sensorInfos[i1].DistanceFront));
-                    sb1.FrontExtend = Math.Max(fSet, 1.0f);
+                    else fSet = (float)Math.Abs(fFront + Math.Abs(sensorInfos[iSensor].DistanceFront));
+                    sb1.FrontExtend = Math.Max(fSet, fMinSensorSetting);
 
                     if (fBack < 0) fSet = -fBack;
-                    else fSet = (float)Math.Abs(fBack + Math.Abs(sensorInfos[i1].DistanceBack));
-                    sb1.BackExtend = Math.Max(fSet, 1.0f);
+                    else fSet = (float)Math.Abs(fBack + Math.Abs(sensorInfos[iSensor].DistanceBack));
+                    sb1.BackExtend = Math.Max(fSet, fMinSensorSetting);
                 }
                 else
                 {
@@ -298,6 +293,8 @@ namespace IngameScript
                     vFBR = points[1];
                     vFTL = points[2];
                     vFTR = points[3];
+//                    _program.ErrorLog("vFBL=" + vFBL.ToString());
+//                    _program.ErrorLog("vFBR=" + vFBR.ToString());
 
                     orientedBoundingBox.GetFaceCorners(OrientedBoundingBoxFaces.LookupBack, points); // face 4=back output order is BL, BR, TL, TR
                     vBBL = points[0];
@@ -321,12 +318,12 @@ namespace IngameScript
                     Vector3D vPos = sb1.GetPosition();
 
                     double distanceFront = PlanarDistance(vPos, vFBL, vFBR, vFTR);
-                    //                    Echo("DistanceFront=" + distanceFront.ToString("0.00"));
+//                    _program.ErrorLog("DistanceFront=" + distanceFront.ToString("0.00"));
                     Vector3D vFront = vPos + sb1.WorldMatrix.Forward * distanceFront;
                     //                    debugGPSOutput("FRONT", vFront);
 
                     double distanceBack = PlanarDistance(vPos, vBBL, vBBR, vBTR);
-                    //                    Echo("DistanceBack=" + distanceBack.ToString("0.00"));
+//                    _program.ErrorLog("DistanceBack=" + distanceBack.ToString("0.00"));
                     Vector3D vBack = vPos + sb1.WorldMatrix.Forward * distanceBack; // distance is negative for 'back'
                                                                                     //                    debugGPSOutput("BACK", vBack);
 
@@ -337,53 +334,18 @@ namespace IngameScript
 
                     float fSet = 0;
                     fSet = (float)Math.Abs(fLeft + Math.Abs(distanceLeft));
-                    sb1.LeftExtend = Math.Max(fSet, 1.0f);
+                    sb1.LeftExtend = Math.Max(fSet, fMinSensorSetting);
                     fSet = (float)Math.Abs(fRight + Math.Abs(distanceRight));
-                    sb1.RightExtend = Math.Max(fSet, 1.0f);
+                    sb1.RightExtend = Math.Max(fSet, fMinSensorSetting);
                     fSet = (float)Math.Abs(fUp + Math.Abs(distanceUp));
-                    sb1.TopExtend = Math.Max(fSet, 1.0f);
+                    sb1.TopExtend = Math.Max(fSet, fMinSensorSetting);
                     fSet = (float)Math.Abs(fDown + Math.Abs(distanceDown));
-                    sb1.BottomExtend = Math.Max(fSet, 1.0f);
+                    sb1.BottomExtend = Math.Max(fSet, fMinSensorSetting);
                     fSet = (float)Math.Abs(fFront + Math.Abs(distanceFront));
-                    sb1.FrontExtend = Math.Max(fSet, 1.0f);
+                    sb1.FrontExtend = Math.Max(fSet, fMinSensorSetting);
                     fSet = (float)Math.Abs(fBack + Math.Abs(distanceBack));
-                    sb1.BackExtend = Math.Max(fSet, 1.0f);
+                    sb1.BackExtend = Math.Max(fSet, fMinSensorSetting);
                 }
-
-                /*
-                //x=width, y=height, z=back/forth. (fw=+z) (right=-y)
-
-                float fScale = 2.5f;
-                if (tb1.CubeGrid.GridSizeEnum == MyCubeSize.Small)
-                {
-                    Echo("Small Grid Ship");
-                    fScale = 0.5f;
-                }
-                else Echo("Large Grid Ship");
-                float fXOffset = sb1.Position.X * fScale; // small grid only?
-                float fYOffset = sb1.Position.Y * fScale;
-                float fZOffset = sb1.Position.Z * fScale;
-                Echo("SB.x.y.z=" + fXOffset.ToString("0.0") + ":" + fYOffset.ToString("0.0") + ":" + fZOffset.ToString("0.0"));
-
-    //            Echo("MIN=" + Me.CubeGrid.Min.ToString() + "\nMAX:" + Me.CubeGrid.Max.ToString());
-                // TODO: need to use grid orientation to main orientation block
-                // BUG: Assumes orientation is SAME as main orientation block
-                float fSet;
-                fSet = (float)(shipDim.WidthInMeters() / 2 - fXOffset + fLeft);
-                sb1.LeftExtend = Math.Max(fSet, 1.0f);
-                fSet = (float)(shipDim.WidthInMeters() / 2 + fXOffset + fRight);
-                sb1.RightExtend = Math.Max(fSet, 1.0f);
-
-                fSet = (float)(shipDim.HeightInMeters() / 2 - fYOffset + fUp);
-                sb1.TopExtend = Math.Max(fSet, 1.0f);
-                fSet = (float)(shipDim.HeightInMeters() / 2 + fYOffset + fDown);
-                sb1.BottomExtend = Math.Max(fSet, 1.0f);
-                fSet = (float)(shipDim.LengthInMeters() + fZOffset + fFront);
-                sb1.FrontExtend = Math.Max(fSet, 1.0f);
-                fSet = (float)(shipDim.LengthInMeters() - fZOffset + fBack);
-                sb1.BackExtend = Math.Max(fSet, 1.0f);
-                */
-
                 sb1.Enabled = true;
 
             }
