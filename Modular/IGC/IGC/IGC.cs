@@ -22,7 +22,7 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         // Source is available from: https://github.com/Wicorel/WicoSpaceEngineers/tree/master/Modular/IGC
-        class WicoIGC
+        public class WicoIGC
         {
             // the one and only unicast listener.  Must be shared amoung all interested parties
             IMyUnicastListener _unicastListener;
@@ -102,6 +102,8 @@ namespace IngameScript
                 if (_debug) _gridProgram.Echo(_broadcastChannels.Count.ToString() + " broadcast channels");
                 if (_debug) _gridProgram.Echo(_broadcastMessageHandlers.Count.ToString() + " broadcast message handlers");
                 if (_debug) _gridProgram.Echo(_unicastMessageHandlers.Count.ToString() + " unicast message handlers");
+
+
                 // TODO: make this a yield return thing if processing takes too long
                 do
                 {
@@ -119,14 +121,18 @@ namespace IngameScript
                             }
                             foreach (var handler in _broadcastMessageHandlers)
                             {
+                                if (_debug) _gridProgram.Echo("Calling handler");
                                 handler(msg);
                             }
+                            if (_debug) _gridProgram.Echo("Broadcast Handlers completed");
                         }
                     }
                 } while (bFoundMessages); // Process all pending messages
 
                 if (_unicastListener != null)
                 {
+                    if (_debug) _gridProgram.Echo("Unicast check");
+
                     // TODO: make this a yield return thing if processing takes too long
                     do
                     {
@@ -140,13 +146,26 @@ namespace IngameScript
                             if (_debug) _gridProgram.Echo("Unicast received. TAG:" + msg.Tag);
                             foreach (var handler in _unicastMessageHandlers)
                             {
+                                if (_debug) _gridProgram.Echo(" Unicast Handler");
                                 // Call each handler
                                 handler(msg);
                             }
+                            if (_debug) _gridProgram.Echo("Broadcast Handlers completed");
                         }
                     } while (bFoundMessages); // Process all pending messages
+                    if (_debug) _gridProgram.Echo("Unicast check completed");
                 }
 
+            }
+
+            /// <summary>
+            /// Set debug mode
+            /// </summary>
+            /// <param name="debug"></param>
+            public void SetDebug(bool debug)
+            {
+                _debug = debug;
+                if (_debug) _debugTextPanel?.WriteText("");
             }
         }
     }
