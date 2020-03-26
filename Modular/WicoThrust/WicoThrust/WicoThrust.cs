@@ -23,7 +23,7 @@ namespace IngameScript
     {
         #region THRUSTERS
 
-        class WicoThrusters
+        public class WicoThrusters
         {
             List<IMyTerminalBlock> thrustAllList = new List<IMyTerminalBlock>();
 
@@ -45,6 +45,7 @@ namespace IngameScript
             }
             public void ThrustersInit()
             {
+                // TODO: change to handler. pay attention to execution sequence that results. (we may need this defined before getting blocks)
                 thisProgram._CustomDataIni.Get(sThrusterSection, "CutterThruster").ToString(sCutterThruster);
                 thisProgram._CustomDataIni.Set(sThrusterSection, "CutterThruster", sCutterThruster);
 
@@ -220,7 +221,7 @@ namespace IngameScript
             /// <param name="fPower">power setting 0->100</param>
             /// <param name="iTypes">Type of thrusters to control. Default is all</param>
             /// <returns>number of thrusters changed</returns>
-            public int powerUpThrusters(List<IMyTerminalBlock> thrusters, float fPower, int iTypes = thrustAll)
+            public int powerUpThrusters(List<IMyTerminalBlock> thrusters, float fPower=100f, int iTypes = thrustAll)
             {
                 int iCount = 0;
                 if (fPower > 100) fPower = 100;
@@ -277,47 +278,48 @@ namespace IngameScript
                 Vector3D vNGN = v1;
                 vNGN.Normalize();
                 double cos45 = MathHelper.Sqrt2 * 0.5;
-//                thisProgram.sMasterReporting += "GBT: Checking cos45=" + cos45.ToString("0.00")+"\n";
+//                _program.sMasterReporting += "GBT: Checking cos45=" + cos45.ToString("0.00")+"\n";
 
                 // default selection to assign out parameters in main-line code
                 thrustTowards = thrustForwardList;
                 thrustAway = thrustBackwardList;
 
 //                thrustForwardList[0].Orientation.GetMatrix(out or1);
-                
+/*                
                 vThrustAim = thrustForwardList[0].WorldMatrix.Forward;
                 angle = vNGN.Dot(vThrustAim);
-//                thisProgram.sMasterReporting += "GBT:T F:Angle=" + angle.ToString("0.00") + "\n";
+//                _program.sMasterReporting += "GBT:T F:Angle=" + angle.ToString("0.00") + "\n";
 
 //                thrustUpList[0].Orientation.GetMatrix(out or1);
 //                vThrustAim = or1.Forward;
                 vThrustAim = thrustUpList[0].WorldMatrix.Forward;
                 angle = vNGN.Dot(vThrustAim);
-//                thisProgram.sMasterReporting += "GBT:T U:Angle=" + angle.ToString("0.00") + "\n";
+//                _program.sMasterReporting += "GBT:T U:Angle=" + angle.ToString("0.00") + "\n";
 
 //                thrustBackwardList[0].Orientation.GetMatrix(out or1);
 //                vThrustAim = or1.Forward;
                 vThrustAim = thrustBackwardList[0].WorldMatrix.Forward;
                 angle = vNGN.Dot(vThrustAim);
-//                thisProgram.sMasterReporting += "GBT:T B:Angle=" + angle.ToString("0.00") + "\n";
+//                _program.sMasterReporting += "GBT:T B:Angle=" + angle.ToString("0.00") + "\n";
 
 //                thrustDownList[0].Orientation.GetMatrix(out or1);
 //                vThrustAim = or1.Forward;
                 vThrustAim = thrustDownList[0].WorldMatrix.Forward;
                 angle = vNGN.Dot(vThrustAim);
-//                thisProgram.sMasterReporting += "GBT:T D:Angle=" + angle.ToString("0.00") + "\n";
+//                _program.sMasterReporting += "GBT:T D:Angle=" + angle.ToString("0.00") + "\n";
 
 //                thrustRightList[0].Orientation.GetMatrix(out or1);
 //                vThrustAim = or1.Forward;
                 vThrustAim = thrustRightList[0].WorldMatrix.Forward;
                 angle = vNGN.Dot(vThrustAim);
-//                thisProgram.sMasterReporting += "GBT:T R:Angle=" + angle.ToString("0.00") + "\n";
+//                _program.sMasterReporting += "GBT:T R:Angle=" + angle.ToString("0.00") + "\n";
 
 //                thrustLeftList[0].Orientation.GetMatrix(out or1);
 //                vThrustAim = or1.Forward;
                 vThrustAim = thrustLeftList[0].WorldMatrix.Forward;
                 angle = vNGN.Dot(vThrustAim);
-//                thisProgram.sMasterReporting += "GBT:T L:Angle=" + angle.ToString("0.00") + "\n";
+//                _program.sMasterReporting += "GBT:T L:Angle=" + angle.ToString("0.00") + "\n";
+*/
 
                 /*
                 thrustDownList[0].CustomName = "thrust DN";
@@ -346,11 +348,11 @@ namespace IngameScript
 //                    vThrustAim = or1.Forward;
                     vThrustAim = thrustForwardList[0].WorldMatrix.Forward;
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
-//                    thisProgram.sMasterReporting += "GBT: F:Angle="+angle.ToString("0.00") + "\n";
+//                    _program.sMasterReporting += "GBT: F:Angle="+angle.ToString("0.00") + "\n";
                     if (angle > cos45)
                     {
-//                        thisProgram.Echo("GBT: Thrust fowrard");
-                        thisProgram.sMasterReporting += "GBT: Thrust fowrard\n";
+//                        _program.Echo("GBT: Thrust fowrard");
+//                        _program.sMasterReporting += "GBT: Thrust fowrard\n";
                         return;
                     }
                 }
@@ -363,8 +365,8 @@ namespace IngameScript
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
-                        thisProgram.sMasterReporting += "GBT: Thrust UP\n";
-//                        thisProgram.Echo("GBT: Thrust UP");
+//                        _program.sMasterReporting += "GBT: Thrust UP\n";
+//                        _program.Echo("GBT: Thrust UP");
                         thrustTowards = thrustUpList;
                         thrustAway = thrustDownList;
                         return;
@@ -379,8 +381,8 @@ namespace IngameScript
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
-                        //                      thisProgram.Echo("GBT: Thrust BACKWARD");
-//                        thisProgram.sMasterReporting += "GBT: Thrust BACKWARD\n";
+                        //                      _program.Echo("GBT: Thrust BACKWARD");
+//                        _program.sMasterReporting += "GBT: Thrust BACKWARD\n";
                         thrustTowards = thrustBackwardList;
                         thrustAway = thrustForwardList;
                         return;
@@ -395,8 +397,8 @@ namespace IngameScript
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
-                        //                        thisProgram.Echo("GBT: Thrust DOWN");
-//                        thisProgram.sMasterReporting += "GBT: Thrust DOWN\n";
+                        //                        _program.Echo("GBT: Thrust DOWN");
+//                        _program.sMasterReporting += "GBT: Thrust DOWN\n";
                         thrustTowards = thrustDownList;
                         thrustAway = thrustUpList;
                         return;
@@ -411,8 +413,8 @@ namespace IngameScript
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
-                        //                        thisProgram.Echo("GBT: Thrust RIGHT");
-//                        thisProgram.sMasterReporting += "GBT: Thrust RIGHT\n";
+                        //                        _program.Echo("GBT: Thrust RIGHT");
+//                        _program.sMasterReporting += "GBT: Thrust RIGHT\n";
                         thrustTowards = thrustRightList;
                         thrustAway = thrustLeftList;
                         return;
@@ -427,15 +429,15 @@ namespace IngameScript
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
-                        //                        thisProgram.Echo("GBT: Thrust LEFT");
-//                        thisProgram.sMasterReporting += "GBT: Thrust LEFT\n";
+                        //                        _program.Echo("GBT: Thrust LEFT");
+//                        _program.sMasterReporting += "GBT: Thrust LEFT\n";
                         thrustTowards = thrustLeftList;
                         thrustAway = thrustRightList;
                         return;
                     }
                 }
-//                thisProgram.Echo("GBT: Thrust DEFAULT");
-                thisProgram.sMasterReporting += "GBT: Thrust DEFAULT\n";
+//                _program.Echo("GBT: Thrust DEFAULT");
+//                _program.sMasterReporting += "GBT: Thrust DEFAULT\n";
 
             }
 
@@ -533,6 +535,7 @@ namespace IngameScript
                             hoverthrust -= (atmoThrust * atmoPercent / 100);
                     }
                 }
+                if (hoverthrust < 0.01) hoverthrust = 0;
                 //	Echo("ALeft over thrust=" + hoverthrust.ToString("N0"));
 
                 if (ionThrust > 0 && hoverthrust > 0)
@@ -549,6 +552,7 @@ namespace IngameScript
                             hoverthrust -= ((ionThrust * ionPercent) / 100);
                     }
                 }
+                if (hoverthrust < 0.01) hoverthrust = 0;
                 //	Echo("ILeft over thrust=" + hoverthrust.ToString("N0"));
 
                 if (hydroThrust > 0 && hoverthrust > 0)
@@ -565,10 +569,10 @@ namespace IngameScript
                             hoverthrust -= ((hydroThrust * hydroPercent) / 100); ;
                     }
                 }
-                //	Echo("Atmo=" + ((atmoThrust * atmoPercent) / 100).ToString("N0"));
-                //	Echo("ion=" + ((ionThrust * ionPercent) / 100).ToString("N0"));
-                //	Echo("hydro=" + ((hydroThrust * hydroPercent) / 100).ToString("N0"));
-                //	Echo("Left over thrust=" + hoverthrust.ToString("N0"));
+                if (atmoPercent < 0.01) atmoPercent = 0;
+                if (hydroPercent < 0.01) hydroPercent = 0;
+                if (ionPercent < 0.01) ionPercent = 0;
+
                 if (hoverthrust > 0) return false;
                 return true;
             }
@@ -580,7 +584,7 @@ namespace IngameScript
             /// <param name="currentV">velocity to calculage</param>
             /// <param name="dGrav">optional gravity factor</param>
             /// <returns>stopping distance in meters</returns>
-            public double calculateStoppingDistance(float physicalMass, List<IMyTerminalBlock> thrustStopList, double currentV, double dGrav)
+            public double calculateStoppingDistance(double physicalMass, List<IMyTerminalBlock> thrustStopList, double currentV, double dGrav)
             {
                 double hoverthrust = physicalMass * dGrav * 9.810;
                 double maxThrust = calculateMaxThrust(thrustStopList);
@@ -619,6 +623,80 @@ namespace IngameScript
                 }
                 return totalThrust;
             }
+
+            int _iMFSWiggle = 0;
+            //        double mmfLastVelocity = -1;
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="fTarget"></param>
+            /// <param name="fAbort"></param>
+            /// <param name="mfsForwardThrust"></param>
+            /// <param name="mfsBackwardThrust"></param>
+            /// <param name="effectiveMass"></param>
+            /// <param name="shipSpeed"></param>
+            public void MoveForwardSlow(float fTarget, float fAbort, List<IMyTerminalBlock> mfsForwardThrust,
+                List<IMyTerminalBlock> mfsBackwardThrust, double effectiveMass, double shipSpeed)
+            {
+                if (_iMFSWiggle < 0) _iMFSWiggle = 0;
+
+                //            Echo("mMF " + iMMFWiggle.ToString());
+                double maxThrust = calculateMaxThrust(mfsForwardThrust);
+                //            Echo("maxThrust=" + maxThrust.ToString("N0"));
+
+ //               MyShipMass myMass;
+                //                myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
+//                double effectiveMass = wicoBlockMaster.GetPhysicalMass();// myMass.PhysicalMass;
+                float thrustPercent = 100f;
+                if (effectiveMass > 0)
+                {
+                    double maxDeltaV = (maxThrust) / effectiveMass;
+                    //           Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+                    if (maxDeltaV > 0) thrustPercent = (float)(fTarget / maxDeltaV);
+                    //                Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
+                }
+                //            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
+                if (shipSpeed > fAbort)
+                {
+                    //               Echo("ABORT");
+                    powerDownThrusters(thrustAllList);
+                    //               iMMFWiggle/=2;
+                }
+                else if (shipSpeed < (fTarget * 0.90))
+                {
+                    if (shipSpeed < 0.09)
+                        _iMFSWiggle++;
+                    if (shipSpeed < fTarget * 0.25)
+                        _iMFSWiggle++;
+                    //                Echo("Push ");
+                    //                Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
+                    powerUpThrusters(mfsForwardThrust, thrustPercent + _iMFSWiggle / 5);
+                    //                powerUpThrusters(thrustForwardList, 15f + iMMFWiggle);
+                }
+                else if (shipSpeed < (fTarget * 1.1))
+                {
+                    // we are around target. 90%<-current->120%
+                    //                                 Echo("Coast");
+                    _iMFSWiggle--;
+                    // turn off reverse thrusters and 'coast'.
+                    powerDownThrusters(mfsBackwardThrust, thrustAll, true);
+                    powerDownThrusters(mfsForwardThrust);
+                }
+                else
+                { // above 110% target, but below abort
+                  //                Echo("Coast2");
+                    _iMFSWiggle--;
+                    _iMFSWiggle--;
+                    powerUpThrusters(mfsForwardThrust, 1f); // coast
+                }
+
+            }
+
+            public void MoveForwardSlowReset()
+            {
+                _iMFSWiggle = 0;
+            }
+
 
         }
         #endregion
