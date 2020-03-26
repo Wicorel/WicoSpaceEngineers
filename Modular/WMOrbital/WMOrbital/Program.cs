@@ -48,8 +48,8 @@ namespace IngameScript
             //sVersion = "4";
 
             wicoThrusters = new WicoThrusters(this);
-            wicoGyros = new WicoGyros(this, null);
-            wicoGasTanks = new GasTanks(this);
+            wicoGyros = new WicoGyros(this, wicoBlockMaster);
+            wicoGasTanks = new GasTanks(this,wicoBlockMaster);
             wicoGasGens = new GasGens(this);
             wicoConnectors = new Connectors(this);
             wicoLandingGears = new LandingGears(this);
@@ -57,10 +57,10 @@ namespace IngameScript
             wicoParachutes = new Parachutes(this);
             wicoNavRotors = new NavRotors(this);
             wicoAntennas = new Antennas(this);
-            wicoSensors = new Sensors(this, wicoBlockMaster.GetMainController());
+            wicoSensors = new Sensors(this, wicoBlockMaster);
             wicoWheels = new Wheels(this);
             wicoEngines = new HydrogenEngines(this);
-            wicoPower = new PowerProduction(this);
+            wicoPower = new PowerProduction(this,wicoBlockMaster);
 
             wicoOrbitalLaunch = new OrbitalModes(this);
             //            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
@@ -102,7 +102,8 @@ namespace IngameScript
                     var tanksfill = wicoPower.EnginesTanksFill();
                     Echo(" Tanks Filled=" + (tanksfill * 100).ToString() + "%");
                 }
-                
+                // ensure we run at least at slow speed for updates.
+                wicoControl.WantSlow(); 
             }
         }
 
