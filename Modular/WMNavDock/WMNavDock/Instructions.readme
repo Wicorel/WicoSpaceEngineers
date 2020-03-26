@@ -1,0 +1,14 @@
+﻿Wico Navigiation and Space Dock
+Modular System
+-----------
+
+Navigation: autopilot with collision detection and avoidance.
+Space Dock: Docking to dynamic connectors.  Requires 'base' to have script to communicate connector locations.
+
+https://steamcommunity.com/sharedfiles/filedetails/?id=2035485220
+
+See manual at:
+<<<>>>
+
+
+TODO:
