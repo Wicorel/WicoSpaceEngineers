@@ -83,8 +83,8 @@ namespace IngameScript
 
                 double area = halfArea * halfArea;
                 terminal = Math.Sqrt((mass * gravity) / (area * count * atmo * 1.225 * gridsize));
-                //                thisProgram.Echo("Gravity=" + gravity.ToString("0.00") + " area=" + area.ToString("0.00"));
-                //                thisProgram.Echo("mass="+mass.ToString("0.00")+ " area="
+                //                _program.Echo("Gravity=" + gravity.ToString("0.00") + " area=" + area.ToString("0.00"));
+                //                _program.Echo("mass="+mass.ToString("0.00")+ " area="
 
                 return terminal;
             }
@@ -102,7 +102,7 @@ namespace IngameScript
 
                 if (parachuteList.Count > 1)
                 {
-                    Matrix or1;
+                    //Matrix or1;
                     //                    parachuteList[0].Orientation.GetMatrix(out or1);
                     //                    orientation = or1.Forward;
                     orientation = parachuteList[0].WorldMatrix.Forward;
