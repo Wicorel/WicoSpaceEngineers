@@ -90,23 +90,23 @@ namespace IngameScript
                         //Max Output: 500.00 kW
                         //Current Output: 260 W
                         //Filled: 100.0 % (16000L / 16000L)
-//                        thisProgram.Echo("DetailedInfo=\n" + tb.DetailedInfo);
+//                        _program.Echo("DetailedInfo=\n" + tb.DetailedInfo);
                         string[] lines = tb.DetailedInfo.Trim().Split('\n');
-//                        thisProgram.Echo("#lines=" + lines.Length);
+//                        _program.Echo("#lines=" + lines.Length);
                         if (lines.Length < 3) // not what we expected
                             continue;
 
                         //Filled: 100.0% (16000L/16000L)
                         string[] aParams = lines[3].Split(' ');
-//                        thisProgram.Echo("#params=" + aParams.Length);
+//                        _program.Echo("#params=" + aParams.Length);
                         if (aParams.Length < 2) // not what we expected
                             continue;
-//                        thisProgram.Echo("Param=" + aParams[1]);
+//                        _program.Echo("Param=" + aParams[1]);
                         string sPercent = aParams[1].Replace('%', ' ');
                         bool bOK = double.TryParse(sPercent.Trim(), out tankLevel);
 //                        bool bOK = double.TryParse(aParams[1], out tankLevel);
-//                        if (!bOK) thisProgram.Echo("Tryparse fail!");
-//                        thisProgram.Echo("Tanklevel=" + tankLevel.ToString());
+//                        if (!bOK) _program.Echo("Tryparse fail!");
+//                        _program.Echo("Tanklevel=" + tankLevel.ToString());
                         tankLevel /= 100.0; // convert from 0->100 to 0->1.0
                         totalLevel += tankLevel;
                         iTanksCount++;
