@@ -23,11 +23,10 @@ namespace IngameScript
     {
 
         WicoIGC wicoIGC;
-        WicoControl wicoControl;
+//        WicoControl _wicoControl;
         WicoBlockMaster wicoBlockMaster;
+        WicoElapsedTime wicoElapsedTime;
         //        TravelMovement wicoTravelMovement;
-
-
 
         // Handlers
         private List<Action<string,MyCommandLine, UpdateType>> UpdateTriggerHandlers = new List<Action<string,MyCommandLine, UpdateType>>();
@@ -38,6 +37,12 @@ namespace IngameScript
 
         private List<Action<MyIni>> SaveHandlers = new List<Action<MyIni>>();
         private List<Action<MyIni>> LoadHandlers = new List<Action<MyIni>>();
+
+        // reset motion handlers
+        private List<Action<bool>> ResetMotionHandlers = new List<Action<bool>>();
+
+        // Post init handlers
+        private List<Action> PostInitHandlers = new List<Action>();
 
         // https://github.com/malware-dev/MDK-SE/wiki/Handling-configuration-and-storage
         private MyIni _SaveIni = new MyIni();
@@ -52,8 +57,6 @@ namespace IngameScript
         /// </summary>
         UpdateType utUpdates = UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100 | UpdateType.Once;
 
-        // reset motion handlers
-        private List<Action<bool>> ResetMotionHandlers = new List<Action<bool>>();
 
         // Surface stuff
         IMyTextSurface mesurface0;
@@ -88,10 +91,19 @@ namespace IngameScript
                 Echo(result.ToString());
                 //                throw new Exception(result.ToString());
             }
+            long meentityid=0;
+            _SaveIni.Get(OurName+sVersion,"MEENITYID").TryGetInt64(out meentityid);
+            if (meentityid != Me.EntityId)
+            { // what's in storage was not created by this blueprint; clear it out.
+                Storage = "";
+                _SaveIni.Clear();
+            }
 
-            wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
+            wicoIGC = new WicoIGC(this, false); // Must be first as some use it in constructor
             wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
-            wicoControl = new WicoControl(this);
+            ModuleControlInit();
+//            _wicoControl = new WicoControl(this);
+            wicoElapsedTime = new WicoElapsedTime(this,_wicoControl);
 
             ModuleProgramInit();
 
@@ -181,20 +193,39 @@ namespace IngameScript
             }
         }
 
+        void AddPostInitHandler(Action handler)
+        {
+            if (!PostInitHandlers.Contains(handler))
+                PostInitHandlers.Add(handler);
+        }
+
+        void PostInit()
+        {
+            foreach (var handler in PostInitHandlers)
+            {
+                handler();
+            }
+        }
+
 
         public void Main(string argument, UpdateType updateSource)
         {
-            wicoControl.ResetUpdates();
+            //            _wicoControl.ResetUpdates();
+            Echo(moduleList.Trim());
             ModulePreMain(argument, updateSource);
             if (tmGridCheckElapsedMs >= 0) tmGridCheckElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
             if (!WicoLocalInit())
             {
-                Echo("Init");
+
+                // we did not complete an init.
+                Echo("Init Failed.  Trying again");
+
+                // try again
+                Runtime.UpdateFrequency = UpdateFrequency.Once;
             }
             else
             {
-                if (wicoControl.IamMain()) Echo("MAIN MODULE");
-                else Echo("SUB MODULE");
+                _wicoControl.AnnounceState();
                 // only do this on update, not triggers
                 if ((updateSource & utUpdates) > 0)
                 {
@@ -220,19 +251,17 @@ namespace IngameScript
                 }
                 //                else Echo("Init and NOTE update");
             }
-//            Echo(updateSource.ToString());
+            //            Echo(updateSource.ToString());
+//            Echo("A:UF=" + _wicoControl.GenerateUpdate());
             if ((updateSource & UpdateType.IGC) > 0)
             {
-                //                Echo("IGC");
+//                Echo("IGC");
                 wicoIGC.ProcessIGCMessages();
-                if (wicoControl.IamMain())
-                    mesurface1.WriteText("Master Module");
-                else
-                    mesurface1.WriteText("Sub Module");
             }
+//            Echo("B:UF=" + _wicoControl.GenerateUpdate());
             if ((updateSource & (utTriggers)) > 0)
             {
-                                Echo("Triggers:"+argument);
+//                Echo("Triggers:"+argument);
                 MyCommandLine useCommandLine = null;
                 if (myCommandLine.TryParse(argument))
                 {
@@ -241,56 +270,46 @@ namespace IngameScript
                 bool bProcessed = false;
                 if(myCommandLine.ArgumentCount>1)
                 {
-                    if(myCommandLine.Argument(0)=="setmode")
-                    {
-                        int toMode = 0;
-                        bool bOK = int.TryParse(myCommandLine.Argument(1), out toMode);
-                        if (bOK)
-                        {
-                            wicoControl.SetMode(toMode);
-                            bProcessed = true;
-                        }
-                    }
                 }
                 if (!bProcessed)
                 {
+                    Echo("Calling all trigger handlers ("+UpdateTriggerHandlers.Count.ToString()+")");
                     foreach (var handler in UpdateTriggerHandlers)
                     {
                         handler(argument, useCommandLine, updateSource);
                     }
                 }
             }
+//            Echo("C:UF=" + _wicoControl.GenerateUpdate());
             if ((updateSource & (utUpdates)) > 0)
             {
-                //                Echo("Update");
+                _wicoControl.ResetUpdates();
+//                Echo("Update");
                 foreach (var handler in UpdateUpdateHandlers)
                 {
                     handler(updateSource);
                 }
             }
+//            Echo("D:UF=" + _wicoControl.GenerateUpdate());
 
-            /*
-            Echo("I Am Main=" + wicoControl.IamMain().ToString());
-            Echo(wicoThrusters.ThrusterCount() + " Thrusters Found");
+//            Echo("Mode=" + _wicoControl.IMode.ToString() + " State=" + _wicoControl.IState.ToString());
 
-            if (wicoGyros.gyroControl == null)
-                wicoGyros.SetController();
-            Echo(wicoGyros.NumberAllGyros() + " Total Gyros Found");
-            Echo(wicoGyros.NumberUsedGyros() + " Used Gyros");
-
-            var shipController= wicoBlockMaster.GetMainController();
-            if (shipController != null)
-                Echo("Controller = " + shipController.CustomName);
-            */
-            Echo("Mode=" + wicoControl.IMode.ToString() + " State=" + wicoControl.IState.ToString());
-
-            Echo("Reporting:\n"+sMasterReporting);
+            if(sMasterReporting!="") Echo("Reporting:\n"+sMasterReporting);
+            if (sMasterReporting.Length > 1024)
+            {
+                sMasterReporting = "";
+            }
 
             ModulePostMain();
-            Runtime.UpdateFrequency = wicoControl.GenerateUpdate()
-                | UpdateFrequency.Update100
-                ;
+            wicoElapsedTime.CheckTimers();
+            Runtime.UpdateFrequency = _wicoControl.GenerateUpdate();
 
+//            Echo("UF=" + Runtime.UpdateFrequency.ToString());
+        }
+
+        public void ErrorLog(string str)
+        {
+            sMasterReporting += "\n"+str;
         }
 
         bool bInitDone = false;
@@ -298,13 +317,13 @@ namespace IngameScript
         {
             if (bInitDone) return true;
 
-            // must come late as the above inits may add handlers
-            wicoBlockMaster.LocalBlocksInit();
+            PostInit();
 
             bInitDone = true;
 
-            // last thing after init is done
-            wicoControl.ModeAfterInit(_SaveIni);
+            // last thing after init is done so that all modules are loaded
+            // This call also has sub-handlers.
+            _wicoControl.ModeAfterInit(_SaveIni);
 
             // Save it now so that any defaults are set after an initial run
             Me.CustomData = _CustomDataIni.ToString();
@@ -317,8 +336,8 @@ namespace IngameScript
             bInitDone = false;
         }
 
-
-        string niceDoubleMeters(double thed)
+        // UTILITY ROUTINES
+        public string niceDoubleMeters(double thed)
         {
             string nice = "";
             if (thed > 1000)
@@ -338,6 +357,34 @@ namespace IngameScript
                 nice = thed.ToString("0.000") + "m";
             }
             return nice;
+        }
+        public string Vector3DToString(Vector3D v)
+        {
+            string s;
+            s = v.X.ToString("0.00") + ":" + v.Y.ToString("0.00") + ":" + v.Z.ToString("0.00");
+            return s;
+        }
+        public bool stringToBool(string txt)
+        {
+            txt = txt.Trim().ToLower();
+            return (txt == "on" || txt == "true");
+        }
+        string toGpsName(string ShipName, string sQual)
+        {
+            //NOTE: GPS Name can be a MAX of 32 total chars.
+            string s;
+            int iName = ShipName.Length;
+            int iQual = sQual.Length;
+            if (iName + iQual > 32)
+            {
+                if (iQual > 31) return "INVALID";
+                iName = 32 - iQual;
+            }
+            s = ShipName.Substring(0, iName) + sQual;
+            s.Replace(":", "_"); // filter out bad characters
+            s.Replace(";", "_"); // filter out bad characters
+            return s;
+
         }
 
 
