@@ -24,7 +24,7 @@ namespace IngameScript
 
         #region WicoBlockMaster
 
-        class WicoBlockMaster //really "ship" master
+        public class WicoBlockMaster //really "ship" master
         {
             Program thisProgram;
             IMyGridTerminalSystem GridTerminalSystem;
@@ -62,6 +62,7 @@ namespace IngameScript
                     // TODO: Check for other things for ignoring
                     // like toilets, etc.
                     shipControllers.Add(tb as IMyShipController);
+                    thisProgram.Echo("Found shipController:" + tb.CustomName);
                 }
             }
 
@@ -78,8 +79,17 @@ namespace IngameScript
             /// <returns></returns>
             public IMyShipController GetMainController()
             {
-                //                thisProgram.Echo(shipControllers.Count.ToString() + " Ship Controllers");
-                // TODO: check for occupied, etc.
+                //                _program.Echo(shipControllers.Count.ToString() + " Ship Controllers");
+                //  check for occupied, etc.
+                foreach (var tb in shipControllers)
+                {
+                    if (tb.IsUnderControl)
+                    {
+                        // found a good one
+                        MainShipController = tb;
+                        break;
+                    }
+                }
                 // TODO: ignore stuff like cyro, toilets, etc.
                 if (MainShipController == null)
                 {
@@ -125,11 +135,57 @@ namespace IngameScript
                         // we found one
                         ShipDimensions(MainShipController);
                     }
+                    else
+                    {
+                        thisProgram.Echo("No ship controller found");
+//                        _program.ErrorLog("No Ship Controller Found");
+                    }
                 }
 
                 return MainShipController;
 
             }
+
+            public Vector3D CenterOfMass()
+            {
+                Vector3D com=_emptyV3D;
+                var shipcontroller = GetMainController();
+                if(shipcontroller!=null)
+                    com= shipcontroller.CenterOfMass;
+                return com;
+            }
+            public double GetShipSpeed()
+            {
+                double shipspeed = -1;
+                var shipcontroller = GetMainController();
+                if (shipcontroller != null)
+                    shipspeed = shipcontroller.GetShipSpeed();
+                return shipspeed;
+            }
+
+            public Vector3D GetNaturalGravity()
+            {
+                Vector3D vNG = _emptyV3D;
+                var shipcontroller = GetMainController();
+                if (shipcontroller != null)
+                    vNG = shipcontroller.GetNaturalGravity();
+                return vNG;
+
+            }
+            public double GetPhysicalMass()
+            {
+                double effectiveMass = -1;
+                var shipcontroller = GetMainController();
+                if (shipcontroller != null)
+                {
+                    MyShipMass myMass;
+                    myMass = shipcontroller.CalculateShipMass();
+                    effectiveMass = myMass.PhysicalMass;
+                }
+                return effectiveMass;
+
+            }
+
             #endregion
 
             #region BLOCKHANDLING
@@ -196,6 +252,11 @@ namespace IngameScript
                 }
             }
 
+            void PostInitHandler()
+            {
+                LocalBlocksInit();
+            }
+
             /// <summary>
             /// Call to initialize all remote blocks and their handlers
             /// </summary>
@@ -247,7 +308,7 @@ namespace IngameScript
             {
                 gtsTestBlocks.Clear();
                 GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => x1.IsSameConstructAs(thisProgram.Me) && ValidBlock(x1)));
-                //                thisProgram.Echo("test block count=" + gtsTestBlocks.Count.ToString());
+                //                _program.Echo("test block count=" + gtsTestBlocks.Count.ToString());
                 if (localBlocksCount != gtsTestBlocks.Count || bForceUpdate)
                 {
                     LocalBlocksChanged(); // tell them something changed
@@ -265,9 +326,11 @@ namespace IngameScript
                 return false;
             }
 
+            readonly Vector3D _emptyV3D=new Vector3D();
+
             bool ValidBlock(IMyTerminalBlock tb)
             {
-                if (tb.GetPosition() == new Vector3D())
+                if (tb.GetPosition() == _emptyV3D)
                 {
                     return false;
                 }

@@ -21,7 +21,7 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-        class Cameras
+        public class Cameras
         {
             string sCameraViewOnly = "[VIEW]"; // do not use cameras with this in their name for scanning.
 
