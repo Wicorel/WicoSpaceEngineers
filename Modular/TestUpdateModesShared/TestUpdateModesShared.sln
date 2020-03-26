@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUpdateModesShared", "TestUpdateModesShared\TestUpdateModesShared.csproj", "{B06BBA43-8300-4E15-8D04-8FD28B6D45A0}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModularMain", "..\ModularMain\ModularMain\ModularMain.shproj", "{2C75AB60-AE98-4544-B151-13769A76C6C4}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoUpdates", "..\WicoUpdates\WicoUpdates\WicoUpdates.shproj", "{C0CDA458-C1B4-45BA-94DE-ADC133813CB0}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoUpdateModes", "..\WicoUpdateModes\WicoUpdateModes\WicoUpdateModes.shproj", "{12C8EA8A-536A-4CD4-848F-C7CCE9E751BB}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoUpdatesModeShared", "..\WicoUpdatesModeShared\WicoUpdatesModeShared\WicoUpdatesModeShared.shproj", "{B112D6D3-C17B-413B-B055-DF11DCC35D90}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "IGC", "..\IGC\IGC\IGC.shproj", "{D641AA70-4A98-4D1B-B594-F38F66938D65}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BlockMaster", "..\BlockMaster\BlockMaster\BlockMaster.shproj", "{6242F17F-6F6A-4721-8475-03A861445DEC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ElapsedTime", "..\ElapsedTime\ElapsedTime\ElapsedTime.shproj", "{69F6E441-D885-42B3-8A7F-E224CC869DA3}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\WicoUpdateModes\WicoUpdateModes\WicoUpdateModes.projitems*{12c8ea8a-536a-4cd4-848f-c7cce9e751bb}*SharedItemsImports = 13
+		..\ModularMain\ModularMain\ModularMain.projitems*{2c75ab60-ae98-4544-b151-13769a76c6c4}*SharedItemsImports = 13
+		..\BlockMaster\BlockMaster\BlockMaster.projitems*{6242f17f-6f6a-4721-8475-03a861445dec}*SharedItemsImports = 13
+		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{69f6e441-d885-42b3-8a7f-e224cc869da3}*SharedItemsImports = 13
+		..\BlockMaster\BlockMaster\BlockMaster.projitems*{b06bba43-8300-4e15-8d04-8fd28b6d45a0}*SharedItemsImports = 4
+		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{b06bba43-8300-4e15-8d04-8fd28b6d45a0}*SharedItemsImports = 4
+		..\IGC\IGC\IGC.projitems*{b06bba43-8300-4e15-8d04-8fd28b6d45a0}*SharedItemsImports = 4
+		..\ModularMain\ModularMain\ModularMain.projitems*{b06bba43-8300-4e15-8d04-8fd28b6d45a0}*SharedItemsImports = 4
+		..\WicoUpdateModes\WicoUpdateModes\WicoUpdateModes.projitems*{b06bba43-8300-4e15-8d04-8fd28b6d45a0}*SharedItemsImports = 4
+		..\WicoUpdatesModeShared\WicoUpdatesModeShared\WicoUpdatesModeShared.projitems*{b06bba43-8300-4e15-8d04-8fd28b6d45a0}*SharedItemsImports = 4
+		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{b06bba43-8300-4e15-8d04-8fd28b6d45a0}*SharedItemsImports = 4
+		..\WicoUpdatesModeShared\WicoUpdatesModeShared\WicoUpdatesModeShared.projitems*{b112d6d3-c17b-413b-b055-df11dcc35d90}*SharedItemsImports = 13
+		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{c0cda458-c1b4-45ba-94de-adc133813cb0}*SharedItemsImports = 13
+		..\IGC\IGC\IGC.projitems*{d641aa70-4a98-4d1b-b594-f38f66938d65}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B06BBA43-8300-4E15-8D04-8FD28B6D45A0}.Debug|x64.ActiveCfg = Debug|x64
+		{B06BBA43-8300-4E15-8D04-8FD28B6D45A0}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {08014017-EF80-44A0-A6A3-B9A4DB42FC13}
+	EndGlobalSection
+EndGlobal
