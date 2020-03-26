@@ -21,9 +21,9 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-        class Antennas
+        public class Antennas
         {
-            bool CommunicationsStealth = false;
+ //           bool CommunicationsStealth = false;
 
             bool bGotAntennaName = false;
             public string AntennaName;
@@ -78,12 +78,13 @@ namespace IngameScript
             /// <param name="bAll">Ensures All, or just ones that have script attached are also Enabled</param>
             public void SetLowPower(bool bAll = false)
             {
-
+                bool bFirst = true;
                 foreach (var a in antennaList)
                 {
                     a.Radius = 200;
-                    if (a.AttachedProgrammableBlock > 0 || bAll)
+                    if (bFirst || bAll)
                     {
+                        bFirst = false;
                         a.Enabled = true;
                     }
                 }
@@ -96,10 +97,13 @@ namespace IngameScript
             /// <param name="bAll">Set all antennas (true) or just ones that have script attached (default) (false)</param>
             public void SetRadius(float fRadius = 200, bool bAll = false)
             {
+                bool bFirst = true;
                 foreach (var a1 in antennaList)
                 {
                     //                    if (a1.AttachedProgrammableBlock > 0 || bAll)
+                    if (bFirst || bAll)
                     {
+                        bFirst = false;
                         a1.Radius = fRadius;
                         a1.Enabled = true;
                     }
@@ -146,10 +150,14 @@ namespace IngameScript
 
             public void SetDesiredPower(bool bAll = false)
             {
+
+                bool bFirst = true;
                 foreach (var a in antennaList)
                 {
                     //                    if (a.AttachedProgrammableBlock > 0 || bAll)
+                    if (bFirst || bAll)
                     {
+                        bFirst = false;
                         float maxPower = a.GetMaximum<float>("Radius");
                         if (fAntennaDesiredRange < maxPower) maxPower = fAntennaDesiredRange;
                         a.Radius = maxPower;
