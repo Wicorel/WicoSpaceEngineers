@@ -17,15 +17,12 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-        #region Gyros
-        class WicoGyros
+        public class WicoGyros
         {
             // Originally from: http://forums.keenswh.com/threads/aligning-ship-to-planet-gravity.7373513/#post-1286885461 
             List<IMyGyro> allLocalGyros = new List<IMyGyro>();
             List<IMyGyro> useGyros = new List<IMyGyro>();
 
-
-            Program thisProgram;
 
             public IMyShipController gyroControl;
 
@@ -39,10 +36,15 @@ namespace IngameScript
             /// </summary>
             int LIMIT_GYROS = 1;
 
-            public WicoGyros(Program program, IMyShipController myShipController)
+            Program _program;
+            WicoBlockMaster _wicoBlockMaster;
+
+
+            public WicoGyros(Program program, WicoBlockMaster wbm)
             {
-                thisProgram = program;
-                gyroControl = myShipController;
+                _program = program;
+                _wicoBlockMaster = wbm;
+
                 GyrosInit();
             }
 
@@ -50,11 +52,11 @@ namespace IngameScript
 
             public void GyrosInit()
             {
-                thisProgram._CustomDataIni.Get(sGridSection, "CTRL_COEFF").ToDouble(CTRL_COEFF);
-                thisProgram._CustomDataIni.Get(sGridSection, "LIMIT_GYROS").ToInt32(LIMIT_GYROS);
+                _program._CustomDataIni.Get(sGridSection, "CTRL_COEFF").ToDouble(CTRL_COEFF);
+                _program._CustomDataIni.Get(sGridSection, "LIMIT_GYROS").ToInt32(LIMIT_GYROS);
 
-                thisProgram._CustomDataIni.Set(sGridSection, "CTRL_COEFF", CTRL_COEFF);
-                thisProgram._CustomDataIni.Set(sGridSection, "LIMIT_GYROS", LIMIT_GYROS);
+                _program._CustomDataIni.Set(sGridSection, "CTRL_COEFF", CTRL_COEFF);
+                _program._CustomDataIni.Set(sGridSection, "LIMIT_GYROS", LIMIT_GYROS);
 
                 // In case we had previous control info; reset it.
                 allLocalGyros.Clear();
@@ -65,10 +67,10 @@ namespace IngameScript
                 useGyros.Clear();
 
                 // Minimal init; just add handlers
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                _wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
-                thisProgram.AddResetMotionHandler(ResetMotionHandler);
+                _program.AddResetMotionHandler(ResetMotionHandler);
             }
 
             void ResetMotionHandler(bool bNoDrills=false)
@@ -112,7 +114,7 @@ namespace IngameScript
                 useGyros.Clear();
                 if (gyroControl == null)
                 {
-                    gyroControl = thisProgram.wicoBlockMaster.GetMainController();
+                    gyroControl = _program.wicoBlockMaster.GetMainController();
                 }
                 if (gyroControl == null)
                 {
@@ -198,8 +200,8 @@ namespace IngameScript
                 bool bAligned = true;
                 if (gyroControl == null)
                     GyroSetup();
-                thisProgram.Echo("vDirection= " + vDirection.ToString());
-                thisProgram.Echo("vTarget= " + vTarget.ToString());
+//                _program.Echo("vDirection= " + vDirection.ToString());
+//                _program.Echo("vTarget= " + vTarget.ToString());
 
                 vTarget.Normalize();
                 Matrix or1;
@@ -226,7 +228,7 @@ namespace IngameScript
                         g1.GyroOverride = false;
                         continue;
                     }
-                      thisProgram.Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
+                      _program.Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
 
                     float yawMax = (float)(2 * Math.PI);
 
@@ -256,6 +258,42 @@ namespace IngameScript
                 }
                 return bAligned;
             }
+
+            public bool BeamRider(Vector3D vStart, Vector3D vEnd, IMyTerminalBlock OrientationBlock)
+            {
+                // 'BeamRider' routine that takes start,end and tries to stay on that beam.
+                bool bAimed = false;
+                Vector3D vBoreEnd = (vEnd - vStart);
+                Vector3D vPosition;
+                if (OrientationBlock is IMyShipController)
+                {
+                    vPosition = ((IMyShipController)OrientationBlock).CenterOfMass;
+                }
+                else
+                {
+                    vPosition = OrientationBlock.GetPosition();
+                }
+                Vector3D vAimEnd = (vEnd - vPosition);
+                Vector3D vRejectEnd = VectorRejection(vBoreEnd, vAimEnd);
+
+                Vector3D vCorrectedAim = (vEnd - vRejectEnd * 2) - vPosition;
+                Matrix or1;
+                OrientationBlock.Orientation.GetMatrix(out or1);
+                bAimed = AlignGyros(or1.Forward, vCorrectedAim);
+                //               bAimed = GyroMain("forward", vCorrectedAim, OrientationBlock);
+                               bAimed = AlignGyros("forward", vCorrectedAim, OrientationBlock);
+                return bAimed;
+            }
+
+            // From Whip. on discord
+            Vector3D VectorRejection(Vector3D a, Vector3D b) //reject a on b    
+            {
+                if (Vector3D.IsZero(b))
+                    return Vector3D.Zero;
+
+                return a - a.Dot(b) / b.LengthSquared() * b;
+            }
+
             public int NumberAllGyros()
             {
                 return allLocalGyros.Count();
@@ -498,6 +536,5 @@ namespace IngameScript
             #endregion
         }
 
-        #endregion
     }
 }
