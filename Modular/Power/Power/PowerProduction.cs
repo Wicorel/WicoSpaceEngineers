@@ -43,6 +43,9 @@ namespace IngameScript
             public double batteryTotalInput = 0;
             public double batteryTotalOutput = 0;
 
+            public int batterypcthigh = 80;
+            public int batterypctlow = 20;
+
             List<IMyTerminalBlock> turbineList = new List<IMyTerminalBlock>();
             public double maxTurbinePower = -1;
             public float currentTurbineOutput = 0;
@@ -51,13 +54,21 @@ namespace IngameScript
             public double maxTotalPower = -1;
             public double currentTotalOutput = -1;
 
-            Program thisProgram;
-            public PowerProduction(Program program)
-            {
-                thisProgram = program;
 
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+            string sPowerSection = "POWER";
+
+            Program _program;
+            WicoBlockMaster _wicoBlockMaster;
+            public PowerProduction(Program program, WicoBlockMaster wbm)
+            {
+                _program = program;
+                _wicoBlockMaster = wbm;
+
+                _wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+
+                _program.AddLoadHandler(LoadHandler);
+                _program.AddSaveHandler(SaveHandler);
             }
 
             /// <summary>
@@ -84,7 +95,7 @@ namespace IngameScript
                 }
                 if (tb.BlockDefinition.TypeIdString == "MyObjectBuilder_WindTurbine")
                 {
-                    lHydrogenEngines.Add(tb);
+                    turbineList.Add(tb);
                 }
             }
 
@@ -103,6 +114,17 @@ namespace IngameScript
                 batteryList.Clear();
                 maxBatteryPower = -1;
                 batteryPercentage = -1;
+            }
+            void LoadHandler(MyIni Ini)
+            {
+                batterypcthigh = Ini.Get(sPowerSection, "batterypcthigh").ToInt32(batterypcthigh);
+                batterypctlow = Ini.Get(sPowerSection, "batterypctlow").ToInt32(batterypctlow);
+            }
+
+            void SaveHandler(MyIni Ini)
+            {
+                Ini.Set(sPowerSection, "batterypcthigh", batterypcthigh);
+                Ini.Set(sPowerSection, "batterypctlow", batterypctlow);
             }
 
             /// <summary>
@@ -307,7 +329,7 @@ namespace IngameScript
                     else s += " ";
                     s += percentthisbattery + "%";
                     s += ":" + batteryList[ib].CustomName;
-                    if (bEcho) thisProgram.Echo(s);
+                    if (bEcho) _program.Echo(s);
                     if (isRechargeSet(batteryList[ib]) && targetMax > 0)
                     {
                         if (percentthisbattery < targetMax)
@@ -347,7 +369,7 @@ namespace IngameScript
             // Set the state of the batteries and optionally display state of the batteries
             public void BatteryDischargeSet(bool bEcho = false, bool bDischarge = true)
             {
-                if (bEcho) thisProgram.Echo(batteryList.Count + " Batteries");
+                if (bEcho) _program.Echo(batteryList.Count + " Batteries");
                 string s;
                 for (int i = 0; i < batteryList.Count; i++)
                 {
@@ -375,7 +397,7 @@ namespace IngameScript
                     {
                         s += "NOTDISCHARGE";
                     }
-                    if (bEcho) thisProgram.Echo(s);
+                    if (bEcho) _program.Echo(s);
                 }
             }
 
