@@ -16,6 +16,12 @@ using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Game;
 using VRageMath;
 
+#region mdk preserve
+#region mdk macros
+// script was deployed at $MDK_DATETIME$
+#endregion
+#endregion
+
 namespace IngameScript
 {
 
@@ -39,17 +45,22 @@ namespace IngameScript
 //        OrbitalModes wicoOrbitalLaunch;
          Navigation wicoNavigation;
 
+        //        WicoUpdateModesShared _wicoControl;
+        WicoControl _wicoControl;
+
+        void ModuleControlInit()
+        {
+            //            _wicoControl = new WicoUpdateModesShared(this);
+            _wicoControl = new WicoControl(this);
+        }
 
         void ModuleProgramInit()
         {
-            wicoTravelMovement = new TravelMovement(this);
-            //OurName = "";
-            //moduleName += "\nOrbital V4";
-            //sVersion = "4";
+            wicoTravelMovement = new TravelMovement(this, _wicoControl);
 
             wicoThrusters = new WicoThrusters(this);
-            wicoGyros = new WicoGyros(this, null);
-            wicoGasTanks = new GasTanks(this);
+            wicoGyros = new WicoGyros(this, wicoBlockMaster);
+            wicoGasTanks = new GasTanks(this,wicoBlockMaster);
             wicoGasGens = new GasGens(this);
             wicoConnectors = new Connectors(this);
             wicoLandingGears = new LandingGears(this);
@@ -57,19 +68,31 @@ namespace IngameScript
             wicoParachutes = new Parachutes(this);
             wicoNavRotors = new NavRotors(this);
             wicoAntennas = new Antennas(this);
-            wicoSensors = new Sensors(this, wicoBlockMaster.GetMainController());
+            wicoSensors = new Sensors(this, wicoBlockMaster);
             wicoWheels = new Wheels(this);
 
-//            wicoOrbitalLaunch = new OrbitalModes(this);
-             wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
+            wicoNavigation = new Navigation(this,_wicoControl,wicoBlockMaster, wicoIGC);
+
+            _wicoControl.WantSlow(); // get updates so we can check for things like navigation commands in oldschool format
+
+            /// DEBUG
+            wicoIGC.SetDebug(true);
+            _wicoControl.SetDebug(true);
 
         }
         public void ModulePreMain(string argument, UpdateType updateSource)
         {
+            Echo("UpdateSource=" + updateSource.ToString());
+//            Echo(" Main=" + wicoControl.IamMain().ToString());
         }
 
         public void ModulePostMain()
         {
+        }
+
+        public void ModulePostInit()
+        {
+            wicoSensors.SensorInit(wicoBlockMaster.GetMainController());
         }
 
     }
