@@ -21,11 +21,12 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-        #region WicoControl
 
-        class WicoControl
+        public class WicoControl
         {
             public float fMaxWorldMps = 100f;
+
+            bool _bDebug = false;
 
             #region MODES
             const string MODECHANGETAG = "[WICOMODECHANGE]";
@@ -76,12 +77,19 @@ namespace IngameScript
             public const int MODE_LANDED = 180;
 
             public const int MODE_MINE = 500;
+            public const int MODE_GOTOORE = 510;
+            public const int MODE_BORESINGLE = 520;
+
+            public const int MODE_EXITINGASTEROID = 590;
 
 
             public const int MODE_STARTNAV = 600; // start the navigation operations
             public const int MODE_GOINGTARGET = 650;
             public const int MODE_NAVNEXTTARGET = 670; // go to the next target
             public const int MODE_ARRIVEDTARGET = 699; // we have arrived at target
+
+
+            public const int MODE_DOSCANS = 900; // Start scanning
 
             public const int MODE_ATTENTION = 9999;
 
@@ -91,6 +99,7 @@ namespace IngameScript
                 if (_iMode == theNewMode)
                     return;
 
+                // possible optimization.. make modules register for what modes they care about...
                 string sData = "";
                 sData += _iMode.ToString() + "\n";
                 sData += _iState.ToString() + "\n";
@@ -102,10 +111,12 @@ namespace IngameScript
 
                 _iMode = theNewMode;
                 _iState = theNewState;
+                WantOnce();
             }
 
             public void SetState(int theNewState)
             {
+                // not synced..
                 _iState = theNewState;
             }
             public bool AddControlChangeHandler(Action<int, int, int, int> handler)
@@ -193,10 +204,8 @@ namespace IngameScript
             {
                 thisProgram = program;
 
-
                 WicoControlInit();
             }
-
 
             /// <summary>
             /// List of Wico PB blocks on local construct
@@ -213,11 +222,6 @@ namespace IngameScript
             public void WicoControlInit()
             {
                 // Wico Configuration system
-                //TODO: Load defaults from CustomData
-                //thisProgram._CustomDataIni;
-
-                //TODO: load last mode/state from Storage
-                //thisProgram._SaveIni;
 
                 // send a messge to all local 'Wico' PBs to get configuration.  
                 // This will be used to determine the 'master' PB and to know who to send requests to
@@ -244,216 +248,23 @@ namespace IngameScript
             /// <param name="updateSource"></param>
             public void ProcessTrigger(string sArgument,MyCommandLine myCommandLine, UpdateType updateSource)
             {
-                if(sArgument=="test")
+                if (myCommandLine.ArgumentCount > 1)
                 {
-                    
-                }
-                /*
-                string[] varArgs = sArgument.Trim().Split(';');
-                bool bFoundNAVCommands = false;
-                for (int iArg = 0; iArg < varArgs.Length; iArg++)
-                {
-                    string[] args = varArgs[iArg].Trim().Split(' ');
-
-                    if (args[0] == "W" || args[0] == "O")
-                    { // [W|O] <x>:<y>:<z>  || W <x>,<y>,<z>
-                      // W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
-                      // O means orient towards.  W means orient, then move to
-                        bFoundNAVCommands = true;
-                        thisProgram.Echo("Args:");
-                        for (int icoord = 0; icoord < args.Length; icoord++)
-                            thisProgram.Echo(args[icoord]);
-                        if (args.Length < 1)
-                        {
-                            thisProgram.Echo("Invalid Command:(" + varArgs[iArg] + ")");
-                            continue;
-                        }
-                        string sArg = args[1].Trim();
-
-                        if (args.Length > 2)
-                        {
-                            sArg = args[1];
-                            for (int kk = 2; kk < args.Length; kk++)
-                                sArg += " " + args[kk];
-                            sArg = sArg.Trim();
-                        }
-
-                        //                    Echo("sArg=\n'" + sArg+"'");
-                        string[] coordinates = sArg.Split(',');
-                        if (coordinates.Length < 3)
-                        {
-                            coordinates = sArg.Split(':');
-                        }
-                        //                    Echo(coordinates.Length + " Coordinates");
-                        for (int icoord = 0; icoord < coordinates.Length; icoord++)
-                            thisProgram.Echo(coordinates[icoord]);
-                        //Echo("coordiantes.Length="+coordinates.Length);  
-                        if (coordinates.Length < 3)
-                        {
-                            //Echo("P:B");  
-
-                            thisProgram.Echo("Invalid Command:(" + varArgs[iArg] + ")");
-//                            gyrosOff();// shutdown(gyroList);
-                            return;
-                        }
-                        int iCoordinate = 0;
-                        string sWaypointName = "Waypoint";
-                        //  -  0   1           2        3          4       5
-                        // W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
-                        if (coordinates[0] == "GPS")
-                        {
-                            if (coordinates.Length > 4)
-                            {
-                                sWaypointName = coordinates[1];
-                                iCoordinate = 2;
-                            }
-                            else
-                            {
-                                thisProgram.Echo("Invalid Command");
-                                thisProgram.ResetMotion();
-//                                gyrosOff();
-                                return;
-                            }
-                        }
-
-                        double x, y, z;
-                        bool xOk = double.TryParse(coordinates[iCoordinate++].Trim(), out x);
-                        bool yOk = double.TryParse(coordinates[iCoordinate++].Trim(), out y);
-                        bool zOk = double.TryParse(coordinates[iCoordinate++].Trim(), out z);
-                        if (!xOk || !yOk || !zOk)
-                        {
-                            //Echo("P:C");  
-                            thisProgram.Echo("Invalid Command:(" + varArgs[iArg] + ")");
-                            //			shutdown(gyroList);
-                            continue;
-                        }
-
-                        //                    sStartupError = "CMD Initiated NAV:\n" + sArgument;
-
-                        //                    _vNavTarget = new Vector3D(x, y, z);
-                        //                    _bValidNavTarget = true;
-                        if (args[0] == "W")
-                        {
-                            _NavAddTarget(new Vector3D(x, y, z), MODE_NAVNEXTTARGET, 0, ArrivalDistanceMin, sWaypointName, _shipSpeedMax);
-                            //                        bGoOption = true;
-                        }
-                        else
-                        {
-                            _NavAddTarget(new Vector3D(x, y, z), MODE_NAVNEXTTARGET, 0, ArrivalDistanceMin, sWaypointName, _shipSpeedMax, false);
-                            //                        bGoOption = false;
-                        }
-                        //                    sStartupError += "\nW " + sWaypointName + ":" + wicoNavCommands.Count.ToString();
-                        //                   setMode(MODE_GOINGTARGET);
-
-                    }
-                    else if (args[0] == "S")
-                    { // S <mps>
-                      // TODO: Queue the command into NavCommands
-                        if (args.Length < 1)
-                        {
-                            thisProgram.Echo("Invalid Command:(" + varArgs[iArg] + ")");
-                            continue;
-                        }
-                        double x;
-                        bool xOk = double.TryParse(args[1].Trim(), out x);
-                        if (xOk)
-                        {
-                            _shipSpeedMax = x;
-                            //                        Echo("Set speed to:" + _shipSpeedMax.ToString("0.00"));
-                            //             setMode(MODE_ARRIVEDTARGET);
-                        }
-                        else
-                        {
-                            //Echo("P:C");  
-                            thisProgram.Echo("Invalid Command:(" + varArgs[iArg] + ")");
-                            continue;
-                        }
-                    }
-                    else if (args[0] == "D")
-                    { // D <meters>
-                      // TODO: Queue the command into NavCommands
-                        if (args.Length < 1)
-                        {
-                            thisProgram.Echo("Invalid Command:(" + varArgs[iArg] + ")");
-                            continue;
-                        }
-                        double x;
-                        bool xOk = double.TryParse(args[1].Trim(), out x);
-                        if (xOk)
-                        {
-                            ArrivalDistanceMin = x;
-                            //                        Echo("Set arrival distance to:" + ArrivalDistanceMin.ToString("0.00"));
-                        }
-
-                        else
-                        {
-                            thisProgram.Echo("Invalid Command:(" + varArgs[iArg] + ")");
-                            continue;
-                        }
-                    }
-                    else if (args[0] == "C")
-                    { // C <anything>
-                        if (args.Length < 1)
-                        {
-                            thisProgram.Echo("Invalid Command:(" + varArgs[iArg] + ")");
-                            continue;
-                        }
-                        else
-                        {
-                            thisProgram.Echo(varArgs[iArg]);
-                        }
-                    }
-                    else if (args[0] == "L")
-                    { // L launch
-                        bFoundNAVCommands = true;
-                        _NavQueueLaunch();
-                    }
-                    else if (args[0] == "launch")
-                    { // L launch
-                        bFoundNAVCommands = true;
-                        _NavQueueLaunch();
-                    }
-                    else if (args[0] == "OL")
-                    { // OL Orbital launch
-                        bFoundNAVCommands = true;
-                        _NavQueueOrbitalLaunch();
-                    }
-                    else if (args[0] == "orbitallaunch")
-                    { // OL Orbital launch
-                        bFoundNAVCommands = true;
-                        _NavQueueOrbitalLaunch();
-                    }
-                    else if (args[0] == "dock")
-                    { // dock
-                        bFoundNAVCommands = true;
-                        _NavQueueOrbitalLaunch();
-                    }
-                    // todo: add launch, dock, land, etc
-                    else
+                    if (myCommandLine.Argument(0) == "setmode")
                     {
-                        int iDMode;
-                        if (modeCommands.TryGetValue(args[0].ToLower(), out iDMode))
+                        int toMode = 0;
+                        bool bOK = int.TryParse(myCommandLine.Argument(1), out toMode);
+                        if (bOK)
                         {
-                            sArgResults = "mode set to " + iDMode;
-                            setMode(iDMode);
-                            // return true;
-                        }
-                        else
-                        {
-                            sArgResults = "Unknown argument:" + args[0];
+                            SetMode(toMode);
+                            WantOnce();
                         }
                     }
                 }
-                if (bFoundNAVCommands)
-                {
-                    //                sStartupError += "\nFound NAV Commands:" + wicoNavCommands.Count.ToString();
-                    _NavStart();
-                }
-                */
 
             }
 
-            public void SendToAllSubscribers(string tag, string argument)
+                public void SendToAllSubscribers(string tag, string argument)
             {
                 foreach (var submodule in _WicoMainSubscribers)
                 {
@@ -470,15 +281,16 @@ namespace IngameScript
             {
                 var tag = msg.Tag;
 
-                //            Echo("WMMH:"+tag);
-
                 var src = msg.Source;
                 if (tag == WicoMainTag)
                 {
-                    string data = (string)msg.Data;
-                    if (data == "Configure")
+                    if (msg.Data is string)
                     {
-                        thisProgram.IGC.SendUnicastMessage(src, UnicastAnnounce, "");
+                        string data = (string)msg.Data;
+                        if (data == "Configure")
+                        {
+                            thisProgram.IGC.SendUnicastMessage(src, UnicastAnnounce, "");
+                        }
                     }
                 }
             }
@@ -505,17 +317,17 @@ namespace IngameScript
                     else
                     {
                         // not in the list
-                        thisProgram.Echo("Adding new");
+//                        _program.Echo("Adding new");
                         _WicoMainSubscribers.Add(src);
                     }
-                    bIAmMain = true;
+                    bIAmMain = true; // assume we are the main module
                     foreach (var other in _WicoMainSubscribers)
                     {
                         // if somebody has a lower ID, use them instead.
                         if (other < thisProgram.Me.EntityId)
                         {
                             bIAmMain = false;
-                            thisProgram.Echo("Found somebody lower");
+//                            _program.Echo("Found somebody lower");
                         }
                     }
                 }
@@ -530,17 +342,33 @@ namespace IngameScript
                     // 0=old mode 1=old state. 2=new mode 3=new state
                     int theNewMode = Convert.ToInt32(aLines[2]);
                     int theNewState = Convert.ToInt32(aLines[3]);
+
+                    if(_iMode != theNewMode)
+                        HandleModeChange(_iMode, _iState, theNewMode, theNewState);
+
                     _iMode = theNewMode;
                     _iState = theNewState;
-
                 }
                 // TODO: add more messages as needed
             }
 
+            public void SetDebug(bool bDebug)
+            {
+                _bDebug = bDebug;
+            }
 
+            public void AnnounceState()
+            {
+                if (_bDebug)
+                {
+                    thisProgram.Echo("Me=" + thisProgram.Me.EntityId.ToString("X"));
+                    thisProgram.Echo("Subscribers=" + _WicoMainSubscribers.Count());
+                }
+                if (bIAmMain) thisProgram.Echo("MAIN. Mode=" + IMode.ToString() + " S=" + IState.ToString());
+                else thisProgram.Echo("SUB. Mode=" + IMode.ToString() + " S=" + IState.ToString());
+            }
 
         }
-        #endregion
 
     }
 }
