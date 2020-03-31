@@ -68,9 +68,35 @@ namespace IngameScript
 
             public void LocalGridChangedHandler()
             {
-                // forget what we through we knew
+                // forget what we thought we knew
+                shipdimController = null;
                 MainShipController = null;
                 shipControllers.Clear();
+            }
+
+            /// <summary>
+            /// return the ship's remote control
+            /// </summary>
+            /// <returns></returns>
+            public IMyRemoteControl GetRemoteControl()
+            {
+                foreach(var tb in shipControllers)
+                {
+                    if(tb is IMyRemoteControl && tb.IsUnderControl)
+                    {
+
+                        return tb as IMyRemoteControl;
+                    }
+                }
+                foreach (var tb in shipControllers)
+                {
+                    if (tb is IMyRemoteControl)
+                    {
+                        return tb as IMyRemoteControl;
+                    }
+                }
+
+                return null;
             }
 
             /// <summary>
@@ -97,7 +123,7 @@ namespace IngameScript
 
                     foreach (var tb in shipControllers)
                     {
-                        if (tb is IMyRemoteControl)
+                        if (tb is IMyRemoteControl && tb.CanControlShip)
                         {
                             // found a good one
                             MainShipController = tb;
@@ -109,7 +135,7 @@ namespace IngameScript
                     {
                         foreach (var tb in shipControllers)
                         {
-                            if (tb is IMyCockpit)
+                            if (tb is IMyCockpit && tb.CanControlShip)
                             {
                                 // found a good one
                                 MainShipController = tb;
@@ -122,7 +148,7 @@ namespace IngameScript
                     {
                         foreach (var tb in shipControllers)
                         {
-                            if (tb is IMyShipController)
+                            if (tb is IMyShipController && tb.CanControlShip)
                             {
                                 // found a good one
                                 MainShipController = tb;
@@ -374,8 +400,11 @@ namespace IngameScript
             public float gridsize;
             private OrientedBoundingBoxFaces _obbf;
 
+            IMyShipController shipdimController;
             void ShipDimensions(IMyShipController orientationBlock)//BoundingBox bb, double BlockMetricConversion)
             {
+                shipdimController = orientationBlock;
+
                 if (thisProgram.Me.CubeGrid.GridSizeEnum.ToString().ToLower().Contains("small"))
                     gridsize = SMALL_BLOCK_LENGTH;
                 else
@@ -394,43 +423,40 @@ namespace IngameScript
                 _length_blocks = (float)(_length / gridsize);
                 _width_blocks = (float)(_width / gridsize);
                 _height_blocks = (float)(_height / gridsize);
-
-                /*
-                                _length_blocks = bb.Size.GetDim(2) + 1;
-                                _width_blocks = bb.Size.GetDim(0) + 1;
-                                _height_blocks = bb.Size.GetDim(1) + 1;
-                                _block2metric = BlockMetricConversion;
-                                _length = Math.Round(_length_blocks * BlockMetricConversion, 2);
-                                _width = Math.Round(_width_blocks * BlockMetricConversion, 2);
-                                _height = Math.Round(_height_blocks * BlockMetricConversion, 2);
-                                */
             }
             public float LengthInBlocks()
             {
+                if (shipdimController == null) ShipDimensions(GetMainController());
                 return _length_blocks;
             }
             public double LengthInMeters()
             {
+                if (shipdimController == null) ShipDimensions(GetMainController());
                 return _length;
             }
             public float WidthInBlocks()
             {
+                if (shipdimController == null) ShipDimensions(GetMainController());
                 return _width_blocks;
             }
             public double WidthInMeters()
             {
+                if (shipdimController == null) ShipDimensions(GetMainController());
                 return _width;
             }
             public float HeightInBlocks()
             {
+                if (shipdimController == null) ShipDimensions(GetMainController());
                 return _height_blocks;
             }
             public double HeightInMeters()
             {
+                if (shipdimController == null) ShipDimensions(GetMainController());
                 return _height;
             }
             public double BlockMultiplier()
             {
+                if (shipdimController == null) ShipDimensions(GetMainController());
                 return gridsize;
             }
             #endregion
