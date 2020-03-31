@@ -46,7 +46,7 @@ namespace IngameScript
             public void ThrustersInit()
             {
                 // TODO: change to handler. pay attention to execution sequence that results. (we may need this defined before getting blocks)
-                thisProgram._CustomDataIni.Get(sThrusterSection, "CutterThruster").ToString(sCutterThruster);
+                sCutterThruster=thisProgram._CustomDataIni.Get(sThrusterSection, "CutterThruster").ToString(sCutterThruster);
                 thisProgram._CustomDataIni.Set(sThrusterSection, "CutterThruster", sCutterThruster);
 
                 // Minimal init; just add handlers
