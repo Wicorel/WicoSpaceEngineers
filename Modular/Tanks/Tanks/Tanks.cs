@@ -29,16 +29,23 @@ namespace IngameScript
 
             List<IMyTerminalBlock> isolatedoxytankList = new List<IMyTerminalBlock>();
 
-            Program thisProgram;
+            string _tanksSection = "TANKS";
+
+            Program _program;
             WicoBlockMaster wbm;
 
             public GasTanks(Program program, WicoBlockMaster wicoBlockMaster)
             {
-                thisProgram = program;
+                _program = program;
                 wbm = wicoBlockMaster;
 
                 wbm.AddLocalBlockHandler(BlockParseHandler);
                 wbm.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                tankspcthigh = _program._CustomDataIni.Get(_tanksSection, "tankspcthigh").ToInt32(tankspcthigh);
+                _program._CustomDataIni.Set(_tanksSection, "tankspcthigh", tankspcthigh);
+
+                tankspctlow = _program._CustomDataIni.Get(_tanksSection, "tankspctlow").ToInt32(tankspctlow);
+                _program._CustomDataIni.Set(_tanksSection, "tankspctlow", tankspctlow);
             }
 
             /// <summary>
@@ -78,6 +85,10 @@ namespace IngameScript
 
             //
             // Start custom functions
+
+            public int tankspcthigh = 99;
+            public int tankspctlow = 25;
+
             public double hydroPercent = -1;
             public double oxyPercent = -1;
             public void TanksCalculate()

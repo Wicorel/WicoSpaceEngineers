@@ -69,6 +69,12 @@ namespace IngameScript
 
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
+                batterypcthigh = _program._CustomDataIni.Get(sPowerSection, "batterypcthigh").ToInt32(batterypcthigh);
+                _program._CustomDataIni.Set(sPowerSection, "batterypcthigh", batterypcthigh);
+
+                batterypctlow = _program._CustomDataIni.Get(sPowerSection, "batterypctlow").ToInt32(batterypctlow);
+                _program._CustomDataIni.Set(sPowerSection, "batterypctlow", batterypctlow);
+
             }
 
             /// <summary>
@@ -117,14 +123,14 @@ namespace IngameScript
             }
             void LoadHandler(MyIni Ini)
             {
-                batterypcthigh = Ini.Get(sPowerSection, "batterypcthigh").ToInt32(batterypcthigh);
-                batterypctlow = Ini.Get(sPowerSection, "batterypctlow").ToInt32(batterypctlow);
+//                batterypcthigh = Ini.Get(sPowerSection, "batterypcthigh").ToInt32(batterypcthigh);
+//                batterypctlow = Ini.Get(sPowerSection, "batterypctlow").ToInt32(batterypctlow);
             }
 
             void SaveHandler(MyIni Ini)
             {
-                Ini.Set(sPowerSection, "batterypcthigh", batterypcthigh);
-                Ini.Set(sPowerSection, "batterypctlow", batterypctlow);
+//                Ini.Set(sPowerSection, "batterypcthigh", batterypcthigh);
+//                Ini.Set(sPowerSection, "batterypctlow", batterypctlow);
             }
 
             /// <summary>

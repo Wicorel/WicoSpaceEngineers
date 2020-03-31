@@ -52,8 +52,8 @@ namespace IngameScript
 
             public void GyrosInit()
             {
-                _program._CustomDataIni.Get(sGridSection, "CTRL_COEFF").ToDouble(CTRL_COEFF);
-                _program._CustomDataIni.Get(sGridSection, "LIMIT_GYROS").ToInt32(LIMIT_GYROS);
+                CTRL_COEFF=_program._CustomDataIni.Get(sGridSection, "CTRL_COEFF").ToDouble(CTRL_COEFF);
+                LIMIT_GYROS = _program._CustomDataIni.Get(sGridSection, "LIMIT_GYROS").ToInt32(LIMIT_GYROS);
 
                 _program._CustomDataIni.Set(sGridSection, "CTRL_COEFF", CTRL_COEFF);
                 _program._CustomDataIni.Set(sGridSection, "LIMIT_GYROS", LIMIT_GYROS);
