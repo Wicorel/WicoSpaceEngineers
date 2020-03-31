@@ -44,6 +44,8 @@ namespace IngameScript
             IMyShipController ShipControl;
             Matrix fromGridToReference;
 
+            List<long> localGrids = new List<long>();
+
             Program thisProgram;
             public Cameras(Program program)
             {
@@ -59,6 +61,8 @@ namespace IngameScript
             /// <param name="tb"></param>
             public void BlockParseHandler(IMyTerminalBlock tb)
             {
+                if (!localGrids.Contains(tb.CubeGrid.EntityId))
+                    localGrids.Add(tb.CubeGrid.EntityId);
                 if (tb is IMyCameraBlock)
                 {
                     if (tb.CustomName.Contains(sCameraViewOnly))
@@ -76,6 +80,7 @@ namespace IngameScript
                 cameraDownList.Clear();
                 cameraUpList.Clear();
                 bCamerasInit = false;
+                localGrids.Clear();
             }
 
             void CamerasInit()
@@ -180,7 +185,10 @@ namespace IngameScript
                 {
                     //		Echo("simple Scan with Camera:" + camera.CustomName);
 
-                    lastDetectedInfo = camera.Raycast(scandistance, pitch, yaw);
+                    MyDetectedEntityInfo detectedInfo= camera.Raycast(scandistance, pitch, yaw);
+                    if (localGrids.Contains(detectedInfo.EntityId))
+                        detectedInfo = new MyDetectedEntityInfo();
+                    lastDetectedInfo = detectedInfo;
                     lastCamera = camera;
 
                     //                    if (!lastDetectedInfo.IsEmpty())
