@@ -98,6 +98,7 @@ namespace IngameScript
                 // do nothing if we are already in that mode
                 if (_iMode == theNewMode)
                     return;
+//                thisProgram.ErrorLog("Set M=" + theNewMode + " S=" + theNewState+" OM="+IMode+" OS="+_iState);
 
                 // possible optimization.. make modules register for what modes they care about...
                 string sData = "";
@@ -117,6 +118,8 @@ namespace IngameScript
             public void SetState(int theNewState)
             {
                 // not synced..
+//                thisProgram.ErrorLog("Set S=" + theNewState);
+
                 _iState = theNewState;
             }
             public bool AddControlChangeHandler(Action<int, int, int, int> handler)
@@ -144,6 +147,9 @@ namespace IngameScript
                 _iState = theIni.Get("WicoControl", "State").ToInt32(_iState);
                 _iMode = theIni.Get("WicoControl", "Mode").ToInt32(_iMode);
 
+//                thisProgram.ErrorLog("MAI:M=" + _iMode.ToString() + " S=" + _iState.ToString());
+//                thisProgram.ErrorLog(thisProgram.Storage);
+
                 foreach (var handler in ModeAfterInitHandlers)
                 {
                     handler();
@@ -152,6 +158,8 @@ namespace IngameScript
 
             void SaveHandler(MyIni theIni)
             {
+//                thisProgram.ErrorLog("wicocontrol save handler");
+//                thisProgram.ErrorLog("WCSH:M=" + _iMode.ToString() + " S=" + _iState.ToString());
                 theIni.Set("WicoControl", "Mode", _iMode);
                 theIni.Set("WicoControl", "State", _iState);
             }
@@ -222,17 +230,19 @@ namespace IngameScript
             public void WicoControlInit()
             {
                 // Wico Configuration system
+                _WicoMainSubscribers.Clear();
 
                 // send a messge to all local 'Wico' PBs to get configuration.  
                 // This will be used to determine the 'master' PB and to know who to send requests to
                 thisProgram.IGC.SendBroadcastMessage(WicoMainTag, "Configure", localConstructs);
 
-                _WicoMainSubscribers.Clear();
 
                 thisProgram.wicoIGC.AddPublicHandler(WicoMainTag, WicoControlMessagehandler);
                 thisProgram.wicoIGC.AddUnicastHandler(WicoConfigUnicastListener);
 
                 thisProgram.UpdateTriggerHandlers.Add(ProcessTrigger);
+
+                // ModeAfterInit gets called by main
                 thisProgram.AddSaveHandler(SaveHandler);
 
             }
@@ -248,7 +258,7 @@ namespace IngameScript
             /// <param name="updateSource"></param>
             public void ProcessTrigger(string sArgument,MyCommandLine myCommandLine, UpdateType updateSource)
             {
-                if (myCommandLine.ArgumentCount > 1)
+                if (myCommandLine != null && myCommandLine.ArgumentCount > 1)
                 {
                     if (myCommandLine.Argument(0) == "setmode")
                     {
@@ -264,7 +274,7 @@ namespace IngameScript
 
             }
 
-                public void SendToAllSubscribers(string tag, string argument)
+            public void SendToAllSubscribers(string tag, string argument)
             {
                 foreach (var submodule in _WicoMainSubscribers)
                 {
