@@ -43,6 +43,8 @@ namespace IngameScript
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
 
+                cargopctmin = _program._CustomDataIni.Get(sCargoSection, "cargopctmin").ToInt32(cargopctmin);
+                _program._CustomDataIni.Set(sCargoSection, "cargopctmin", cargopctmin);
             }
 
             /// <summary>
@@ -81,12 +83,12 @@ namespace IngameScript
 
             void LoadHandler(MyIni Ini)
             {
-                cargopctmin = Ini.Get(sCargoSection, "cargopctmin").ToInt32(cargopctmin);
+//                cargopctmin = Ini.Get(sCargoSection, "cargopctmin").ToInt32(cargopctmin);
             }
 
             void SaveHandler(MyIni Ini)
             {
-                Ini.Set(sCargoSection, "cargopctmin", cargopctmin);
+//                Ini.Set(sCargoSection, "cargopctmin", cargopctmin);
             }
 
 
