@@ -22,7 +22,7 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
 
-        class NavRotors
+        public class NavRotors
         {
             List<IMyMotorStator> rotorNavList = new List<IMyMotorStator>();
             List<IMyMotorStator> rotorNavLeftList = new List<IMyMotorStator>();

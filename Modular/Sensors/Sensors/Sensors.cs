@@ -1,6 +1,7 @@
 ﻿using Sandbox.ModAPI.Ingame;
 using System;
 using System.Collections.Generic;
+using VRage.Game.ModAPI.Ingame;
 using VRageMath;
 
 namespace IngameScript
@@ -29,18 +30,18 @@ namespace IngameScript
 
             List<SensorInfo> sensorInfos = new List<SensorInfo>();
 
-            Program thisProgram;
+            Program _program;
             IMyShipController shipController;
-            WicoBlockMaster WicoBlockMaster;
+            WicoBlockMaster _wicoBlockMaster;
+            List<IMyCubeGrid> localGrids = new List<IMyCubeGrid>();
 
             public Sensors(Program program,WicoBlockMaster wicoBlockMaster)
             {
-                thisProgram = program;
-                WicoBlockMaster = wicoBlockMaster;
-                
-                WicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                WicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
-                thisProgram.AddPostInitHandler(PostInitHandler);
+                _program = program;
+                _wicoBlockMaster = wicoBlockMaster;
+                _wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                _program.AddPostInitHandler(PostInitHandler);
             }
 
             /// <summary>
@@ -49,6 +50,8 @@ namespace IngameScript
             /// <param name="tb"></param>
             public void BlockParseHandler(IMyTerminalBlock tb)
             {
+                if (!localGrids.Contains(tb.CubeGrid))
+                    localGrids.Add(tb.CubeGrid);
                 if (tb is IMySensorBlock)
                 {
                     // TODO: Only use sSensorUse sensors...
@@ -60,12 +63,12 @@ namespace IngameScript
                 sensorsList.Clear();
                 sensorInfos.Clear();
                 shipController = null;
-
+                localGrids.Clear();
             }
 
             void PostInitHandler()
             {
-                shipController = WicoBlockMaster.GetMainController();
+                shipController = _wicoBlockMaster.GetMainController();
             }
 
             public string SensorInit(IMyShipController orientationBlock, bool bSleep = false)

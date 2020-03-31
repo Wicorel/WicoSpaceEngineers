@@ -26,13 +26,15 @@ namespace IngameScript
             WicoControl _wicoControl;
             WicoIGC _wicoIGC;
             WicoBlockMaster _wicoBlockMaster;
+            Cameras _cameras;
 
-            public ScansMode(Program program, WicoControl wicoControl, WicoBlockMaster wicoBlockMaster, WicoIGC igc) : base(program)
+            public ScansMode(Program program, WicoControl wicoControl, WicoBlockMaster wicoBlockMaster, WicoIGC igc, Cameras cameras) : base(program)
             {
                 _program = program;
                 _wicoControl = wicoControl;
                 _wicoBlockMaster = wicoBlockMaster;
                 _wicoIGC = igc;
+                _cameras = cameras;
 
                 _program.moduleName += " Scans";
                 _program.moduleList += "\nScans V4";
@@ -59,28 +61,32 @@ namespace IngameScript
         void LoadHandler(MyIni Ini)
         {
 
-            //dtNavStartShip = DateTime.FromBinary(Ini.Get(sNavSection, "dStartShip").ToInt64());
-        }
+                //dtNavStartShip = DateTime.FromBinary(Ini.Get(sNavSection, "dStartShip").ToInt64());
+//                iNIHolder.GetValue(sScansSection, "DoneMode", ref ScansDoneMode, true);
+//                iNIHolder.GetValue(sScansSection, "DoneState", ref ScansDoneState, true);
+            }
 
-        void SaveHandler(MyIni Ini)
+            void SaveHandler(MyIni Ini)
         {
-            
-//            Ini.Set(sNavSection, "dStartShip", dtNavStartShip.ToBinary());
-        }
-        /// <summary>
-        /// Modes have changed and we are being called as a handler
-        /// </summary>
-        /// <param name="fromMode"></param>
-        /// <param name="fromState"></param>
-        /// <param name="toMode"></param>
-        /// <param name="toState"></param>
-        public void ModeChangeHandler(int fromMode, int fromState, int toMode, int toState)
+//                iNIHolder.SetValue(sScansSection, "DoneMode", ScansDoneMode);
+//                iNIHolder.SetValue(sScansSection, "DoneState", ScansDoneState);
+
+                //            Ini.Set(sNavSection, "dStartShip", dtNavStartShip.ToBinary());
+            }
+            /// <summary>
+            /// Modes have changed and we are being called as a handler
+            /// </summary>
+            /// <param name="fromMode"></param>
+            /// <param name="fromState"></param>
+            /// <param name="toMode"></param>
+            /// <param name="toState"></param>
+            public void ModeChangeHandler(int fromMode, int fromState, int toMode, int toState)
         {
   //          if (fromMode == WicoControl.MODE_GOINGTARGET)
             {
             }
             // need to check if this is us
-            if (toMode == WicoControl.MODE_SCANS
+            if (toMode == WicoControl.MODE_DOSCANS
 //                || toMode == WicoControl.MODE_STARTNAV
                 )
             {
@@ -95,7 +101,7 @@ namespace IngameScript
             int iMode = _wicoControl.IMode;
             int iState = _wicoControl.IState;
 
-            if (iMode == WicoControl.MODE_SCANS)
+            if (iMode == WicoControl.MODE_DOSCANS)
             {
                 // TODO: Check state and re-init as needed
                 _wicoControl.WantFast();
@@ -121,7 +127,7 @@ namespace IngameScript
             int iState = _wicoControl.IState;
 
             // need to check if this is us
-            if (iMode == WicoControl.MODE_SCANS)  { doModeScans(); }
+            if (iMode == WicoControl.MODE_DOSCANS)  { doModeScans(); }
         }
 
         void BroadcastHandler(MyIGCMessage msg)
@@ -134,23 +140,6 @@ namespace IngameScript
             int ScansDoneState = 0;
 
             string sScansSection = "SCANS";
-            void ScansInitCustomData(INIHolder iNIHolder)
-            {
-                //           iNIHolder.GetValue(sScansSection, "CameraViewOnly", ref sCameraViewOnly, true);
-            }
-            void ScansSerialize(INIHolder iNIHolder)
-            {
-                //            iNIHolder.SetValue(sNavSection, "vNavHome", vNavHome);
-                //            iNIHolder.SetValue(sNavSection, "ValidNavHome", bValidNavHome);
-                iNIHolder.SetValue(sScansSection, "DoneMode", ScansDoneMode);
-                iNIHolder.SetValue(sScansSection, "DoneState", ScansDoneState);
-
-            }
-            void ScansDeserialize(INIHolder iNIHolder)
-            {
-                iNIHolder.GetValue(sScansSection, "DoneMode", ref ScansDoneMode, true);
-                iNIHolder.GetValue(sScansSection, "DoneState", ref ScansDoneState, true);
-            }
 
             // TODO: Flags for other options (TBD)
             // TODO: scan range
@@ -177,40 +166,42 @@ namespace IngameScript
 
             void doModeScans()
             {
-                StatusLog("clear", textPanelReport);
-                StatusLog(moduleName + ":SCAN!", textPanelReport);
-                Echo("Scan:current_state=" + current_state.ToString());
+                int iMode = _wicoControl.IMode;
+                int iState = _wicoControl.IState;
+//                StatusLog("clear", textPanelReport);
+//                StatusLog(moduleName + ":SCAN!", textPanelReport);
+                _program.Echo("Scan:iState=" + iState.ToString());
 
-                switch (current_state)
+                switch (iState)
                 {
                     case 0:
                         { // init camera scan for asteroids/objects
-                            ResetMotion();
+                            _program.ResetMotion();
                             scanElapsedMs = 0;
 
                             // initialize cameras
-                            scanfrontScanner = new QuadrantCameraScanner(this, cameraForwardList, 5000);
-                            scanbackScanner = new QuadrantCameraScanner(this, cameraBackwardList, 5000);
-                            scanleftScanner = new QuadrantCameraScanner(this, cameraLeftList, 5000);
-                            scanrightScanner = new QuadrantCameraScanner(this, cameraRightList, 5000);
-                            scantopScanner = new QuadrantCameraScanner(this, cameraUpList, 5000);
-                            scanbottomScanner = new QuadrantCameraScanner(this, cameraDownList, 5000);
+                            scanfrontScanner = new QuadrantCameraScanner(_program,_cameras.GetForwardCameras(), 5000);
+                            scanbackScanner = new QuadrantCameraScanner(_program, _cameras.GetBackwardCameras(), 5000);
+                            scanleftScanner = new QuadrantCameraScanner(_program, _cameras.GetLeftCameras(), 5000);
+                            scanrightScanner = new QuadrantCameraScanner(_program, _cameras.GetRightCameras(), 5000);
+                            scantopScanner = new QuadrantCameraScanner(_program, _cameras.GetUpCameras(), 5000);
+                            scanbottomScanner = new QuadrantCameraScanner(_program, _cameras.GetDownwardCameras(), 5000);
 
-                            current_state = 410;
-                            bWantFast = true;
+                            _wicoControl.SetState(410);// iState = 410;
+                            _wicoControl.WantFast();
                             break;
                         }
                     case 410:
                         {
-                            StatusLog("Long Range Scan", textPanelReport);
+//                            StatusLog("Long Range Scan", textPanelReport);
                             if (scanfrontScanner == null) // in case we reload/compile in this state..
                             {
-                                bWantFast = true;
-                                current_state = 0;
+                                _wicoControl.WantFast();
+                                iState = 0;
                                 return;
                             }
-                            bWantMedium = true;
-                            scanElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
+                            _wicoControl.WantMedium();
+                            scanElapsedMs += _program.Runtime.TimeSinceLastRun.TotalMilliseconds;
                             // use for timeout...
 
                             // do camera scans
@@ -311,8 +302,8 @@ namespace IngameScript
                                 s += "No Known Asteroid";
                             else s += "FOUND at least one asteroid!";
 
-                            StatusLog(s, textPanelReport);
-                            Echo(s);
+//                            StatusLog(s, textPanelReport);
+                            _program.Echo(s);
 
                             if (
                                 scanfrontScanner.DoneScanning() &&
@@ -323,11 +314,10 @@ namespace IngameScript
                                 scanbottomScanner.DoneScanning()
                                 )
                             {
-                                setMode(ScansDoneMode);
-                                current_state = ScansDoneState;
-
+                                _wicoControl.SetMode(ScansDoneMode, ScansDoneState);
+ 
                                 // reset to default for possible next run
-                                ScansDoneMode = MODE_SCANCOMPLETED;
+                                ScansDoneMode = WicoControl.MODE_NAVNEXTTARGET;
                                 ScansDoneState = 0;
                             }
                             break;

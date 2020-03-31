@@ -159,7 +159,7 @@ namespace IngameScript
             void BroadcastHandler(MyIGCMessage msg)
             {
                 // NOTE: called on ALL received messages; not just 'our' tag
-                if(msg.Tag=="BASE?")//if (_BASE_IGCChannel.HasPendingMessage)
+                if(msg.Tag=="BASE?")
                 {
                     _program.Echo("Base Request");
                     string sMessage = (string)msg.Data;
@@ -169,7 +169,7 @@ namespace IngameScript
                     pOK = long.TryParse(aMessage[0], out incomingID);
                     doBaseAnnounce(true);
                 }
-                if(msg.Tag=="CON?")//if (_CON_IGCChannel.HasPendingMessage)
+                if(msg.Tag=="CON?")
                 {
                     _program.Echo("Connector Approach Request!");
                     string sMessage = (string)msg.Data;
@@ -216,11 +216,10 @@ namespace IngameScript
                         _program.Echo("Sending Dock Fail");
                         // docking request failed
                         // need to have 'target' for message based on request message.
-                        //                           _program.IGC.SendBroadcastMessage("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
                         _program.IGC.SendBroadcastMessage("CONF", incomingID + ":" + _program.Me.CubeGrid.CustomName + ":" + _program.Me.EntityId.ToString() + ":" + _program.Vector3DToString(_program.Me.GetPosition()));
                     }
                 }
-                if(msg.Tag=="COND?") //if (_COND_IGCChannel.HasPendingMessage)
+                if(msg.Tag=="COND?") 
                 {
                     _program.Echo("Connector Dock Request!");
                     string sMessage = (string)msg.Data;
@@ -236,8 +235,6 @@ namespace IngameScript
                         // not our message.  Not Jenny's boat
                         return;
                     }
-
-                    //                sReceivedMessage = ""; // we processed it.
 
                     string sType = aMessage[iOffset++];
                     double height = -1;
@@ -264,7 +261,6 @@ namespace IngameScript
                     else
                     {
                         // docking request failed
-                        //                            _program.IGC.SendBroadcastMessage("WICO:CONF:" + incomingID + ":" + Me.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(antennaPosition()));
                         _program.IGC.SendBroadcastMessage("CONF", incomingID + ":" + _program.Me.CubeGrid.CustomName + ":" + _program.Me.EntityId.ToString() + ":" + _program.Vector3DToString(_program.Me.GetPosition()));
                     }
                 }
@@ -429,19 +425,18 @@ namespace IngameScript
                 if (bApproach)
                 {
                     Vector3D vApproach = vPosition + vVec * 30;
-                    //                _program.IGC.SendBroadcastMessage("WICO:CONA:" + incomingID + ":" + connector.EntityId + ":" + Vector3DToString(vApproach));
+//                    _program.ErrorLog("Sending CONA:" + _program.Vector3DToString(vApproach));
                     _program.IGC.SendBroadcastMessage("CONA", incomingID + ":" + connector.EntityId + ":" + _program.Vector3DToString(vApproach));
                 }
                 else
                 {
                     if (dockingInfo[iDock].lAlign < 0)
                     {
-                        //                    _program.IGC.SendBroadcastMessage("WICO:COND:" + incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName) + ":" + Vector3DToString(vPosition) + ":" + Vector3DToString(vVec));
                         _program.IGC.SendBroadcastMessage("COND", incomingID + ":" + connector.EntityId + ":" + _program.toGpsName("", connector.CustomName) + ":" + _program.Vector3DToString(vPosition) + ":" + _program.Vector3DToString(vVec));
+//                        _program.ErrorLog("Sending COND:" + _program.Vector3DToString(vPosition) + " vec=" + _program.Vector3DToString(vVec));
                     }
                     else
                     {
-                        //                    _program.IGC.SendBroadcastMessage("WICO:ACOND:" + incomingID + ":" + connector.EntityId + ":" + gpsName("", connector.CustomName)
                         _program.IGC.SendBroadcastMessage("ACOND", incomingID + ":" + connector.EntityId + ":" + _program.toGpsName("", connector.CustomName)
                         + ":" + _program.Vector3DToString(vPosition) + ":" + _program.Vector3DToString(vVec) + ":" + _program.Vector3DToString(vAlign));
                     }

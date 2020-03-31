@@ -22,7 +22,7 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
 
-        class Wheels
+        public class Wheels
         {
             List<IMyTerminalBlock> wheelList = new List<IMyTerminalBlock>();
 
