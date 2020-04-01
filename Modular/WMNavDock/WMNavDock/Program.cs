@@ -45,7 +45,7 @@ namespace IngameScript
         Timers wicoTimers;
         WicoBases wicoBases;
         //       NavRemote navRemote;
-        NavCommon navCommon;
+//        NavCommon navCommon;
         CargoCheck _cargoCheck;
 
         TravelMovement wicoTravelMovement;
@@ -89,7 +89,7 @@ namespace IngameScript
 //            navCommon = new NavCommon(this);
             _cargoCheck = new CargoCheck(this, wicoBlockMaster);
 
-            wicoNavigation = new Navigation(this, _wicoControl, wicoBlockMaster, wicoIGC);
+            wicoNavigation = new Navigation(this, _wicoControl, wicoBlockMaster, wicoIGC, wicoTravelMovement, wicoGyros, wicoWheels, wicoNavRotors);
 
             spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster, wicoThrusters, wicoConnectors,
                 wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, wicoTimers, wicoIGC, wicoBases, wicoNavigation, _cargoCheck);
