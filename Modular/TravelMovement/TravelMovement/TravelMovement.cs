@@ -34,7 +34,7 @@ namespace IngameScript
 
             // below are private
             IMyShipController tmShipController = null;
-            double tmMaxSpeed = 85; // calculated max speed.
+            double tmMaxSpeed = 100; // calculated max speed.
 
             List<IMyTerminalBlock> thrustTmBackwardList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> thrustTmForwardList = new List<IMyTerminalBlock>();
@@ -90,13 +90,13 @@ namespace IngameScript
                 _program = program;
                 _wicoControl = wicoControl;
 
-                _program._CustomDataIni.Get(sSection, "Debug").ToBoolean(dTMDebug);
+                dTMDebug = _program._CustomDataIni.Get(sSection, "Debug").ToBoolean(dTMDebug);
                 _program._CustomDataIni.Set(sSection, "Debug", dTMDebug);
 
-                _program._CustomDataIni.Get(sSection, "UseCameraCollision").ToBoolean(dTMUseCameraCollision);
+                dTMUseCameraCollision = _program._CustomDataIni.Get(sSection, "UseCameraCollision").ToBoolean(dTMUseCameraCollision);
                 _program._CustomDataIni.Set(sSection, "UseCameraCollision", dTMUseCameraCollision);
 
-                _program._CustomDataIni.Get(sSection, "UseSensorCollision").ToBoolean(dTMUseSensorCollision);
+                dTMUseSensorCollision=_program._CustomDataIni.Get(sSection, "UseSensorCollision").ToBoolean(dTMUseSensorCollision);
                 _program._CustomDataIni.Set(sSection, "UseSensorCollision", dTMUseSensorCollision);
 
                 //                _program.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
@@ -135,7 +135,7 @@ namespace IngameScript
             /// <param name="maxSpeed"></param>
             /// <param name="myShipController"></param>
             /// <param name="iThrustType"></param>
-            void InitDoTravelMovement(Vector3D vTargetLocation, double maxSpeed, IMyTerminalBlock myShipController, int iThrustType = WicoThrusters.thrustAll)
+            public void InitDoTravelMovement(Vector3D vTargetLocation, double maxSpeed, IMyTerminalBlock myShipController, int iThrustType = WicoThrusters.thrustAll)
             {
                 tmMaxSpeed = maxSpeed;
                 if (tmMaxSpeed > _wicoControl.fMaxWorldMps)
@@ -195,10 +195,12 @@ namespace IngameScript
                     tmSB.DetectStations = true;
                     tmSB.DetectPlayers = false; // run them over!
                     tmMaxSensorM = tmSB.GetMaximum<float>("Front");
+//                    _program.ErrorLog("Found Sensors");
                     if (!_program.wicoCameras.HasForwardCameras())//  cameraForwardList.Count < 1)
                     {
                         // sensors, but no cameras.
                         //                        if (!AllowBlindNav)
+//                        _program.ErrorLog(" but no cameras");
                         tmMaxSpeed = tmMaxSensorM / 2;
                         //                        if (dTMUseCameraCollision) sStartupError += "\nNo Cameras for collision detection";
                     }
@@ -208,10 +210,12 @@ namespace IngameScript
                     // no sensors...
                     tmSB = null;
                     tmMaxSensorM = 0;
+//                    _program.ErrorLog("Found NO Sensors");
                     if (!_program.wicoCameras.HasForwardCameras())//  cameraForwardList.Count < 1)
                     {
                         //                        if (dTMUseCameraCollision || dTMUseSensorCollision) sStartupError += "\nNo Sensor nor cameras\n for collision detection";
                         //                        if (!AllowBlindNav)
+//                        _program.ErrorLog(" and NO Cameras");
                         tmMaxSpeed = 5;
                     }
                     else
@@ -230,7 +234,7 @@ namespace IngameScript
                 if (optimalV < tmMaxSpeed)
                     tmMaxSpeed = optimalV;
 
-                //                if (dTMDebug) sInitResults += "\nDistance=" + niceDoubleMeters(distance) + " OptimalV=" + niceDoubleMeters(optimalV);
+                if (dTMDebug) _program.ErrorLog("\nDistance=" + _program.niceDoubleMeters(distance) + " OptimalV=" + _program.niceDoubleMeters(optimalV));
 
                 dtmFarSpeed = tmMaxSpeed;
                 dtmApproachSpeed = tmMaxSpeed * 0.50;
@@ -254,8 +258,8 @@ namespace IngameScript
                     dtmFar = _program.wicoThrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmFarSpeed, 0); // calculate maximum stopping distance at full speed                }
 
                 }
-                //                if (dTMDebug) sInitResults += "\nFarSpeed==" + niceDoubleMeters(dtmFarSpeed) + " ASpeed=" + niceDoubleMeters(dtmApproachSpeed);
-                //                if (dTMDebug) sInitResults += "\nFar==" + niceDoubleMeters(dtmFar) + " A=" + niceDoubleMeters(dtmApproach) + " P=" + niceDoubleMeters(dtmPrecision);
+                if (dTMDebug) _program.ErrorLog("FarSpeed==" + _program.niceDoubleMeters(dtmFarSpeed) + " ASpeed=" + _program.niceDoubleMeters(dtmApproachSpeed));
+                if (dTMDebug) _program.ErrorLog("Far ==" + _program.niceDoubleMeters(dtmFar) + " A=" + _program.niceDoubleMeters(dtmApproach) + " P=" + _program.niceDoubleMeters(dtmPrecision));
                 bCollisionWasSensor = false;
                 tmCameraElapsedMs = -1; // no delay for next check  
                 tmScanElapsedMs = 0;// do delay until check 
@@ -283,6 +287,7 @@ namespace IngameScript
                     tmShipController.Orientation.GetMatrix(out or1);
                     vBestThrustOrientation = or1.Forward;
                 }
+                if(dTMDebug) _program.ErrorLog(" TM Init: max=" + tmMaxSpeed.ToString("0") + ":far=" + dtmFar.ToString("0"));
             }
 
             /// <summary>
@@ -293,7 +298,8 @@ namespace IngameScript
             /// <param name="arrivalState">state to use when 'arrived'</param>
             /// <param name="colDetectState">state to use when 'collision'</param>
             /// <param name="bAsteroidTarget">if True, target location is in/near an asteroid.  don't collision detect with it</param>
-            public void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState, bool bAsteroidTarget = false)
+            public void doTravelMovement(Vector3D vTargetLocation, float arrivalDistance, int arrivalState, int colDetectState, 
+                double maxSpeed, int iThrustType = WicoThrusters.thrustAll, bool bAsteroidTarget = false)
             {
                 bool bArrived = false;
                 if (dTMDebug)
@@ -307,7 +313,7 @@ namespace IngameScript
                 if (tmShipController == null)
                 {
                     // first (for THIS target) time init
-                    InitDoTravelMovement(vTargetLocation, _wicoControl.fMaxWorldMps, _program.wicoBlockMaster.GetMainController());
+                    InitDoTravelMovement(vTargetLocation, maxSpeed, _program.wicoBlockMaster.GetMainController(), iThrustType);
                 }
                 Vector3D vg= tmShipController.GetNaturalGravity();
                 double dGravity = vg.Length();
@@ -799,28 +805,44 @@ namespace IngameScript
             /// <returns>optimal max speed (may be game max speed)</returns>
             public double CalculateOptimalSpeed(List<IMyTerminalBlock> thrustList, double distance)
             {
+                if(thrustList==null)
+                {
+                    _program.ErrorLog("COS: NULL list");
+                    return 0;
+                }
                 //
                 //            Echo("#thrusters=" + thrustList.Count.ToString());
                 if (thrustList.Count < 1) return _wicoControl.fMaxWorldMps;
 
+                IMyShipController myShip = tmShipController;
+                if (myShip == null) myShip = _program.wicoBlockMaster.GetMainController();
+
                 MyShipMass myMass;
-                myMass = tmShipController.CalculateShipMass();
+                myMass = myShip.CalculateShipMass();
                 double maxThrust = _program.wicoThrusters.calculateMaxThrust(thrustList);
                 double maxDeltaV = maxThrust / myMass.PhysicalMass;
                 // Magic..
                 double optimalV, secondstozero, stoppingM;
-                optimalV = ((distance * .75) / 2) / (maxDeltaV); // determined by experimentation and black magic
-                                                                 //            Echo("COS");
+
+                if (dTMDebug) _program.ErrorLog("distance="+distance.ToString("N1")+ " MaxdeltaV="+maxDeltaV.ToString("F1"));
+
+                //                optimalV = ((distance * .75) / 2) / (maxDeltaV); // determined by experimentation and black magic
+                //            Echo("COS");
+                optimalV = tmMaxSpeed;
+                if (dTMDebug) _program.ErrorLog("initial optimalV=" + _program.niceDoubleMeters(optimalV));
+
                 do
                 {
                     //                Echo("COS:DO");
                     secondstozero = optimalV / maxDeltaV;
                     stoppingM = optimalV / 2 * secondstozero;
+                    if (dTMDebug) _program.ErrorLog("stopm=" + stoppingM.ToString("F1") + " distance=" + distance.ToString("N1"));
                     if (stoppingM > distance)
                     {
                         optimalV *= 0.85;
                     }
-                    //                Echo("stoppingM=" + stoppingM.ToString("F1") + " distance=" + distance.ToString("N1"));
+                    if (dTMDebug) _program.ErrorLog("looping optimalV=" + _program.niceDoubleMeters(optimalV));
+
                 }
                 while (stoppingM > distance);
                 //            Echo("COS:X");
