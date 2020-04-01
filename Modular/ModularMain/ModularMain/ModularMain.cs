@@ -95,9 +95,11 @@ namespace IngameScript
             _SaveIni.Get(OurName+sVersion,"MEENITYID").TryGetInt64(out meentityid);
             if (meentityid != Me.EntityId)
             { // what's in storage was not created by this blueprint; clear it out.
+                ErrorLog("New instance:Resetting Storage");
                 Storage = "";
                 _SaveIni.Clear();
             }
+            _SaveIni.Set(OurName + sVersion, "MEENITYID", Me.EntityId);
 
             wicoIGC = new WicoIGC(this, false); // Must be first as some use it in constructor
             wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
@@ -207,7 +209,7 @@ namespace IngameScript
             }
         }
 
-
+        bool bCustomDataNeedsSave = false;
         public void Main(string argument, UpdateType updateSource)
         {
             //            _wicoControl.ResetUpdates();
@@ -268,12 +270,21 @@ namespace IngameScript
                     useCommandLine = myCommandLine;
                 }
                 bool bProcessed = false;
-                if(myCommandLine.ArgumentCount>1)
+
+//                if(myCommandLine.ArgumentCount>1)
                 {
+                    if (argument == "save")
+//                        if (myCommandLine.Argument(0) == "save")
+                    {
+                        Save();
+                        ErrorLog("After Save storage=");
+                        ErrorLog(Storage);
+                        bProcessed = true;
+                    }
+
                 }
                 if (!bProcessed)
                 {
-                    Echo("Calling all trigger handlers ("+UpdateTriggerHandlers.Count.ToString()+")");
                     foreach (var handler in UpdateTriggerHandlers)
                     {
                         handler(argument, useCommandLine, updateSource);
@@ -284,7 +295,7 @@ namespace IngameScript
             if ((updateSource & (utUpdates)) > 0)
             {
                 _wicoControl.ResetUpdates();
-//                Echo("Update");
+                Echo("Update");
                 foreach (var handler in UpdateUpdateHandlers)
                 {
                     handler(updateSource);
@@ -295,13 +306,20 @@ namespace IngameScript
 //            Echo("Mode=" + _wicoControl.IMode.ToString() + " State=" + _wicoControl.IState.ToString());
 
             if(sMasterReporting!="") Echo("Reporting:\n"+sMasterReporting);
-            if (sMasterReporting.Length > 1024)
+            if (sMasterReporting.Length > 1024*2)
             {
                 sMasterReporting = "";
             }
+//            Echo("Length=" + wicoBlockMaster.LengthInMeters().ToString());
 
             ModulePostMain();
             wicoElapsedTime.CheckTimers();
+            if (bCustomDataNeedsSave)
+            {
+                bCustomDataNeedsSave = false;
+                Me.CustomData = _CustomDataIni.ToString();
+            }
+
             Runtime.UpdateFrequency = _wicoControl.GenerateUpdate();
 
 //            Echo("UF=" + Runtime.UpdateFrequency.ToString());
@@ -334,6 +352,14 @@ namespace IngameScript
         void WicoInitReset()
         {
             bInitDone = false;
+        }
+
+        /// <summary>
+        /// Set flag so customdata will be saved at end of this run
+        /// </summary>
+        void CustomDataChanged()
+        {
+            bCustomDataNeedsSave = true;
         }
 
         // UTILITY ROUTINES
