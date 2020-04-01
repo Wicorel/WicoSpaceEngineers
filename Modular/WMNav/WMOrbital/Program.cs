@@ -71,13 +71,13 @@ namespace IngameScript
             wicoSensors = new Sensors(this, wicoBlockMaster);
             wicoWheels = new Wheels(this);
 
-            wicoNavigation = new Navigation(this,_wicoControl,wicoBlockMaster, wicoIGC);
+            wicoNavigation = new Navigation(this,_wicoControl,wicoBlockMaster, wicoIGC, wicoTravelMovement,wicoGyros,wicoWheels,wicoNavRotors);
 
             _wicoControl.WantSlow(); // get updates so we can check for things like navigation commands in oldschool format
 
             /// DEBUG
-            wicoIGC.SetDebug(true);
-            _wicoControl.SetDebug(true);
+//            wicoIGC.SetDebug(true);
+//            _wicoControl.SetDebug(true);
 
         }
         public void ModulePreMain(string argument, UpdateType updateSource)
@@ -88,6 +88,7 @@ namespace IngameScript
 
         public void ModulePostMain()
         {
+            _wicoControl.WantSlow(); // get updates so we can check for things like navigation commands in oldschool format
         }
 
         public void ModulePostInit()
