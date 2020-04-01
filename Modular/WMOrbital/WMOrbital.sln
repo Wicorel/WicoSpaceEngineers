@@ -47,6 +47,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "HydrogenEngines", "..\Hydro
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Power", "..\Power\Power\Power.shproj", "{11D02C04-292A-4E4D-B6A7-4175FB98A163}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ElapsedTime", "..\ElapsedTime\ElapsedTime\ElapsedTime.shproj", "{69F6E441-D885-42B3-8A7F-E224CC869DA3}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\Power\Power\Power.projitems*{11d02c04-292a-4e4d-b6a7-4175fb98a163}*SharedItemsImports = 13
@@ -62,6 +64,7 @@ Global
 		..\Connectors\Connectors\Connectors.projitems*{5d612757-2295-45b9-bf2f-f056f3343151}*SharedItemsImports = 13
 		..\WicoThrust\WicoThrust\WicoThrust.projitems*{61eba249-19f3-48b6-a25b-a4cee90168ba}*SharedItemsImports = 13
 		..\BlockMaster\BlockMaster\BlockMaster.projitems*{6242f17f-6f6a-4721-8475-03a861445dec}*SharedItemsImports = 13
+		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{69f6e441-d885-42b3-8a7f-e224cc869da3}*SharedItemsImports = 13
 		..\HydrogenEngines\HydrogenEngines\HydrogenEngines.projitems*{76c7e306-96e2-4766-8fea-29261ab8f94b}*SharedItemsImports = 13
 		..\Navigation\Navigation\Navigation.projitems*{88e62142-15b2-40d2-944b-9fd1b0e42ef5}*SharedItemsImports = 13
 		..\NAVRotors\NAVRotors\NAVRotors.projitems*{8f6cbb54-6529-43a9-8641-32af99460465}*SharedItemsImports = 13
@@ -73,6 +76,7 @@ Global
 		..\BlockMaster\BlockMaster\BlockMaster.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Cameras\Cameras\Cameras.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Connectors\Connectors\Connectors.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\GasGens\GasGens\GasGens.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Gyros\Gyros\Gyros.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\HydrogenEngines\HydrogenEngines\HydrogenEngines.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4

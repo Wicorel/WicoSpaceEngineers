@@ -62,10 +62,19 @@ namespace IngameScript
             wicoEngines = new HydrogenEngines(this);
             wicoPower = new PowerProduction(this,wicoBlockMaster);
 
-            wicoOrbitalLaunch = new OrbitalModes(this);
+            wicoOrbitalLaunch = new OrbitalModes(this, _wicoControl);
             //            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
 
         }
+        //        WicoUpdateModesShared _wicoControl;
+        WicoControl _wicoControl;
+
+        void ModuleControlInit()
+        {
+            //            _wicoControl = new WicoUpdateModesShared(this);
+            _wicoControl = new WicoControl(this);
+        }
+
         public void ModulePreMain(string argument, UpdateType updateSource)
         {
             Echo("Commands:");
@@ -103,7 +112,7 @@ namespace IngameScript
                     Echo(" Tanks Filled=" + (tanksfill * 100).ToString() + "%");
                 }
                 // ensure we run at least at slow speed for updates.
-                wicoControl.WantSlow(); 
+                _wicoControl.WantSlow(); 
             }
         }
 
