@@ -22,10 +22,38 @@ namespace IngameScript
         public class ScanBase
         {
             readonly Program _program;
-            public ScanBase(Program program)
+            readonly WicoControl _wicoControl;
+
+            int ScansDoneMode = WicoControl.MODE_NAVNEXTTARGET;
+            int ScansDoneState = 0;
+
+            string sScansSection = "SCANS";
+            public ScanBase(Program program,WicoControl wicoControl)
             {
                 _program = program;
+                _wicoControl = wicoControl;
+                _program.AddLoadHandler(LoadHandler);
+                _program.AddSaveHandler(SaveHandler);
             }
+
+            void LoadHandler(MyIni Ini)
+            {
+                ScansDoneMode = Ini.Get(sScansSection, "ScansDoneMode").ToInt32(ScansDoneMode);
+                ScansDoneState = Ini.Get(sScansSection, "ScansDoneState").ToInt32(ScansDoneState);
+            }
+
+            void SaveHandler(MyIni Ini)
+            {
+                Ini.Set(sScansSection, "ScansDoneMode", ScansDoneMode);
+                Ini.Set(sScansSection, "ScansDoneState", ScansDoneState);
+            }
+
+
+            // Module code:
+
+            readonly string sScansTag = "WICOSCANS";
+            readonly string sStartCommand = "START";
+
             // TODO: Flags for other options (TBD)
             // TODO: scan range
             // TODO: stop on first hit (by type?)
@@ -34,14 +62,10 @@ namespace IngameScript
             {
                 // scans are not in this module with base.
                 // send IGC message to local construct to do scans.
-
-                // TODO: Implementation: see navcommon
-                /*
                 ScansDoneMode = doneMode;
                 ScansDoneState = doneState;
-                current_state = 0;
-                setMode(MODE_DOSCAN);
-                */
+                string sCommand = sStartCommand+":" + ScansDoneMode.ToString() + ":" + ScansDoneState.ToString();
+                _wicoControl.SendToAllSubscribers(sScansTag, sCommand);
             }
 
         }
