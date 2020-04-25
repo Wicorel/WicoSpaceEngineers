@@ -26,27 +26,32 @@ namespace IngameScript
 
         public class WicoBlockMaster //really "ship" master
         {
-            Program thisProgram;
+            Program _program;
             IMyGridTerminalSystem GridTerminalSystem;
 
             public WicoBlockMaster(Program program)
             {
-                thisProgram = program;
-                GridTerminalSystem = thisProgram.GridTerminalSystem;
+                _program = program;
+
+                GridTerminalSystem = _program.GridTerminalSystem;
 
                 AddLocalBlockHandler(BlockParseHandler);
                 AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
-                thisProgram.AddLoadHandler(LoadHandler);
-                thisProgram.AddSaveHandler(SaveHandler);
+                _program.AddLoadHandler(LoadHandler);
+                _program.AddSaveHandler(SaveHandler);
+
+//                _program.AddPostInitHandler(PostInitHandler());
+                _program.AddPostInitHandler(LocalBlocksInit());
+
+                DesiredMinTravelElevation = (float)_program._CustomDataIni.Get("Ship", "MinTravelElevation").ToDouble(DesiredMinTravelElevation);
+                _program._CustomDataIni.Set("Ship", "MinTravelElevation", DesiredMinTravelElevation);
             }
             void LoadHandler(MyIni theINI)
             {
-                DesiredMinTravelElevation = (float)theINI.Get("Ship", "MinTravelElevation").ToDouble(DesiredMinTravelElevation);
             }
             void SaveHandler(MyIni theINI)
             {
-                theINI.Set("Ship", "MinTravelElevation", DesiredMinTravelElevation);
             }
             #region SHIPCONTROLLER
             List<IMyShipController> shipControllers = new List<IMyShipController>();
@@ -62,7 +67,7 @@ namespace IngameScript
                     // TODO: Check for other things for ignoring
                     // like toilets, etc.
                     shipControllers.Add(tb as IMyShipController);
-                    thisProgram.Echo("Found shipController:" + tb.CustomName);
+//                    _program.Echo("WBM:BPH:Found shipController:" + tb.CustomName);
                 }
             }
 
@@ -72,6 +77,19 @@ namespace IngameScript
                 shipdimController = null;
                 MainShipController = null;
                 shipControllers.Clear();
+            }
+            //
+
+
+            /// <summary>
+            /// Checks if the specified block has been closed/deleted from the construct
+            /// </summary>
+            /// <param name="block">The block to check</param>
+            /// <returns></returns>
+            public bool IsClosed(IMyTerminalBlock block)
+            {
+                if (block == null || block.WorldMatrix == MatrixD.Identity) return true;
+                return !(GridTerminalSystem.GetBlockWithId(block.EntityId) == block);
             }
 
             /// <summary>
@@ -105,11 +123,12 @@ namespace IngameScript
             /// <returns></returns>
             public IMyShipController GetMainController()
             {
-                //                _program.Echo(shipControllers.Count.ToString() + " Ship Controllers");
+//                _program.Echo("GetMainController()");
+//                _program.Echo(shipControllers.Count.ToString() + " Ship Controllers");
                 //  check for occupied, etc.
                 foreach (var tb in shipControllers)
                 {
-                    if (tb.IsUnderControl)
+                    if (tb.IsUnderControl && tb.CanControlShip)
                     {
                         // found a good one
                         MainShipController = tb;
@@ -163,7 +182,7 @@ namespace IngameScript
                     }
                     else
                     {
-                        thisProgram.Echo("No ship controller found");
+                        _program.Echo("GetMainController:No ship controller found");
 //                        _program.ErrorLog("No Ship Controller Found");
                     }
                 }
@@ -254,21 +273,42 @@ namespace IngameScript
             /// <summary>
             /// Call to initialize the local blocks and all subscribers
             /// </summary>
-            public void LocalBlocksInit()
+            public IEnumerator<bool> LocalBlocksInit()
             {
+                yield return true;
+                float fper = 0;
+
                 //TODO: Load defaults from CustomData
-
                 gtsLocalBlocks.Clear();
-                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, (x1 => x1.IsSameConstructAs(thisProgram.Me)));
-                localBlocksCount = gtsLocalBlocks.Count;
+                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, (x1 => x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
+                fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
+                if (fper > 0.75f) yield return true;
 
+                localBlocksCount = gtsLocalBlocks.Count;
+//                _program.EchoInstructions("WBM:LBI: #Handlers=" + WicoLocalBlockParseHandlers.Count);
                 foreach (var tb in gtsLocalBlocks)
                 {
+                    fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
+                    if (fper > 0.75f)
+                    {
+//                        _program.ErrorLog("Yield return");
+                        yield return true;
+                    }
+//                    _program.EchoInstructions("WBM:LBI+TB:"+tb.CustomName);
                     foreach (var handler in WicoLocalBlockParseHandlers)
                     {
+                        fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
+                        if (fper > 0.75f)
+                        {
+//                            _program.ErrorLog("Yield return");
+                            yield return true;
+                        }
                         handler(tb);
                     }
                 }
+//                yield return true;
+//                _program.ErrorLog("WBM: LBI:EOR");
+//                _program.EchoInstructions("WBM:LBI:EOR");
             }
             void LocalBlocksChanged()
             {
@@ -278,9 +318,11 @@ namespace IngameScript
                 }
             }
 
-            void PostInitHandler()
+            public IEnumerator<bool> PostInitHandler()
             {
+                yield return true;
                 LocalBlocksInit();
+                yield return false;
             }
 
             /// <summary>
@@ -289,7 +331,7 @@ namespace IngameScript
             public void RemoteBlocksInit()
             {
                 gtsRemoteBlocks.Clear();
-                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsRemoteBlocks, (x1 => !x1.IsSameConstructAs(thisProgram.Me)));
+                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsRemoteBlocks, (x1 => !x1.IsSameConstructAs(_program.Me)));
                 remoteBlocksCount = gtsRemoteBlocks.Count;
                 foreach (var tb in gtsRemoteBlocks)
                 {
@@ -333,10 +375,11 @@ namespace IngameScript
             public bool CalcLocalGridChange(bool bForceUpdate = false)
             {
                 gtsTestBlocks.Clear();
-                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => x1.IsSameConstructAs(thisProgram.Me) && ValidBlock(x1)));
+                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
                 //                _program.Echo("test block count=" + gtsTestBlocks.Count.ToString());
                 if (localBlocksCount != gtsTestBlocks.Count || bForceUpdate)
                 {
+                    _program.Echo("WBM:CGC:CHANGE DETECTED! New="+gtsTestBlocks.Count + " Old="+localBlocksCount);
                     LocalBlocksChanged(); // tell them something changed
                     localBlocksCount = gtsTestBlocks.Count;
                     gtsLocalBlocks = gtsTestBlocks;
@@ -370,7 +413,7 @@ namespace IngameScript
             public bool CalcRemoteGridChange()
             {
                 List<IMyTerminalBlock> gtsTestBlocks = new List<IMyTerminalBlock>();
-                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => !x1.IsSameConstructAs(thisProgram.Me)));
+                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => !x1.IsSameConstructAs(_program.Me)));
                 if (remoteBlocksCount != gtsTestBlocks.Count)
                 {
                     RemoteBlocksChanged();
@@ -405,7 +448,7 @@ namespace IngameScript
             {
                 shipdimController = orientationBlock;
 
-                if (thisProgram.Me.CubeGrid.GridSizeEnum.ToString().ToLower().Contains("small"))
+                if (_program.Me.CubeGrid.GridSizeEnum.ToString().ToLower().Contains("small"))
                     gridsize = SMALL_BLOCK_LENGTH;
                 else
                     gridsize = LARGE_BLOCK_LENGTH;
