@@ -53,7 +53,8 @@ namespace IngameScript
         SpaceDock spaceDock;
 //        OrbitalModes wicoOrbitalLaunch;
          Navigation wicoNavigation;
-        
+
+        Displays _wicoDisplays;
 
         //        WicoUpdateModesShared _wicoControl;
         WicoControl _wicoControl;
@@ -84,21 +85,26 @@ namespace IngameScript
             wicoEngines = new HydrogenEngines(this);
             wicoPower = new PowerProduction(this, wicoBlockMaster);
             wicoTimers = new Timers(this, wicoBlockMaster);
-            wicoBases = new WicoBases(this, wicoIGC);
             //            navRemote = new NavRemote(this);
-//            navCommon = new NavCommon(this);
-            _cargoCheck = new CargoCheck(this, wicoBlockMaster);
+            //            navCommon = new NavCommon(this);
+            _wicoDisplays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
+            _cargoCheck = new CargoCheck(this, wicoBlockMaster,_wicoDisplays);
 
-            wicoNavigation = new Navigation(this, _wicoControl, wicoBlockMaster, wicoIGC, wicoTravelMovement, wicoGyros, wicoWheels, wicoNavRotors);
+            wicoBases = new WicoBases(this, wicoIGC,_wicoDisplays);
 
-            spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster, wicoThrusters, wicoConnectors,
-                wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, wicoTimers, wicoIGC, wicoBases, wicoNavigation, _cargoCheck);
+            wicoNavigation = new Navigation(this, _wicoControl, wicoBlockMaster, wicoIGC, wicoTravelMovement, wicoElapsedTime,
+                wicoGyros, wicoWheels, wicoNavRotors, wicoThrusters, _wicoDisplays);
+
+            spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster, wicoThrusters, wicoConnectors
+                , wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, wicoTimers
+                , wicoIGC, wicoBases, wicoNavigation, _cargoCheck, _wicoDisplays);
 
             _wicoControl.WantSlow(); // get updates so we can check for things like navigation commands in oldschool format
 
             /// DEBUG
-//            wicoIGC.SetDebug(true);
-//            _wicoControl.SetDebug(true);
+            //            wicoIGC.SetDebug(true);
+            //            _wicoControl.SetDebug(true);
+            //            wicoElapsedTime.SetDebug(true);
 
         }
         public void ModulePreMain(string argument, UpdateType updateSource)
@@ -110,7 +116,12 @@ namespace IngameScript
         public void ModulePostMain()
         {
             _wicoControl.WantSlow();
-            Echo(wicoBases.baseInfoString());
+            if (bInitDone)
+            {
+                _wicoDisplays.EchoInfo();
+                _wicoControl.AnnounceState();
+                Echo(wicoBases.baseInfoString());
+            }
         }
 
         public void ModulePostInit()

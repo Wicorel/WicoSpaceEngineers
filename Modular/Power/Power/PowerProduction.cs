@@ -77,6 +77,12 @@ namespace IngameScript
 
             }
 
+            // TODO: Consider some batteries as 'cargo' and not to be used for thrust
+            // 1) turn them off when under way.
+            // 2) Don't count them for fuel counts
+            // 3) commands to force load cargo and unload cargo.
+            // 4) emergency use when low on power.
+
             /// <summary>
             /// gets called for every block on the local construct
             /// </summary>
@@ -295,6 +301,7 @@ namespace IngameScript
                 batteryTotalOutput = 0;
                 maxBatteryPower = -1;
 
+
                 for (int ib = 0; ib < batteryList.Count; ib++)
                 {
                     float charge = 0;
@@ -335,7 +342,8 @@ namespace IngameScript
                     else s += " ";
                     s += percentthisbattery + "%";
                     s += ":" + batteryList[ib].CustomName;
-                    if (bEcho) _program.Echo(s);
+                    if (batteryList.Count < 10 && bEcho) _program.Echo(s);
+
                     if (isRechargeSet(batteryList[ib]) && targetMax > 0)
                     {
                         if (percentthisbattery < targetMax)
@@ -357,6 +365,7 @@ namespace IngameScript
                     f1 = ((totalCharge * 100) / totalCapacity);
                     f1 = (float)Math.Round(f1, 0);
                     batteryPercentage = (int)f1;
+                    if (bEcho) _program.Echo("Batteries: " + f1.ToString("0.0") + "%");
                 }
                 else
                     batteryPercentage = -1;

@@ -72,6 +72,10 @@
   <Import Project="..\..\Drills\Drills\Drills.projitems" Label="Shared" />
   <Import Project="..\..\Asteroids\Asteroids\Asteroids.projitems" Label="Shared" />
   <Import Project="..\..\ScansMode\ScansMode\ScansMode.projitems" Label="Shared" />
+  <Import Project="..\..\Ores\Ores\Ores.projitems" Label="Shared" />
+  <Import Project="..\..\ScanBase\ScanBase\ScanBase.projitems" Label="Shared" />
+  <Import Project="..\..\DockBase\DockBase\DockBase.projitems" Label="Shared" />
+  <Import Project="..\..\Displays\Displays\Displays.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="MDK\MDK.options.props" DestinationFolder="$(TargetDir)\MDK" />

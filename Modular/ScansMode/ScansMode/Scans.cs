@@ -27,14 +27,18 @@ namespace IngameScript
             WicoIGC _wicoIGC;
             WicoBlockMaster _wicoBlockMaster;
             Cameras _cameras;
+            Asteroids _asteroids;
 
-            public ScansMode(Program program, WicoControl wicoControl, WicoBlockMaster wicoBlockMaster, WicoIGC igc, Cameras cameras) : base(program)
+            public ScansMode(Program program, WicoControl wicoControl, WicoBlockMaster wicoBlockMaster, 
+                WicoIGC igc, Cameras cameras, Asteroids asteroids
+                ) : base(program,wicoControl)
             {
                 _program = program;
                 _wicoControl = wicoControl;
                 _wicoBlockMaster = wicoBlockMaster;
                 _wicoIGC = igc;
                 _cameras = cameras;
+                _asteroids = asteroids;
 
                 _program.moduleName += " Scans";
                 _program.moduleList += "\nScans V4";
@@ -139,7 +143,7 @@ namespace IngameScript
         int ScansDoneMode = WicoControl.MODE_NAVNEXTTARGET;
             int ScansDoneState = 0;
 
-            string sScansSection = "SCANS";
+//            string sScansSection = "SCANS";
 
             // TODO: Flags for other options (TBD)
             // TODO: scan range
@@ -208,27 +212,27 @@ namespace IngameScript
 
                             if (scanfrontScanner.DoScans())
                             {
-                                AsteroidProcessLDEI(scanfrontScanner.myLDEI);
+                                _asteroids.AsteroidProcessLDEI(scanfrontScanner.myLDEI);
                             }
                             if (scanbackScanner.DoScans())
                             {
-                                AsteroidProcessLDEI(scanbackScanner.myLDEI);
+                                _asteroids.AsteroidProcessLDEI(scanbackScanner.myLDEI);
                             }
                             if (scanleftScanner.DoScans())
                             {
-                                AsteroidProcessLDEI(scanleftScanner.myLDEI);
+                                _asteroids.AsteroidProcessLDEI(scanleftScanner.myLDEI);
                             }
                             if (scanrightScanner.DoScans())
                             {
-                                AsteroidProcessLDEI(scanrightScanner.myLDEI);
+                                _asteroids.AsteroidProcessLDEI(scanrightScanner.myLDEI);
                             }
                             if (scantopScanner.DoScans())
                             {
-                                AsteroidProcessLDEI(scantopScanner.myLDEI);
+                                _asteroids.AsteroidProcessLDEI(scantopScanner.myLDEI);
                             }
                             if (scanbottomScanner.DoScans())
                             {
-                                AsteroidProcessLDEI(scanbottomScanner.myLDEI);
+                                _asteroids.AsteroidProcessLDEI(scanbottomScanner.myLDEI);
                             }
 
                             // TODO: if missing cameras on a side(s), rotate ship to point cameras at that side
@@ -298,7 +302,7 @@ namespace IngameScript
                             s += " " + scanbottomScanner.myLDEI.Count + " objects";
                             s += "\n";
 
-                            if (AsteroidFindNearest() < 0)
+                            if (_asteroids.AsteroidFindNearest() < 0)
                                 s += "No Known Asteroid";
                             else s += "FOUND at least one asteroid!";
 

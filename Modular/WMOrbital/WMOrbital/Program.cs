@@ -36,6 +36,9 @@ namespace IngameScript
         HydrogenEngines wicoEngines;
         PowerProduction wicoPower;
 
+        Timers _timers;
+        Displays _displays;
+
         OrbitalModes wicoOrbitalLaunch;
         //        Navigation wicoNavigation;
 
@@ -61,8 +64,12 @@ namespace IngameScript
             wicoWheels = new Wheels(this);
             wicoEngines = new HydrogenEngines(this);
             wicoPower = new PowerProduction(this,wicoBlockMaster);
+            _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
+            _timers = new Timers(this, wicoBlockMaster);
 
-            wicoOrbitalLaunch = new OrbitalModes(this, _wicoControl);
+            wicoOrbitalLaunch = new OrbitalModes(this, _wicoControl,wicoBlockMaster
+                , wicoThrusters, wicoGyros,wicoConnectors,wicoLandingGears,wicoGasTanks,wicoGasGens, _timers, _displays
+                );
             //            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
 
         }
@@ -111,6 +118,9 @@ namespace IngameScript
                     var tanksfill = wicoPower.EnginesTanksFill();
                     Echo(" Tanks Filled=" + (tanksfill * 100).ToString() + "%");
                 }
+
+                _displays.EchoInfo();
+
                 // ensure we run at least at slow speed for updates.
                 _wicoControl.WantSlow(); 
             }

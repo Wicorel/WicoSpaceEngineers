@@ -86,8 +86,9 @@ namespace IngameScript
             {
                 if (tb is IMyGyro)
                 {
-                    // TODO: Ignore cutters, etc
                     allLocalGyros.Add(tb as IMyGyro);
+                    // TODO: Limit gyros used so not all gyros are used so that player can still have control
+//                    useGyros.Add(tb as IMyGyro);
                 }
             }
             void LocalGridChangedHandler()
@@ -133,12 +134,13 @@ namespace IngameScript
                         useGyros.Add(tb);
                     }
                 }
+
             }
 
-            /// <summary>
-            /// GYRO:how tight to maintain aim. Lower is tighter. Default is 0.01f
-            /// </summary>
-            float minAngleRad = 0.01f;
+        /// <summary>
+        /// GYRO:how tight to maintain aim. Lower is tighter. Default is 0.01f
+        /// </summary>
+        float minAngleRad = 0.01f;
 
             public void SetMinAngle(float angleRad = 0.01f)
             {
@@ -286,7 +288,7 @@ namespace IngameScript
             }
 
             // From Whip. on discord
-            Vector3D VectorRejection(Vector3D a, Vector3D b) //reject a on b    
+            public Vector3D VectorRejection(Vector3D a, Vector3D b) //reject a on b    
             {
                 if (Vector3D.IsZero(b))
                     return Vector3D.Zero;
@@ -316,84 +318,32 @@ namespace IngameScript
                     }
                 }
             }
-
-            // FROM: http://steamcommunity.com/sharedfiles/filedetails/?id=498780349  
-            // IMyGyroControl class v1.0  
-            // Developed by Lynnux  
-            // The Avionics:IMyGyroControl is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.  
-            // To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/.   
-            public const Base6Directions.Direction Forward = Base6Directions.Direction.Forward;
-            public const Base6Directions.Direction Backward = Base6Directions.Direction.Backward;
-            public const Base6Directions.Direction Left = Base6Directions.Direction.Left;
-            public const Base6Directions.Direction Right = Base6Directions.Direction.Right;
-            public const Base6Directions.Direction Up = Base6Directions.Direction.Up;
-            public const Base6Directions.Direction Down = Base6Directions.Direction.Down;
+            //Whip's ApplyGyroOverride Method v9 - 8/19/17
+            void ApplyGyroOverride(double pitch_speed, double yaw_speed, double roll_speed, List<IMyGyro> gyro_list, IMyTerminalBlock reference)
+            {
+                var rotationVec = new Vector3D(-pitch_speed, yaw_speed, roll_speed); //because keen does some weird stuff with signs
+                var shipMatrix = reference.WorldMatrix;
+                var relativeRotationVec = Vector3D.TransformNormal(rotationVec, shipMatrix);
+                foreach (var thisGyro in gyro_list)
+                {
+                    var gyroMatrix = thisGyro.WorldMatrix;
+                    var transformedRotationVec = Vector3D.TransformNormal(relativeRotationVec, Matrix.Transpose(gyroMatrix));
+                    thisGyro.Pitch = (float)transformedRotationVec.X;
+                    thisGyro.Yaw = (float)transformedRotationVec.Y;
+                    thisGyro.Roll = (float)transformedRotationVec.Z;
+                    thisGyro.GyroOverride = true;
+                }
+            }
 
             public float MaxYPR = 30.0f;
             //            public List<IMyTerminalBlock> Gyros = new List<IMyTerminalBlock>();
             //            public List<IMyGyro> Gyros = new List<IMyGyro>();
 
-            Base6Directions.Direction YawAxisDir = Up;
-            Base6Directions.Direction PitchAxisDir = Left;
-            Base6Directions.Direction RollAxisDir = Forward;
-            Base6Directions.Direction RefUp = Up;
-//            Base6Directions.Direction RefLeft = Left;
-//            Base6Directions.Direction RefForward = Forward;
-
-            void GetAxisAndDir(Base6Directions.Direction RefDir, out string Axis, out float sign)
-            {
-                Axis = "Yaw";
-                sign = -1.0f;
-                if (Base6Directions.GetAxis(YawAxisDir) == Base6Directions.GetAxis(RefDir))
-                {
-                    if (YawAxisDir == RefDir) sign = 1.0f;
-                }
-                if (Base6Directions.GetAxis(PitchAxisDir) == Base6Directions.GetAxis(RefDir))
-                {
-                    Axis = "Pitch";
-                    if (PitchAxisDir == RefDir) sign = 1.0f;
-                }
-                if (Base6Directions.GetAxis(RollAxisDir) == Base6Directions.GetAxis(RefDir))
-                {
-                    Axis = "Roll";
-                    if (RollAxisDir == RefDir) { } else sign = 1.0f;
-                }
-            }
-            public void SetAxis(IMyGyro gyro, string Axis, float value)
-            {
-                if (Axis == "Yaw")
-                {
-                    gyro.Yaw = value;
-                }
-                else if (Axis == "Pitch")
-                {
-                    gyro.Pitch = value;
-
-                }
-                else //roll
-                {
-                    gyro.Roll = value;
-                }
-
-            }
             public void SetYaw(float yaw)
             {
                 //                for (int i = 0; i < Gyros.Count; i++)
-                foreach (var gyro in useGyros)
-                {
-                    string Axis;
-                    float sign;
-                    Vector3 RotatedVector = Base6Directions.GetVector(Up);
-                    Vector3.TransformNormal(ref RotatedVector, gyro.Orientation, out RotatedVector);
-                    YawAxisDir = Base6Directions.GetDirection(ref RotatedVector);
-                    GetAxisAndDir(RefUp, out Axis, out sign);
-                    //                    Echo("Set axis=" + Azis + " yaw="+yaw.ToString("0.00")+" sign=" + sign);
-
-                    SetAxis(gyro, Axis, sign * yaw);
-
-                    gyro.Enabled = true;
-                    gyro.GyroOverride = true;
-                }
+                if (useGyros.Count < 1) GyroSetup();
+                ApplyGyroOverride(0, yaw, 0, useGyros, _wicoBlockMaster.GetMainController());
             }
             public bool DoRotate(double rollAngle, string sPlane = "Roll", float maxYPR = -1, float facingFactor = 1f)
             {
@@ -415,33 +365,33 @@ namespace IngameScript
 
                 if (Math.Abs(rollAngle) > 1.0)
                 {
-                    //                Echo("MAx gyro");
+                    _program.Echo("MAx gyro");
                     targetNewSetting = maxRoll * (float)(rollAngle) * facingFactor;
                 }
                 else if (Math.Abs(rollAngle) > .7)
                 {
                     // need to dampen 
-                    //                 Echo(".7 gyro");
+                    _program.Echo(".7 gyro");
                     targetNewSetting = maxRoll * (float)(rollAngle) / 4;
                 }
                 else if (Math.Abs(rollAngle) > 0.5)
                 {
-                    //                 Echo(".5 gyro");
+                    _program.Echo(".5 gyro");
                     targetNewSetting = 0.11f * Math.Sign(rollAngle);
                 }
                 else if (Math.Abs(rollAngle) > 0.1)
                 {
-                    //                 Echo(".1 gyro");
+                    _program.Echo(".1 gyro");
                     targetNewSetting = 0.11f * Math.Sign(rollAngle);
                 }
                 else if (Math.Abs(rollAngle) > 0.01)
                 {
-                    //                 Echo(".01 gyro");
+                    _program.Echo(".01 gyro");
                     targetNewSetting = 0.11f * Math.Sign(rollAngle);
                 }
                 else if (Math.Abs(rollAngle) > 0.001)
                 {
-                    //                 Echo(".001 gyro");
+                    _program.Echo(".001 gyro");
                     targetNewSetting = 0.09f * Math.Sign(rollAngle);
                 }
                 else targetNewSetting = 0;
@@ -449,6 +399,7 @@ namespace IngameScript
                 SetYaw(targetNewSetting);
                 if (Math.Abs(rollAngle) < minAngleRad)
                 {
+                    _program.Echo("rollAngle<minAngleRad");
                     gyrosOff(); //SetOverride(false);
                     //                GyroControl.RequestEnable(true);
                 }
@@ -501,15 +452,6 @@ namespace IngameScript
 
                 double centerTargetDistance = Vector3D.DistanceSquared(vCenter, destination);
                 double backTargetDistance = Vector3D.DistanceSquared(vBack, destination);
-                /*
-                double upTargetDistance = Vector3D.DistanceSquared(vUp, destination);
-                double rightLocalDistance = Vector3D.DistanceSquared(vRight, vCenter);
-                double rightTargetDistance = Vector3D.DistanceSquared(vRight, destination);
-
-                double leftTargetDistance = Vector3D.DistanceSquared(vLeft, destination);
-
-                double yawLocalDistance = Vector3D.DistanceSquared(vRight, vLeft);
-                */
                 facingTarget = centerTargetDistance < backTargetDistance;
 
                 yawAngle = (leftTargetDistance - rightTargetDistance) / yawLocalDistance;
@@ -527,6 +469,8 @@ namespace IngameScript
             {
                 return Vector3D.Distance(a, b);
             }
+
+
             #region Grid2World
             // from http://forums.keenswh.com/threads/library-grid-to-world-coordinates.7284828/
             MatrixD GetGrid2WorldTransform(IMyCubeGrid grid)

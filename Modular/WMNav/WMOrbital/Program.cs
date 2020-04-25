@@ -40,18 +40,19 @@ namespace IngameScript
         Sensors wicoSensors;
         Wheels wicoWheels;
 
+        Displays _wicoDisplays;
+
         TravelMovement wicoTravelMovement;
 
 //        OrbitalModes wicoOrbitalLaunch;
          Navigation wicoNavigation;
 
-        //        WicoUpdateModesShared _wicoControl;
         WicoControl _wicoControl;
 
         void ModuleControlInit()
         {
-            //            _wicoControl = new WicoUpdateModesShared(this);
             _wicoControl = new WicoControl(this);
+//            _wicoControl.SetDebug(true);
         }
 
         void ModuleProgramInit()
@@ -71,24 +72,35 @@ namespace IngameScript
             wicoSensors = new Sensors(this, wicoBlockMaster);
             wicoWheels = new Wheels(this);
 
-            wicoNavigation = new Navigation(this,_wicoControl,wicoBlockMaster, wicoIGC, wicoTravelMovement,wicoGyros,wicoWheels,wicoNavRotors);
+            _wicoDisplays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
+
+            wicoNavigation = new Navigation(this,_wicoControl,wicoBlockMaster, wicoIGC, wicoTravelMovement, wicoElapsedTime,
+                wicoGyros,wicoWheels,wicoNavRotors, wicoThrusters,_wicoDisplays);
 
             _wicoControl.WantSlow(); // get updates so we can check for things like navigation commands in oldschool format
 
             /// DEBUG
-//            wicoIGC.SetDebug(true);
+            //            wicoIGC.SetDebug(true);
 //            _wicoControl.SetDebug(true);
+            // wicoElapsedTime.SetDebug(true);
 
         }
         public void ModulePreMain(string argument, UpdateType updateSource)
         {
-            Echo("UpdateSource=" + updateSource.ToString());
+//            Echo("UpdateSource=" + updateSource.ToString());
 //            Echo(" Main=" + wicoControl.IamMain().ToString());
         }
 
         public void ModulePostMain()
         {
             _wicoControl.WantSlow(); // get updates so we can check for things like navigation commands in oldschool format
+                                     //            Echo("#navRotors=" + wicoNavRotors.NavRotorCount());
+            if (bInitDone)
+            {
+                _wicoDisplays.EchoInfo();
+            }
+            _wicoControl.AnnounceState();
+            Echo("LastRun=" + LastRunMs.ToString("0.00")+"ms Max=" + MaxRunMs.ToString("0.00") + "ms");
         }
 
         public void ModulePostInit()

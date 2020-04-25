@@ -57,6 +57,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoUpdatesModeShared", "..
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ElapsedTime", "..\ElapsedTime\ElapsedTime\ElapsedTime.shproj", "{69F6E441-D885-42B3-8A7F-E224CC869DA3}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Displays", "..\Displays\Displays\Displays.shproj", "{33E46B38-C87F-445A-B3A9-3466910DECA6}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\GasGens\GasGens\GasGens.projitems*{121cbf09-ca3f-465e-beb0-e14c8e22cd35}*SharedItemsImports = 13
@@ -65,6 +67,7 @@ Global
 		..\Wheels\Wheels\Wheels.projitems*{16185a11-ab01-459f-b25f-61436d5e4023}*SharedItemsImports = 13
 		..\Sensors\Sensors\Sensors.projitems*{22cb2a2b-7da5-4e54-955b-668721f0c414}*SharedItemsImports = 13
 		..\ModularMain\ModularMain\ModularMain.projitems*{2c75ab60-ae98-4544-b151-13769a76c6c4}*SharedItemsImports = 13
+		..\Displays\Displays\Displays.projitems*{33e46b38-c87f-445a-b3a9-3466910deca6}*SharedItemsImports = 13
 		..\Gyros\Gyros\Gyros.projitems*{39d1bda2-1f2e-45ef-b3a6-17215ca7ef6b}*SharedItemsImports = 13
 		..\Tanks\Tanks\Tanks.projitems*{3c377b47-c3d2-487d-bbcd-d9f49adf2208}*SharedItemsImports = 13
 		..\TravelMovement\TravelMovement\TravelMovement.projitems*{41371b34-d471-4372-91eb-8406bd7f1652}*SharedItemsImports = 13
@@ -88,6 +91,7 @@ Global
 		..\BlockMaster\BlockMaster\BlockMaster.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Cameras\Cameras\Cameras.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Connectors\Connectors\Connectors.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Displays\Displays\Displays.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\GasGens\GasGens\GasGens.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Gyros\Gyros\Gyros.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4

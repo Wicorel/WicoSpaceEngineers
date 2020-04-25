@@ -19,7 +19,7 @@ namespace IngameScript
 {
     partial class Program
     {
-        public class SpaceDock
+        public class SpaceDock: DockBase
         {
             private Program _program;
             private WicoControl _wicoControl;
@@ -36,6 +36,7 @@ namespace IngameScript
             private NavCommon _navCommon;
 //            private NavRemote _navRemote;
             private CargoCheck _cargoCheck;
+            private Displays _displays;
 
             bool bAutoRelaunch = false;
             bool bAutoRefuel = true;
@@ -64,7 +65,9 @@ namespace IngameScript
 
             public SpaceDock(Program program, WicoControl wc, WicoBlockMaster wbm, WicoThrusters thrusters, Connectors connectors, 
                 Antennas ant, GasTanks gasTanks, WicoGyros wicoGyros, PowerProduction pp, Timers tim, WicoIGC iGC,
-                WicoBases wicoBases, NavCommon navCommon, CargoCheck cargoCheck)
+                WicoBases wicoBases, NavCommon navCommon, CargoCheck cargoCheck
+                ,Displays displays): base(program)
+
             {
                 _program = program;
                 _wicoControl = wc;
@@ -80,15 +83,13 @@ namespace IngameScript
                 _wicoBases = wicoBases;
                 _navCommon = navCommon;
                 _cargoCheck = cargoCheck;
+                _displays = displays;
 
 
                 //                shipController = myShipController;
 
                 _program.moduleName += " Space Dock";
-                _program.moduleList += "\nSpaceDock V4";
-
-//                _program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
-//                _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
+                _program.moduleList += "\nSpaceDock V4.2";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -114,16 +115,67 @@ namespace IngameScript
                 bAutoRelaunch=_program._CustomDataIni.Get(sDockingSection, "AutoRelaunch").ToBoolean(bAutoRelaunch);
                 _program._CustomDataIni.Set(sDockingSection, "AutoRelaunch", bAutoRelaunch);
 
+                _displays.AddSurfaceHandler("MODE", SurfaceHandler);
+            }
+            StringBuilder sbNotices = new StringBuilder(300);
+            StringBuilder sbModeInfo = new StringBuilder(100);
+
+            public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
+            {
+                if (tag == "MODE")
+                {
+                    if (ActionType == Displays.DODRAW)
+                    {
+                        int iMode = _wicoControl.IMode;
+                        int iState = _wicoControl.IState;
+
+                        if (
+                            iMode == WicoControl.MODE_LAUNCH
+                            || iMode == WicoControl.MODE_DOCKING
+                            || iMode == WicoControl.MODE_DOCKED
+                         )
+                        {
+                            tsurface.WriteText(sbModeInfo);
+                            if (tsurface.SurfaceSize.Y < 512)
+                            { // small/corner LCD
+
+                            }
+                            else
+                            {
+                                tsurface.WriteText(sbNotices, true);
+                            }
+                        }
+                    }
+                    else if (ActionType == Displays.SETUPDRAW)
+                    {
+                        tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                        tsurface.WriteText("");
+                        if (tsurface.SurfaceSize.Y < 512)
+                        {
+                            tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                            tsurface.FontSize = 2;
+                        }
+                        else
+                        {
+                            tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
+                            tsurface.FontSize = 1.5f;
+                        }
+                    }
+                    else if(ActionType == Displays.CLEARDISPLAY)
+                    {
+                        tsurface.WriteText("");
+                    }
+                }
             }
 
             void LoadHandler(MyIni Ini)
             {
-                _program._CustomDataIni.Get(sDockingSection, "bDoingDocking").ToBoolean(bDoingDocking);
+                bDoingDocking=Ini.Get(sDockingSection, "bDoingDocking").ToBoolean(bDoingDocking);
             }
 
             void SaveHandler(MyIni Ini)
             {
-                _program._CustomDataIni.Set(sDockingSection, "bDoingDocking", bDoingDocking);
+                Ini.Set(sDockingSection, "bDoingDocking", bDoingDocking);
                 _program.CustomDataChanged();
             }
 
@@ -141,20 +193,22 @@ namespace IngameScript
                     || fromMode == WicoControl.MODE_LAUNCH
                     )
                 {
-                    _program.wicoGyros.gyrosOff();
-                    _program.wicoThrusters.powerDownThrusters();
+                    _displays.ClearDisplays("MODE");
+                    _gyros.gyrosOff();
+                    _thrusters.powerDownThrusters();
                 }
                 if (toMode == WicoControl.MODE_DOCKING)
+                {
                     bDoingDocking = true;
-                else if (toMode == WicoControl.MODE_GOINGTARGET
-                    || toMode == WicoControl.MODE_NAVNEXTTARGET
-                    || toMode == WicoControl.MODE_STARTNAV
-                    )
-                { // don't assume..
-
                 }
-                else
+                if (
+                    toMode == WicoControl.MODE_DOCKED
+                    || toMode == 0
+                    || toMode == WicoControl.MODE_ATTENTION
+                    )
+                {
                     bDoingDocking = false;
+                }
 
                 // need to check if this is us
                 if (toMode == WicoControl.MODE_DOCKED
@@ -260,18 +314,29 @@ namespace IngameScript
                 int iMode = _wicoControl.IMode;
                 int iState = _wicoControl.IState;
 
-                if (iMode == 0 || iMode == WicoControl.MODE_ATTENTION) return;
+//                if (iMode == 0 || iMode == WicoControl.MODE_ATTENTION) return;
 
                 if (iMode == WicoControl.MODE_LAUNCH) { doModeLaunch(); return; }
                 if (iMode == WicoControl.MODE_DOCKING) { doModeDocking(); return; }
                 if (iMode == WicoControl.MODE_DOCKED) { doModeDocked(); return; }
 
-                // we are NOT DOCKED, DOCKING or LAUNCHING
-                if(!bDoingDocking && bAutoRefuel)
+                if(
+                    (
+                    iMode==WicoControl.MODE_GOINGTARGET 
+                    || iMode==WicoControl.MODE_ARRIVEDTARGET
+                    )
+                    && !bDoingDocking 
+                    && bAutoRefuel
+                    
+                  )
                 {
                     bool bAirWorthy = DockAirWorthy(false, false);
                     if (!bAirWorthy)
+                    {
+                        _program.ErrorLog("Gasp! Need to DOCK! Doing="+bDoingDocking + " Mode="+iMode);
+
                         _wicoControl.SetMode(WicoControl.MODE_DOCKING);
+                    }
                 }
             }
 
@@ -475,7 +540,6 @@ namespace IngameScript
                 }
             }
 
-            #region LAUNCH
             /*
                 * TODO:
                 * 
@@ -512,9 +576,11 @@ namespace IngameScript
                 // todo: waypoint sequence for launch (complicated hangars)
                 // todo: test/make work in gravity
 
-//                StatusLog("clear", textPanelReport);
-//                StatusLog(moduleName + ":LAUNCH!", textPanelReport);
-
+                //                StatusLog("clear", textPanelReport);
+                //                StatusLog(moduleName + ":LAUNCH!", textPanelReport);
+                sbNotices.Clear();
+                sbModeInfo.Clear();
+                sbModeInfo.AppendLine("Launch from Connector");
                 _wicoControl.WantMedium();
                 if (iState == 0)
                 {
@@ -593,14 +659,13 @@ namespace IngameScript
                 double stoppingD = _thrusters.calculateStoppingDistance((float)_wicoBlockMaster.GetPhysicalMass(),thrustLaunchBackwardList, _wicoBlockMaster.GetShipSpeed(), 0);
                 if ((dist + stoppingD) > LaunchDistance)
                 {
+                    sbModeInfo.AppendLine("Launch Completed");
                     _connectors.ConnectAnyConnectors(true, true);
                     _program.ResetMotion();
                     _wicoControl.SetMode(WicoControl.MODE_NAVNEXTTARGET);
                 }
             }
-            #endregion
 
-            #region DOCKING
             /*
             state
             0 master inint
@@ -625,6 +690,7 @@ namespace IngameScript
             300  Start:	Move through locations
             'Back' Connector:
             310 NAV move to Home Arrive->340
+            311 waiting for nav
 
             340 Delay for motion
             350 slow move rest of way to Home. Arrival->400
@@ -676,6 +742,10 @@ namespace IngameScript
                 //            StatusLog(moduleName + ":Docking: iState=" + iState, textLongStatus, true);
                 //           _wicoControl.WantFast();
                 _program.Echo("DOCKING: state=" + iState);
+                sbNotices.Clear();
+                sbModeInfo.Clear();
+
+                sbModeInfo.AppendLine("Docking");
 
                 _wicoControl.WantSlow();
 
@@ -698,7 +768,7 @@ namespace IngameScript
 
                     _timers.TimerTriggers("[DOCKING]");
 
-                    _program.wicoThrusters.ThrustersCalculateOrientation(_wicoBlockMaster.GetMainController(),
+                    _thrusters.ThrustersCalculateOrientation(_wicoBlockMaster.GetMainController(),
                         ref thrustForwardList, ref thrustBackwardList,
                         ref thrustDownList, ref thrustUpList,
                         ref thrustLeftList, ref thrustRightList
@@ -757,16 +827,17 @@ namespace IngameScript
                 { // wait for slow
                     if (_wicoBlockMaster.GetShipSpeed() < 10)
                     {
+                        sbModeInfo.AppendLine("Finding Base");
                         if (lTargetBase < 0) lTargetBase = _wicoBases.BaseFindBest();
-//                        _program.ErrorLog("110: Base=" + lTargetBase);
+                        //                        _program.ErrorLog("110: Base=" + lTargetBase);
                         //                   sInitResults += "110: Base=" + iTargetBase;
                         dtDockingActionStart = DateTime.Now;
                         if (lTargetBase >= 0)
                         {
-                            OrientedBoundingBoxFaces orientedBoundingBoxFaces=new OrientedBoundingBoxFaces(dockingConnector);
+                            OrientedBoundingBoxFaces orientedBoundingBoxFaces = new OrientedBoundingBoxFaces(dockingConnector);
                             Vector3D[] points = new Vector3D[4];
                             orientedBoundingBoxFaces.GetFaceCorners(5, points); // 5 = front
-                                                             // front output order is BL, BR, TL, TR
+                                                                                // front output order is BL, BR, TL, TR
                             double width = (points[0] - points[1]).Length();
                             double height = (points[0] - points[2]).Length();
                             orientedBoundingBoxFaces.GetFaceCorners(0, points);
@@ -788,7 +859,7 @@ namespace IngameScript
                         else // No available base
                         {
                             // try to get a base to respond
-//                            _wicoBases.checkBases(true);
+                            //                            _wicoBases.checkBases(true);
                             _wicoBases.checkBases(true);
                             // TODO: Change to elapsedtime handler
                             dtDockingActionStart = DateTime.Now;
@@ -797,13 +868,17 @@ namespace IngameScript
                         }
                     }
                     else
+                    {
+                        sbModeInfo.AppendLine("Waiting for slower speed");
                         _program.ResetMotion();
+                    }
                 }
                 else if (iState == 120)
                 { // wait for reply from base
-//                    StatusLog("Awaiting Response from Base", textPanelReport);
+                  //                    StatusLog("Awaiting Response from Base", textPanelReport);
+                    sbModeInfo.AppendLine("Awaiting Response from Base");
 
-//                    _wicoControl.WantFast();
+                    //                    _wicoControl.WantFast();
                     DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
                     DateTime dtNow = DateTime.Now;
                     if (DateTime.Compare(dtNow, dtMaxWait) > 0)
@@ -852,13 +927,15 @@ namespace IngameScript
                 else if (iState == 126)
                 {
                     // we are waiting for NAV module to get message and start
+                    sbModeInfo.AppendLine("Waiting for NAV to start");
                     _program.Echo("Waiting for NAV to start");
                 }
                 else if (iState == 130)
                 {
                     // no known bases. requested response. wait for a while to see if we get one
-//                    StatusLog("Trying to find a base", textPanelReport);
-//                    bWantFast = false;
+                    sbModeInfo.AppendLine("Trying to find a base");
+                    //                    StatusLog("Trying to find a base", textPanelReport);
+                    //                    bWantFast = false;
                     DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
                     DateTime dtNow = DateTime.Now;
                     if (DateTime.Compare(dtNow, dtMaxWait) > 0)
@@ -896,12 +973,14 @@ namespace IngameScript
                 else if (iState == 176)
                 {
                     // we are waiting for NAV module to get message and start
+                    sbModeInfo.AppendLine("Waiting for NAV to start");
                     _program.Echo("Waiting for NAV to start");
                 }
                 else if (iState == 200)
                 {//200	Arrived at approach location
                  // request available docking connector
-//                    StatusLog("Requsting Docking Connector", textPanelReport);
+                 //                    StatusLog("Requsting Docking Connector", textPanelReport);
+                    sbModeInfo.AppendLine("Requsting Docking Connector");
                     if (_wicoBlockMaster.GetShipSpeed() < 1)
                     {
 
@@ -935,8 +1014,9 @@ namespace IngameScript
                 }
                 else if (iState == 210)
                 { //210	wait for available connector
-//                    StatusLog("Awaiting reply with Docking Connector", textPanelReport);
-//                    bWantFast = false;
+                    sbModeInfo.AppendLine("Awaiting reply with Docking Connector");
+                    //                    StatusLog("Awaiting reply with Docking Connector", textPanelReport);
+                    //                    bWantFast = false;
                     DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
                     DateTime dtNow = DateTime.Now;
                     if (DateTime.Compare(dtNow, dtMaxWait) > 0)
@@ -988,6 +1068,7 @@ namespace IngameScript
                 }
                 else if (iState == 310)
                 { //	310 move to home
+                    sbModeInfo.AppendLine("Moving to Home");
                     _program.Echo("Moving to Home");
                     //		if(iPushCount<60) iPushCount++;
                     //		else
@@ -998,11 +1079,13 @@ namespace IngameScript
                 else if (iState == 311)
                 {
                     // we are waiting for NAV module to get message and start
+                    sbModeInfo.AppendLine("Waiting for NAV to start") ;
                     _program.Echo("Waiting for NAV to start");
                 }
                 else if (iState == 340)
                 { // arrived at 'home' from NAV
                     _program.ResetMotion();
+                    sbModeInfo.AppendLine("Waiting for ship to stop");
                     _program.Echo("Waiting for ship to stop");
                     _connectors.TurnEjectorsOff();
                     _thrusters.MoveForwardSlowReset();
@@ -1045,6 +1128,7 @@ namespace IngameScript
                 {
                     // move to Launch1
                     _program.Echo("Moving to Launch1");
+                    sbModeInfo.AppendLine("Moving To Connector Entry");
 
                     _navCommon.NavGoTarget(vLaunch1, iMode, 410, 3, "DOCK Connector Entry");
                     _wicoControl.SetState(401);
@@ -1057,6 +1141,7 @@ namespace IngameScript
                 else if (iState == 410)
                 {
                     // move closer to Launch1
+                    sbModeInfo.AppendLine("Moving closer Connector Entry");
                     double distanceSQ = (vLaunch1 - _wicoBlockMaster.CenterOfMass() ).LengthSquared();
                     _program.Echo("DistanceSQ=" + distanceSQ.ToString("0.0"));
                     double stoppingDistance = _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetPhysicalMass(), thrustBackwardList, _wicoBlockMaster.GetShipSpeed(), 0);
@@ -1085,7 +1170,8 @@ namespace IngameScript
                 else if (iState == 450 || iState == 452)
                 { //450 452 'reverse' to dock, aiming connector at dock location
                   // align to docking alignment if needed
-//                    StatusLog("Align Up to Docking Connector", textPanelReport);
+                    sbModeInfo.AppendLine("Align Up to Docking Connector");
+                    //                    StatusLog("Align Up to Docking Connector", textPanelReport);
                     _wicoControl.WantFast();
                     //                turnEjectorsOff();
                     if (!bDoDockAlign)
@@ -1105,7 +1191,8 @@ namespace IngameScript
                 }
                 else if (iState == 451)
                 { //451 align to dock
-//                    StatusLog("Align to Docking Connector", textPanelReport);
+                  //                    StatusLog("Align to Docking Connector", textPanelReport);
+                    sbModeInfo.AppendLine("Align to Docking Connector");
                     _wicoControl.WantFast();
                     Vector3D vTargetLocation = vDock;
                     Vector3D vVec = vTargetLocation - dockingConnector.GetPosition();
@@ -1127,6 +1214,7 @@ namespace IngameScript
                 { //500 'reverse' to dock, aiming connector at dock location (really it's connector-forward)
                   // TODO: needs a time-out for when misaligned or base connector moves.
                   //               _wicoControl.WantFast();
+                    sbModeInfo.AppendLine("Reversing to Docking Connector");
                     //StatusLog("Reversing to Docking Connector", textPanelReport);
                     _program.Echo("bDoDockAlign=" + bDoDockAlign);
                     //                StatusLog(moduleName + ":Docking: Reversing to dock! Velocity=" + wicoBlockMaster.GetShipSpeed().ToString("0.00"), textPanelReport);
@@ -1137,6 +1225,8 @@ namespace IngameScript
                     Vector3D vTargetLocation = vDock;
                     Vector3D vVec = vTargetLocation - dockingConnector.GetPosition();
                     double distance = vVec.Length();
+                    sbNotices.AppendLine("distance=" + _program.niceDoubleMeters(distance));
+                    sbNotices.AppendLine("velocity=" + _wicoBlockMaster.GetShipSpeed().ToString("0.00"));
                     _program.Echo("distance=" + _program.niceDoubleMeters(distance));
                     _program.Echo("velocity=" + _wicoBlockMaster.GetShipSpeed().ToString("0.00"));
 //                    StatusLog("Distance=" + niceDoubleMeters(distance), textPanelReport);
@@ -1258,9 +1348,7 @@ namespace IngameScript
                     _thrusters.MoveForwardSlow(5, 10, thrustDockBackwardList, thrustDockForwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
                 }
             }
-            #endregion
 
-            #region DOCKED
             /*
               * TODO:
               * 
@@ -1287,10 +1375,14 @@ namespace IngameScript
             {
                 int iMode = _wicoControl.IMode;
                 int iState = _wicoControl.IState;
+                sbNotices.Clear();
+                sbModeInfo.Clear();
 
-//                StatusLog("clear", textPanelReport);
-//                StatusLog(moduleName + ":DOCKED!", textPanelReport);
+                //                StatusLog("clear", textPanelReport);
+                //                StatusLog(moduleName + ":DOCKED!", textPanelReport);
+                sbModeInfo.AppendLine("Docked");
                 _program.Echo("Docked!");
+                sbNotices.AppendLine("Autorelaunch=" + bAutoRelaunch.ToString());
                 _program.Echo("Autorelaunch=" + bAutoRelaunch.ToString());
 
                 _wicoControl.WantSlow();
@@ -1298,6 +1390,7 @@ namespace IngameScript
 
                 if (bAutoRelaunch)
                 {
+                    sbModeInfo.AppendLine(" Checking Relaunch");
                     _program.Echo("Docked. Checking Relaunch");
                     if (DockAirWorthy())
                     {
@@ -1307,6 +1400,7 @@ namespace IngameScript
                     }
                     else
                     {
+                        sbNotices.AppendLine(" Awaiting Relaunch Criteria");
                         _program.Echo(" Awaiting Relaunch Criteria");
 //                        StatusLog("Awaiting Relaunch Criteria", textPanelReport);
                         //                    if (!BatteryGo)
@@ -1333,9 +1427,11 @@ namespace IngameScript
                     _wicoControl.SetMode(WicoControl.MODE_IDLE);
 
                     _thrusters.powerDownThrusters(); // turn thrusters ON
+
 //                    if ((craft_operation & CRAFT_MODE_NOTANK) == 0)
                         _tanks.TanksStockpile(false); // turn tanks ON
-                                                                                           // TODO: allow for relay ships that are NOT bases..
+
+                    // TODO: allow for relay ships that are NOT bases..
                     float range = _wicoBases.RangeToNearestBase() + 100f + (float)_wicoBlockMaster.GetShipSpeed() * 5f;
                     _antennas.SetMaxPower(false, range);
                     _power.BatterySetNormal();
@@ -1343,7 +1439,8 @@ namespace IngameScript
                 else
                 {
 
-//                    StatusLog(moduleName + ":Power Saving Mode", textPanelReport);
+                    //                    StatusLog(moduleName + ":Power Saving Mode", textPanelReport);
+                    sbModeInfo.AppendLine("Power Saving Mode");
                     _program.Echo("Power Saving Mode");
                     if (iState == 0)
                     {
@@ -1507,8 +1604,22 @@ namespace IngameScript
 
             }
 
-            #endregion
+            public override void SetRelaunch(bool bRelaunch = true)
+            {
+                bAutoRelaunch = bRelaunch;
+            }
 
+            void RelaunchMessageHandler(MyIGCMessage msg)
+            {
+                if (msg.Tag == WICOB_DOCKSETRELAUNCH && msg.Data is string)
+                {
+                    bool bResult = false;
+                    bool bOK = bool.TryParse((string)msg.Data, out bResult);
+                    if (bOK)
+                        bAutoRelaunch = bResult;
+                }
+
+            }
         }
     }
 }

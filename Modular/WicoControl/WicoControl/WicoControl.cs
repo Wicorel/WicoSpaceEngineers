@@ -98,7 +98,7 @@ namespace IngameScript
                 // do nothing if we are already in that mode
                 if (_iMode == theNewMode)
                     return;
-//                thisProgram.ErrorLog("Set M=" + theNewMode + " S=" + theNewState+" OM="+IMode+" OS="+_iState);
+                if(_bDebug) thisProgram.ErrorLog("Set M=" + theNewMode + " S=" + theNewState+" OM="+IMode+" OS="+_iState);
 
                 // possible optimization.. make modules register for what modes they care about...
                 string sData = "";
@@ -118,7 +118,7 @@ namespace IngameScript
             public void SetState(int theNewState)
             {
                 // not synced..
-//                thisProgram.ErrorLog("Set S=" + theNewState);
+                if (_bDebug) thisProgram.ErrorLog("Set S=" + theNewState);
 
                 _iState = theNewState;
             }
@@ -147,8 +147,8 @@ namespace IngameScript
                 _iState = theIni.Get("WicoControl", "State").ToInt32(_iState);
                 _iMode = theIni.Get("WicoControl", "Mode").ToInt32(_iMode);
 
-//                thisProgram.ErrorLog("MAI:M=" + _iMode.ToString() + " S=" + _iState.ToString());
-//                thisProgram.ErrorLog(thisProgram.Storage);
+//                _program.ErrorLog("MAI:M=" + _iMode.ToString() + " S=" + _iState.ToString());
+//                _program.ErrorLog(_program.Storage);
 
                 foreach (var handler in ModeAfterInitHandlers)
                 {
@@ -158,8 +158,8 @@ namespace IngameScript
 
             void SaveHandler(MyIni theIni)
             {
-//                thisProgram.ErrorLog("wicocontrol save handler");
-//                thisProgram.ErrorLog("WCSH:M=" + _iMode.ToString() + " S=" + _iState.ToString());
+//                _program.ErrorLog("wicocontrol save handler");
+//                _program.ErrorLog("WCSH:M=" + _iMode.ToString() + " S=" + _iState.ToString());
                 theIni.Set("WicoControl", "Mode", _iMode);
                 theIni.Set("WicoControl", "State", _iState);
             }

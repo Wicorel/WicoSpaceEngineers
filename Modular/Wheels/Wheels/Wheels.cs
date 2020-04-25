@@ -30,7 +30,6 @@ namespace IngameScript
             List<IMyTerminalBlock> wheelRearSledList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> wheelFrontSledList = new List<IMyTerminalBlock>();
 
-            //        List<IMyTerminalBlock> wheelList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> wheelRearList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> wheelFrontList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> wheelLeftList = new List<IMyTerminalBlock>();
@@ -51,6 +50,12 @@ namespace IngameScript
                 WheelsPowerUp(0, 75);
             }
 
+            const string SledWheels = "[SLED]";
+            const string RearWheels = "[REAR]";
+            const string FrontWheels = "[FRONT]";
+            const string RightWheels = "[RIGHT]";
+            const string LeftWheels = "[LEFT]";
+
             /// <summary>
             /// gets called for every block on the local construct
             /// </summary>
@@ -59,33 +64,34 @@ namespace IngameScript
             {
                 if (tb is IMyMotorSuspension)
                 {
-                    if (tb.CustomName.Contains("[SLED]") || tb.CustomData.Contains("[SLED]"))
+                    if (tb.CustomName.Contains(SledWheels) || tb.CustomData.Contains(SledWheels))
                     {
                         wheelSledList.Add(tb);
-                        if (tb.CustomName.Contains("[REAR]") || tb.CustomData.Contains("[FRONT]"))
+                        if (tb.CustomName.Contains(RearWheels) || tb.CustomData.Contains(FrontWheels))
                         {
                             wheelRearSledList.Add(tb);
                         }
-                        if (tb.CustomName.Contains("[FRONT]") || tb.CustomData.Contains("[FRONT]"))
+                        if (tb.CustomName.Contains(FrontWheels) || tb.CustomData.Contains(FrontWheels))
                         {
                             wheelFrontSledList.Add(tb);
                         }
                     }
                     else
                     {
-                        if (tb.CustomName.Contains("[LEFT]") || tb.CustomData.Contains("[LEFT]"))
+                        wheelList.Add(tb);
+                        if (tb.CustomName.Contains(LeftWheels) || tb.CustomData.Contains(LeftWheels))
                         {
                             wheelLeftList.Add(tb);
                         }
-                        else if (tb.CustomName.Contains("[RIGHT]") || tb.CustomData.Contains("[RIGHT]"))
+                        else if (tb.CustomName.Contains(RightWheels) || tb.CustomData.Contains(RightWheels))
                         {
                             wheelRightList.Add(tb);
                         }
-                        if (tb.CustomName.Contains("[REAR]") || tb.CustomData.Contains("[FRONT]"))
+                        if (tb.CustomName.Contains(RearWheels) || tb.CustomData.Contains(FrontWheels))
                         {
                             wheelRearList.Add(tb);
                         }
-                        if (tb.CustomName.Contains("[FRONT]") || tb.CustomData.Contains("[FRONT]"))
+                        if (tb.CustomName.Contains(FrontWheels) || tb.CustomData.Contains(FrontWheels))
                         {
                             wheelFrontList.Add(tb);
                         }
@@ -121,10 +127,6 @@ namespace IngameScript
                     // BUG in 1.186.200.  using setter sets to MAX and not set value
                     w1.SetValueFloat("Friction", 0);
                     //w1.Friction = 0; // 1.186.201 02152018
-
-                    //                w1.SetValueFloat("Friction", 0);
-                    //                w1.SetValueFloat("Strength", 20);
-                    //                w1.Friction = 0;
                 }
             }
 
@@ -209,8 +211,19 @@ namespace IngameScript
                 return bAtMax;
             }
 
-            public void WheelsSetFriction(float fFriction)
+            public void WheelsSetFriction(float fFriction, bool bSetSled=false)
             {
+                if(bSetSled)
+                {
+                    foreach (var wh1 in wheelSledList)
+                    {
+                        var w1 = wh1 as IMyMotorSuspension;
+
+                        // BUG in 1.186.200.  using setter sets to MAX and not set value
+                        w1.SetValueFloat("Friction", fFriction);
+                        //w1.Friction = fFriction; 
+                    }
+                }
                 foreach (var wh1 in wheelList)
                 {
                     var w1 = wh1 as IMyMotorSuspension;
@@ -218,9 +231,7 @@ namespace IngameScript
                     // BUG in 1.186.200.  using setter sets to MAX and not set value
                     w1.SetValueFloat("Friction", fFriction);
                     //w1.Friction = fFriction; 
-
                 }
-
             }
 
         }

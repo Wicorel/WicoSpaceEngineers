@@ -95,7 +95,32 @@ namespace IngameScript
                 }
                 return false;
             }
+            /// <summary>
+            /// Stops the timer and resets to un-run time.
+            /// </summary>
+            /// <param name="sName"></param>
+            /// <returns></returns>
             public bool ResetTimer(string sName)
+            {
+                foreach (var et in TimerList)
+                {
+                    if (et.sName == sName)
+                    {
+                        et.dElapsedSeconds =-1;
+                        et.bActive = false;
+                        return true;
+                    }
+                }
+                return false;
+
+            }
+
+            /// <summary>
+            /// reset the timer to zero elapsed time
+            /// </summary>
+            /// <param name="sName"></param>
+            /// <returns></returns>
+            public bool RestartTimer(string sName)
             {
                 foreach (var et in TimerList)
                 {
@@ -108,14 +133,34 @@ namespace IngameScript
                 return false;
 
             }
+
+            /// <summary>
+            /// Returns if the timer is epxired.  False if the timer is not active.
+            /// </summary>
+            /// <param name="sName"></param>
+            /// <returns></returns>
             public bool IsExpired(string sName)
             {
                 foreach (var et in TimerList)
                 {
                     if (et.sName == sName)
                     {
+                        if (!et.bActive) return false;
+                        if (et.dElapsedSeconds < 0) return true;
                         if (et.dElapsedSeconds > et.dWaitSeconds) return true;
                         else return false;
+                    }
+                }
+                return false;
+            }
+
+            public bool IsActive(string sName)
+            {
+                foreach (var et in TimerList)
+                {
+                    if (et.sName == sName)
+                    {
+                        if (et.bActive) return true;
                     }
                 }
                 return false;
@@ -148,21 +193,24 @@ namespace IngameScript
                 return -1;
             }
 
+            /// <summary>
+            /// Call from main loop for EVERY update source type.
+            /// </summary>
             public void CheckTimers()
             {
                 if (_bDebug) _program.Echo("CheckTimers() " + TimerList.Count.ToString() + " Timers");
                 foreach (var et in TimerList)
                 {
-                    if(et.bActive)
+                    if (_bDebug) _program.Echo("Timer:" + et.sName + " Active="+ et.bActive+" " + et.dElapsedSeconds.ToString("0.00") + "/" + et.dWaitSeconds.ToString("0.00"));
+                    if (et.bActive)
                     {
                         if (et.dElapsedSeconds >= 0)
                         {
                             et.dElapsedSeconds += _program.Runtime.TimeSinceLastRun.TotalMilliseconds/1000;
                         }
-                        if(_bDebug) _program.Echo("Active Timer:" + et.sName + " " + et.dElapsedSeconds.ToString("0.00") + "/" + et.dWaitSeconds.ToString("0.00"));
                         if (et.dElapsedSeconds<0 || et.dElapsedSeconds>et.dWaitSeconds)
                         {
-                            _program.Echo("Trigger:" + et.sName);
+                            if (_bDebug) _program.Echo("Trigger:" + et.sName);
                             if (et.handler != null)
                             {
                                 et.dElapsedSeconds = 0;

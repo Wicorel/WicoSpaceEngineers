@@ -28,14 +28,14 @@ namespace IngameScript
             List<IMyMotorStator> rotorNavLeftList = new List<IMyMotorStator>();
             List<IMyMotorStator> rotorNavRightList = new List<IMyMotorStator>();
 
-            Program thisProgram;
+            Program _program;
             public NavRotors(Program program)
             {
-                thisProgram = program;
+                _program = program;
 
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
-                thisProgram.AddResetMotionHandler(ResetMotionHandler);
+                _program.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                _program.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                _program.AddResetMotionHandler(ResetMotionHandler);
             }
 
             void ResetMotionHandler(bool bNoDrills = false)
@@ -43,11 +43,11 @@ namespace IngameScript
                 powerDownRotors();
             }
 
-        /// <summary>
-        /// gets called for every block on the local construct
-        /// </summary>
-        /// <param name="tb"></param>
-        public void BlockParseHandler(IMyTerminalBlock tb)
+            /// <summary>
+            /// gets called for every block on the local construct
+            /// </summary>
+            /// <param name="tb"></param>
+            public void BlockParseHandler(IMyTerminalBlock tb)
             {
                 if (tb is IMyMotorStator)
                 {
@@ -69,6 +69,7 @@ namespace IngameScript
                 rotorNavLeftList.Clear();
                 rotorNavRightList.Clear();
             }
+
             public int NavRotorCount()
             {
                 return rotorNavLeftList.Count + rotorNavRightList.Count;
@@ -77,25 +78,32 @@ namespace IngameScript
             {
                 if (rotorNavLeftList.Count < 1) return false;
                 // need to ramp up/down rotor power or they will flip small vehicles and spin a lot
+
                 float maxVelocity = rotorNavLeftList[0].GetMaximum<float>("Velocity");
-                //            float currentVelocity = rotorNavLeftList[0].GetValueFloat("Velocity");
+
+                _program.Echo("MaxVel=" + maxVelocity + " Targetpower=" + targetPower);
+
                 var rotor = rotorNavLeftList[0] as IMyMotorStator;
                 float currentVelocity = rotor.TargetVelocityRPM;
+                _program.Echo("Current Velocity=" + currentVelocity);
 
                 float cPower = (currentVelocity / maxVelocity * 100);
                 cPower = Math.Abs(cPower);
+                /*
                 if (targetPower > (cPower + 5f))
                     targetPower = cPower + 5;
                 if (targetPower < (cPower - 5))
                     targetPower = cPower - 5;
-
+                    */
+                targetPower = maxVelocity * 100 / targetPower;
                 if (targetPower < 0f) targetPower = 0f;
                 if (targetPower > 100f) targetPower = 100f;
-
+                _program.Echo("cPower=" + cPower + " targetPower=" + targetPower);
                 if (Math.Abs(targetPower) > 0)
                 {
-                    powerUpRotors(rotorNavLeftList, -targetPower);
-                    powerUpRotors(rotorNavRightList, targetPower);
+                    powerUpRotors(rotorNavLeftList, -(targetPower*maxVelocity/100));
+                    powerUpRotors(rotorNavRightList, (targetPower * maxVelocity / 100));
+                    _program.Echo("Set value=" + rotor.TargetVelocityRPM);
                     return true;
                 }
                 else return false;
@@ -109,23 +117,6 @@ namespace IngameScript
                     if (!rotor.Enabled) rotor.Enabled = true;
                     float targetVelocity = maxVelocity * (targetPower / 100.0f);
                     //                Echo(rotor.CustomName + ":MV=" + maxVelocity.ToString("0.00") + ":V=" + targetVelocity.ToString("0.00"));
-                    /*
-                            float rv = rotor.TargetVelocity;
-                            if (rv > maxVelocity) rv = maxVelocity;
-                            if (rv < -maxVelocity) rv = -maxVelocity;
-                            if(rv<(targetVelocity))
-                            {
-                                targetVelocity = rv + 5;
-                            }
-                            if(rv>targetVelocity)
-                            {
-                    //            targetVelocity = rv - 5;
-                            }
-                            if (targetVelocity > maxVelocity) targetVelocity = maxVelocity;
-                            if (targetVelocity < -maxVelocity) targetVelocity = -maxVelocity;
-                     Echo("CurrentV:"+rv.ToString("0.00")+":ADJV=" + targetVelocity.ToString("0.00"));
-                     */
-                    //                rotor.TargetVelocity = targetVelocity;
                     rotor.TargetVelocityRPM = targetVelocity;
                 }
 
@@ -143,7 +134,6 @@ namespace IngameScript
                 {
                     IMyMotorStator rotor = rotorList[i] as IMyMotorStator;
                     rotor.TargetVelocityRPM = 0;
-                    //                rotor.TargetVelocity = 0;
                 }
                 return true;
             }

@@ -284,68 +284,10 @@ namespace IngameScript
                 thrustTowards = thrustForwardList;
                 thrustAway = thrustBackwardList;
 
-//                thrustForwardList[0].Orientation.GetMatrix(out or1);
-/*                
-                vThrustAim = thrustForwardList[0].WorldMatrix.Forward;
-                angle = vNGN.Dot(vThrustAim);
-//                _program.sMasterReporting += "GBT:T F:Angle=" + angle.ToString("0.00") + "\n";
-
-//                thrustUpList[0].Orientation.GetMatrix(out or1);
-//                vThrustAim = or1.Forward;
-                vThrustAim = thrustUpList[0].WorldMatrix.Forward;
-                angle = vNGN.Dot(vThrustAim);
-//                _program.sMasterReporting += "GBT:T U:Angle=" + angle.ToString("0.00") + "\n";
-
-//                thrustBackwardList[0].Orientation.GetMatrix(out or1);
-//                vThrustAim = or1.Forward;
-                vThrustAim = thrustBackwardList[0].WorldMatrix.Forward;
-                angle = vNGN.Dot(vThrustAim);
-//                _program.sMasterReporting += "GBT:T B:Angle=" + angle.ToString("0.00") + "\n";
-
-//                thrustDownList[0].Orientation.GetMatrix(out or1);
-//                vThrustAim = or1.Forward;
-                vThrustAim = thrustDownList[0].WorldMatrix.Forward;
-                angle = vNGN.Dot(vThrustAim);
-//                _program.sMasterReporting += "GBT:T D:Angle=" + angle.ToString("0.00") + "\n";
-
-//                thrustRightList[0].Orientation.GetMatrix(out or1);
-//                vThrustAim = or1.Forward;
-                vThrustAim = thrustRightList[0].WorldMatrix.Forward;
-                angle = vNGN.Dot(vThrustAim);
-//                _program.sMasterReporting += "GBT:T R:Angle=" + angle.ToString("0.00") + "\n";
-
-//                thrustLeftList[0].Orientation.GetMatrix(out or1);
-//                vThrustAim = or1.Forward;
-                vThrustAim = thrustLeftList[0].WorldMatrix.Forward;
-                angle = vNGN.Dot(vThrustAim);
-//                _program.sMasterReporting += "GBT:T L:Angle=" + angle.ToString("0.00") + "\n";
-*/
-
-                /*
-                thrustDownList[0].CustomName = "thrust DN";
-                thrustDownList[0].ShowOnHUD = true;
-                thrustDownList[0].ShowInTerminal= true;
-                thrustForwardList[0].CustomName = "thrust FW";
-                thrustForwardList[0].ShowOnHUD = true;
-                thrustForwardList[0].ShowInTerminal = true;
-                thrustUpList[0].CustomName = "thrust Up";
-                thrustUpList[0].ShowOnHUD = true;
-                thrustUpList[0].ShowInTerminal = true;
-                thrustBackwardList[0].CustomName = "thrust BK";
-                thrustBackwardList[0].ShowOnHUD = true;
-                thrustBackwardList[0].ShowInTerminal = true;
-                thrustRightList[0].CustomName = "thrust RT";
-                thrustRightList[0].ShowOnHUD = true;
-                thrustRightList[0].ShowInTerminal = true;
-                thrustLeftList[0].CustomName = "thrust LF";
-                thrustLeftList[0].ShowOnHUD = true;
-                thrustLeftList[0].ShowInTerminal = true;
-                */
+                if (Vector3D.IsZero(vNGN)) return;
 
                 if (thrustForwardList.Count > 0)
                 {
-  //                  thrustForwardList[0].Orientation.GetMatrix(out or1);
-//                    vThrustAim = or1.Forward;
                     vThrustAim = thrustForwardList[0].WorldMatrix.Forward;
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
 //                    _program.sMasterReporting += "GBT: F:Angle="+angle.ToString("0.00") + "\n";
@@ -359,7 +301,7 @@ namespace IngameScript
 
                 if (thrustUpList.Count > 0)
                 {
-  //                  thrustUpList[0].Orientation.GetMatrix(out or1);
+//                  thrustUpList[0].Orientation.GetMatrix(out or1);
 //                    vThrustAim = or1.Forward;
                     vThrustAim = thrustUpList[0].WorldMatrix.Forward;
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
@@ -381,7 +323,7 @@ namespace IngameScript
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
-                        //                      _program.Echo("GBT: Thrust BACKWARD");
+//                      _program.Echo("GBT: Thrust BACKWARD");
 //                        _program.sMasterReporting += "GBT: Thrust BACKWARD\n";
                         thrustTowards = thrustBackwardList;
                         thrustAway = thrustForwardList;
@@ -397,7 +339,7 @@ namespace IngameScript
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
-                        //                        _program.Echo("GBT: Thrust DOWN");
+//                        _program.Echo("GBT: Thrust DOWN");
 //                        _program.sMasterReporting += "GBT: Thrust DOWN\n";
                         thrustTowards = thrustDownList;
                         thrustAway = thrustUpList;
@@ -413,7 +355,7 @@ namespace IngameScript
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
-                        //                        _program.Echo("GBT: Thrust RIGHT");
+//                        _program.Echo("GBT: Thrust RIGHT");
 //                        _program.sMasterReporting += "GBT: Thrust RIGHT\n";
                         thrustTowards = thrustRightList;
                         thrustAway = thrustLeftList;
@@ -429,7 +371,7 @@ namespace IngameScript
                     angle = Math.Abs(vNGN.Dot(vThrustAim));
                     if (angle > cos45)
                     {
-                        //                        _program.Echo("GBT: Thrust LEFT");
+//                        _program.Echo("GBT: Thrust LEFT");
 //                        _program.sMasterReporting += "GBT: Thrust LEFT\n";
                         thrustTowards = thrustLeftList;
                         thrustAway = thrustRightList;
@@ -499,11 +441,6 @@ namespace IngameScript
                 }
 
                 return;
-                /*
-                Matrix or1;
-                tb.Orientation.GetMatrix(out or1);
-                return or1.Down;
-                */
             }
 
             public bool CalculateHoverThrust(IMyShipController ShipController, List<IMyTerminalBlock> thrusters, out float atmoPercent, out float hydroPercent, out float ionPercent)

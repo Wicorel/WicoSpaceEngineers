@@ -23,6 +23,12 @@ namespace IngameScript
     {
         public class GasTanks
         {
+            // TODO: Consider some tanks as 'cargo' and not to be used for thrust
+            // 1) turn them off when under way.
+            // 2) Don't count them for fuel counts
+            // 3) commands to force load cargo and unload cargo.
+            // 4) emergency use when low on power.
+
             List<IMyTerminalBlock> tankList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> oxytankList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> hydrotankList = new List<IMyTerminalBlock>();

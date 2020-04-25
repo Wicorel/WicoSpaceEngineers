@@ -40,6 +40,7 @@ namespace IngameScript
 //        NavRemote navRemote;
         NavCommon navCommon;
         CargoCheck _cargoCheck;
+        Displays _displays;
 
         SpaceDock spaceDock;
         // OrbitalModes wicoOrbitalLaunch;
@@ -77,25 +78,30 @@ namespace IngameScript
             wicoEngines = new HydrogenEngines(this);
             wicoPower = new PowerProduction(this,wicoBlockMaster);
             wicoTimers = new Timers(this, wicoBlockMaster);
-            wicoBases = new WicoBases(this, wicoIGC);
+            _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
+            wicoBases = new WicoBases(this, wicoIGC,_displays);
 //            navRemote = new NavRemote(this);
             navCommon = new NavCommon(this);
-            _cargoCheck = new CargoCheck(this, wicoBlockMaster);
+            _cargoCheck = new CargoCheck(this, wicoBlockMaster,_displays);
 
-            spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster, wicoThrusters, wicoConnectors, 
-                wicoAntennas,  wicoGasTanks, wicoGyros, wicoPower, wicoTimers, wicoIGC, wicoBases, navCommon, _cargoCheck);
+            spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster, wicoThrusters, wicoConnectors,
+                wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, wicoTimers, wicoIGC, wicoBases, navCommon, _cargoCheck
+                ,_displays);
+
             //wicoOrbitalLaunch = new OrbitalModes(this);
             //            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
 
             /// DEBUG
-            wicoIGC.SetDebug(true);
-            _wicoControl.SetDebug(true);
+            //            wicoIGC.SetDebug(true);
+//            _wicoControl.SetDebug(true);
+            // wicoElapsedTime.SetDebug(true);
         }
+
         public void ModulePreMain(string argument, UpdateType updateSource)
         {
-            Echo("Space Dock Module:");
-//            Echo(" Main=" + wicoControl.IamMain().ToString());
-//            Echo("");
+            
+//            Echo("Space Dock Module:");
+//            Echo("UpdateType=" + updateSource.ToString() + " Init=" + bInitDone);
         }
 
         public void ModulePostMain()
@@ -126,8 +132,14 @@ namespace IngameScript
                 }
                 // ensure we run at least at slow speed for updates.
                 _wicoControl.WantSlow();
-                Echo(wicoBases.baseInfoString());
+                
+                _displays.EchoInfo();
+                Echo(wicoBases.baseInfoString().Trim());
             }
+            
+            _wicoControl.AnnounceState();
+            Echo("LastRun=" + LastRunMs.ToString("0.00") + "ms Max=" + MaxRunMs.ToString("0.00") + "ms");
+            EchoInstructions();
         }
 
     }

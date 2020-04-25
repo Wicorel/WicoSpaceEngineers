@@ -51,14 +51,22 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ScansMode", "..\ScansMode\S
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ores", "..\Ores\Ores\Ores.shproj", "{388CB0A5-49B9-4F62-9A8A-F34B091E6BEC}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ScanBase", "..\ScanBase\ScanBase\ScanBase.shproj", "{24A08AEB-6026-4D42-AD4A-2853477D5970}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DockBase", "..\DockBase\DockBase\DockBase.shproj", "{7C1A6FC6-A618-468F-980B-ACDE09069953}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Displays", "..\Displays\Displays\Displays.shproj", "{33E46B38-C87F-445A-B3A9-3466910DECA6}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\Power\Power\Power.projitems*{11d02c04-292a-4e4d-b6a7-4175fb98a163}*SharedItemsImports = 13
 		..\GasGens\GasGens\GasGens.projitems*{121cbf09-ca3f-465e-beb0-e14c8e22cd35}*SharedItemsImports = 13
 		..\Antennas\Antennas\Antennas.projitems*{14fd351b-b99b-4e0f-9128-250fb3532f36}*SharedItemsImports = 13
 		..\Sensors\Sensors\Sensors.projitems*{22cb2a2b-7da5-4e54-955b-668721f0c414}*SharedItemsImports = 13
+		..\ScanBase\ScanBase\ScanBase.projitems*{24a08aeb-6026-4d42-ad4a-2853477d5970}*SharedItemsImports = 13
 		..\Timers\Timers\Timers.projitems*{2587e72f-cf86-4b72-b553-06474a810b0d}*SharedItemsImports = 13
 		..\ModularMain\ModularMain\ModularMain.projitems*{2c75ab60-ae98-4544-b151-13769a76c6c4}*SharedItemsImports = 13
+		..\Displays\Displays\Displays.projitems*{33e46b38-c87f-445a-b3a9-3466910deca6}*SharedItemsImports = 13
 		..\Ores\Ores\Ores.projitems*{388cb0a5-49b9-4f62-9a8a-f34b091e6bec}*SharedItemsImports = 13
 		..\Gyros\Gyros\Gyros.projitems*{39d1bda2-1f2e-45ef-b3a6-17215ca7ef6b}*SharedItemsImports = 13
 		..\Tanks\Tanks\Tanks.projitems*{3c377b47-c3d2-487d-bbcd-d9f49adf2208}*SharedItemsImports = 13
@@ -69,6 +77,8 @@ Global
 		..\Cameras\Cameras\Cameras.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\CargoCheck\CargoCheck\CargoCheck.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Connectors\Connectors\Connectors.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
+		..\Displays\Displays\Displays.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
+		..\DockBase\DockBase\DockBase.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Drills\Drills\Drills.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\GasGens\GasGens\GasGens.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
@@ -77,8 +87,10 @@ Global
 		..\Miner\Miner\Miner.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\ModularMain\ModularMain\ModularMain.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\NavCommon\NavCommon\NavCommon.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
+		..\Ores\Ores\Ores.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Power\Power\Power.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\QuadrantScanner\QuadrantScanner\QuadrantScanner.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
+		..\ScanBase\ScanBase\ScanBase.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\ScansMode\ScansMode\ScansMode.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Sensors\Sensors\Sensors.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Tanks\Tanks\Tanks.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
@@ -91,6 +103,7 @@ Global
 		..\BlockMaster\BlockMaster\BlockMaster.projitems*{6242f17f-6f6a-4721-8475-03a861445dec}*SharedItemsImports = 13
 		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{69f6e441-d885-42b3-8a7f-e224cc869da3}*SharedItemsImports = 13
 		..\Asteroids\Asteroids\Asteroids.projitems*{6edafb8c-8813-4aed-8794-b756ec416aa9}*SharedItemsImports = 13
+		..\DockBase\DockBase\DockBase.projitems*{7c1a6fc6-a618-468f-980b-acde09069953}*SharedItemsImports = 13
 		..\Cameras\Cameras\Cameras.projitems*{8fb811e0-76f1-499f-b6d2-360ee94c5961}*SharedItemsImports = 13
 		..\ScansMode\ScansMode\ScansMode.projitems*{a1965c9f-3406-44fd-b829-56382885eea9}*SharedItemsImports = 13
 		..\NavCommon\NavCommon\NavCommon.projitems*{b28d34d0-bfa4-4db3-a4fc-7374d0148092}*SharedItemsImports = 13

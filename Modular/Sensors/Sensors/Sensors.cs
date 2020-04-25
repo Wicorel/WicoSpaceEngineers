@@ -41,7 +41,7 @@ namespace IngameScript
                 _wicoBlockMaster = wicoBlockMaster;
                 _wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
-                _program.AddPostInitHandler(PostInitHandler);
+                _program.AddPostInitHandler(PostInitHandler());
             }
 
             /// <summary>
@@ -66,10 +66,14 @@ namespace IngameScript
                 localGrids.Clear();
             }
 
-            void PostInitHandler()
+            public IEnumerator<bool> PostInitHandler()
             {
                 shipController = _wicoBlockMaster.GetMainController();
+                SensorInit(shipController);
+                yield return false;
             }
+
+            public float SensorSettleWait = 0.175f;
 
             public string SensorInit(IMyShipController orientationBlock, bool bSleep = false)
             {
@@ -237,10 +241,12 @@ namespace IngameScript
 
             public void SensorSetToShip(IMySensorBlock sb1, float fLeft, float fRight, float fUp, float fDown, float fFront, float fBack)
             {
-                // need to use world matrix to get orientation correctly
-                //                IMySensorBlock sb1 = tb1 as IMySensorBlock;
-
-//                _program.Echo("SensorSetShip()");
+                if (sb1 == null)
+                {
+                    _program.ErrorLog("SetSensorToShip: Null sensor");
+                    return;
+                }
+//                _program.ErrorLog("SensorSetShip("+sb1.CustomName+")");
 
                 int iSensor = 0;
                 for (; iSensor < sensorInfos.Count; iSensor++)
@@ -315,7 +321,6 @@ namespace IngameScript
                     //                    debugGPSOutput("BTL", vBTL);
                     //                    debugGPSOutput("BTR", vBTR);
 
-                    if (sb1 == null) return;
                     //                    Echo(sb1.CustomName);
 
                     Vector3D vPos = sb1.GetPosition();
@@ -350,7 +355,6 @@ namespace IngameScript
                     sb1.BackExtend = Math.Max(fSet, fMinSensorSetting);
                 }
                 sb1.Enabled = true;
-
             }
 
             public bool SensorIsActive(IMySensorBlock s1, ref bool bAsteroidFound, ref bool bLargeFound, ref bool bSmallFound)
@@ -359,6 +363,7 @@ namespace IngameScript
                 bAsteroidFound = false;
                 bLargeFound = false;
                 bSmallFound = false;
+                if (s1 == null) _program.ErrorLog("SensorIsActive: Null sensor");
 
                 if (s1 != null && s1.IsActive && s1.Enabled && !s1.LastDetectedEntity.IsEmpty())
                 {

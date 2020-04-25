@@ -21,10 +21,11 @@ namespace IngameScript
     {
         public class NavCommon
         {
-            Program thisProgram;
+            Program _program;
+
             public NavCommon(Program program)
             {
-                thisProgram = program;
+                _program = program;
 
                 // TODO: talk to NAV module at startup to see if it exists.
                 // If it DOES NOT, then maybe use Keen autopilot?
@@ -36,6 +37,7 @@ namespace IngameScript
             public const string WICOB_NAVADDTARGET = "WICOB_NAVADDTARGET";
             public const string WICOB_NAVSTART = "WICOB_NAVSTART";
             public const string WICOB_NAVRESET = "WICOB_NAVRESET";
+            public const string WICOB_NAVSETMODE = "WICOB_NAVSETMODE";
 
             public static string NAVSerializeCommand(Vector3D vTarget, int modeArrival = WicoControl.MODE_NAVNEXTTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
@@ -98,22 +100,28 @@ namespace IngameScript
 
             public virtual void NavReset()
             {
-                thisProgram.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVRESET, "", TransmissionDistance.CurrentConstruct);
+                _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVRESET, "", TransmissionDistance.CurrentConstruct);
             }
 
             public virtual void NavAddTarget(Vector3D vTarget, int modeArrival = WicoControl.MODE_NAVNEXTTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
                 string data = NavCommon.NAVSerializeCommand(vTarget, modeArrival, stateArrival, DistanceMin, TargetName, maxSpeed, bGo);
-                thisProgram.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVADDTARGET, data, TransmissionDistance.CurrentConstruct);
+                _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVADDTARGET, data, TransmissionDistance.CurrentConstruct);
             }
 
             public virtual void NavGoTarget(Vector3D vTarget, int modeArrival = WicoControl.MODE_ARRIVEDTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
-                thisProgram.ErrorLog("NavCommon NavGoTarget");
+//                _program.ErrorLog("NavCommon NavGoTarget");
                 string data = NavCommon.NAVSerializeCommand(vTarget, modeArrival, stateArrival, DistanceMin, TargetName, maxSpeed, bGo);
-                thisProgram.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVADDTARGET, data, TransmissionDistance.CurrentConstruct);
-                thisProgram.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVSTART, "", TransmissionDistance.CurrentConstruct);
+                _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVADDTARGET, data, TransmissionDistance.CurrentConstruct);
+                _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVSTART, "", TransmissionDistance.CurrentConstruct);
             }
+            public virtual void NavQueueMode(int theMode)
+            {
+//                _program.ErrorLog("NavCommon NavQueueMode");
+                _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVSETMODE, theMode.ToString(), TransmissionDistance.CurrentConstruct);
+            }
+
 
 
         }

@@ -76,10 +76,9 @@
   <Import Project="..\..\WicoBases\WicoBases\WicoBases.projitems" Label="Shared" />
   <Import Project="..\..\NavCommon\NavCommon\NavCommon.projitems" Label="Shared" />
   <Import Project="..\..\CargoCheck\CargoCheck\CargoCheck.projitems" Label="Shared" />
-  <Import Project="..\..\WicoUpdateModes\WicoUpdateModes\WicoUpdateModes.projitems" Label="Shared" />
-  <Import Project="..\..\WicoUpdates\WicoUpdates\WicoUpdates.projitems" Label="Shared" />
-  <Import Project="..\..\WicoUpdatesModeShared\WicoUpdatesModeShared\WicoUpdatesModeShared.projitems" Label="Shared" />
   <Import Project="..\..\ElapsedTime\ElapsedTime\ElapsedTime.projitems" Label="Shared" />
+  <Import Project="..\..\DockBase\DockBase\DockBase.projitems" Label="Shared" />
+  <Import Project="..\..\Displays\Displays\Displays.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="MDK\MDK.options.props" DestinationFolder="$(TargetDir)\MDK" />
