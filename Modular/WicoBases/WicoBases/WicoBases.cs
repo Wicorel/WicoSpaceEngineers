@@ -51,17 +51,75 @@ namespace IngameScript
 
             const string sIGCBaseAnnounceTag = "BASE";
 
-            Program _thisProgram;
+            Program _program;
             WicoIGC _wicoIGC;
+            Displays _displays;
 
-            public WicoBases(Program program, WicoIGC iGC)
+            public WicoBases(Program program, WicoIGC iGC, Displays displays )
             {
-                _thisProgram = program;
+                _program = program;
                 _wicoIGC = iGC;
-                _thisProgram.AddLoadHandler(LoadHandler);
-                _thisProgram.AddSaveHandler(SaveHandler);
+                _displays = displays;
+
+                _program.AddLoadHandler(LoadHandler);
+                _program.AddSaveHandler(SaveHandler);
+
+                _displays.AddSurfaceHandler("BASELOCS", SurfaceHandler);
+
 
                 _wicoIGC.AddPublicHandler(sIGCBaseAnnounceTag, BaseBroadcastHandler);
+            }
+
+            StringBuilder sbNotices = new StringBuilder(300);
+            StringBuilder sbModeInfo = new StringBuilder(100);
+
+            public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
+            {
+                if (tag == "BASELOCS")
+                {
+                    if (ActionType == Displays.DODRAW)
+                    {
+                        sbNotices.Clear();
+                        sbModeInfo.Clear();
+                        sbNotices.AppendLine(baseList.Count + " Known bases");
+
+                        {
+                            foreach (var myBase in baseList)
+                            {
+                                
+                                sbNotices.AppendLine(myBase.baseName + " " + (_program.Me.GetPosition() - myBase.position).Length().ToString("N0") + "Meters");
+                            }
+                            tsurface.WriteText(sbModeInfo);
+                            if (tsurface.SurfaceSize.Y < 512)
+                            { // small/corner LCD
+
+                            }
+                            else
+                            {
+                                tsurface.WriteText(sbNotices, true);
+                            }
+                        }
+                    }
+                    else if (ActionType == Displays.SETUPDRAW)
+                    {
+                        tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                        tsurface.WriteText("");
+                        if (tsurface.SurfaceSize.Y < 512)
+                        {
+                            tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                            tsurface.FontSize = 2;
+                        }
+                        else
+                        {
+                            tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
+                            tsurface.FontSize = 1.5f;
+                        }
+                    }
+                    else if (ActionType == Displays.CLEARDISPLAY)
+                    {
+                        tsurface.WriteText("");
+                    }
+                }
             }
 
             void LoadHandler(MyIni Ini)
@@ -154,7 +212,7 @@ namespace IngameScript
                 {
                     //                s += baseList[i].baseId + ":";
                     s1 += baseList[i].baseName + ":";
-                    s1 += _thisProgram.Vector3DToString(baseList[i].position) + ":";
+                    s1 += _program.Vector3DToString(baseList[i].position) + ":";
                     s1 += "\n";
                 }
                 return s1;
@@ -166,8 +224,8 @@ namespace IngameScript
 
             public void checkBases(bool bForceRequest = false)
             {
-                string sName = _thisProgram.Me.CubeGrid.CustomName;
-                Vector3D vPosition = _thisProgram.Me.GetPosition();
+                string sName = _program.Me.CubeGrid.CustomName;
+                Vector3D vPosition = _program.Me.GetPosition();
 
                 if (bForceRequest)
                 {
@@ -179,18 +237,18 @@ namespace IngameScript
                 {
                     dBaseRequestLastTransmit = 0;
 
-                    _thisProgram.IGC.SendBroadcastMessage("BASE?", sName + ":" + _thisProgram.Me.EntityId.ToString() + ":" + _thisProgram.Vector3DToString(vPosition));
+                    _program.IGC.SendBroadcastMessage("BASE?", sName + ":" + _program.Me.EntityId.ToString() + ":" + _program.Vector3DToString(vPosition));
                 }
                 else
                 {
                     if (dBaseRequestLastTransmit < 0)
                     {
                         // first-time init
-                        dBaseRequestLastTransmit = _thisProgram.Me.EntityId % dBaseRequestTransmitWait; // randomize initial send
+                        dBaseRequestLastTransmit = _program.Me.EntityId % dBaseRequestTransmitWait; // randomize initial send
 
                     }
                     if (baseList.Count < 1)
-                        dBaseRequestLastTransmit += _thisProgram.Runtime.TimeSinceLastRun.TotalSeconds;
+                        dBaseRequestLastTransmit += _program.Runtime.TimeSinceLastRun.TotalSeconds;
                 }
             }
 
@@ -200,7 +258,7 @@ namespace IngameScript
                 int iBest = BaseIndexOf(BaseFindNearest());
                 if (iBest >= 0 )
                 {
-                    bestRange = (_thisProgram.Me.GetPosition() - baseList[iBest].position).Length();
+                    bestRange = (_program.Me.GetPosition() - baseList[iBest].position).Length();
                 }
                 return (float)bestRange;
             }
@@ -212,7 +270,7 @@ namespace IngameScript
                 //sInitResults += baseList.Count + " Bases";
                 for (int i = 0; i < baseList.Count; i++)
                 {
-                    double curDistanceSQ = Vector3D.DistanceSquared(baseList[i].position, _thisProgram.Me.GetPosition());
+                    double curDistanceSQ = Vector3D.DistanceSquared(baseList[i].position, _program.Me.GetPosition());
                     if (curDistanceSQ < distanceSQ)
                     {
                         //                    sInitResults += " Choosing" + baseList[i].baseName;
@@ -259,7 +317,7 @@ namespace IngameScript
 
                 if (msg.Data is string)
                 {
-                    _thisProgram.Echo("Base Response");
+                    _program.Echo("Base Response");
                     string sMessage = (string)msg.Data;
                     string[] aMessage = sMessage.Trim().Split(':');
 
@@ -275,7 +333,7 @@ namespace IngameScript
                     z1 = Convert.ToDouble(aMessage[iOffset++]);
                     Vector3D vPosition = new Vector3D(x1, y1, z1);
 
-                    bool bJumpCapable = _thisProgram.stringToBool(aMessage[iOffset++]);
+                    bool bJumpCapable = _program.stringToBool(aMessage[iOffset++]);
 
                     BaseAdd(id, sName, vPosition, bJumpCapable);
                 }

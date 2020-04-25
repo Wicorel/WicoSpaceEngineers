@@ -27,16 +27,19 @@ namespace IngameScript
             double totalCurrentVolume = 0.0; // volume
             bool bCreative = false;
 
-            List<IMyTerminalBlock> lContainers = new List<IMyTerminalBlock>();
+            public List<IMyTerminalBlock> lContainers = new List<IMyTerminalBlock>();
 
             Program _program;
             WicoBlockMaster _wicoBlockMaster;
+            Displays _displays;
 
             string sCargoSection = "CARGO";
-            public CargoCheck(Program program, WicoBlockMaster wbm)
+            public CargoCheck(Program program, WicoBlockMaster wbm, Displays displays)
             {
                 _program = program;
                 _wicoBlockMaster = wbm;
+                _displays = displays;
+
                 _wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
@@ -45,8 +48,51 @@ namespace IngameScript
 
                 cargopctmin = _program._CustomDataIni.Get(sCargoSection, "cargopctmin").ToInt32(cargopctmin);
                 _program._CustomDataIni.Set(sCargoSection, "cargopctmin", cargopctmin);
+
+                if(_displays!=null) _displays.AddSurfaceHandler("CARGOCHECK", SurfaceHandler);
             }
 
+            StringBuilder sbNotices = new StringBuilder(300);
+            StringBuilder sbModeInfo = new StringBuilder(100);
+
+            public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
+            {
+                if (tag == "CARGOCHECK")
+                {
+                    if (ActionType == Displays.DODRAW)
+                    {
+                        tsurface.WriteText(sbModeInfo);
+                        if (tsurface.SurfaceSize.Y < 512)
+                        { // small/corner LCD
+
+                        }
+                        else
+                        {
+                            tsurface.WriteText(sbNotices, true);
+                        }
+
+                    }
+                    else if (ActionType == Displays.SETUPDRAW)
+                    {
+                        tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                        tsurface.WriteText("");
+                        if (tsurface.SurfaceSize.Y < 512)
+                        {
+                            tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                            tsurface.FontSize = 2;
+                        }
+                        else
+                        {
+                            tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
+                            tsurface.FontSize = 1.5f;
+                        }
+                    }
+                    else if (ActionType == Displays.CLEARDISPLAY)
+                    {
+                        tsurface.WriteText("");
+                    }
+                }
+            }
             /// <summary>
             /// gets called for every block on the local construct
             /// </summary>
@@ -64,7 +110,7 @@ namespace IngameScript
                 else if(tb is IMyShipConnector)
                 {
                     if (tb.BlockDefinition.SubtypeName == "ConnectorSmall)")
-                    {
+                    { // don't add ejectors.
                         return;
                     }
                     else
@@ -98,9 +144,12 @@ namespace IngameScript
             public void doCargoCheck()
             {
 
+                sbNotices.Clear();
+                sbModeInfo.Clear();
                 if (lContainers.Count < 1)
                 {
                     // No cargo containers found.
+                    sbModeInfo.AppendLine("No Cargo Containers Found");
                     cargopcent = -1;
                     cargoMult = -1;
                     return;
@@ -111,10 +160,15 @@ namespace IngameScript
 
                 bool bCargoFull = true;
                 bool bDrillFull = false;
+                bool bHasDrills = false;
 
-                // TODO: if all cargo containers are full and ANY drill is full, call it 99%
+                sbNotices.AppendLine(lContainers.Count+ " Cargo Containers");
                 for (int i = 0; i < lContainers.Count; i++)
                 {
+                    if ((lContainers[i] is IMyShipDrill))
+                    {
+                        bHasDrills = true;
+                    }
                     //                totalMax += cargoCapacity(lContainers[i]);
                     double capacity = -1;
 
@@ -186,6 +240,9 @@ namespace IngameScript
                 }
                 //Echo("ratio="+ratio.ToString());
                 cargopcent = (int)ratio;
+                sbModeInfo.AppendLine(cargopcent + "% full");
+                sbNotices.AppendLine("Cargo Full=" + bCargoFull);
+                if(bHasDrills) sbNotices.AppendLine("Drills Full=" + bDrillFull);
 
                 // if any drill is full and ALL cargo are full, call it 100%
                 if (bCargoFull && bDrillFull)
