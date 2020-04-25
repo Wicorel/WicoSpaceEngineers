@@ -34,7 +34,7 @@ namespace IngameScript
 
                 WicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
                 WicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
-                thisProgram.AddPostInitHandler(PostInitHandler);
+//                thisProgram.AddPostInitHandler(PostInitHandler);
             }
 
             /// <summary>

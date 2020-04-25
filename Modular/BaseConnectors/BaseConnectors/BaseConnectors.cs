@@ -42,7 +42,7 @@ namespace IngameScript
                 _program.AddTriggerHandler(ProcessTrigger);
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
-                _program.AddPostInitHandler(PostInitHandler);
+                _program.AddPostInitHandler(PostInitHandler());
 //                _program.AddResetMotionHandler(ResetMotionHandler);
 
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
@@ -73,9 +73,9 @@ namespace IngameScript
             {
             }
 
-            void PostInitHandler()
+            public IEnumerator<bool> PostInitHandler()
             {
-
+                yield return true;
             }
 
             public void ModeChangeHandler(int fromMode, int fromState, int toMode, int toState)
