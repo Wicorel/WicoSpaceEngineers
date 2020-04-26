@@ -209,22 +209,20 @@ namespace IngameScript
         int postInitIterator = 0;
         bool PostInit()
         {
-            EchoInstructions("PostInit: #Handlers=" + PostInitHandlers.Count);
+//            EchoInstructions("PostInit: #Handlers=" + PostInitHandlers.Count);
             for (; postInitIterator < PostInitHandlers.Count;postInitIterator++)
             {
                 if(PostInitHandlers[postInitIterator].MoveNext())
-                { // more to do on this handler.. but we need another tick
-                    _wicoControl.WantOnce();
+                { // more to do on this handler.. 
                     return true;
                 }
                 else
                 {
                     // we are with with this handler
                     PostInitHandlers[postInitIterator].Dispose();
-                    
                 }
             }
-            EchoInstructions("PostInit:EOR");
+//            EchoInstructions("PostInit:EOR");
             return false;// no need to run again.
         }
 
@@ -246,7 +244,6 @@ namespace IngameScript
             {
                 if (!WicoLocalInit())
                 {
-
                     // we did not complete an init.
                     Echo("Init Incomplete.  Trying again");
 
