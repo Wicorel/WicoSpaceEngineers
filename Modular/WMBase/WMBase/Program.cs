@@ -21,7 +21,13 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-        //WicoThrusters wicoThrusters;
+        /* 
+         * TODO:
+        Add local resources checking like Hydrogen, Ore processing/storage/etc
+        Add base requests based on item needed to get or wanted to get rid of
+        Add asteroids, ores and known ships
+        Add menu system to send ships to ores/asteroid/ships
+        */
         BaseConnectors baseConnectors;
 
         /// <summary>
