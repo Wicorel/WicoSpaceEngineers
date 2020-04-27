@@ -314,13 +314,30 @@ namespace IngameScript
                 int iMode = _wicoControl.IMode;
                 int iState = _wicoControl.IState;
 
-//                if (iMode == 0 || iMode == WicoControl.MODE_ATTENTION) return;
+                //                if (iMode == 0 || iMode == WicoControl.MODE_ATTENTION) return;
 
                 if (iMode == WicoControl.MODE_LAUNCH) { doModeLaunch(); return; }
                 if (iMode == WicoControl.MODE_DOCKING) { doModeDocking(); return; }
                 if (iMode == WicoControl.MODE_DOCKED) { doModeDocked(); return; }
 
-                if(
+                if (_connectors.AnyConnectorIsConnected() && iMode != WicoControl.MODE_DOCKED)
+                {
+                    _wicoControl.SetMode(WicoControl.MODE_DOCKED);
+                }
+                if (iMode == WicoControl.MODE_MINE
+                    || iMode == WicoControl.MODE_GOTOORE
+                    || iMode== WicoControl.MODE_EXITINGASTEROID
+                    )
+                {
+                    // we expect them to do cargo checks.
+
+                }
+                else
+                {
+                    _cargoCheck.doCargoCheck();
+                }
+
+                if (
                     (
                     iMode==WicoControl.MODE_GOINGTARGET 
                     || iMode==WicoControl.MODE_ARRIVEDTARGET
@@ -1142,20 +1159,25 @@ namespace IngameScript
                 {
                     // move closer to Launch1
                     sbModeInfo.AppendLine("Moving closer Connector Entry");
-                    double distanceSQ = (vLaunch1 - _wicoBlockMaster.CenterOfMass() ).LengthSquared();
+                    Vector3D vVec = vLaunch1 - _wicoBlockMaster.CenterOfMass();
+                    bool bAimed = _gyros.AlignGyros("forward", vVec, _wicoBlockMaster.GetMainController());
+                    double distanceSQ = (vLaunch1 - _wicoBlockMaster.CenterOfMass()).LengthSquared();
                     _program.Echo("DistanceSQ=" + distanceSQ.ToString("0.0"));
-                    double stoppingDistance = _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetPhysicalMass(), thrustBackwardList, _wicoBlockMaster.GetShipSpeed(), 0);
-                    if (distanceSQ > _wicoBlockMaster.BlockMultiplier() * 3)
-                    {
-                        _thrusters.MoveForwardSlow(3, 5, thrustForwardList, thrustBackwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
-                        
-                        _wicoControl.WantMedium();
-                    }
-                    else
+                    if (distanceSQ < _wicoBlockMaster.BlockMultiplier() * 3)
                     {
                         _program.ResetMotion();
                         _thrusters.MoveForwardSlowReset();
                         _wicoControl.SetState(430);
+                        _wicoControl.WantFast();
+                    }
+                    if (bAimed)
+                    {
+                        //                    double stoppingDistance = _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetPhysicalMass(), thrustBackwardList, _wicoBlockMaster.GetShipSpeed(), 0);
+                            _thrusters.MoveForwardSlow(3, 5, thrustForwardList, thrustBackwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
+                            _wicoControl.WantMedium();
+                    }
+                    else
+                    {
                         _wicoControl.WantFast();
                     }
                 }
@@ -1367,9 +1389,13 @@ namespace IngameScript
 
             // 0 = master init
             // 1 battery check 30%.  If no batteries->4
-            // 2 battery check 80%
-            // 3 battery check 100%
-            // 4 no battery checks
+            // 2 battery check 40%
+            // 3 battery check 50%
+            // 4 battery check 60%
+            //   75%
+            // 90%
+            //  battery check 100%
+            // 50 no battery checks.. 
 
             void doModeDocked()
             {
@@ -1402,23 +1428,21 @@ namespace IngameScript
                     {
                         sbNotices.AppendLine(" Awaiting Relaunch Criteria");
                         _program.Echo(" Awaiting Relaunch Criteria");
-//                        StatusLog("Awaiting Relaunch Criteria", textPanelReport);
-                        //                    if (!BatteryGo)
-                        {
-//                            StatusLog(" Battery " + batteryPercentage + "% (" + batterypcthigh + "%)", textPanelReport);
-                            _program.Echo(" Battery " + _power.batteryPercentage + "% (" + _power.batterypcthigh + "%)");
-                        }
-                        //                   if(!CargoGo)
-                        {
-                            //                            StatusLog(" Cargo: " + cargopcent + "% (" + cargopctmin + ")", textPanelReport);
-                            _program.Echo(" Cargo: " + _cargoCheck.cargopcent + "% (" + _cargoCheck.cargopctmin + ")");
-                        }
-                        if (_tanks.HasHydroTanks())
-                        {
-//                            StatusLog(" Hydro: " + hydroPercent + "% (" + cargopctmin + ")", textPanelReport);
-                            _program.Echo(" Hydro: " + _tanks.hydroPercent + "% (" + _cargoCheck.cargopctmin + ")");
-                        }
                     }
+                }
+                {
+                    //                            StatusLog(" Battery " + batteryPercentage + "% (" + batterypcthigh + "%)", textPanelReport);
+                    sbNotices.AppendLine(" Battery " + _power.batteryPercentage + "% (" + _power.batterypcthigh + "%)");
+                    _program.Echo(" Battery " + _power.batteryPercentage + "% (" + _power.batterypcthigh + "%)");
+                }
+                {
+                    sbNotices.AppendLine(" Cargo: " + _cargoCheck.cargopcent + "% (" + _cargoCheck.cargopctmin + ")");
+                    _program.Echo(" Cargo: " + _cargoCheck.cargopcent + "% (" + _cargoCheck.cargopctmin + ")");
+                }
+                if (_tanks.HasHydroTanks())
+                {
+                    sbNotices.AppendLine(" Hydro: " + (_tanks.hydroPercent*100).ToString("0") + "% (" + _tanks.tankspcthigh + ")");
+                    _program.Echo(" Hydro: " + (_tanks.hydroPercent * 100).ToString("0") + "% (" + _tanks.tankspcthigh + ")");
                 }
                 if (!_connectors.AnyConnectorIsConnected())
                 {
@@ -1429,7 +1453,7 @@ namespace IngameScript
                     _thrusters.powerDownThrusters(); // turn thrusters ON
 
 //                    if ((craft_operation & CRAFT_MODE_NOTANK) == 0)
-                        _tanks.TanksStockpile(false); // turn tanks ON
+                    _tanks.TanksStockpile(false); // turn tanks ON
 
                     // TODO: allow for relay ships that are NOT bases..
                     float range = _wicoBases.RangeToNearestBase() + 100f + (float)_wicoBlockMaster.GetShipSpeed() * 5f;
@@ -1439,13 +1463,11 @@ namespace IngameScript
                 else
                 {
 
-                    //                    StatusLog(moduleName + ":Power Saving Mode", textPanelReport);
                     sbModeInfo.AppendLine("Power Saving Mode");
                     _program.Echo("Power Saving Mode");
                     if (iState == 0)
                     {
-//                        if ((craft_operation & CRAFT_MODE_NOTANK) == 0)
-                            _tanks.TanksStockpile(true);
+                        _tanks.TanksStockpile(true);
 
                         // make a 'lower power' handler?
                         _thrusters.powerDownThrusters(WicoThrusters.thrustAll, true);
@@ -1454,29 +1476,68 @@ namespace IngameScript
                         // TODO: ??? turn gyos off?
 
                         _power.BatteryCheck(0, true);
+                        
                         _timers.TimerTriggers("[DOCKED]");
-                        _wicoControl.SetState(1);
+                        if (_power.HasBatteries())
+                        {
+                            _wicoControl.SetState(1);
+                        }
+                        else _wicoControl.SetState(50);
+
                     }
                     else if (iState == 1)
                     {
+                        sbNotices.AppendLine("Charging batteries to 10%");
                         _power.BatteryCheck(0, true);
 //                        if (batteryPercentage < 0 || (craft_operation & CRAFT_MODE_NOPOWERMGMT) == 0)
 //                            _wicoControl.SetState(4; // skip battery checks
 //                        else 
-                            if (!_power.BatteryCheck(30, true))
-                                _wicoControl.SetState(2);
+                            if (!_power.BatteryCheck(10, true))
+                            _wicoControl.SetState(iState+1);
                     }
                     else if (iState == 2)
                     {
-                        if (!_power.BatteryCheck(80, true))
-                            _wicoControl.SetState(3);
+                        sbNotices.AppendLine("Charging batteries to 30%");
+                        if (!_power.BatteryCheck(30, true))
+                            _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 3)
                     {
-                        if (!_power.BatteryCheck(100, true))
-                            _wicoControl.SetState(1); // go back and check again
+                        sbNotices.AppendLine("Charging batteries to 40%");
+                        if (!_power.BatteryCheck(40, true))
+                            _wicoControl.SetState(iState + 1);
                     }
-                    else //state 4
+                    else if (iState == 4)
+                    {
+                        sbNotices.AppendLine("Charging batteries to 50%");
+                        if (!_power.BatteryCheck(50, true))
+                            _wicoControl.SetState(iState + 1);
+                    }
+                    else if (iState == 5)
+                    {
+                        sbNotices.AppendLine("Charging batteries to 60%");
+                        if (!_power.BatteryCheck(60, true))
+                            _wicoControl.SetState(iState + 1);
+                    }
+                    else if (iState == 4)
+                    {
+                        sbNotices.AppendLine("Charging batteries to 75%");
+                        if (!_power.BatteryCheck(75, true))
+                            _wicoControl.SetState(iState + 1);
+                    }
+                    else if (iState == 4)
+                    {
+                        sbNotices.AppendLine("Charging batteries to 90%");
+                        if (!_power.BatteryCheck(90, true))
+                            _wicoControl.SetState(iState + 1);
+                    }
+                    else if (iState == 4)
+                    {
+                        sbNotices.AppendLine("Charging batteries to 100%");
+                        if (!_power.BatteryCheck(100, true))
+                            _wicoControl.SetState(1);
+                    }
+                    else // allow display of info without setting
                     {
                         _power.BatteryCheck(0, true); //,textBlock);
                     }
@@ -1505,7 +1566,7 @@ namespace IngameScript
 //                            if (hydroPercent < 0.20f)
 //                                StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
 
-                            _program.Echo("H:" + (_tanks.hydroPercent * 100).ToString("000.0%"));
+                            _program.Echo("H:" + _tanks.hydroPercent.ToString("000.0%"));
                         }
                         else _program.Echo("No Hydrogen Tanks");
                         if (_power.batteryPercentage >= 0 && _power.batteryPercentage < _power.batterypctlow)
