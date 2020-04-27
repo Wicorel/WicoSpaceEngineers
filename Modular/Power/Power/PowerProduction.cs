@@ -278,6 +278,16 @@ namespace IngameScript
                 }
                 else return false;
             }
+
+            /// <summary>
+            /// Check if the local construct has any batteries.
+            /// </summary>
+            /// <returns></returns>
+            public bool HasBatteries()
+            {
+                return batteryList.Count >0;
+            }
+
             /// <summary>
             /// This routine goes through the batteries and turns the lowest to recharge and the others to discharge
             /// This is to prevent overloading power on the mother ship
@@ -344,20 +354,30 @@ namespace IngameScript
                     s += ":" + batteryList[ib].CustomName;
                     if (batteryList.Count < 10 && bEcho) _program.Echo(s);
 
-                    if (isRechargeSet(batteryList[ib]) && targetMax > 0)
+                    if (targetMax > 0) // only change things when targetMax>0
                     {
-                        if (percentthisbattery < targetMax)
-                            bFoundRecharging = true;
-                        else if (percentthisbattery > 99)
+                        if (b.ChargeMode==ChargeMode.Recharge)
                         {
-                            b.ChargeMode = ChargeMode.Recharge;
+                            if (percentthisbattery > Math.Min(targetMax,99))
+                            {
+                                // it no longer needs to be charging
+                                b.ChargeMode = ChargeMode.Auto;
+                            }
+                            else bFoundRecharging = true;
                         }
-                    }
-                    if (!(b.ChargeMode == ChargeMode.Recharge) && percentthisbattery < targetMax && !bFoundRecharging)
-                    {
-                        //                    Echo("Turning on Recharge for " + b.CustomName);
-                        b.ChargeMode = ChargeMode.Recharge;
-                        bFoundRecharging = true;
+                        else // not set to recharge
+                        {
+                            if (percentthisbattery < targetMax && !bFoundRecharging)
+                            {
+                                // first one found only.
+                                b.ChargeMode = ChargeMode.Recharge;
+                                bFoundRecharging = true;
+                            }
+                            else
+                            {
+                                b.ChargeMode = ChargeMode.Auto;
+                            }
+                        }
                     }
                 }
                 if (totalCapacity > 0)
@@ -421,7 +441,7 @@ namespace IngameScript
                 calcCurrentSolar();
                 reactorCheck(out currentReactorOutput);
                 CalcCurrentEngine();
-                BatteryCheck(0);
+                BatteryCheck(0,false);
                 calcCurrentTurbine();
 
                 maxTotalPower = maxBatteryPower + maxHydrogenPower + maxReactorPower + maxSolarPower +maxTurbinePower;
