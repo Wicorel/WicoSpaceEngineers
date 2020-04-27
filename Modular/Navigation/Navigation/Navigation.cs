@@ -859,8 +859,9 @@ namespace IngameScript
                 }
                 else if (iState == 160)
                 { //	160 move to Target
+                    _program.EchoInstructions("NAV:160");
                     sbNotices.AppendLine("Moving to Target");
-                    _program.Echo("Grav Moving to Target");
+                    _program.Echo("Moving to Target");
                     _program.Echo("Target="+VNavTarget.ToString());
                     Vector3D vTargetLocation = VNavTarget;
                     double velocityShip = shipController.GetShipSpeed();
