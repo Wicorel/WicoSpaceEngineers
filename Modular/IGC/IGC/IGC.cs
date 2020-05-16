@@ -41,20 +41,25 @@ namespace IngameScript
             /// </summary>
             List<IMyBroadcastListener> _broadcastChannels = new List<IMyBroadcastListener>();
 
-            MyGridProgram _gridProgram;
+            Program _program;
             bool _debug = false;
             IMyTextPanel _debugTextPanel;
 
+            string WicoIGCSection = "WicoIGC";
             /// <summary>
             /// Constructor.
             /// </summary>
             /// <param name="myProgram"></param>
             /// <param name="debug"></param>
-            public WicoIGC(MyGridProgram myProgram, bool debug = false)
+            public WicoIGC(Program myProgram)
             {
-                _gridProgram = myProgram;
-                _debug = debug;
-                _debugTextPanel = _gridProgram.GridTerminalSystem.GetBlockWithName("IGC Report") as IMyTextPanel;
+                _program = myProgram;
+
+                //                _debug = debug;
+                _debug = _program._CustomDataIni.Get(WicoIGCSection, "Debug").ToBoolean(_debug);
+                _program._CustomDataIni.Set(WicoIGCSection, "Debug", _debug);
+
+                _debugTextPanel = _program.GridTerminalSystem.GetBlockWithName("IGC Report") as IMyTextPanel;
                 if (_debug) _debugTextPanel?.WriteText("");
             }
 
@@ -69,14 +74,17 @@ namespace IngameScript
             {
                 IMyBroadcastListener publicChannel;
                 // IGC Init
-                publicChannel = _gridProgram.IGC.RegisterBroadcastListener(channelTag); // What it listens for
+                publicChannel = _program.IGC.RegisterBroadcastListener(channelTag); // What it listens for
                 if (setCallback) publicChannel.SetMessageCallback(channelTag); // What it will run the PB with once it has a message
 
                 // add broadcast message handlers
-                _broadcastMessageHandlers.Add(handler);
+                if(!_broadcastMessageHandlers.Contains(handler))
+                    _broadcastMessageHandlers.Add(handler);
 
                 // add to list of channels to check
-                _broadcastChannels.Add(publicChannel);
+                if(!_broadcastChannels.Contains(publicChannel))
+                   _broadcastChannels.Add(publicChannel);
+
                 return true;
             }
 
@@ -87,9 +95,10 @@ namespace IngameScript
             /// <returns></returns>
             public bool AddUnicastHandler(Action<MyIGCMessage> handler)
             {
-                _unicastListener = _gridProgram.IGC.UnicastListener;
+                _unicastListener = _program.IGC.UnicastListener;
                 _unicastListener.SetMessageCallback("UNICAST");
-                _unicastMessageHandlers.Add(handler);
+                if(!_unicastMessageHandlers.Contains(handler))
+                    _unicastMessageHandlers.Add(handler);
                 return true;
 
             }
@@ -99,9 +108,9 @@ namespace IngameScript
             public void ProcessIGCMessages()
             {
                 bool bFoundMessages = false;
-                if (_debug) _gridProgram.Echo(_broadcastChannels.Count.ToString() + " broadcast channels");
-                if (_debug) _gridProgram.Echo(_broadcastMessageHandlers.Count.ToString() + " broadcast message handlers");
-                if (_debug) _gridProgram.Echo(_unicastMessageHandlers.Count.ToString() + " unicast message handlers");
+                if (_debug) _program.Echo(_broadcastChannels.Count.ToString() + " broadcast channels");
+                if (_debug) _program.Echo(_broadcastMessageHandlers.Count.ToString() + " broadcast message handlers");
+                if (_debug) _program.Echo(_unicastMessageHandlers.Count.ToString() + " unicast message handlers");
 
 
                 // TODO: make this a yield return thing if processing takes too long
@@ -116,22 +125,22 @@ namespace IngameScript
                             var msg = channel.AcceptMessage();
                             if (_debug)
                             {
-                                _gridProgram.Echo("Broadcast received. TAG:" + msg.Tag);
+                                _program.Echo("Broadcast received. TAG:" + msg.Tag);
                                 _debugTextPanel?.WriteText("IGC:" +msg.Tag+" SRC:"+msg.Source.ToString("X")+"\n",true);
                             }
                             foreach (var handler in _broadcastMessageHandlers)
                             {
-                                if (_debug) _gridProgram.Echo("Calling handler");
+                                if (_debug) _program.Echo("Calling handler");
                                 handler(msg);
                             }
-                            if (_debug) _gridProgram.Echo("Broadcast Handlers completed");
+                            if (_debug) _program.Echo("Broadcast Handlers completed");
                         }
                     }
                 } while (bFoundMessages); // Process all pending messages
 
                 if (_unicastListener != null)
                 {
-                    if (_debug) _gridProgram.Echo("Unicast check");
+                    if (_debug) _program.Echo("Unicast check");
 
                     // TODO: make this a yield return thing if processing takes too long
                     do
@@ -143,17 +152,17 @@ namespace IngameScript
                         {
                             bFoundMessages = true;
                             var msg = _unicastListener.AcceptMessage();
-                            if (_debug) _gridProgram.Echo("Unicast received. TAG:" + msg.Tag);
+                            if (_debug) _program.Echo("Unicast received. TAG:" + msg.Tag);
                             foreach (var handler in _unicastMessageHandlers)
                             {
-                                if (_debug) _gridProgram.Echo(" Unicast Handler");
+                                if (_debug) _program.Echo(" Unicast Handler");
                                 // Call each handler
                                 handler(msg);
                             }
-                            if (_debug) _gridProgram.Echo("Broadcast Handlers completed");
+                            if (_debug) _program.Echo("Broadcast Handlers completed");
                         }
                     } while (bFoundMessages); // Process all pending messages
-                    if (_debug) _gridProgram.Echo("Unicast check completed");
+                    if (_debug) _program.Echo("Unicast check completed");
                 }
 
             }

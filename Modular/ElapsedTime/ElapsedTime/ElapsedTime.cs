@@ -26,10 +26,15 @@ namespace IngameScript
 
             bool _bDebug = false;
 
+            string wicoETString = "WicoET";
+
             public WicoElapsedTime(Program program, WicoControl wicoControl)
             {
                 _program = program;
                 _wicoControl = wicoControl;
+
+                _bDebug = _program._CustomDataIni.Get(wicoETString, "Debug").ToBoolean(_bDebug);
+                _program._CustomDataIni.Set(wicoETString, "Debug", _bDebug);
             }
 
             List<ElapsedTimers> TimerList = new List<ElapsedTimers>();

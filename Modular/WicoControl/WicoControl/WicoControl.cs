@@ -71,7 +71,7 @@ namespace IngameScript
 
             public const int MODE_LAUNCHPREP = 100; // oribital launch prep
             public const int MODE_ORBITALLAUNCH = 120;
-            public const int MODE_DESCENT = 150; // descend into space and stop NN meters above surface
+            public const int MODE_DESCENT = 150; // descend from space and stop NN meters above surface
             public const int MODE_ORBITALLAND = 151; // land from orbit
             public const int MODE_HOVER = 170;
             public const int MODE_LANDED = 180;
@@ -221,6 +221,8 @@ namespace IngameScript
             List<long> _WicoMainSubscribers = new List<long>();
             bool bIAmMain = true; // assume we are main
 
+            readonly string WicoControlSection = "WicoControl";
+
             // WIco Main/Config stuff
             readonly string WicoMainTag = "WicoTagMain";
             readonly string YouAreSub = "YOUARESUB";
@@ -232,10 +234,12 @@ namespace IngameScript
                 // Wico Configuration system
                 _WicoMainSubscribers.Clear();
 
+                _bDebug = thisProgram._CustomDataIni.Get(WicoControlSection, "Debug").ToBoolean(_bDebug);
+                thisProgram._CustomDataIni.Set(WicoControlSection, "Debug", _bDebug);
+
                 // send a messge to all local 'Wico' PBs to get configuration.  
                 // This will be used to determine the 'master' PB and to know who to send requests to
                 thisProgram.IGC.SendBroadcastMessage(WicoMainTag, "Configure", localConstructs);
-
 
                 thisProgram.wicoIGC.AddPublicHandler(WicoMainTag, WicoControlMessagehandler);
                 thisProgram.wicoIGC.AddUnicastHandler(WicoConfigUnicastListener);
@@ -353,7 +357,8 @@ namespace IngameScript
                     int theNewMode = Convert.ToInt32(aLines[2]);
                     int theNewState = Convert.ToInt32(aLines[3]);
 
-                    if(_iMode != theNewMode)
+                    if (_bDebug) thisProgram.ErrorLog("IGCS M=" + theNewMode + " S=" + theNewState + " OM=" + IMode + " OS=" + _iState);
+                    if (_iMode != theNewMode)
                         HandleModeChange(_iMode, _iState, theNewMode, theNewState);
 
                     _iMode = theNewMode;
