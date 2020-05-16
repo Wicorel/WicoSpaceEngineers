@@ -23,6 +23,8 @@ namespace IngameScript
         {
             public int cargopctmin = 5;
             public int cargopcent = -1;
+            public int cargohighwater = 95;
+
             double cargoMult = -1;
             double totalCurrentVolume = 0.0; // volume
             bool bCreative = false;
@@ -49,7 +51,10 @@ namespace IngameScript
                 cargopctmin = _program._CustomDataIni.Get(sCargoSection, "cargopctmin").ToInt32(cargopctmin);
                 _program._CustomDataIni.Set(sCargoSection, "cargopctmin", cargopctmin);
 
-                if(_displays!=null) _displays.AddSurfaceHandler("CARGOCHECK", SurfaceHandler);
+                cargohighwater = _program._CustomDataIni.Get(sCargoSection, "cargohighwater").ToInt32(cargohighwater);
+                _program._CustomDataIni.Set(sCargoSection, "cargohighwater", cargohighwater);
+
+                if (_displays!=null) _displays.AddSurfaceHandler("CARGOCHECK", SurfaceHandler);
             }
 
             StringBuilder sbNotices = new StringBuilder(300);
@@ -62,7 +67,7 @@ namespace IngameScript
                     if (ActionType == Displays.DODRAW)
                     {
                         tsurface.WriteText(sbModeInfo);
-                        if (tsurface.SurfaceSize.Y < 512)
+                        if (tsurface.SurfaceSize.Y < 256)
                         { // small/corner LCD
 
                         }
@@ -76,7 +81,7 @@ namespace IngameScript
                     {
                         tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
                         tsurface.WriteText("");
-                        if (tsurface.SurfaceSize.Y < 512)
+                        if (tsurface.SurfaceSize.Y < 256)
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
                             tsurface.FontSize = 2;
@@ -136,7 +141,6 @@ namespace IngameScript
             {
 //                Ini.Set(sCargoSection, "cargopctmin", cargopctmin);
             }
-
 
 
             //
