@@ -105,7 +105,7 @@ namespace IngameScript
             }
             _SaveIni.Set(OurName + sVersion, "MEENITYID", Me.EntityId);
 
-            wicoIGC = new WicoIGC(this, false); // Must be first as some use it in constructor
+            wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
             wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
             ModuleControlInit();
 
@@ -293,7 +293,7 @@ namespace IngameScript
             if ((updateSource & (utTriggers)) > 0)
             {
                 //                Echo("Triggers:"+argument);
-//                ErrorLog("Trigger:" + argument);
+                ErrorLog("Trigger:"+updateSource.ToString()+":" + argument);
                 MyCommandLine useCommandLine = null;
                 if (myCommandLine.TryParse(argument))
                 {
