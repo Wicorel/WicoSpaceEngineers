@@ -60,7 +60,7 @@ namespace IngameScript
 
 
                 _program.moduleName += " Navigation";
-                _program.moduleList += "\nNavigation V4.2";
+                _program.moduleList += "\nNavigation V4.2c";
 
                 NAVEmulateOld=_program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
                 _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
@@ -104,7 +104,7 @@ namespace IngameScript
                             )
                         {
                             tsurface.WriteText(sbModeInfo);
-                            if (tsurface.SurfaceSize.Y < 512)
+                            if (tsurface.SurfaceSize.Y < 256)
                             { // small/corner LCD
 
                             }
@@ -118,7 +118,7 @@ namespace IngameScript
                     {
                         tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
                         tsurface.WriteText("");
-                        if (tsurface.SurfaceSize.Y < 512)
+                        if (tsurface.SurfaceSize.Y < 256)
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
                             tsurface.FontSize = 2;
@@ -713,7 +713,7 @@ namespace IngameScript
                             _wicoBlockMaster.DesiredMinTravelElevation = 75; // for EFM getting to target 'arrived' radius
                     }
 
-                    if (dGravity > 0)
+                    if (dGravity <= 0)
                         _wicoControl.SetState(160);
                     else
                     if (BValidNavTarget)
@@ -859,7 +859,7 @@ namespace IngameScript
                 }
                 else if (iState == 160)
                 { //	160 move to Target
-                    _program.EchoInstructions("NAV:160");
+//                    _program.EchoInstructions("NAV:160");
                     sbNotices.AppendLine("Moving to Target");
                     _program.Echo("Moving to Target");
                     _program.Echo("Target="+VNavTarget.ToString());
