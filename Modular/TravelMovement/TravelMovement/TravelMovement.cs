@@ -269,9 +269,11 @@ namespace IngameScript
 
                 if (!(btmWheels || btmRotor))
                 {
-                    dtmPrecision = _program.wicoThrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmPrecisionSpeed + (dtmApproachSpeed - dtmPrecisionSpeed) / 2, 0);
-                    dtmApproach = _program.wicoThrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmApproachSpeed + (dtmFarSpeed - dtmApproachSpeed) / 2, 0);
-                    dtmFar = _program.wicoThrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmFarSpeed, 0); // calculate maximum stopping distance at full speed                }
+                    dtmPrecision = _program.wicoThrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmPrecisionSpeed, 0);
+                    dtmApproach = dtmPrecision + _program.wicoThrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmApproachSpeed, 0);
+                    dtmFar = dtmApproach + _program.wicoThrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmFarSpeed, 0); 
+//                  dtmApproach = _program.wicoThrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmApproachSpeed + (dtmFarSpeed - dtmApproachSpeed) / 2, 0);
+//                  dtmPrecision = _program.wicoThrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmPrecisionSpeed + (dtmApproachSpeed - dtmPrecisionSpeed) / 2, 0);
 
                     if (dTMDebug) _program.ErrorLog("d=" + distance.ToString("0.0"));
                     if (dTMDebug) _program.ErrorLog("FW T=" + _program.wicoThrusters.calculateMaxThrust(thrustTmForwardList));
@@ -641,7 +643,7 @@ namespace IngameScript
                         {
                             case 0:
                                 if (_program.wicoCameras.CameraForwardScan(scanDistance))
-                                {
+                                { // center scan.
                                     bDidScan = true;
                                 }
                                 break;
@@ -799,7 +801,7 @@ namespace IngameScript
 
                     //TODO: before starting up full blast thrust, check for CLOSE collision 
 
-                    if ((distance+arrivalDistance+velocityShip*2) > dtmFar && !btmApproach)
+                    if ((distance + arrivalDistance + velocityShip * 2) > dtmFar && !btmApproach)
                     {
                         // we are 'far' from target location.  use fastest movement
                         //                    if(dTMDebug)
@@ -923,7 +925,6 @@ namespace IngameScript
                 double maxDeltaV = maxThrust / myMass.PhysicalMass;
                 // Magic..
                 double optimalV, secondstozero, stoppingM;
-                _program.EchoInstructions("COS A");
 
                 if (dTMDebug)
                 {
