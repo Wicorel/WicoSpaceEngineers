@@ -86,11 +86,10 @@ namespace IngameScript
                         {
                             foreach (var myBase in baseList)
                             {
-                                
-                                sbNotices.AppendLine(myBase.baseName + " " + (_program.Me.GetPosition() - myBase.position).Length().ToString("N0") + "Meters");
+                                sbNotices.AppendLine(myBase.baseName + " " + (_program.Me.GetPosition() - myBase.position).Length().ToString("N0") + " Meters");
                             }
                             tsurface.WriteText(sbModeInfo);
-                            if (tsurface.SurfaceSize.Y < 512)
+                            if (tsurface.SurfaceSize.Y < 256)
                             { // small/corner LCD
 
                             }
@@ -104,7 +103,7 @@ namespace IngameScript
                     {
                         tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
                         tsurface.WriteText("");
-                        if (tsurface.SurfaceSize.Y < 512)
+                        if (tsurface.SurfaceSize.Y < 256)
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
                             tsurface.FontSize = 2;
