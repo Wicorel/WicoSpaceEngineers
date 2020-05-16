@@ -163,6 +163,9 @@ namespace IngameScript
                 CamerasInit();
                 double foundmax = 0;
                 lastCamera = null;
+
+                // TODO: Get min & max pitch, yaw from camera customdata to allow partial obscured cameras.
+
                 for (int i = 0; i < cameraList.Count; i++)
                 {
                     double thismax = ((IMyCameraBlock)cameraList[i]).AvailableScanRange;
@@ -190,10 +193,6 @@ namespace IngameScript
                         detectedInfo = new MyDetectedEntityInfo();
                     lastDetectedInfo = detectedInfo;
                     lastCamera = camera;
-
-                    //                    if (!lastDetectedInfo.IsEmpty())
-                    //                        addDetectedEntity(lastDetectedInfo);
-
                     return true;
                 }
                 else
@@ -202,7 +201,6 @@ namespace IngameScript
                 }
 
                 return false;
-
             }
 
             public bool CameraForwardScan(Vector3D targetPos)
@@ -257,10 +255,13 @@ namespace IngameScript
                 {
                     //                Echo("Scanning with Camera:" + camera.CustomName);
                     lastDetectedInfo = camera.Raycast(targetPos);
+                    if (localGrids.Contains(lastDetectedInfo.EntityId))
+                    {
+                        lastDetectedInfo = new MyDetectedEntityInfo();
+                        thisProgram.ErrorLog("Detected Self");
+                        return true;
+                    }
                     lastCamera = camera;
-
-                    //                    if (!lastDetectedInfo.IsEmpty())
-                    //                        addDetectedEntity(lastDetectedInfo);
 
                     return true;
                 }
