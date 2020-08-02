@@ -26,6 +26,7 @@ namespace IngameScript
             List<IMyTerminalBlock> localConnectors = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> localDockConnectors = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> localBaseConnectors = new List<IMyTerminalBlock>();
+            List<IMyTerminalBlock> localNondesignatedConnectors = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> localEjectors = new List<IMyTerminalBlock>();
 
             Program thisProgram;
@@ -52,10 +53,19 @@ namespace IngameScript
                     else
                     {
                         localConnectors.Add(tb);
+                        bool bDesignated = false;
                         if (tb.CustomName.Contains("[DOCK]") || tb.CustomData.Contains("[DOCK]"))
+                        {
+                            bDesignated = true;
                             localDockConnectors.Add(tb);
+                        }
                         if (tb.CustomName.Contains("[BASE]") || tb.CustomData.Contains("[BASE]"))
+                        {
+                            bDesignated = true;
                             localBaseConnectors.Add(tb);
+                        }
+                        if (!bDesignated)
+                            localNondesignatedConnectors.Add(tb);
                     }
                 }
             }
@@ -69,7 +79,8 @@ namespace IngameScript
             public bool AnyConnectorIsLocked()
             {
                 List<IMyTerminalBlock> useConnectors = localDockConnectors;
-                if (useConnectors.Count < 1) useConnectors = localConnectors;
+                if (useConnectors.Count < 1) useConnectors = localNondesignatedConnectors;
+                if (localBaseConnectors.Count < 1 && useConnectors.Count < 1) useConnectors = localConnectors;
                 for (int i = 0; i < useConnectors.Count; i++)
                 {
                     var sc1 = useConnectors[i] as IMyShipConnector;
@@ -84,7 +95,9 @@ namespace IngameScript
             public bool AnyConnectorIsConnected()
             {
                 List<IMyTerminalBlock> useConnectors = localDockConnectors;
-                if (useConnectors.Count < 1) useConnectors = localConnectors;
+                if (useConnectors.Count < 1) useConnectors = localNondesignatedConnectors;
+                if (localBaseConnectors.Count < 1 && useConnectors.Count < 1) useConnectors = localConnectors;
+                thisProgram.Echo("ACIC() # connectors=" + useConnectors.Count.ToString());
                 for (int i = 0; i < useConnectors.Count; i++)
                 {
                     var sc1 = useConnectors[i] as IMyShipConnector;
@@ -106,7 +119,8 @@ namespace IngameScript
             public void ConnectAnyConnectors(bool bConnect = true, bool bOn = true)
             {
                 List<IMyTerminalBlock> useConnectors = localDockConnectors;
-                if (useConnectors.Count < 1) useConnectors = localConnectors;
+                if (useConnectors.Count < 1) useConnectors = localNondesignatedConnectors;
+                if (localBaseConnectors.Count < 1 && useConnectors.Count < 1) useConnectors = localConnectors;
                 for (int i = 0; i < useConnectors.Count; i++)
                 {
                     var sc1 = useConnectors[i] as IMyShipConnector;
@@ -148,7 +162,8 @@ namespace IngameScript
             public IMyTerminalBlock GetConnectedConnector(bool bMe = false)
             {
                 List<IMyTerminalBlock> useConnectors = localDockConnectors;
-                if (useConnectors.Count < 1) useConnectors = localConnectors;
+                if (useConnectors.Count < 1) useConnectors = localNondesignatedConnectors;
+                if (localBaseConnectors.Count < 1 && useConnectors.Count < 1) useConnectors = localConnectors;
 
                 for (int i = 0; i < localDockConnectors.Count; i++)
                 {
@@ -180,7 +195,8 @@ namespace IngameScript
             public IMyTerminalBlock GetDockingConnector() // maybe pass in prefered orientation?
             { // dumb mode for now.
                 List<IMyTerminalBlock> useConnectors = localDockConnectors;
-                if (useConnectors.Count < 1) useConnectors = localConnectors;
+                if (useConnectors.Count < 1) useConnectors = localNondesignatedConnectors;
+                if (localBaseConnectors.Count < 1 && useConnectors.Count < 1) useConnectors = localConnectors;
 
                 if (localDockConnectors.Count > 0)
                 {
@@ -207,6 +223,16 @@ namespace IngameScript
                     if (b.Enabled)
                         b.Enabled = false;
                 }
+            }
+
+            public void DisplayInfo()
+            {
+                thisProgram.Echo("localConnectors#=" + localConnectors.Count);
+                thisProgram.Echo("localDockConnectors#=" + localDockConnectors.Count);
+                thisProgram.Echo("localBaseConnectors#=" + localBaseConnectors.Count);
+                thisProgram.Echo("localNDConnectors#=" + localNondesignatedConnectors.Count);
+                thisProgram.Echo("localEjectors#=" + localEjectors.Count);
+                thisProgram.Echo("AnyConnected=" + AnyConnectorIsConnected().ToString());
             }
 
         }
