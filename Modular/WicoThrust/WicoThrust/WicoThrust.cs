@@ -27,7 +27,8 @@ namespace IngameScript
         {
             List<IMyTerminalBlock> thrustAllList = new List<IMyTerminalBlock>();
 
-            Program thisProgram;
+            Program _program;
+            WicoBlockMaster _wicoBlockMaster;
 
             string sThrusterSection = "THRUSTERS";
 
@@ -38,22 +39,24 @@ namespace IngameScript
                 return thrustAllList.Count;
             }
 
-            public WicoThrusters(Program program)
+            public WicoThrusters(Program program, WicoBlockMaster wicoBlockMaster)
             {
-                thisProgram = program;
+                _program = program;
+                _wicoBlockMaster = wicoBlockMaster;
+
                 ThrustersInit();
             }
             public void ThrustersInit()
             {
                 // TODO: change to handler. pay attention to execution sequence that results. (we may need this defined before getting blocks)
-                sCutterThruster=thisProgram._CustomDataIni.Get(sThrusterSection, "CutterThruster").ToString(sCutterThruster);
-                thisProgram._CustomDataIni.Set(sThrusterSection, "CutterThruster", sCutterThruster);
+                sCutterThruster=_program._CustomDataIni.Get(sThrusterSection, "CutterThruster").ToString(sCutterThruster);
+                _program._CustomDataIni.Set(sThrusterSection, "CutterThruster", sCutterThruster);
 
                 // Minimal init; just add handlers
                 thrustAllList.Clear();
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(ThrusterParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
-                thisProgram.AddResetMotionHandler(ResetMotionHandler);
+                _wicoBlockMaster.AddLocalBlockHandler(ThrusterParseHandler);
+                _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                _program.AddResetMotionHandler(ResetMotionHandler);
             }
 
             void ResetMotionHandler(bool bNoDrills = false)
@@ -443,7 +446,7 @@ namespace IngameScript
                 return;
             }
 
-            public bool CalculateHoverThrust(IMyShipController ShipController, List<IMyTerminalBlock> thrusters, out float atmoPercent, out float hydroPercent, out float ionPercent)
+            public bool CalculateHoverThrust( List<IMyTerminalBlock> thrusters, out float atmoPercent, out float hydroPercent, out float ionPercent)
             {
                 atmoPercent = 0;
                 hydroPercent = 0;
@@ -452,11 +455,10 @@ namespace IngameScript
                 double atmoThrust = calculateMaxThrust(thrusters, thrustatmo);
                 double hydroThrust = calculateMaxThrust(thrusters, thrusthydro);
 
-                MyShipMass myMass;
-                myMass = ShipController.CalculateShipMass();
-                Vector3D vGrav = ShipController.GetNaturalGravity();
+                double physicalMass = _wicoBlockMaster.GetAllPhysicalMass();
+                Vector3D vGrav = _wicoBlockMaster.GetNaturalGravity();
                 double dGravity = vGrav.Length() / 9.81;
-                double hoverthrust = myMass.PhysicalMass * dGravity * 9.810;
+                double hoverthrust = physicalMass * dGravity * 9.810;
 
                 if (atmoThrust > 0)
                 {
