@@ -41,7 +41,7 @@ namespace IngameScript
                 _asteroids = asteroids;
 
                 _program.moduleName += " Scans";
-                _program.moduleList += "\nScans V4";
+                _program.moduleList += "\nScans V4.1";
 
 //                _program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
 //                _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);

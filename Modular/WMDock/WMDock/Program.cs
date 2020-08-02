@@ -63,7 +63,7 @@ namespace IngameScript
             //moduleName += "\nOrbital V4";
             //sVersion = "4";
 
-            wicoThrusters = new WicoThrusters(this);
+            wicoThrusters = new WicoThrusters(this, wicoBlockMaster);
             wicoGyros = new WicoGyros(this, wicoBlockMaster);
             wicoGasTanks = new GasTanks(this, wicoBlockMaster);
             wicoGasGens = new GasGens(this);
@@ -92,7 +92,7 @@ namespace IngameScript
             //            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
 
             /// DEBUG
-            //            wicoIGC.SetDebug(true);
+//            wicoIGC.SetDebug(true);
 //            _wicoControl.SetDebug(true);
             // wicoElapsedTime.SetDebug(true);
         }
@@ -108,20 +108,8 @@ namespace IngameScript
         {
             if(bInitDone)
             {
-                int engines = 0;
-                /* Testing hydrogen engine processing
-                double currentoutput = 0;
-                double maxoutput = 0;
-                engines = wicoEngines.CurrentOutput(ref currentoutput, ref maxoutput);
-                Echo("Engines: " + engines.ToString());
-                if(engines>0)
-                {
-                    Echo("XMaxoutput=" + maxoutput.ToString() + " Current=" + currentoutput.ToString());
-                    Echo("Tank Filled=" + (wicoEngines.tanksFill()*100).ToString() + "%");
-                }
-                */
-
                 wicoPower.CalcPower();
+                int engines = 0;
                 engines = wicoPower.EnginesCount();
                 Echo("H Engines: " + engines.ToString());
                 if (engines > 0)

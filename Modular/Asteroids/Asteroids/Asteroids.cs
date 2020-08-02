@@ -53,7 +53,7 @@ namespace IngameScript
                         sbModeInfo.AppendLine(asteroidsInfo.Count + " Known Asteroids");
                         foreach(var ai in asteroidsInfo)
                         {
-                            sbNotices.AppendLine(" " + (_program.Me.GetPosition() - ai.Position).Length().ToString("N0")+"Meters");
+                            sbNotices.AppendLine(" " + (_program.Me.GetPosition() - ai.Position).Length().ToString("N0")+" Meters");
                         }
                         tsurface.WriteText(sbModeInfo);
                         if (tsurface.SurfaceSize.Y < 512)

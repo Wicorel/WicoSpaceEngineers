@@ -1,10 +1,12 @@
 ﻿Wico Modular
 Space Dock
 
-Feb 28, 2019
-
 Commands:
 
+godock: Find a base and request a docking connector. Move to it and then connect
+relaunch: Toggle automatic relaunch ability
+refuel: toggle automatic refuel ability.  Will automatically godock when fuel is low
+launch: Disconnect from connector and move away from it.
 
-<<STEAMLINK>>
+https://steamcommunity.com/sharedfiles/filedetails/?id=2073024363
 

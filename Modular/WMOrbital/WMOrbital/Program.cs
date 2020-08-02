@@ -50,7 +50,7 @@ namespace IngameScript
             //moduleName += "\nOrbital V4";
             //sVersion = "4";
 
-            wicoThrusters = new WicoThrusters(this);
+            wicoThrusters = new WicoThrusters(this,wicoBlockMaster);
             wicoGyros = new WicoGyros(this, wicoBlockMaster);
             wicoGasTanks = new GasTanks(this,wicoBlockMaster);
             wicoGasGens = new GasGens(this);
@@ -120,6 +120,9 @@ namespace IngameScript
                 }
 
                 _displays.EchoInfo();
+
+                //                wicoConnectors.DisplayInfo();
+                wicoBlockMaster.DisplayInfo();
 
                 // ensure we run at least at slow speed for updates.
                 _wicoControl.WantSlow(); 

@@ -59,7 +59,7 @@ namespace IngameScript
         {
             wicoTravelMovement = new TravelMovement(this, _wicoControl);
 
-            wicoThrusters = new WicoThrusters(this);
+            wicoThrusters = new WicoThrusters(this, wicoBlockMaster);
             wicoGyros = new WicoGyros(this, wicoBlockMaster);
             wicoGasTanks = new GasTanks(this,wicoBlockMaster);
             wicoGasGens = new GasGens(this);
@@ -82,7 +82,7 @@ namespace IngameScript
             /// DEBUG
             //            wicoIGC.SetDebug(true);
 //            _wicoControl.SetDebug(true);
-            // wicoElapsedTime.SetDebug(true);
+//             wicoElapsedTime.SetDebug(true);
 
         }
         public void ModulePreMain(string argument, UpdateType updateSource)

@@ -293,7 +293,7 @@ namespace IngameScript
             if ((updateSource & (utTriggers)) > 0)
             {
                 //                Echo("Triggers:"+argument);
-                ErrorLog("Trigger:"+updateSource.ToString()+":" + argument);
+//               ErrorLog("Trigger:"+updateSource.ToString()+":" + argument);
                 MyCommandLine useCommandLine = null;
                 if (myCommandLine.TryParse(argument))
                 {

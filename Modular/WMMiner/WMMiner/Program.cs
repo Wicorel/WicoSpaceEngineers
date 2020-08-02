@@ -63,7 +63,7 @@ namespace IngameScript
         void ModuleProgramInit()
         {
 
-            wicoThrusters = new WicoThrusters(this);
+            wicoThrusters = new WicoThrusters(this, wicoBlockMaster);
             wicoGyros = new WicoGyros(this, wicoBlockMaster);
             wicoGasTanks = new GasTanks(this, wicoBlockMaster);
             wicoGasGens = new GasGens(this);
@@ -84,8 +84,8 @@ namespace IngameScript
             _dock = new DockBase(this);
             Echo("_dock");
 //            _scanBase = new ScanBase(this, _wicoControl);
-            _scanMode = new ScansMode(this, _wicoControl, wicoBlockMaster, wicoIGC, wicoCameras, _asteroids);
             _asteroids = new Asteroids(this, _wicoControl, wicoIGC,_displays);
+            _scanMode = new ScansMode(this, _wicoControl, wicoBlockMaster, wicoIGC, wicoCameras, _asteroids);
             _ores = new Ores(this, wicoBlockMaster, _wicoControl, wicoIGC, _asteroids, _displays);
 
             Echo("_ores");

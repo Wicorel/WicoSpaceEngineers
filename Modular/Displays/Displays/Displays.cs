@@ -58,6 +58,7 @@ namespace IngameScript
                     if(tb.CustomName.Contains(tag))
                     {
                         var tsp = tb as IMyTextSurfaceProvider;
+                        var x=tsp.SurfaceCount;
                         var tsurface = tsp.GetSurface(0);
                         if(tsurface!=null)
                             _surfaces.Add(tsurface);

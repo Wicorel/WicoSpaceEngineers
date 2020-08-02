@@ -831,7 +831,7 @@ namespace IngameScript
                             float hydro;
                             float ion;
 
-                            _wicoThrusters.CalculateHoverThrust(shipController, thrustForwardList, out atmo, out hydro, out ion);
+                            _wicoThrusters.CalculateHoverThrust( thrustForwardList, out atmo, out hydro, out ion);
                             atmo += 1;
                             hydro += 1;
                             ion += 1;
@@ -925,7 +925,7 @@ namespace IngameScript
                         float atmo;
                         float hydro;
                         float ion;
-                        _wicoThrusters.CalculateHoverThrust(shipController, thrustUpList, out atmo, out hydro, out ion);
+                        _wicoThrusters.CalculateHoverThrust( thrustUpList, out atmo, out hydro, out ion);
 
                         if (
                             //                        !bSled && !bRotor && 
