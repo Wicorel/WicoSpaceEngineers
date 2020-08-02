@@ -41,8 +41,9 @@ namespace IngameScript
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
 
-//                _program.AddPostInitHandler(PostInitHandler());
+                //                _program.AddPostInitHandler(PostInitHandler());
                 _program.AddPostInitHandler(LocalBlocksInit());
+                _program.AddPostInitHandler(RemoteBlocksInit());
 
                 DesiredMinTravelElevation = (float)_program._CustomDataIni.Get("Ship", "MinTravelElevation").ToDouble(DesiredMinTravelElevation);
                 _program._CustomDataIni.Set("Ship", "MinTravelElevation", DesiredMinTravelElevation);
@@ -215,8 +216,32 @@ namespace IngameScript
                 if (shipcontroller != null)
                     vNG = shipcontroller.GetNaturalGravity();
                 return vNG;
-
             }
+
+            public double GetAllPhysicalMass()
+            {
+                double effectiveMass = -1;
+                effectiveMass = GetPhysicalMass();
+                foreach(var grid in remoteCubeGrids)
+                {
+                    bool bGridDone = false;
+                    foreach(var tb in gtsRemoteBlocks)
+                    {
+                        if(tb is IMyShipController && tb.CubeGrid==grid)
+                        {
+                            var sc = tb as IMyShipController;
+                            MyShipMass myMass;
+                            myMass = sc.CalculateShipMass();
+                            effectiveMass += myMass.PhysicalMass;
+                            bGridDone = true;
+                            break;
+                        }
+                    }
+                    if (bGridDone) break;
+                }
+                return effectiveMass;
+            }
+
             public double GetPhysicalMass()
             {
                 double effectiveMass = -1;
@@ -228,17 +253,31 @@ namespace IngameScript
                     effectiveMass = myMass.PhysicalMass;
                 }
                 return effectiveMass;
-
             }
 
             #endregion
+
+            public void DisplayInfo()
+            {
+                _program.Echo("LBlocks =" + localBlocksCount + " grids=" + localCubeGrids.Count);
+                _program.Echo("RBlocks =" + remoteBlocksCount + " grids=" + remoteCubeGrids.Count);
+                _program.Echo("PM=" + GetPhysicalMass().ToString("N2"));
+                _program.Echo("APM=" + GetAllPhysicalMass().ToString("N2"));
+
+            }
 
             #region BLOCKHANDLING
             List<IMyTerminalBlock> gtsLocalBlocks = new List<IMyTerminalBlock>();
             public long localBlocksCount = 0;
 
+            bool CollectRemote = false;
+
             List<IMyTerminalBlock> gtsRemoteBlocks = new List<IMyTerminalBlock>();
             long remoteBlocksCount = 0;
+
+            List<IMyCubeGrid> localCubeGrids = new List<IMyCubeGrid>();
+
+            List<IMyCubeGrid> remoteCubeGrids = new List<IMyCubeGrid>();
 
             List<Action<IMyTerminalBlock>> WicoLocalBlockParseHandlers = new List<Action<IMyTerminalBlock>>();
             List<Action<IMyTerminalBlock>> WicoRemoteBlockParseHandlers = new List<Action<IMyTerminalBlock>>();
@@ -278,8 +317,9 @@ namespace IngameScript
                 yield return true;
                 float fper = 0;
 
-                //TODO: Load defaults from CustomData
                 gtsLocalBlocks.Clear();
+                localCubeGrids.Clear();
+
                 GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, (x1 => x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
                 fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
                 if (fper > 0.75f) yield return true;
@@ -288,6 +328,10 @@ namespace IngameScript
 //                _program.EchoInstructions("WBM:LBI: #Handlers=" + WicoLocalBlockParseHandlers.Count);
                 foreach (var tb in gtsLocalBlocks)
                 {
+                    if(!localCubeGrids.Contains(tb.CubeGrid))
+                    {
+                        localCubeGrids.Add(tb.CubeGrid);
+                    }
                     fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
                     if (fper > 0.75f)
                     {
@@ -318,36 +362,63 @@ namespace IngameScript
                 }
             }
 
-            public IEnumerator<bool> PostInitHandler()
+            /// <summary>
+            /// Call to initialize the Remote blocks and all subscribers
+            /// </summary>
+            public IEnumerator<bool> RemoteBlocksInit()
             {
                 yield return true;
-                LocalBlocksInit();
-                yield return false;
-            }
+                float fper = 0;
 
-            /// <summary>
-            /// Call to initialize all remote blocks and their handlers
-            /// </summary>
-            public void RemoteBlocksInit()
-            {
                 gtsRemoteBlocks.Clear();
-                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsRemoteBlocks, (x1 => !x1.IsSameConstructAs(_program.Me)));
-                remoteBlocksCount = gtsRemoteBlocks.Count;
-                foreach (var tb in gtsRemoteBlocks)
+                remoteCubeGrids.Clear();
+
+                if (CollectRemote)
                 {
-                    foreach (var handler in WicoRemoteBlockParseHandlers)
+                    GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsRemoteBlocks, (x1 => !x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
+                    fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
+                    if (fper > 0.75f) yield return true;
+
+                    remoteBlocksCount = gtsRemoteBlocks.Count;
+                    foreach (var tb in gtsRemoteBlocks)
                     {
-                        handler(tb);
+                        if (!remoteCubeGrids.Contains(tb.CubeGrid))
+                        {
+                            remoteCubeGrids.Add(tb.CubeGrid);
+                        }
+                        fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
+                        if (fper > 0.75f)
+                        {
+                            //                        _program.ErrorLog("Yield return");
+                            yield return true;
+                        }
+                        //                    _program.EchoInstructions("WBM:LBI+TB:"+tb.CustomName);
+                        foreach (var handler in WicoRemoteBlockParseHandlers)
+                        {
+                            fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
+                            if (fper > 0.75f)
+                            {
+                                //                            _program.ErrorLog("Yield return");
+                                yield return true;
+                            }
+                            handler(tb);
+                        }
                     }
                 }
             }
             void RemoteBlocksChanged()
             {
-                foreach (var handler in WicoRemoteBlockChangedHandlers)
+                foreach (var handler in WicoLocalBlockChangedHandlers)
                 {
                     handler();
                 }
             }
+
+            public void SetCollectRemote(bool bUse=true)
+            {
+                CollectRemote = bUse;
+            }
+ 
             public List<IMyTerminalBlock> GetBlocksContains<T>(string Keyword = null) where T : class
             {
                 var Output = new List<IMyTerminalBlock>();
