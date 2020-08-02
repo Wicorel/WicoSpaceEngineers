@@ -58,7 +58,7 @@ namespace IngameScript
                 
 
                 _program.moduleName += " Orbital";
-                _program.moduleList += "\nOrbital V4.2";
+                _program.moduleList += "\nOrbital V4.2b";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -450,7 +450,7 @@ namespace IngameScript
 
 
                     //                    calculateBestGravityThrust();
-
+                    
                     bHasAtmo = false;
                     bHasHydro = false;
                     bHasIon = false;
@@ -567,7 +567,7 @@ namespace IngameScript
                 if (iState == 10)
                 {
                     _wicoControl.WantOnce();
-                    _wicoThrusters.CalculateHoverThrust(shipController, thrustOrbitalUpList, out fOrbitalAtmoPower, out fOrbitalHydroPower, out fOrbitalIonPower);
+                    _wicoThrusters.CalculateHoverThrust( thrustOrbitalUpList, out fOrbitalAtmoPower, out fOrbitalHydroPower, out fOrbitalIonPower);
                     _wicoThrusters.powerDownThrusters(thrustOrbitalDownList, WicoThrusters.thrustAll, true);
 
                     double physicalMass = _wicoBlockMaster.GetPhysicalMass();
@@ -717,7 +717,7 @@ namespace IngameScript
                     if (expectedV > dMin)
                     // if(velocityShip>(fMaxMps-5))
                     {
-                        bool bThrustOK = _wicoThrusters.CalculateHoverThrust(shipController, thrustOrbitalUpList, out fOrbitalAtmoPower, out fOrbitalHydroPower, out fOrbitalIonPower);
+                        bool bThrustOK = _wicoThrusters.CalculateHoverThrust(thrustOrbitalUpList, out fOrbitalAtmoPower, out fOrbitalHydroPower, out fOrbitalIonPower);
                         //                        if (bOrbitalLaunchDebug) 
                         //                        _program.Echo("hover thrust:" + fOrbitalAtmoPower.ToString("0.00") + ":" + fOrbitalHydroPower.ToString("0.00") + ":" + fOrbitalIonPower.ToString("0.00"));
                         //                        if (bOrbitalLaunchDebug) StatusLog("hover thrust:" + fOrbitalAtmoPower.ToString("0.00") + ":" + fOrbitalHydroPower.ToString("0.00") + ":" + fOrbitalIonPower.ToString("0.00"), textPanelReport);
@@ -972,8 +972,6 @@ namespace IngameScript
                     //                    _program.sMasterReporting += "OUP thrust0=" + thrustOrbitalUpList[0].CustomName + "\n";
                     //                    _program.sMasterReporting += "OBACK thrust0=" + thrustOrbitalDownList[0].CustomName + "\n";
 
-
-
                     Matrix or1;
                     if (thrustOrbitalUpList.Count > 0)
                     {
@@ -987,15 +985,13 @@ namespace IngameScript
                     {
                         shipController.Orientation.GetMatrix(out or1);
                         vBestThrustOrientation = or1.Down; // assumes forward facing cockpit
-                        //vBestThrustOrientation = shipController.WorldMatrix.Down;
                     }
+                    _gyros.SetMinAngle(0.005f);
                     _wicoControl.SetState(10);
-                    //iState = 10;
-                    //                powerDownThrusters(thrustAllList, thrustAll); // turns ON thrusters
                 }
 
                 float fAtmoPower, fHydroPower, fIonPower;
-                _wicoThrusters.CalculateHoverThrust(shipController, thrustOrbitalUpList, out fAtmoPower, out fHydroPower, out fIonPower);
+                _wicoThrusters.CalculateHoverThrust(thrustOrbitalUpList, out fAtmoPower, out fHydroPower, out fIonPower);
 
                 if (fAtmoPower > 75)
                 {
@@ -1100,14 +1096,11 @@ namespace IngameScript
                         // gears just became locked
                         _program.Echo("Force thrusters Off!");
                         _wicoThrusters.powerDownThrusters(WicoThrusters.thrustAll, true);
-                        //                    blockApplyAction(thrustAllList, "OnOff_Off");
 
                         //                        if ((craft_operation & CRAFT_MODE_NOTANK) == 0)
                         {
                             _gasTanks.TanksStockpile(true);
                             _gasGens.GasGensEnable();
-                            //                        blockApplyAction(tankList, "Stockpile_On");
-                            //                        blockApplyAction(gasgenList, "OnOff_On");
                         }
                         _wicoControl.SetState(20);// iState = 20;
                     }
@@ -1173,6 +1166,7 @@ namespace IngameScript
                     //prepareForSupported();
                     //                    StatusLog("Connector connected!\n   auto-prepare for launch", textPanelReport);
                     _wicoControl.SetMode(WicoControl.MODE_LAUNCHPREP);
+                    _program.ErrorLog("Hover: Forcing Launch Prep due to connector connected");
                 }
                 else
                 {
@@ -1205,7 +1199,7 @@ namespace IngameScript
                     }
                     else
                     */
-                    if(bAlignGravityHover)
+                    if (bAlignGravityHover)
                     {
                         //                       StatusLog("Gravity Alignment Operational", textPanelReport);
 
@@ -1217,13 +1211,19 @@ namespace IngameScript
                         //                        bool bAimed = GyroMain(sOrbitalUpDirection);
                         sbNotices.AppendLine("Aligning to Gravity");
                         _program.Echo("Aligning to gravity");
-//                        vBestThrustOrientation = thrustOrbitalUpList[0].WorldMatrix.Forward;
-//                        _program.Echo("bestThrust:" + vBestThrustOrientation.ToString()+"\nvNG="+vNG.ToString());
+                        //                        vBestThrustOrientation = thrustOrbitalUpList[0].WorldMatrix.Forward;
+                        //                        _program.Echo("bestThrust:" + vBestThrustOrientation.ToString()+"\nvNG="+vNG.ToString());
                         bool bAimed = _gyros.AlignGyros(vBestThrustOrientation, vNG);
                         //                        bool bAimed = _gyros.AlignGyros(vBestThrustOrientation, vNG, shipController);
-                        if (bAimed) _wicoControl.WantMedium(); //                            bWantMedium = true;
+                        if (bAimed)
+                        {
+                            _wicoControl.WantMedium();
+                        }
                         else
-                            _wicoControl.WantFast();//                    bWantFast = true;
+                        {
+                            _program.Echo("Not Aligned: Request Fast!");
+                            _wicoControl.WantFast();
+                        }
                     }
                     else
                     {
@@ -1281,7 +1281,7 @@ namespace IngameScript
                 }
 
                 bool bGearLocked = _landingGears.AnyGearIsLocked();
-                bool bAnyConnectorLocked = _landingGears.AnyGearIsLocked();
+                bool bAnyConnectorLocked = _connectors.AnyConnectorIsLocked();
                 bool bAnyConnectorConnected = _connectors.AnyConnectorIsConnected();
 
                 _program.Echo(" Gear=" + bGearLocked.ToString() + "\n ConLock=" + bAnyConnectorLocked.ToString() + "\n ConConn=" + bAnyConnectorConnected.ToString());
@@ -1508,6 +1508,7 @@ namespace IngameScript
                 if (_connectors.AnyConnectorIsConnected())
                 {
                     _wicoControl.SetMode(WicoControl.MODE_LAUNCHPREP);// setMode(MODE_IDLE);
+                    _program.ErrorLog("Descent: Forcing Launch Prep due to connector connected");
                     return;
                 }
                 if (_connectors.AnyConnectorIsLocked())
@@ -1904,7 +1905,7 @@ namespace IngameScript
                     // final descent to land
                     _wicoControl.WantFast();
 
-                    _wicoThrusters.CalculateHoverThrust(shipController, thrustOrbitalUpList,
+                    _wicoThrusters.CalculateHoverThrust(thrustOrbitalUpList,
                         out fOrbitalAtmoPower, out fOrbitalHydroPower, out fOrbitalIonPower
                         );
                     float fTotalPower = fOrbitalAtmoPower + fOrbitalHydroPower + fOrbitalIonPower;
