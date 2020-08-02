@@ -137,10 +137,10 @@ namespace IngameScript
 
             }
 
-        /// <summary>
-        /// GYRO:how tight to maintain aim. Lower is tighter. Default is 0.01f
-        /// </summary>
-        float minAngleRad = 0.01f;
+            /// <summary>
+            /// GYRO:how tight to maintain aim. Lower is tighter. Default is 0.01f
+            /// </summary>
+            float minAngleRad = 0.01f;
 
             public void SetMinAngle(float angleRad = 0.01f)
             {
@@ -216,7 +216,6 @@ namespace IngameScript
                     var localCurrent = Vector3D.Transform(vDirection, MatrixD.Transpose(or1));
                     var localTarget = Vector3D.Transform(vTarget, MatrixD.Transpose(g1.WorldMatrix.GetOrientation()));
 
-
                     //Since the gyro ui lies, we are not trying to control yaw,pitch,roll but rather we 
                     //need a rotation vector (axis around which to rotate) 
                     var rot = Vector3D.Cross(localCurrent, localTarget);
@@ -226,11 +225,10 @@ namespace IngameScript
                     if (dot2 < 0) ang = Math.PI - ang; // compensate for >+/-90
                     if (ang < minAngleRad)
                     { // close enough 
-
                         g1.GyroOverride = false;
                         continue;
                     }
-                      _program.Echo("Auto-Level:Off level: "+(ang*180.0/3.14).ToString()+"deg"); 
+                    _program.Echo("Auto-Level:Off level: " + (ang * 180.0 / 3.14).ToString("0.0") + " deg");
 
                     float yawMax = (float)(2 * Math.PI);
 
@@ -243,20 +241,29 @@ namespace IngameScript
 
                     float pitch = -(float)rot.X;
                     if (Math.Abs(g1.Pitch - pitch) > 0.01)
+                    {
                         g1.Pitch = pitch;
+                        g1.GyroOverride = true;
+                        bAligned = false;
+                    }
 
                     float yaw = -(float)rot.Y;
                     if (Math.Abs(g1.Yaw - yaw) > 0.01)
+                    { 
                         g1.Yaw = yaw;
+                        g1.GyroOverride = true;
+                        bAligned = false;
+                    }
 
                     float roll = -(float)rot.Z;
                     if (Math.Abs(g1.Roll - roll) > 0.01)
+                    { 
                         g1.Roll = roll;
+                        g1.GyroOverride = true;
+                        bAligned = false;
+                    }
 
                     //		g.SetValueFloat("Power", 1.0f); 
-                    g1.GyroOverride = true;
-
-                    bAligned = false;
                 }
                 return bAligned;
             }
@@ -282,8 +289,7 @@ namespace IngameScript
                 Matrix or1;
                 OrientationBlock.Orientation.GetMatrix(out or1);
                 bAimed = AlignGyros(or1.Forward, vCorrectedAim);
-                //               bAimed = GyroMain("forward", vCorrectedAim, OrientationBlock);
-                               bAimed = AlignGyros("forward", vCorrectedAim, OrientationBlock);
+                bAimed = AlignGyros("forward", vCorrectedAim, OrientationBlock);
                 return bAimed;
             }
 
