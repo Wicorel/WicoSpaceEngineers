@@ -93,6 +93,8 @@ namespace IngameScript
             }
             public static string Vector3DToString(Vector3D v)
             {
+            // new format GPS: 1.196  
+            // GPS: Wicorel #1:9984.6:60391.79:4806.48:#FF75C9F1:
                 string s;
                 s = v.X.ToString("0.00") + ":" + v.Y.ToString("0.00") + ":" + v.Z.ToString("0.00");
                 return s;

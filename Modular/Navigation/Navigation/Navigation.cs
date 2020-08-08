@@ -274,7 +274,10 @@ namespace IngameScript
                     if (args[0] == "W" || args[0] == "O")
                     { // [W|O] <x>:<y>:<z>  || W <x>,<y>,<z>
                       // W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
-                      // O means orient towards.  W means orient, then move to
+                      // new format GPS: 1.196  
+                      // GPS: Wicorel #1:9984.6:60391.79:4806.48:#FF75C9F1:
+
+                        // O means orient towards.  W means orient, then move to
                         bFoundNAVCommands = true;
                         _program.Echo("Args:");
                         for (int icoord = 0; icoord < args.Length; icoord++)
@@ -316,6 +319,8 @@ namespace IngameScript
                         string sWaypointName = "Waypoint";
                         // -  0   1           2        3          4       5
                         // W GPS:Wicorel #1:53970.01:128270.31:-123354.92:
+                        // new format GPS: 1.196  (color added at end)
+                        // GPS: Wicorel #1:9984.6:60391.79:4806.48:#FF75C9F1:
                         if (coordinates[0] == "GPS")
                         {
                             if (coordinates.Length > 4)

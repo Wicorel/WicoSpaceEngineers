@@ -97,7 +97,7 @@ namespace IngameScript
                 List<IMyTerminalBlock> useConnectors = localDockConnectors;
                 if (useConnectors.Count < 1) useConnectors = localNondesignatedConnectors;
                 if (localBaseConnectors.Count < 1 && useConnectors.Count < 1) useConnectors = localConnectors;
-                thisProgram.Echo("ACIC() # connectors=" + useConnectors.Count.ToString());
+//                thisProgram.Echo("ACIC() # connectors=" + useConnectors.Count.ToString());
                 for (int i = 0; i < useConnectors.Count; i++)
                 {
                     var sc1 = useConnectors[i] as IMyShipConnector;

@@ -103,8 +103,6 @@ namespace IngameScript
                 dTMUseSensorCollision=_program._CustomDataIni.Get(sSection, "UseSensorCollision").ToBoolean(dTMUseSensorCollision);
                 _program._CustomDataIni.Set(sSection, "UseSensorCollision", dTMUseSensorCollision);
 
-                //                _program.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                //                _program.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             /// <summary>
@@ -899,7 +897,7 @@ namespace IngameScript
 
             }
             /// <summary>
-            /// returns the optimal max speed based on available braking thrust and ship mass
+            /// returns the optimal max speed to go the distnace specied based on available braking thrust and ship mass
             /// </summary>
             /// <param name="thrustList">Thrusters to use</param>
             /// <param name="distance">current distance to target location</param>
@@ -911,8 +909,6 @@ namespace IngameScript
                     _program.ErrorLog("COS: NULL list");
                     return 0;
                 }
-                //
-                //            Echo("#thrusters=" + thrustList.Count.ToString());
                 if (thrustList.Count < 1) return _wicoControl.fMaxWorldMps;
                 distance = Math.Abs(distance);
 
@@ -923,7 +919,6 @@ namespace IngameScript
                 myMass = myShip.CalculateShipMass();
                 double maxThrust = _program.wicoThrusters.calculateMaxThrust(thrustList);
                 double maxDeltaV = maxThrust / myMass.PhysicalMass;
-                // Magic..
                 double optimalV, secondstozero, stoppingM;
 
                 if (dTMDebug)
@@ -932,91 +927,66 @@ namespace IngameScript
                     _program.Echo("distance=" + distance.ToString("N1") + " MaxdeltaV=" + maxDeltaV.ToString("F1"));
                 }
 
-                //                optimalV = ((distance * .75) / 2) / (maxDeltaV); // determined by experimentation and black magic
-                //            Echo("COS");
                 optimalV = tmMaxSpeed;
                 if (dTMDebug) _program.ErrorLog("initial optimalV=" + _program.niceDoubleMeters(optimalV));
-//                _program.EchoInstructions("COS B");
 
                 do
                 {
-//                    _program.EchoInstructions("COS LoopS");
-                    //                Echo("COS:DO");
                     secondstozero = optimalV / maxDeltaV;
                     stoppingM = optimalV / 2 * secondstozero;
                     if (dTMDebug)
                     {
-//                        _program.ErrorLog("stopm=" + stoppingM.ToString("F1") + " distance=" + distance.ToString("N1"));
                         _program.Echo("stopm=" + stoppingM.ToString("F1") + " distance=" + distance.ToString("N1"));
                     }
                     if (stoppingM > distance)
                     {
                         optimalV *= 0.85;
                     }
-//                    if (dTMDebug) _program.ErrorLog("looping optimalV=" + _program.niceDoubleMeters(optimalV));
 
                 }
                 while (stoppingM > 0.01 && stoppingM > distance);
-//                _program.EchoInstructions("COS End");
-                //            Echo("COS:X");
+
                 return optimalV;
             }
 
+            /// <summary>
+            /// Calculate a new waypoint given our wanted target waypoint and the entity we detected.
+            /// </summary>
+            /// <param name="vTargetLocation">where we want to go</param>
+            /// <param name="lastDetectedInfo">the entity detected</param>
+            /// <param name="vAvoid">set the the waypoint to avoid the collision</param>
             public void calcCollisionAvoid(Vector3D vTargetLocation, MyDetectedEntityInfo lastDetectedInfo, out Vector3D vAvoid)
             {
-//                if (tmCameraElapsedMs >= 0) tmCameraElapsedMs += _program.Runtime.TimeSinceLastRun.TotalMilliseconds;
-//                if (tmScanElapsedMs >= 0) tmScanElapsedMs += _program.Runtime.TimeSinceLastRun.TotalMilliseconds;
-
-                //            Echo("Collsion Detected");
                 Vector3D vHit;
                 if (lastDetectedInfo.HitPosition.HasValue)
                 {
-                    //                StatusLog("Has hitposition", gpsPanel);
                     vHit = (Vector3D)lastDetectedInfo.HitPosition;
                 }
                 else
                 {
-                    //                StatusLog("NO hitposition", gpsPanel);
                     vHit = _program.wicoBlockMaster.GetMainController().GetPosition();
                 }
 
                 Vector3D vCenter = lastDetectedInfo.Position;
-                //	Vector3D vTargetLocation = vHome;
-                //vTargetLocation;
-                //            debugGPSOutput("TargetLocation", vTargetLocation);
-                //            debugGPSOutput("HitPosition", vHit);
-                //            debugGPSOutput("CCenter", vCenter);
 
                 // need to check if vector is straight through the object.  then choose 90% vector or something
                 Vector3D vVec = (vCenter - vHit);
                 vVec.Normalize();
-                //           double ang;
 
                 Vector3D vMinBound = lastDetectedInfo.BoundingBox.Min;
-                //            debugGPSOutput("vMinBound", vMinBound);
                 Vector3D vMaxBound = lastDetectedInfo.BoundingBox.Max;
-                //            debugGPSOutput("vMaxBound", vMaxBound);
 
                 double radius = (vCenter - vMinBound).Length();
-                //            Echo("Radius=" + radius.ToString("0.00"));
 
+                // adjust the radius to allow the craft to miss the collision object
                 double modRadius = radius + _program.wicoBlockMaster.WidthInMeters() * 5;
 
-                // the OLD way.
-
-                //            vAvoid = vCenter - vVec * (radius + shipDim.WidthInMeters() * 5);
-                //	 Vector3D shipOrientationBlock.GetPosition() - vAvoid;
-
                 Vector3D cross;
-
                 cross = Vector3D.Cross(vTargetLocation, vHit);
                 cross.Normalize();
-                cross = vHit + cross * modRadius;
-                //            debugGPSOutput("crosshit", cross);
 
-                vAvoid = cross;
-
-                //            debugGPSOutput("vAvoid", vAvoid);
+                // vHit location start position and then adjusted in cross directoy by modified radius length
+                vAvoid = vHit + cross * modRadius;
             }
 
 
@@ -1067,9 +1037,6 @@ namespace IngameScript
             /// </summary>
             public void initEscapeScan(IMyShipController escapeController, bool bWantBack = false, bool bWantForward = true)
             {
-
-                //                if (tmCameraElapsedMs >= 0) tmCameraElapsedMs += _program.Runtime.TimeSinceLastRun.TotalMilliseconds;
-                //                if (tmScanElapsedMs >= 0) tmScanElapsedMs += _program.Runtime.TimeSinceLastRun.TotalMilliseconds;
                 _escapeController = escapeController;
                 bScanLeft = true;
                 bScanRight = true;

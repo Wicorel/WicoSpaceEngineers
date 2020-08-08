@@ -570,6 +570,7 @@ namespace IngameScript
                     _wicoThrusters.CalculateHoverThrust( thrustOrbitalUpList, out fOrbitalAtmoPower, out fOrbitalHydroPower, out fOrbitalIonPower);
                     _wicoThrusters.powerDownThrusters(thrustOrbitalDownList, WicoThrusters.thrustAll, true);
 
+
                     double physicalMass = _wicoBlockMaster.GetPhysicalMass();
 
                     //                    Vector3D vNGN = _wicoBlockMaster.GetMainController().GetNaturalGravity();
@@ -609,35 +610,23 @@ namespace IngameScript
                         dLastVelocityShip = 0;
                     }
 
-                    //                  string sOrientation = "up";
-                    //                    if ((craft_operation & CRAFT_MODE_ROCKET) > 0)
-                    //                        sOrientation = "rocket";
-
-                    //                    bAligned = _gyros.AlignGyros(sOrientation,vNG,shipController);
                     bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
-//                    bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG, shipController);
                     if (!bAligned)
                         _wicoControl.WantFast();
                     else _wicoControl.WantMedium();
-                    //                        bWantFast = true;
                 }
                 else
                 {
-                    _wicoControl.WantSlow();
-                    //                    bWantMedium = true;
+                    _wicoControl.WantMedium();
                     if (alt > 5)
                     {
-                        {
-
-                            //                            bAligned = _gyros.AlignGyros(sOrbitalUpDirection, vNG, shipController);
-                            bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
-                            //                            bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG, shipController);
-                            if (!bAligned)
-                                _wicoControl.WantFast();
-                            //                            bWantFast = true;
-                        }
+                        _gyros.SetMinAngle();
+                        bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
+                        if (!bAligned)
+                            _wicoControl.WantFast();
                     }
                 }
+
                 if (iState == 30)
                 { // Retract landing config
                   //                    StatusLog("Movement started. Retracting Landing config ", textPanelReport);
@@ -1860,6 +1849,7 @@ namespace IngameScript
                         }
                         //                        blockApplyAction(shipOrientationBlock, "DampenersOverride");
                         _wicoControl.SetState(90);//current_state = 90;
+                        _timers.TimerTriggers("[Landing]");
                     }
                 }
                 /*
@@ -1899,6 +1889,7 @@ namespace IngameScript
                 if (iState == 100)
                 {
                     _wicoControl.SetMode(WicoControl.MODE_NAVNEXTTARGET);
+                    _timers.TimerTriggers("[Landed]");
                 }
                 if (iState == 200)
                 {
