@@ -1,0 +1,27 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IGC Positions", "IGC Positions\IGC Positions.csproj", "{D008B44C-593F-4BD4-964B-94BEED094887}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "IGC", "..\IGC\IGC\IGC.shproj", "{D641AA70-4A98-4D1B-B594-F38F66938D65}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\IGC\IGC\IGC.projitems*{d641aa70-4a98-4d1b-b594-f38f66938d65}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D008B44C-593F-4BD4-964B-94BEED094887}.Debug|x64.ActiveCfg = Debug|x64
+		{D008B44C-593F-4BD4-964B-94BEED094887}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F58304B8-D93F-43C6-8958-FE59DEEC241C}
+	EndGlobalSection
+EndGlobal
