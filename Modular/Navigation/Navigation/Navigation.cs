@@ -216,6 +216,7 @@ namespace IngameScript
                 {
                     NavReset();
                 }
+                
             }
             /// <summary>
             /// just after program init, we are starting with these modes
