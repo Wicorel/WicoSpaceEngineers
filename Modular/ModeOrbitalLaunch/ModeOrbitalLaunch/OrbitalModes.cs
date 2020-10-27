@@ -58,7 +58,7 @@ namespace IngameScript
                 
 
                 _program.moduleName += " Orbital";
-                _program.moduleList += "\nOrbital V4.2b";
+                _program.moduleList += "\nOrbital V4.2d";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -244,6 +244,30 @@ namespace IngameScript
                         bAlignGravityHover = !bAlignGravityHover;
                         _program.Echo("alignGravity=" + bAlignGravityHover.ToString());
                     }
+                    if(myCommandLine.Argument(0) == "thrustcheck")
+                    {
+
+                        if (thrustForwardList.Count < 1)
+                        {
+                            _wicoThrusters.ThrustersCalculateOrientation(_wicoBlockMaster.GetMainController(),
+                                ref thrustForwardList, ref thrustBackwardList,
+                                ref thrustDownList, ref thrustUpList,
+                                ref thrustLeftList, ref thrustRightList
+                                );
+                        }
+                        double physicalMass = _wicoBlockMaster.GetPhysicalMass();
+
+                        Vector3D vNGN = _wicoBlockMaster.GetMainController().GetNaturalGravity();
+                        double dGravity = vNGN.Length() / 9.81;
+
+                        double hoverthrust = physicalMass * dGravity * 9.810;
+
+                        double forwardThrust =_wicoThrusters.calculateMaxThrust(thrustForwardList, WicoThrusters.thrusthydro);
+                        double upwardThrust = _wicoThrusters.calculateMaxThrust(thrustUpList, WicoThrusters.thrusthydro);
+                        _program.Echo("fwThrust=" + forwardThrust);
+                        _program.Echo("upThrust=" + upwardThrust);
+
+                    }
                 }
             }
 
@@ -295,7 +319,20 @@ namespace IngameScript
                         if (thrustAvailable > 0) _program.Echo((hoverthrust * 100 / thrustAvailable).ToString("0.00") + "% Thrust Needed");
 
                         if (hoverthrust > thrustAvailable)
+                        {
+                            sbModeInfo.AppendLine("OVERWEIGHT");
                             _program.Echo("OVERWEIGHT");
+                            if(iState==35 || iState==45)
+                            {
+                                // we are already attempting change
+                            }
+                            else if ( CheckAttitudeChange())
+                            {
+                                _wicoControl.SetState(35);
+                                _wicoControl.WantFast();
+                                return;
+                            }
+                        }
                     }
                     
                 }
@@ -582,7 +619,8 @@ namespace IngameScript
                     if (hoverthrust > thrustAvailable)
                     {
                         // Not enough thrust in desired direction
-                        sbNotices.AppendLine("OVERWEIGHT");
+                        sbModeInfo.AppendLine("OVERWEIGHT");
+//                        sbNotices.AppendLine("OVERWEIGHT");
                         _program.Echo("OVERWEIGHT");
                         _connectors.ConnectAnyConnectors(true, true);
 
@@ -639,6 +677,11 @@ namespace IngameScript
                 if (iState == 31)
                 { // accelerate to max speed
 
+                    //                    StatusLog("Accelerating to max speed (" + _wicoControl.fMaxWorldMps.ToString("0") + ")", textPanelReport);
+                    sbModeInfo.AppendLine("Accelerating to max speed");
+                    //                    Log("Accelerating to max speed");
+                    _program.Echo("Accelerating to max speed");
+
                     // TODO: only check every so often.
                     if (CheckAttitudeChange())
                     {
@@ -649,10 +692,6 @@ namespace IngameScript
                     }
                     _wicoThrusters.powerDownThrusters(thrustOrbitalDownList, WicoThrusters.thrustAll, true);
 
-                    //                    StatusLog("Accelerating to max speed (" + _wicoControl.fMaxWorldMps.ToString("0") + ")", textPanelReport);
-                    sbModeInfo.AppendLine("Accelerating to max speed");
-                    //                    Log("Accelerating to max speed");
-                    _program.Echo("Accelerating to max speed");
                     if (dLastVelocityShip < velocityShip)
                     { // we are Accelerating
                         if (bOrbitalLaunchDebug) _program.Echo("Accelerating");
@@ -676,17 +715,21 @@ namespace IngameScript
                 }
                 if (iState == 35)
                 {
+                    sbModeInfo.AppendLine("[Launch-Reorient]");
+
                     _timers.TimerTriggers("[Launch-Reorient]");
                     // re-align and then resume
                     _wicoThrusters.powerDownThrusters();
                     //                bAligned = GyroMain(sOrbitalUpDirection);
                     //                    if (bAligned)
-                    _wicoControl.SetState(31); // next_state = 31;
+//                    _wicoControl.SetState(31); // next_state = 31;
+                    _wicoControl.SetState(45);
                     _wicoControl.WantFast();// bWantFast = true;
                 }
                 if (iState == 40)
                 { // maintain max speed
-                    sbNotices.AppendLine("Maintain max speed");
+                    sbModeInfo.AppendLine("Maintain max speed");
+//                    sbNotices.AppendLine("Maintain max speed");
                     _program.Echo("Maintain max speed");
                     //                    Log("Maintain max speed");
 
@@ -734,13 +777,12 @@ namespace IngameScript
                     // re-align and then resume
                     _wicoThrusters.powerDownThrusters();
                     bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
-                    //                    bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG, shipController);
-                    //                    bAligned = _gyros.AlignGyros(sOrbitalUpDirection, vNG, shipController); //GyroMain(sOrbitalUpDirection);
 
                     if (bAligned)
                     {
-                        _wicoControl.SetState(40);// next_state = 40;
-                        _wicoControl.WantFast();// bWantFast = true;
+                        _wicoControl.SetState(31);
+                        _wicoControl.WantFast();
+                        return; 
                     }
                 }
                 dLastVelocityShip = velocityShip;
@@ -748,6 +790,7 @@ namespace IngameScript
                 if (iState == 100)
                 {
                     // we have just reached space
+                    sbModeInfo.AppendLine("[Reached-Orbit]");
                     _timers.TimerTriggers("[Reached-Orbit]");
                     CheckAttitudeChange(true);
                     _wicoControl.SetState(110);
@@ -756,7 +799,8 @@ namespace IngameScript
                 }
                 if (iState == 110)
                 {
-                    sbNotices.AppendLine("Turning to stop");
+                    sbModeInfo.AppendLine("Turning to stop");
+//                    sbNotices.AppendLine("Turning to stop");
                     MyShipVelocities myShipVelocities = shipController.GetShipVelocities();
 //                    bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
                     bAligned = _gyros.AlignGyros(vBestThrustOrientation, myShipVelocities.LinearVelocity);
@@ -2234,13 +2278,14 @@ namespace IngameScript
                     _wicoThrusters.powerDownThrusters(olddown);
                     _wicoThrusters.powerDownThrusters(oldup);
                     _wicoThrusters.powerDownThrusters(thrustOrbitalDownList, WicoThrusters.thrustAll, true);
+
                     Matrix or1;
                     if (thrustOrbitalUpList.Count > 0)
                     {
                         //                        _program.Echo("Using up thrust[0]");
                         thrustOrbitalUpList[0].Orientation.GetMatrix(out or1);
                         vBestThrustOrientation = or1.Forward;
-//                        vBestThrustOrientation = thrustOrbitalUpList[0].WorldMatrix.Forward;
+                        //                        vBestThrustOrientation = thrustOrbitalUpList[0].WorldMatrix.Forward;
                     }
                     else
                     {
@@ -2250,6 +2295,7 @@ namespace IngameScript
                         vBestThrustOrientation = or1.Forward;
                         //vBestThrustOrientation=shipcontroller.WorldMatrix.Forward;
                     }
+
                     return true;
                 }
                 //                _program.Echo("CheckAttitude:No Change");
