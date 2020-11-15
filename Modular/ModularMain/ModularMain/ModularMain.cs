@@ -153,12 +153,20 @@ namespace IngameScript
             Storage = _SaveIni.ToString();
         }
 
+        /// <summary>
+        /// Save to Storage in INI format
+        /// </summary>
+        /// <param name="handler"></param>
         void AddSaveHandler(Action<MyIni> handler)
         {
             if (!SaveHandlers.Contains(handler))
                 SaveHandlers.Add(handler);
         }
 
+        /// <summary>
+        /// Load from Storage in INI format.
+        /// </summary>
+        /// <param name="handler"></param>
         void AddLoadHandler(Action<MyIni> handler)
         {
             if (!LoadHandlers.Contains(handler))
