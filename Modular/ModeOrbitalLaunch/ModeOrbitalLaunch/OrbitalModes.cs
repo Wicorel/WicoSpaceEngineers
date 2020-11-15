@@ -36,6 +36,9 @@ namespace IngameScript
             Timers _timers;
             Displays _displays;
 
+            public double MaxLaunchMps = 100f;
+            string sOrbitalSection = "ORBITAL";
+
 
             public OrbitalModes(Program program, WicoControl wicoControl, WicoBlockMaster wicoBlockMaster
                 , WicoThrusters wicoThrusters, WicoGyros gyros
@@ -58,10 +61,17 @@ namespace IngameScript
                 
 
                 _program.moduleName += " Orbital";
-                _program.moduleList += "\nOrbital V4.2d";
+                _program.moduleList += "\nOrbital V4.2e";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
+
+                MaxLaunchMps = _program._CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
+                _program._CustomDataIni.Set(sOrbitalSection, "LaunchSpeedMax", MaxLaunchMps);
+
+                _program.AddLoadHandler(LoadHandler);
+                _program.AddSaveHandler(SaveHandler);
+
                 _wicoControl.AddModeInitHandler(ModeInitHandler);
                 _wicoControl.AddControlChangeHandler(ModeChangeHandler);
 
@@ -118,6 +128,14 @@ namespace IngameScript
                         tsurface.WriteText("");
                     }
                 }
+            }
+
+            void LoadHandler(MyIni Ini)
+            {
+            }
+
+            void SaveHandler(MyIni Ini)
+            {
             }
 
             public void ModeChangeHandler(int fromMode, int fromState, int toMode, int toState)
@@ -502,6 +520,8 @@ namespace IngameScript
                 if (iState == 0)
                 {
                     //		dtStartShip = DateTime.Now;
+                    MaxLaunchMps = _program._CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
+
                     _wicoControl.WantOnce();
                     //                    dLastVelocityShip = 0;
                     //                    if ((craft_operation & CRAFT_MODE_NOTANK) == 0) 
@@ -695,7 +715,7 @@ namespace IngameScript
                     if (dLastVelocityShip < velocityShip)
                     { // we are Accelerating
                         if (bOrbitalLaunchDebug) _program.Echo("Accelerating");
-                        if (expectedV < (_wicoControl.fMaxWorldMps / 2))
+                        if (expectedV < (MaxLaunchMps / 2))
                         // if(velocityShip<(fMaxMps/2))
                         {
                             decreasePower(dGravity, alt); // take away from lowest provider
@@ -704,7 +724,7 @@ namespace IngameScript
                         if (expectedV < (_wicoControl.fMaxWorldMps / 5)) // add even more.
                             increasePower(dGravity, alt);
 
-                        if (velocityShip > (_wicoControl.fMaxWorldMps - 5))
+                        if (velocityShip > (MaxLaunchMps - 5))
                             _wicoControl.SetState(40);// next_state = 40;
                     }
                     else
@@ -744,7 +764,7 @@ namespace IngameScript
                     //                  if (bOrbitalLaunchDebug) StatusLog("Expectedv=" + expectedV.ToString("0.00") + " max=" + _wicoControl.fMaxWorldMps.ToString("0.00"), textPanelReport);
                     //                    if (bOrbitalLaunchDebug)
                     //                        _program.Echo("Expectedv=" + expectedV.ToString("0.00") + " max=" + _wicoControl.fMaxWorldMps.ToString("0.00"));
-                    double dMin = (_wicoControl.fMaxWorldMps - _wicoControl.fMaxWorldMps * .02); // within n% of max mps
+                    double dMin = (MaxLaunchMps - MaxLaunchMps * .02); // within n% of max mps
                                                                                                                        //                    _program.Echo("dMin=" + dMin.ToString("0.00"));
                     if (expectedV > dMin)
                     // if(velocityShip>(fMaxMps-5))
@@ -755,14 +775,14 @@ namespace IngameScript
                         //                        if (bOrbitalLaunchDebug) StatusLog("hover thrust:" + fOrbitalAtmoPower.ToString("0.00") + ":" + fOrbitalHydroPower.ToString("0.00") + ":" + fOrbitalIonPower.ToString("0.00"), textPanelReport);
 
                     }
-                    else if (expectedV < (_wicoControl.fMaxWorldMps - 10))
+                    else if (expectedV < (MaxLaunchMps - 10))
                     {
                         //                      _program.Echo("Increase power");
                         decreasePower(dGravity, alt); // take away from lowest provider
                         increasePower(dGravity, alt);// add it back
                         increasePower(dGravity, alt);// and add some more
                     }
-                    if (velocityShip < (_wicoControl.fMaxWorldMps / 2))
+                    if (velocityShip < (MaxLaunchMps / 2))
                     {
                         _wicoControl.SetState(20);// next_state = 20;
                         _wicoControl.WantFast();// bWantFast = true;
