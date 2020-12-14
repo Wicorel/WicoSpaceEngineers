@@ -35,7 +35,7 @@ namespace IngameScript
         Timers wicoTimers;
         //        NavRemote navRemote;
         NavCommon navCommon;
-        CargoCheck _cargoCheck;
+// have Ores        CargoCheck _cargoCheck;
         Sensors _sensors;
         Drills _drills;
 //        ScanBase _scanBase;
@@ -57,7 +57,7 @@ namespace IngameScript
         void ModuleControlInit()
         {
             //            _wicoControl = new WicoUpdateModesShared(this);
-            _wicoControl = new WicoControl(this);
+            _wicoControl = new WicoControl(this, wicoIGC);
         }
 
         void ModuleProgramInit()
@@ -74,12 +74,12 @@ namespace IngameScript
             wicoPower = new PowerProduction(this, wicoBlockMaster);
             wicoTimers = new Timers(this, wicoBlockMaster);
             //            navRemote = new NavRemote(this);
-            navCommon = new NavCommon(this);
+            navCommon = new NavCommon(this,_wicoControl);
             _sensors = new Sensors(this, wicoBlockMaster);
             _drills = new Drills(this, wicoBlockMaster);
             _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
             Echo("_displays");
-            _cargoCheck = new CargoCheck(this, wicoBlockMaster, _displays);
+//            _cargoCheck = new CargoCheck(this, wicoBlockMaster, _displays);
             Echo("_cargoCheck");
             _dock = new DockBase(this);
             Echo("_dock");

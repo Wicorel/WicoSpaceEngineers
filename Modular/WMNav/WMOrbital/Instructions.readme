@@ -8,9 +8,8 @@ See manual at:
 https://steamcommunity.com/sharedfiles/filedetails/?id=2073024104
 
 
-
 TODO:
- Need more space testing
- gravity code not ported over yet.
- Sled code not ported/tested
+WIP Need more space testing
+
+ Sled code not fully tested
  Rotor drive code not ported/tested

@@ -53,7 +53,7 @@ namespace IngameScript
         void ModuleControlInit()
         {
 //            _wicoControl = new WicoUpdateModesShared(this);
-            _wicoControl = new WicoControl(this);
+            _wicoControl = new WicoControl(this, wicoIGC);
         }
 
         void ModuleProgramInit()
@@ -81,7 +81,7 @@ namespace IngameScript
             _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
             wicoBases = new WicoBases(this, wicoIGC,_displays);
 //            navRemote = new NavRemote(this);
-            navCommon = new NavCommon(this);
+            navCommon = new NavCommon(this, _wicoControl);
             _cargoCheck = new CargoCheck(this, wicoBlockMaster,_displays);
 
             spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster, wicoThrusters, wicoConnectors,

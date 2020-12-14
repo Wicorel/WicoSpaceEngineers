@@ -79,7 +79,7 @@ namespace IngameScript
         void ModuleControlInit()
         {
             //            _wicoControl = new WicoUpdateModesShared(this);
-            _wicoControl = new WicoControl(this);
+            _wicoControl = new WicoControl(this, wicoIGC);
         }
 
         public void ModulePreMain(string argument, UpdateType updateSource)
@@ -122,7 +122,7 @@ namespace IngameScript
                 _displays.EchoInfo();
 
                 //                wicoConnectors.DisplayInfo();
-                wicoBlockMaster.DisplayInfo();
+//                wicoBlockMaster.DisplayInfo();
 
                 // ensure we run at least at slow speed for updates.
                 _wicoControl.WantSlow(); 

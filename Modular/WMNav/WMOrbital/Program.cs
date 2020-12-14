@@ -51,7 +51,7 @@ namespace IngameScript
 
         void ModuleControlInit()
         {
-            _wicoControl = new WicoControl(this);
+            _wicoControl = new WicoControl(this, wicoIGC);
 //            _wicoControl.SetDebug(true);
         }
 
@@ -75,7 +75,7 @@ namespace IngameScript
             _wicoDisplays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
 
             wicoNavigation = new Navigation(this,_wicoControl,wicoBlockMaster, wicoIGC, wicoTravelMovement, wicoElapsedTime,
-                wicoGyros,wicoWheels,wicoNavRotors, wicoThrusters,_wicoDisplays);
+                wicoGyros,wicoWheels,wicoNavRotors, wicoThrusters,wicoAntennas,_wicoDisplays);
 
             _wicoControl.WantSlow(); // get updates so we can check for things like navigation commands in oldschool format
 
@@ -99,7 +99,7 @@ namespace IngameScript
             {
                 _wicoDisplays.EchoInfo();
             }
-            _wicoControl.AnnounceState();
+//            _wicoControl.AnnounceState();
             Echo("LastRun=" + LastRunMs.ToString("0.00")+"ms Max=" + MaxRunMs.ToString("0.00") + "ms");
         }
 

@@ -53,6 +53,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Timers", "..\Timers\Timers\
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Displays", "..\Displays\Displays\Displays.shproj", "{33E46B38-C87F-445A-B3A9-3466910DECA6}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "IGCIFF", "..\IGCIFF\IGCIFF\IGCIFF.shproj", "{6E3114C0-2D7D-403B-8A03-DD140FF4BA1B}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\Power\Power\Power.projitems*{11d02c04-292a-4e4d-b6a7-4175fb98a163}*SharedItemsImports = 13
@@ -71,6 +73,7 @@ Global
 		..\WicoThrust\WicoThrust\WicoThrust.projitems*{61eba249-19f3-48b6-a25b-a4cee90168ba}*SharedItemsImports = 13
 		..\BlockMaster\BlockMaster\BlockMaster.projitems*{6242f17f-6f6a-4721-8475-03a861445dec}*SharedItemsImports = 13
 		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{69f6e441-d885-42b3-8a7f-e224cc869da3}*SharedItemsImports = 13
+		..\IGCIFF\IGCIFF\IGCIFF.projitems*{6e3114c0-2d7d-403b-8a03-dd140ff4ba1b}*SharedItemsImports = 13
 		..\HydrogenEngines\HydrogenEngines\HydrogenEngines.projitems*{76c7e306-96e2-4766-8fea-29261ab8f94b}*SharedItemsImports = 13
 		..\Navigation\Navigation\Navigation.projitems*{88e62142-15b2-40d2-944b-9fd1b0e42ef5}*SharedItemsImports = 13
 		..\NAVRotors\NAVRotors\NAVRotors.projitems*{8f6cbb54-6529-43a9-8641-32af99460465}*SharedItemsImports = 13
@@ -87,6 +90,7 @@ Global
 		..\GasGens\GasGens\GasGens.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Gyros\Gyros\Gyros.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\HydrogenEngines\HydrogenEngines\HydrogenEngines.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\IGCIFF\IGCIFF\IGCIFF.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\IGC\IGC\IGC.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\LandingGears\LandingGears\LandingGears.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\ModeOrbitalLaunch\ModeOrbitalLaunch\ModeOrbitalLaunch.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4

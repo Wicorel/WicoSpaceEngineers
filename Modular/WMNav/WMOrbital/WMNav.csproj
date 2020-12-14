@@ -72,6 +72,7 @@
   <Import Project="..\..\ElapsedTime\ElapsedTime\ElapsedTime.projitems" Label="Shared" />
   <Import Project="..\..\WicoControl\WicoControl\WicoControl.projitems" Label="Shared" />
   <Import Project="..\..\Displays\Displays\Displays.projitems" Label="Shared" />
+  <Import Project="..\..\IGCIFF\IGCIFF\IGCIFF.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="MDK\MDK.options.props" DestinationFolder="$(TargetDir)\MDK" />

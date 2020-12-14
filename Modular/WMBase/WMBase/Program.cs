@@ -38,7 +38,7 @@ namespace IngameScript
         void ModuleControlInit()
         {
             // create the appropriate control system for this module
-            _wicoControl = new WicoControl(this);
+            _wicoControl = new WicoControl(this, wicoIGC);
         }
 
         void ModuleProgramInit()
