@@ -84,7 +84,7 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " Space Miner";
-                _program.moduleList += "\nSpaceMiner V4.2";
+                _program.moduleList += "\nSpaceMiner V4.2a";
 
                 //                thisProgram._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
                 //                thisProgram._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
@@ -102,12 +102,15 @@ namespace IngameScript
 
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
+                MiningCargopcthighwater = _program._CustomDataIni.Get(_program.OurName, "MiningCargopcthighwater").ToInt32(MiningCargopcthighwater);
+                _program._CustomDataIni.Set(_program.OurName, "MiningCargopcthighwater", MiningCargopcthighwater);
+
+                MiningCargopctlowwater = _program._CustomDataIni.Get(_program.OurName, "MiningCargopctlowwater").ToInt32(MiningCargopctlowwater);
+                _program._CustomDataIni.Set(_program.OurName, "MiningCargopctlowwater", MiningCargopctlowwater);
+
                 //                _wicoIGC.AddUnicastHandler(UnicastHandler);
 
-                // for backward compatibility
                 //                _wicoIGC.AddPublicHandler(CONNECTORAPPROACHTAG, BroadcastHandler);
-                //                _wicoIGC.AddPublicHandler(CONNECTORDOCKTAG, BroadcastHandler);
-                //                _wicoIGC.AddPublicHandler(CONNECTORALIGNDOCKTAG, BroadcastHandler);
 
                 _elapsedTime.AddTimer(miningChecksElapsed);
                 _elapsedTime.AddTimer(miningElapsed);
@@ -207,6 +210,7 @@ namespace IngameScript
                 {
                     _gyros.gyrosOff();
                     _thrusters.powerDownThrusters();
+                    _drills.turnDrillsOff();
                     _elapsedTime.StopTimer(miningElapsed);
                     _elapsedTime.StopTimer(miningChecksElapsed);
                 }
@@ -260,6 +264,19 @@ namespace IngameScript
                     if (myCommandLine.Argument(0) == "mine")
                     {
                         _wicoControl.SetMode(WicoControl.MODE_MINE);
+                    }
+                    if (myCommandLine.Argument(0) == "dockmine")
+                    {
+                        _navCommon.NavReset();
+
+                        // we should probably give hint to docking as to WHY we want to dock..
+                        _dock.SetRelaunch(true);
+                        _navCommon.NavQueueMode(WicoControl.MODE_DOCKING);
+
+                        // Or maybe we need to tell docking to change mode when relaunched?
+                        _navCommon.NavQueueMode(WicoControl.MODE_MINE);
+
+                        _navCommon.NavStartNav();
                     }
                     if (myCommandLine.Argument(0) == "bore")
                     {
@@ -587,6 +604,7 @@ namespace IngameScript
 
                         _program.ResetMotion();
                         _connectors.TurnEjectorsOff();
+                        _ores.doCargoCheck();
                         _ores.OreDoCargoCheck(true); // init ores to what's currently in inventory
                         MinerCalculateBoreSize();
                         _thrusters.MoveForwardSlowReset();
@@ -917,6 +935,7 @@ namespace IngameScript
                             if (!bLocalAsteroid)
                             { // no asteroid detected on ANY sensors. ->we have exited the asteroid.
                               //                            _program.Echo("No Local Asteroid found");
+                                _program.ErrorLog("MINE35:No Local Asteroid found");
                                 _program.ResetMotion();
                                 //                            echoInstructions("S=" + iState + "RM " + eoicount++);
                                 if (_ores.cargopcent > MiningCargopctlowwater || maxDeltaV < (fMiningMinThrust))
@@ -936,10 +955,11 @@ namespace IngameScript
                             { // asteroid in front of us
                                 _connectors.TurnEjectorsOn();
                                 //                            blockApplyAction(ejectorList, "OnOff_On");
-                                if (maxDeltaV < fMiningMinThrust || _ores.cargopcent > MiningCargopcthighwater && !bMiningWaitingCargo) //
+                                if (!MinerAirWorthy(false, false, MiningCargopcthighwater) || maxDeltaV < fMiningMinThrust || _ores.cargopcent > MiningCargopcthighwater && !bMiningWaitingCargo) //
                                 {
                                     _program.ResetMotion();
                                     // already done                                turnEjectorsOn();
+
                                     bMiningWaitingCargo = true;
                                 }
                                 //                            echoInstructions("S=" + iState + "bmwc check " + eoicount++);
@@ -953,10 +973,23 @@ namespace IngameScript
                                     //                                echoInstructions("S=" + iState + "EDOCC " + eoicount++);
 
                                     double currUndesireable = _ores.CurrentUndesireableAmount();
+                                    _program.ErrorLog("MINE35:undesireable = " + currUndesireable);
                                     _program.Echo("undesireable=" + currUndesireable);
-                                    if (currUndesireable < 15 && (maxDeltaV < fMiningMinThrust || _ores.cargopcent >= MiningCargopctlowwater))
+                                    if (currUndesireable < 15  // we having nothing left to wait for to eject.
+                                        && 
+                                        ( // we are 'fat'
+                                            !MinerAirWorthy(false, false, MiningCargopctlowwater) 
+                                            || maxDeltaV < fMiningMinThrust 
+       //                                     || _ores.cargopcent >= MiningCargopctlowwater
+                                        )
+                                       )
                                     {
-                                        // we are full and not much stone ore in us...
+                                        _program.ErrorLog("MINE35:wanting to exit");
+                                        if (currUndesireable < 15) _program.ErrorLog("currUndesireable<15");
+                                        if (!MinerAirWorthy(false, false, MiningCargopctlowwater)) _program.ErrorLog("!MinerAirWorthy()");
+                                        if (maxDeltaV < fMiningMinThrust) _program.ErrorLog("maxDeltaV < fMiningMinThrust " + maxDeltaV.ToString("0.00") + " < "+ fMiningMinThrust.ToString("0.00"));
+       //                                 if (_ores.cargopcent >= MiningCargopctlowwater) _program.ErrorLog("_ores.cargopcent >= MiningCargopctlowwater " + _ores.cargopcent.ToString() + " >= " + MiningCargopctlowwater.ToString(""));
+                                        // we are full/getting fat and not much undesireable ore in us...
                                         _program.ResetMotion();
                                         _connectors.TurnEjectorsOff();
                                         _elapsedTime.StopTimer(miningChecksElapsed);//miningChecksElapsedMs = -1;
@@ -1942,6 +1975,7 @@ namespace IngameScript
 
                         _program.ResetMotion();
                         _connectors.TurnEjectorsOff();
+                        _ores.doCargoCheck();
                         _ores.OreDoCargoCheck(true); // init ores to what's currently in inventory
                         MinerCalculateBoreSize();
                         _thrusters.MoveForwardSlowReset();
@@ -2012,7 +2046,7 @@ namespace IngameScript
                     if (_elapsedTime.IsExpired(miningChecksElapsed))
                     {
                         _elapsedTime.ResetTimer(miningChecksElapsed);
-                        MinerAirWorthy(false, false); // does the current value checks.
+                        MinerAirWorthy(false, false,MiningCargopcthighwater); // does the current value checks.
                                                      /*
                                                      OreDoCargoCheck();
                                                      batteryCheck(0);
@@ -2044,7 +2078,8 @@ namespace IngameScript
                  * 20 - turn around until aimed 
                  * and them move forward until exittedasteroid ->40
                  * 
-                 * 40 when out, call for pickup
+                 * 40 when out, call for pickup ->50
+                 * 50 start docking procedure.
                  * 
                  */
 
@@ -2203,10 +2238,21 @@ namespace IngameScript
                     case 50:
                         {
                             sbModeInfo.AppendLine("Starting DOCK request");
+                            _elapsedTime.StopTimer(miningChecksElapsed);// miningChecksElapsedMs = -1;
+
+                            _navCommon.NavReset();
+
                             // we should probably give hint to docking as to WHY we want to dock..
                             _dock.SetRelaunch(true);
-                            _elapsedTime.StopTimer(miningChecksElapsed);// miningChecksElapsedMs = -1;
-                            _wicoControl.SetMode(WicoControl.MODE_DOCKING);
+                            _navCommon.NavQueueMode(WicoControl.MODE_DOCKING);
+
+                            // Or maybe we need to tell docking to change mode when relaunched?
+                            _navCommon.NavQueueMode(WicoControl.MODE_MINE);
+
+
+                            _navCommon.NavStartNav();
+
+                            //                          _wicoControl.SetMode(WicoControl.MODE_DOCKING);
                             break;
                         }
                     default:
@@ -2454,6 +2500,7 @@ namespace IngameScript
                 bool ReactorsGo = true;
                 bool CargoGo = true;
 
+                // TODO: Used WicoET
                 if (_airworthyChecksElapsedMs >= 0)
                     _airworthyChecksElapsedMs += _program.Runtime.TimeSinceLastRun.TotalMilliseconds;
                 bool bDoChecks = bForceCheck;
