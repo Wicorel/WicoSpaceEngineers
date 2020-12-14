@@ -356,6 +356,31 @@ namespace IngameScript
                 }
                 sb1.Enabled = true;
             }
+            // From jTurp on Discord. https://discordapp.com/channels/125011928711036928/216219467959500800/780990284644483122
+            public void SetSensorArea(IMySensorBlock s, float fixedDistance)
+            {
+                Vector3 min = s.CubeGrid.Min - s.Position;
+                Vector3 max = s.CubeGrid.Max - s.Position;
+
+                Matrix m;
+                s.Orientation.GetMatrix(out m);
+
+                float gSize = s.CubeGrid.GridSize;
+                Vector3 Zoffset = new Vector3(0, 0, 0.35);
+
+                Vector3 rel_Min = Vector3.Transform(min, Matrix.Transpose(m));
+                Vector3 rel_Max = Vector3.Transform(max, Matrix.Transpose(m));
+
+                Vector3 dim_Min = Vector3.Abs(Vector3.Min(rel_Min, rel_Max) * gSize - (0.5f * gSize) - Zoffset) + fixedDistance;
+                Vector3 dim_Max = Vector3.Max(rel_Min, rel_Max) * gSize + (0.5f * gSize) - Zoffset + fixedDistance;
+
+                s.RightExtend = dim_Max.X;
+                s.LeftExtend = dim_Min.X;
+                s.TopExtend = dim_Max.Y;
+                s.BottomExtend = dim_Min.Y;
+                s.BackExtend = dim_Max.Z;
+                s.FrontExtend = dim_Min.Z;
+            }
 
             public bool SensorIsActive(IMySensorBlock s1, ref bool bAsteroidFound, ref bool bLargeFound, ref bool bSmallFound)
             {
