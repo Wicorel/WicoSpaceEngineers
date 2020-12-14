@@ -30,6 +30,7 @@ namespace IngameScript
             bool bCreative = false;
 
             public List<IMyTerminalBlock> lContainers = new List<IMyTerminalBlock>();
+            public List<IMyTerminalBlock> localEjectors = new List<IMyTerminalBlock>();
 
             Program _program;
             WicoBlockMaster _wicoBlockMaster;
@@ -114,12 +115,14 @@ namespace IngameScript
                     lContainers.Add(tb);
                 else if(tb is IMyShipConnector)
                 {
-                    if (tb.BlockDefinition.SubtypeName == "ConnectorSmall)")
-                    { // don't add ejectors.
-                        return;
+
+                    if (tb.BlockDefinition.SubtypeName.Contains("ConnectorSmall"))
+                    { 
+                        localEjectors.Add(tb);
                     }
                     else
                     {
+//                        _program.ErrorLog("Adding Container:" + tb.CustomName+ ":"+tb.BlockDefinition.SubtypeName);
                         lContainers.Add(tb);
                     }
                 }
@@ -208,14 +211,13 @@ namespace IngameScript
                                 cargoMult = 9999;
                             }
 
-                            if ((double)inv.CurrentVolume < capacity)
+                            if ((double)inv.CurrentVolume < (capacity-1))
                             {
                                 // there is room
                                 if (!(lContainers[i] is IMyShipDrill))
                                 {
                                     bCargoFull = false;
                                 }
-
                             }
 
                             else //if ((double)inv.CurrentVolume + 5 > capacity)
