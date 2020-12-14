@@ -34,7 +34,6 @@ namespace IngameScript
             private WicoIGC _wicoIGC;
             private WicoBases _wicoBases;
             private NavCommon _navCommon;
-//            private NavRemote _navRemote;
             private CargoCheck _cargoCheck;
             private Displays _displays;
 
@@ -49,6 +48,8 @@ namespace IngameScript
             bool bValidDock = false;
             bool bValidLaunch1 = false;
             bool bValidHome = false;
+
+            public bool _Debug = false;
 
             long lTargetBase = -1;
             DateTime dtDockingActionStart;
@@ -85,11 +86,8 @@ namespace IngameScript
                 _cargoCheck = cargoCheck;
                 _displays = displays;
 
-
-                //                shipController = myShipController;
-
                 _program.moduleName += " Space Dock";
-                _program.moduleList += "\nSpaceDock V4.2c";
+                _program.moduleList += "\nSpaceDock V4.2e";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -103,21 +101,39 @@ namespace IngameScript
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
                 _wicoIGC.AddUnicastHandler(DockingUnicastHandler);
+                _wicoIGC.AddPublicHandler(WICOB_DOCKSETRELAUNCH,RelaunchMessagehandler,true);
 
                 // for backward compatibility
                 _wicoIGC.AddPublicHandler(CONNECTORAPPROACHTAG, DockingUnicastHandler);
                 _wicoIGC.AddPublicHandler(CONNECTORDOCKTAG, DockingUnicastHandler);
                 _wicoIGC.AddPublicHandler(CONNECTORALIGNDOCKTAG, DockingUnicastHandler);
 
-                bAutoRefuel=_program._CustomDataIni.Get(sDockingSection, "AutoRefuel").ToBoolean(bAutoRefuel);
+                _Debug = _program._CustomDataIni.Get(sDockingSection, "Debug").ToBoolean(_Debug);
+                _program._CustomDataIni.Set(sDockingSection, "Debug", _Debug);
+
+                bAutoRefuel = _program._CustomDataIni.Get(sDockingSection, "AutoRefuel").ToBoolean(bAutoRefuel);
                 _program._CustomDataIni.Set(sDockingSection, "AutoRefuel", bAutoRefuel);
 
-                bAutoRelaunch=_program._CustomDataIni.Get(sDockingSection, "AutoRelaunch").ToBoolean(bAutoRelaunch);
+                bAutoRelaunch = _program._CustomDataIni.Get(sDockingSection, "AutoRelaunch").ToBoolean(bAutoRelaunch);
                 _program._CustomDataIni.Set(sDockingSection, "AutoRelaunch", bAutoRelaunch);
 
                 _displays.AddSurfaceHandler("MODE", SurfaceHandler);
                 _displays.AddSurfaceHandler("FUEL", SurfaceHandler);
             }
+
+            private void RelaunchMessagehandler(MyIGCMessage msg)
+            {
+                if (msg.Tag == WICOB_DOCKSETRELAUNCH && msg.Data is string)
+                {
+                    if (_Debug) _program.ErrorLog("Received DockSet relaunch =" + (string)msg.Data);
+
+                    bool bResult = false;
+                    bool bOK = bool.TryParse((string)msg.Data, out bResult);
+                    if (bOK)
+                        bAutoRelaunch = bResult;
+                }
+            }
+
             StringBuilder sbModeInfo = new StringBuilder(100);
             StringBuilder sbNotices = new StringBuilder(300);
 
@@ -297,6 +313,7 @@ namespace IngameScript
                     _wicoControl.WantOnce();
                 }
             }
+
             /// <summary>
             /// just after program init, we are starting with these modes
             /// </summary>
@@ -355,7 +372,7 @@ namespace IngameScript
                 {
                     if (myCommandLine.Argument(0) == "godock")
                     {
-                        _program.ErrorLog("godock command");
+//                        _program.ErrorLog("godock command");
                         _wicoControl.SetMode(WicoControl.MODE_DOCKING,0);
                     }
                     if (myCommandLine.Argument(0) == "relaunch")
@@ -511,7 +528,7 @@ namespace IngameScript
 
                 if (msg.Tag== CONNECTORAPPROACHTAG && msg.Data is string)
                 {
-                    _program.ErrorLog("Received APPROACH Tag");
+                    if(_Debug) _program.ErrorLog("Received APPROACH Tag");
                     if (iMode != WicoControl.MODE_DOCKING) return;
                     if(iState!=120) return;
 
@@ -552,7 +569,7 @@ namespace IngameScript
                             _wicoControl.SetState(150);
                         }
                     }
-                    // connector approach reponse found
+                    // connector approach response found
                 }
                 if ((msg.Tag == CONNECTORDOCKTAG || msg.Tag == CONNECTORALIGNDOCKTAG) && msg.Data is string)
                 {
@@ -572,7 +589,7 @@ namespace IngameScript
                     //                    if (iState != 210) return;
                     if ((msg.Tag == CONNECTORDOCKTAG || msg.Tag == CONNECTORALIGNDOCKTAG) && msg.Data is string)
                     {
-                        _program.ErrorLog("Received DOCK Tag");
+                        if (_Debug) _program.ErrorLog("Received DOCK Tag");
 
                         string sMessage = (string)msg.Data;
 
@@ -899,7 +916,7 @@ namespace IngameScript
                             ref thrustDockLeftList, ref thrustDockRightList);
                         _wicoControl.SetState(100);
                     }
-                    lTargetBase = -1;// iTargetBase = -1;
+                    lTargetBase = -1;
                 }
 
 
@@ -936,8 +953,6 @@ namespace IngameScript
                     {
                         sbModeInfo.AppendLine("Finding Base");
                         if (lTargetBase < 0) lTargetBase = _wicoBases.BaseFindBest();
-                        //                        _program.ErrorLog("110: Base=" + lTargetBase);
-                        //                   sInitResults += "110: Base=" + iTargetBase;
                         dtDockingActionStart = DateTime.Now;
                         if (lTargetBase >= 0)
                         {
@@ -966,12 +981,11 @@ namespace IngameScript
                         else // No available base
                         {
                             // try to get a base to respond
-                            //                            _wicoBases.checkBases(true);
                             _wicoBases.checkBases(true);
+
                             // TODO: Change to elapsedtime handler
                             dtDockingActionStart = DateTime.Now;
                             _wicoControl.SetState(130);
-                            //                        setMode(MODE_ATTENTION);
                         }
                     }
                     else
@@ -982,7 +996,6 @@ namespace IngameScript
                 }
                 else if (iState == 120)
                 { // wait for reply from base
-                  //                    StatusLog("Awaiting Response from Base", textPanelReport);
                     sbModeInfo.AppendLine("Awaiting Response from Base");
 
                     //                    _wicoControl.WantFast();
@@ -1540,10 +1553,9 @@ namespace IngameScript
                     // we magically got disconnected..
                     // assume user did it.
                     _wicoControl.SetMode(WicoControl.MODE_IDLE);
-
+                    
                     _thrusters.powerDownThrusters(); // turn thrusters ON
 
-//                    if ((craft_operation & CRAFT_MODE_NOTANK) == 0)
                     _tanks.TanksStockpile(false); // turn tanks ON
 
                     // TODO: allow for relay ships that are NOT bases..
@@ -1558,18 +1570,20 @@ namespace IngameScript
                     _program.Echo("Power Saving Mode");
                     if (iState == 0)
                     {
-                        _tanks.TanksStockpile(true);
+                        if(bAutoRefuel)
+                            _tanks.TanksStockpile(true);
 
                         // make a 'lower power' handler?
                         _thrusters.powerDownThrusters(WicoThrusters.thrustAll, true);
                         _antennas.SetLowPower();
-//                        SensorsSleepAll();
+                        //                        SensorsSleepAll();
                         // TODO: ??? turn gyos off?
 
-                        _power.BatteryCheck(0, true);
+                        if (bAutoRefuel)
+                            _power.BatteryCheck(0, true);
                         
                         _timers.TimerTriggers("[DOCKED]");
-                        if (_power.HasBatteries())
+                        if (_power.HasBatteries() && bAutoRefuel)
                         {
                             _wicoControl.SetState(1);
                         }
@@ -1762,17 +1776,6 @@ namespace IngameScript
                 bAutoRelaunch = bRelaunch;
             }
 
-            void RelaunchMessageHandler(MyIGCMessage msg)
-            {
-                if (msg.Tag == WICOB_DOCKSETRELAUNCH && msg.Data is string)
-                {
-                    bool bResult = false;
-                    bool bOK = bool.TryParse((string)msg.Data, out bResult);
-                    if (bOK)
-                        bAutoRelaunch = bResult;
-                }
-
-            }
         }
     }
 }
