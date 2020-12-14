@@ -88,6 +88,8 @@ namespace IngameScript
             WicoBlockMaster _wicoBlockMaster;
             WicoElapsedTime _wicoElapsedTime;
 
+            readonly string WicoDisplaySection = "WicoDisplay";
+
             public Displays(Program program, WicoBlockMaster wicoBlockMaster, WicoElapsedTime wicoElapsedTime)
             {
                 _program = program;
@@ -98,6 +100,9 @@ namespace IngameScript
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
                 _program.AddPostInitHandler(PostInitHandler());
+
+                _Debug = _program._CustomDataIni.Get(WicoDisplaySection, "Debug").ToBoolean(_Debug);
+                _program._CustomDataIni.Set(WicoDisplaySection, "Debug", _Debug);
 
                 _wicoElapsedTime.AddTimer(DisplayCheckTimer, DisplayInterval, ElapsedTimerHandler);
                 _wicoElapsedTime.StartTimer(DisplayCheckTimer);
