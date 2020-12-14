@@ -47,7 +47,7 @@ namespace IngameScript
             StringBuilder sbNotices = new StringBuilder(300);
             StringBuilder sbModeInfo = new StringBuilder(100);
 
-            public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
+            new public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
             {
                 if (tag == "ORELOCS")
                 {
@@ -444,7 +444,6 @@ namespace IngameScript
                 }
             }
 
-            // uses lContainers from WicoCargo
             public void OreDoCargoCheck(bool bInit = false)
             {
                 OreClearAmounts();
@@ -469,10 +468,27 @@ namespace IngameScript
                     }
 
                 }
+                for (int i = 0; i < localEjectors.Count; i++)
+                {
+                    var inv = localEjectors[i].GetInventory(0);
+                    if (inv == null) continue;
+                    //                var itemsL = inv.GetItems();
+                    inv.GetItems(itemsL);
+                    // go through all itemsL
+                    for (int i2 = 0; i2 < itemsL.Count; i2++)
+                    {
+                        var item = itemsL[i2];
+
+                        if (item.Type.ToString().Contains("Ore"))
+                        {
+                            //                        Echo("Adding " + item.Content.SubtypeId.ToString());
+                            OreAddAmount(item.Type.SubtypeId.ToString(), (double)item.Amount, bInit);
+                        }
+                    }
+
+                }
 
             }
-
-
 
         }
     }
