@@ -22,10 +22,12 @@ namespace IngameScript
         public class NavCommon
         {
             Program _program;
+            WicoControl _wicoControl;
 
-            public NavCommon(Program program)
+            public NavCommon(Program program, WicoControl wicoControl)
             {
                 _program = program;
+                _wicoControl = wicoControl;
 
                 // TODO: talk to NAV module at startup to see if it exists.
                 // If it DOES NOT, then maybe use Keen autopilot?
@@ -35,6 +37,7 @@ namespace IngameScript
             }
 
             public const string WICOB_NAVADDTARGET = "WICOB_NAVADDTARGET";
+            public const string WICOB_NAVIMMEDIATETARGET = "WICOB_NAVTARGET";
             public const string WICOB_NAVSTART = "WICOB_NAVSTART";
             public const string WICOB_NAVRESET = "WICOB_NAVRESET";
             public const string WICOB_NAVSETMODE = "WICOB_NAVSETMODE";
@@ -113,15 +116,19 @@ namespace IngameScript
 
             public virtual void NavGoTarget(Vector3D vTarget, int modeArrival = WicoControl.MODE_ARRIVEDTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
-//                _program.ErrorLog("NavCommon NavGoTarget");
+                //                _program.ErrorLog("NavCommon NavGoTarget");
                 string data = NavCommon.NAVSerializeCommand(vTarget, modeArrival, stateArrival, DistanceMin, TargetName, maxSpeed, bGo);
-                _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVADDTARGET, data, TransmissionDistance.CurrentConstruct);
-                _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVSTART, "", TransmissionDistance.CurrentConstruct);
+                _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVIMMEDIATETARGET, data, TransmissionDistance.CurrentConstruct);
+//                _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVSTART, "", TransmissionDistance.CurrentConstruct);
             }
             public virtual void NavQueueMode(int theMode)
             {
-//                _program.ErrorLog("NavCommon NavQueueMode");
+                //                _program.ErrorLog("NavCommon NavQueueMode");
                 _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVSETMODE, theMode.ToString(), TransmissionDistance.CurrentConstruct);
+            }
+            public virtual void NavStartNav()
+            {
+                _wicoControl.SetMode(WicoControl.MODE_STARTNAV);
             }
 
 
