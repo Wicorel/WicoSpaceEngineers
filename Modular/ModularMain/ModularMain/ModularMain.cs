@@ -21,12 +21,11 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-
         WicoIGC wicoIGC;
-//        WicoControl _wicoControl;
         WicoBlockMaster wicoBlockMaster;
         WicoElapsedTime wicoElapsedTime;
-        //        TravelMovement wicoTravelMovement;
+
+        IFF igciff;
 
         // Handlers
         private List<Action<string,MyCommandLine, UpdateType>> UpdateTriggerHandlers = new List<Action<string,MyCommandLine, UpdateType>>();
@@ -42,7 +41,6 @@ namespace IngameScript
         private List<Action<bool>> ResetMotionHandlers = new List<Action<bool>>();
 
         // Post init handlers
-//        private List<Action> PostInitHandlers = new List<Action>();
         private List<IEnumerator<bool>> PostInitHandlers = new List<IEnumerator<bool>>();
 
         // https://github.com/malware-dev/MDK-SE/wiki/Handling-configuration-and-storage
@@ -60,19 +58,31 @@ namespace IngameScript
 
 
         // Surface stuff
+        bool bUsePBSurfaces = true;
         IMyTextSurface mesurface0;
         IMyTextSurface mesurface1;
 
+        bool bAllowPBRename = true;
 
         double tmGridCheckElapsedMs = 0;
         double tmGridCheckWaitMs = 3.0 * 1000;
 
         string OurName = "Wico Modular";
+        /// <summary>
+        /// The names of the modules attached to this script. Seperate names with space
+        /// </summary>
         string moduleName = "";
+
+        /// <summary>
+        /// The list of modules including version number. Seperate with \n at start.
+        /// </summary>
         string moduleList = "";
-        string sVersion = " 4.1";
+        string sVersion = " 4.2";
 
 
+        /// <summary>
+        /// Reporting string that lives from run-to-run. Displayed in detailedinfo if !=""
+        /// </summary>
         string sMasterReporting = "";
 
         public Program()
@@ -95,6 +105,8 @@ namespace IngameScript
                 _SaveIni.Clear();
                 Echo(result.ToString());
             }
+
+            // check if our saved data is for this blueprint
             long meentityid=0;
             _SaveIni.Get(OurName+sVersion,"MEENITYID").TryGetInt64(out meentityid);
             if (meentityid != Me.EntityId)
@@ -105,43 +117,79 @@ namespace IngameScript
             }
             _SaveIni.Set(OurName + sVersion, "MEENITYID", Me.EntityId);
 
+            bAddDate = _CustomDataIni.Get(OurName, "DebugAddDate").ToBoolean(bAddDate);
+            _CustomDataIni.Set(OurName, "DebugAddDate", bAddDate);
+            bAddLogCount = _CustomDataIni.Get(OurName, "DebugAddLogCount").ToBoolean(bAddLogCount);
+            _CustomDataIni.Set(OurName, "DebugAddLogCount", bAddLogCount);
+            bAddRunCount = _CustomDataIni.Get(OurName, "DebugAddRunCount").ToBoolean(bAddRunCount);
+            _CustomDataIni.Set(OurName, "DebugAddRunCount", bAddRunCount);
+
+            bAllowPBRename = _CustomDataIni.Get(OurName, "AllowPBRename").ToBoolean(bAllowPBRename);
+            _CustomDataIni.Set(OurName, "AllowPBRename", bAllowPBRename);
+
+            bUsePBSurfaces = _CustomDataIni.Get(OurName, "UsePBSurfaces").ToBoolean(bUsePBSurfaces);
+            _CustomDataIni.Set(OurName, "UsePBSurfaces", bUsePBSurfaces);
+
+            bEchoOn = _CustomDataIni.Get(OurName, "EchoOn").ToBoolean(bEchoOn);
+            _CustomDataIni.Set(OurName, "EchoOn", bEchoOn);
+
             wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
             wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
+            wicoBlockMaster.LoadLocalGrid();
+
+            // Module specific control init. (note: wicoControl is optional)
             ModuleControlInit();
 
             wicoElapsedTime = new WicoElapsedTime(this,_wicoControl);
 
+            igciff = new IFF(this, wicoIGC, wicoElapsedTime);
+
+            // initialise module specific classes
             ModuleProgramInit();
 
             Runtime.UpdateFrequency |= UpdateFrequency.Once; // cause ourselves to run again to continue initialization
 
+            _oldEcho = Echo;
+            Echo = MyEcho;
+
             // Local PB Surface Init
-            if (Me.SurfaceCount > 1)
+            if (bUsePBSurfaces)
             {
-                mesurface0 = Me.GetSurface(0);
-                mesurface0.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
-                mesurface0.WriteText(OurName + sVersion + moduleList);
-                mesurface0.FontSize = 2;
-                mesurface0.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                if (Me.SurfaceCount > 0)
+                {
+                    mesurface0 = Me.GetSurface(0);
+                    mesurface0.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                    mesurface0.WriteText(OurName + sVersion + moduleList);
+                    mesurface0.FontSize = 2;
+                    mesurface0.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                }
+
+                if (Me.SurfaceCount > 1)
+                {
+                    mesurface1 = Me.GetSurface(1);
+                    mesurface1.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                    mesurface1.WriteText("Version: " + sVersion);
+                    mesurface1.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                    mesurface1.TextPadding = 0.25f;
+                    mesurface1.FontSize = 3.5f;
+                }
             }
 
-            if (Me.SurfaceCount > 2)
-            {
-                mesurface1 = Me.GetSurface(1);
-                mesurface1.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
-                mesurface1.WriteText("Version: " + sVersion);
-                mesurface1.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
-                mesurface1.TextPadding = 0.25f;
-                mesurface1.FontSize = 3.5f;
-            }
-
-            if (!Me.CustomName.Contains(moduleName))
+            if (bAllowPBRename && !Me.CustomName.Contains(moduleName))
                 Me.CustomName = "PB" +moduleName;
 
             if (!Me.Enabled)
             {
-                Echo("I am turned OFF!");
+                _oldEcho("I am turned OFF!");
             }
+        }
+
+        bool bEchoOn = true;
+
+        Action<string> _oldEcho;
+        void MyEcho(string output)
+        {
+            if (bEchoOn) _oldEcho(output);
         }
 
         public void Save()
@@ -173,7 +221,7 @@ namespace IngameScript
                 LoadHandlers.Add(handler);
         }
 
-        bool LoadHandle(MyIni theIni)
+        bool HandleLoad(MyIni theIni)
         {
             foreach (var handler in LoadHandlers)
             {
@@ -188,18 +236,30 @@ namespace IngameScript
                 UpdateUpdateHandlers.Add(handler);
         }
 
+        /// <summary>
+        /// Add a handler that's called with the script is triggered.
+        /// </summary>
+        /// <param name="handler"></param>
         void AddTriggerHandler(Action<string,MyCommandLine, UpdateType> handler)
         {
             if (!UpdateTriggerHandlers.Contains(handler))
                 UpdateTriggerHandlers.Add(handler);
         }
 
+        /// <summary>
+        /// Add a handler for ResetMotion
+        /// </summary>
+        /// <param name="handler"></param>
         void AddResetMotionHandler(Action<bool> handler)
         {
             if (!ResetMotionHandlers.Contains(handler))
                 ResetMotionHandlers.Add(handler);
         }
 
+        /// <summary>
+        /// Perform ResetMotion. Call all of the handlers for Resetmotion
+        /// </summary>
+        /// <param name="bNoDrills"></param>
         void ResetMotion(bool bNoDrills=false)
         {
             foreach (var handler in ResetMotionHandlers)
@@ -208,6 +268,10 @@ namespace IngameScript
             }
         }
 
+        /// <summary>
+        /// Add a handler that's called after class initialization has completed.
+        /// </summary>
+        /// <param name="handler"></param>
         void AddPostInitHandler(IEnumerator<bool> handler)
         {
             if (!PostInitHandlers.Contains(handler))
@@ -215,6 +279,10 @@ namespace IngameScript
         }
 
         int postInitIterator = 0;
+        /// <summary>
+        /// Perform post init handling.  
+        /// </summary>
+        /// <returns>Return true of more work to be done (for yield/return)</returns>
         bool PostInit()
         {
 //            EchoInstructions("PostInit: #Handlers=" + PostInitHandlers.Count);
@@ -237,15 +305,21 @@ namespace IngameScript
         bool bCustomDataNeedsSave = false;
         double LastRunMs = 0;
         double MaxRunMs = 0;
+        long runCount = 0;
         public void Main(string argument, UpdateType updateSource)
         {
+            runCount++;
             LastRunMs = Runtime.LastRunTimeMs;
             if (bInitDone)
             { // only count max if done with init.
                 if (LastRunMs > MaxRunMs)
                     MaxRunMs = LastRunMs;
             }
-            if (moduleList != "") Echo(moduleList.Trim());
+            if (moduleList != "")
+            {
+                Echo(OurName + sVersion + moduleList);
+//                Echo(moduleList.Trim());
+            }
             ModulePreMain(argument, updateSource);
             if (tmGridCheckElapsedMs >= 0) tmGridCheckElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
             if (!bInitDone)
@@ -263,45 +337,17 @@ namespace IngameScript
             }
             else
             {
-//                Echo("Inited");
-                _wicoControl.AnnounceState();
-                /*
-                // only do this on update, not triggers
-                if ((updateSource & utUpdates) > 0)
-                {
-                    //                    Echo("Init and update. Elapsed:" +tmGridCheckElapsedMs.ToString("0.00"));
-                    //                    Echo("Local:" + wicoBlockMaster.localBlocksCount.ToString() + " blocks");
-                    if (tmGridCheckElapsedMs > tmGridCheckWaitMs || tmGridCheckElapsedMs < 0) // it is time to scan..
-                    {
-                        //                      Echo("time to check");
-                        tmGridCheckElapsedMs = 0;
-                        if (wicoBlockMaster.CalcLocalGridChange())
-                        {
-                            //                            mesurface0.WriteText("GRID check!");
-                            //                            Echo("GRID CHANGED!");
-                            //                            mesurface0.WriteText("GRID CHANGED!", true);
-//                            bInitDone = false;
-                            tmGridCheckElapsedMs = 0;
-                            Runtime.UpdateFrequency |= UpdateFrequency.Once; // cause ourselves to run again to continue initialization
-                            return;
-                        }
-                        //                        else Echo("No Grid Change");
-                    }
-                    //else Echo("Not Timeto check");
-                }
-                //                else Echo("Init and NOTE update");
-                */
+                //                Echo("Inited");
+                if (_wicoControl != null)
+                    _wicoControl.AnnounceState();
             }
 
-            if ((updateSource & UpdateType.IGC) > 0)
+//            if ((updateSource & UpdateType.IGC) > 0)
             {
-//                Echo("IGC");
                 wicoIGC.ProcessIGCMessages();
             }
             if ((updateSource & (utTriggers)) > 0)
             {
-                //                Echo("Triggers:"+argument);
-//               ErrorLog("Trigger:"+updateSource.ToString()+":" + argument);
                 MyCommandLine useCommandLine = null;
                 if (myCommandLine.TryParse(argument))
                 {
@@ -331,7 +377,7 @@ namespace IngameScript
             if ((updateSource & (utUpdates)) > 0)
             {
                 _wicoControl.ResetUpdates();
-                Echo("Update:"+updateSource.ToString());
+//                Echo("Update:"+updateSource.ToString());
                 foreach (var handler in UpdateUpdateHandlers)
                 {
                     handler(updateSource);
@@ -345,7 +391,9 @@ namespace IngameScript
             }
 
             ModulePostMain();
+
             wicoElapsedTime.CheckTimers();
+
             if (bCustomDataNeedsSave)
             {
                 bCustomDataNeedsSave = false;
@@ -355,8 +403,15 @@ namespace IngameScript
             Runtime.UpdateFrequency = _wicoControl.GenerateUpdate();
         }
 
+        long logcount = 0;
+        bool bAddDate = false;
+        bool bAddLogCount = false;
+        bool bAddRunCount = false;
         public void ErrorLog(string str)
         {
+            if (bAddDate) str = System.DateTime.Now.ToLongTimeString() + ":" + str; ;
+            if (bAddLogCount) str = logcount++.ToString() + ":" + str;
+            if (bAddRunCount) str = runCount.ToString() + ":" + str;
             sMasterReporting += "\n"+str;
         }
 
@@ -364,20 +419,20 @@ namespace IngameScript
         int InitStage = 0;
         bool WicoLocalInit()
         {
-            EchoInstructions("WLI:");
+//            EchoInstructions("WLI:");
             if (bInitDone) return true;
             if (InitStage < 1)
             {
-                LoadHandle(_SaveIni);
+                HandleLoad(_SaveIni);
                 InitStage++;
-                EchoInstructions("WLI:AfterLH:");
+//                EchoInstructions("WLI:AfterLH:");
             }
             if (InitStage < 2)
             {
                 if (PostInit())
                     return false; // more needed
                 InitStage++;
-                EchoInstructions("WLI:After PI:");
+//                EchoInstructions("WLI:After PI:");
             }
             bInitDone = true;
 
@@ -385,9 +440,10 @@ namespace IngameScript
             // This call also has sub-handlers.
             if (InitStage < 3)
             {
-                _wicoControl.ModeAfterInit(_SaveIni);
+                if (_wicoControl != null)
+                    _wicoControl.ModeAfterInit(_SaveIni);
                 InitStage++;
-                EchoInstructions("WLI:After _wc:MAI:");
+//                EchoInstructions("WLI:After _wc:MAI:");
             }
 
             // Save it now so that any defaults are set after an initial run
@@ -396,6 +452,9 @@ namespace IngameScript
             return bInitDone;
         }
 
+        /// <summary>
+        /// Request that init be done again
+        /// </summary>
         void WicoInitReset()
         {
             bInitDone = false;
@@ -458,6 +517,7 @@ namespace IngameScript
             s.Replace(":", "_"); // filter out bad characters
             s.Replace(";", "_"); // filter out bad characters
             return s;
+            //TODO: add new color option
 
         }
         void EchoInstructions(string sBanner = null)
