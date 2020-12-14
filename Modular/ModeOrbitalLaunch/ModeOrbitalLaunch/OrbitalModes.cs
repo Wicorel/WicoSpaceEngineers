@@ -62,7 +62,7 @@ namespace IngameScript
                 
 
                 _program.moduleName += " Orbital";
-                _program.moduleList += "\nOrbital V4.2f";
+                _program.moduleList += "\nOrbital V4.2g";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -753,6 +753,8 @@ namespace IngameScript
                 if (iState == 40)
                 { // maintain max speed
                     sbModeInfo.AppendLine("Maintain max speed");
+                    sbModeInfo.AppendLine(_program.niceDoubleMeters(expectedV) + " m/s");
+                    sbModeInfo.AppendLine("Altitude=" + alt.ToString("N0"));
 //                    sbNotices.AppendLine("Maintain max speed");
                     _program.Echo("Maintain max speed");
                     //                    Log("Maintain max speed");
