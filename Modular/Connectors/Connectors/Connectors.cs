@@ -46,7 +46,7 @@ namespace IngameScript
             {
                 if (tb is IMyShipConnector)
                 {
-                    if(tb.BlockDefinition.SubtypeName=="ConnectorSmall)")
+                    if(tb.BlockDefinition.SubtypeName.Contains("ConnectorSmall"))
                     {
                         localEjectors.Add(tb);
                     }
