@@ -23,9 +23,6 @@ namespace IngameScript
     {
         public class Navigation : NavCommon
         {
-
-
-
             Program _program;
             WicoControl _wicoControl;
             WicoBlockMaster _wicoBlockMaster;
@@ -36,15 +33,17 @@ namespace IngameScript
             Wheels _wheels;
             NavRotors _navRotors;
             WicoThrusters _wicoThrusters;
+            Antennas _wicoAntennas;
             Displays _displays;
 
-            bool _Debug = false;
+            public bool _Debug = false;
 
             public Navigation(Program program, WicoControl wc, WicoBlockMaster wbm, WicoIGC wicoIGC, TravelMovement travelMovement,
                 WicoElapsedTime wicoElapsedTime, WicoGyros wicoGyros,
                 Wheels wicoWheels, NavRotors navRotors, WicoThrusters wicoThrusters
+                ,Antennas wicoAntennas
                 ,Displays displays
-                ): base(program)
+                 ): base(program, wc)
             {
                 _program = program;
                 _wicoControl = wc;
@@ -56,17 +55,23 @@ namespace IngameScript
                 _wheels = wicoWheels;
                 _navRotors = navRotors;
                 _wicoThrusters = wicoThrusters;
+                _wicoAntennas = wicoAntennas;
                 _displays = displays;
 
-
                 _program.moduleName += " Navigation";
-                _program.moduleList += "\nNavigation V4.2c";
+                _program.moduleList += "\nNavigation V4.2e";
 
                 NAVEmulateOld=_program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
                 _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
 
                 bAutoPatrol = _program._CustomDataIni.Get(sNavSection, "AutoPatrol").ToBoolean(bAutoPatrol);
                 _program._CustomDataIni.Set(sNavSection, "AutoPatrol", bAutoPatrol);
+
+//                bControlAntennaRange = _program._CustomDataIni.Get(sNavSection, "ControlAntennaRange").ToBoolean(bControlAntennaRange);
+//                _program._CustomDataIni.Set(sNavSection, "ControlAntennaRange", bControlAntennaRange);
+
+                _Debug = _program._CustomDataIni.Get(sNavSection, "Debug").ToBoolean(_Debug);
+                _program._CustomDataIni.Set(sNavSection, "Debug", _Debug);
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -80,8 +85,10 @@ namespace IngameScript
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
                 _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVADDTARGET, BroadcastHandler);
+                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVIMMEDIATETARGET, BroadcastHandler);
                 _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVRESET,     BroadcastHandler);
                 _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVSTART,     BroadcastHandler);
+                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVSETMODE,   BroadcastHandler);
 
                 _displays.AddSurfaceHandler("MODE", SurfaceHandler);
 
@@ -159,9 +166,9 @@ namespace IngameScript
 
                 dtNavStartShip=DateTime.FromBinary(Ini.Get(sNavSection, "dStartShip").ToInt64());
                 ShipSpeedMax=Ini.Get(sNavSection, "shipSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
-                ArrivalDistanceMin = Ini.Get(sNavSection, "arrivalDistanceMin").ToDouble();
-                NAVArrivalMode = Ini.Get(sNavSection, "NAVArrivalMode").ToInt32();
-                NAVArrivalState = Ini.Get(sNavSection, "NAVArrivalState").ToInt32();
+                ArrivalDistanceMin = Ini.Get(sNavSection, "arrivalDistanceMin").ToDouble(ArrivalDistanceMin);
+                NAVArrivalMode = Ini.Get(sNavSection, "NAVArrivalMode").ToInt32(NAVArrivalMode);
+                NAVArrivalState = Ini.Get(sNavSection, "NAVArrivalState").ToInt32(NAVArrivalState);
 
                 _NavCommandsLoad(Ini);
             }
@@ -480,6 +487,7 @@ namespace IngameScript
                 if (iMode == WicoControl.MODE_GOINGTARGET)
                 {
                     doModeGoTarget();
+                    return;
                 }
                 if (iMode == WicoControl.MODE_STARTNAV) { doModeStartNav(); return; }
                 if (iMode == WicoControl.MODE_NAVNEXTTARGET) { doModeNavNext(); return; }
@@ -501,10 +509,28 @@ namespace IngameScript
             void BroadcastHandler(MyIGCMessage msg)
             {
                 // NOTE: called on ALL received messages; not just 'our' tag
-                if(msg.Tag==NavCommon.WICOB_NAVADDTARGET)
+                if (msg.Tag == NavCommon.WICOB_NAVIMMEDIATETARGET)
                 {
                     if (msg.Data is string)
                     {
+                        if (_Debug) _program.ErrorLog(msg.Tag);
+                        Vector3D vTarget;
+                        int modeArrival;
+                        int stateArrival;
+                        double DistanceMin;
+                        string TargetName;
+                        double maxSpeed;
+                        bool bGo;
+                        NavCommon.NAVDeserializeCommand(msg.Data.ToString(), out vTarget, out modeArrival, out stateArrival, out DistanceMin, out TargetName, out maxSpeed, out bGo);
+                        _NavImmediateTarget(vTarget, TargetName, bGo, modeArrival, stateArrival, DistanceMin, maxSpeed);
+                        _NavStart();
+                    }
+                }
+                if (msg.Tag == NavCommon.WICOB_NAVADDTARGET)
+                {
+                    if (msg.Data is string)
+                    {
+                        if (_Debug) _program.ErrorLog(msg.Tag);
                         Vector3D vTarget;
                         int modeArrival;
                         int stateArrival;
@@ -517,21 +543,35 @@ namespace IngameScript
                     }
 
                 }
-                    else if(msg.Tag==NavCommon.WICOB_NAVRESET)
+                else if (msg.Tag==NavCommon.WICOB_NAVRESET)
                 {
-//                    _program.ErrorLog("Received: " + msg.Tag);
+                    if (_Debug) _program.ErrorLog(msg.Tag);
+                    //                    _program.ErrorLog("Received: " + msg.Tag);
                     if (msg.Data is string)
                     {
                         NavReset();
                     }
-
                 }
-                else if(msg.Tag==NavCommon.WICOB_NAVSTART)
+                else if (msg.Tag == NavCommon.WICOB_NAVSTART)
+                {
+                    if (_Debug) _program.ErrorLog(msg.Tag);
+                    if (msg.Data is string)
+                    {
+                        //                        _program.ErrorLog("Received: "+msg.Tag);
+                        _NavStart();
+                    }
+                }
+                else if (msg.Tag == NavCommon.WICOB_NAVSETMODE)
                 {
                     if (msg.Data is string)
                     {
-//                        _program.ErrorLog("Received: "+msg.Tag);
-                        _NavStart();
+                        if (_Debug) _program.ErrorLog("Received: "+msg.Tag + " to mode:"+(string)msg.Data);
+                        int iMode;
+                        bool bOK = int.TryParse((string)msg.Data, out iMode);
+                        if(bOK)
+                        {
+                            _NavQueueMode(iMode);
+                        }
                     }
                 }
             }
@@ -544,6 +584,7 @@ namespace IngameScript
             Vector3D vBestThrustOrientation;
 
             bool bAutoPatrol = false;
+            bool bControlAntennaRange = true;
 
             /// <summary>
             /// We are a sled. Default false
@@ -685,6 +726,8 @@ namespace IngameScript
                     Matrix or1;
                     thrustForwardList[0].Orientation.GetMatrix(out or1);
                     vBestThrustOrientation = or1.Forward; // start out aiming at whatever the FW thrusters are aiming at..
+
+                    bControlAntennaRange = _program._CustomDataIni.Get(sNavSection, "ControlAntennaRange").ToBoolean(bControlAntennaRange);
 
                     _travelMovement.ResetTravelMovement(_wicoElapsedTime);
 
@@ -884,10 +927,9 @@ namespace IngameScript
                     string sTarget = "Moving to Target";
                     if (NAVTargetName != "") sTarget = "Moving to " + NAVTargetName;
 
-
                     if (
                         BGoOption && 
-                        (distance < ArrivalDistanceMin))
+                        (distance < Math.Max(_wicoBlockMaster.gridsize * 2, ArrivalDistanceMin)))
                     {
                         _wicoControl.SetState(500);
 
@@ -1133,11 +1175,19 @@ namespace IngameScript
                     _wicoControl.WantFast();
                     Matrix or1;
                     Vector3 vOrientation;
-                    thrustUpList[0].Orientation.GetMatrix(out or1);
-                    vOrientation = or1.Forward;
-                    if(_gyros.AlignGyros(vBestThrustOrientation, vNG))
+                    if (thrustUpList.Count > 1)
                     {
-                        _wicoControl.SetState(349);
+                        thrustUpList[0].Orientation.GetMatrix(out or1);
+                        vOrientation = or1.Forward;
+                        if (_gyros.AlignGyros(vBestThrustOrientation, vNG))
+                        {
+                            _wicoControl.SetState(349);
+                        }
+                    }
+                    else
+                    {
+                        // no up thrust to get out of the situation.
+                        _wicoControl.SetState(300);
                     }
                 }
                 else if (iState == 349)
@@ -1265,6 +1315,7 @@ namespace IngameScript
                     ini.Set(NAVCOMMANDS, "shipSpeedMax" + current, nc.shipSpeedMax);
                     ini.Set(NAVCOMMANDS, "arrivalDistanceMin" + current, nc.arrivalDistanceMin);
                     ini.Set(NAVCOMMANDS, "NAVTargetName" + current, nc.NAVTargetName);
+                    ini.Set(NAVCOMMANDS, "SetMode" + current, nc.SetMode);
                 }
             }
 
@@ -1283,6 +1334,7 @@ namespace IngameScript
                     wnc.shipSpeedMax = ini.Get(NAVCOMMANDS, "shipSpeedMax" + current).ToDouble();
                     wnc.arrivalDistanceMin = ini.Get(NAVCOMMANDS, "arrivalDistanceMin" + current).ToDouble();
                     wnc.NAVTargetName = ini.Get(NAVCOMMANDS, "NAVTargetName" + current).ToString();
+                    wnc.SetMode = ini.Get(NAVCOMMANDS, "SetMode" + current).ToInt32();
 
                     wnc.pg = _program;
                     wnc._wicoControl = _wicoControl;
@@ -1321,7 +1373,7 @@ namespace IngameScript
 
             void _NavAddTarget(Vector3D vTarget, string TargetName = "", bool bGo = true, int modeArrival = WicoControl.MODE_NAVNEXTTARGET, int stateArrival = 0, double DistanceMin = 50, double maxSpeed = 9999)
             {
-//                _program.ErrorLog("_NavAddTarget()"+TargetName);
+                //                _program.ErrorLog("_NavAddTarget()"+TargetName);
 
                 if (maxSpeed > _wicoControl.fMaxWorldMps)
                     maxSpeed = _wicoControl.fMaxWorldMps;
@@ -1337,7 +1389,7 @@ namespace IngameScript
                     NAVTargetName = TargetName,
                     _wicoControl = _wicoControl,
                     _wicoNavigation = this
-                
+
                 };
                 if (bGo) wicoNavCommand.Command = CommandTypes.Waypoint;
                 else wicoNavCommand.Command = CommandTypes.Orientation;
@@ -1347,26 +1399,61 @@ namespace IngameScript
                 //            _program.sMasterReporting += " Loc=" + Vector3DToString(wicoNavCommand.vNavTarget);
                 wicoNavCommands.Add(wicoNavCommand);
             }
+            void _NavImmediateTarget(Vector3D vTarget, string TargetName = "", bool bGo = true, int modeArrival = WicoControl.MODE_NAVNEXTTARGET, int stateArrival = 0, double DistanceMin = 50, double maxSpeed = 9999)
+            {
+                //                _program.ErrorLog("_NavAddTarget()"+TargetName);
+
+                if (maxSpeed > _wicoControl.fMaxWorldMps)
+                    maxSpeed = _wicoControl.fMaxWorldMps;
+                WicoNavCommand wicoNavCommand = new WicoNavCommand
+                {
+                    pg = _program,
+                    vNavTarget = vTarget,
+                    bValidNavTarget = true,
+                    NAVArrivalMode = modeArrival,
+                    NAVArrivalState = stateArrival,
+                    arrivalDistanceMin = DistanceMin,
+                    shipSpeedMax = maxSpeed,
+                    NAVTargetName = TargetName,
+                    _wicoControl = _wicoControl,
+                    _wicoNavigation = this
+
+                };
+                if (bGo) wicoNavCommand.Command = CommandTypes.Waypoint;
+                else wicoNavCommand.Command = CommandTypes.Orientation;
+
+                //            _program.sMasterReporting += "Adding NAV Commnd:";
+                //            _program.sMasterReporting += " Name=:" + wicoNavCommand.NAVTargetName;
+                //            _program.sMasterReporting += " Loc=" + Vector3DToString(wicoNavCommand.vNavTarget);
+                wicoNavCommands.Insert(0, wicoNavCommand);
+            }
+
             void _NavQueueMode(int theMode)
             {
                 WicoNavCommand wicoNavCommand = new WicoNavCommand
                 {
                     pg = _program,
                     Command = CommandTypes.SetMode,
+                    _wicoControl = _wicoControl,
+                    _wicoNavigation = this,
                     SetMode = theMode
                 };
 
                 wicoNavCommands.Add(wicoNavCommand);
-
             }
+
             void _NavGoTarget(Vector3D vTarget, int modeArrival = WicoControl.MODE_ARRIVEDTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
                 _NavAddTarget(vTarget, TargetName, bGo, modeArrival, stateArrival, DistanceMin, maxSpeed);
                 _NavStart();
             }
+            void _NavImmediateGoTarget(Vector3D vTarget, int modeArrival = WicoControl.MODE_ARRIVEDTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
+            {
+                _NavImmediateTarget(vTarget, TargetName, bGo, modeArrival, stateArrival, DistanceMin, maxSpeed);
+                _NavStart();
+            }
             void _NavStart()
             {
-                if (_Debug) _program.ErrorLog("NavStart():" + wicoNavCommands.Count + " Commands");
                 if (_Debug) _program.Echo("NavStart():" + wicoNavCommands.Count + " Commands");
                 if (wicoNavCommands.Count > 0)
                 {
@@ -1402,6 +1489,7 @@ namespace IngameScript
             void doModeStartNav()
             {
                 if (_Debug) _program.ErrorLog("doModeStartNav()");
+                _program.Echo("doModeStartNav()");
                 NavCommandProcessNext();
                 _wicoControl.WantFast();
             }
@@ -1440,11 +1528,6 @@ namespace IngameScript
 
             }
 
-            void SetDebug(bool debug)
-            {
-                _Debug = debug;
-            }
-
         }
 
         public enum CommandTypes { unknown, Waypoint, Orientation, ArrivalDistance, MaxSpeed,SetMode, Launch, Land, Dock, OrbitalLaunch };
@@ -1477,6 +1560,8 @@ namespace IngameScript
 
             public bool ProcessCommand()
             {
+                if (_wicoNavigation._Debug) pg.ErrorLog("ProcessCommand:" + Command.ToString());
+
                 switch (Command)
                 {
                     case CommandTypes.Waypoint:
@@ -1522,6 +1607,7 @@ namespace IngameScript
                         break;
                     case CommandTypes.SetMode:
                         {
+                            if (_wicoNavigation._Debug) pg.ErrorLog("PC:SetMode to:" + SetMode.ToString());
                             _wicoControl.SetMode(SetMode);
                         }
                         break;
