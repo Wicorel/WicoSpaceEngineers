@@ -421,6 +421,8 @@ namespace IngameScript
                     stoppingDistance = _program.wicoThrusters.calculateStoppingDistance(myMass.PhysicalMass,thrustTmBackwardList, velocityShip, 0);
                 }
                 // TODO: calculate stopping D for wheels
+
+
                 if (tmSB!=null && dTMUseSensorCollision && _program.wicoSensors.GetCount() > 0)
                 {
                     //                    float fScanDist = Math.Min(1f, (float)stoppingDistance * 1.5f);
