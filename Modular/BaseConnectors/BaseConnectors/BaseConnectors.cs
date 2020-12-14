@@ -36,7 +36,7 @@ namespace IngameScript
                 _wicoElapsedTime = wicoElapsedTime;
 
                 _program.moduleName += " Base Connectors";
-                _program.moduleList += "\nBase Connectors V4.1";
+                _program.moduleList += "\nBase Connectors V4.2a";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
