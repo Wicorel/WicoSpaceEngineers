@@ -150,7 +150,6 @@ namespace IngameScript
 
             public void SetDesiredPower(bool bAll = false)
             {
-
                 bool bFirst = true;
                 foreach (var a in antennaList)
                 {
