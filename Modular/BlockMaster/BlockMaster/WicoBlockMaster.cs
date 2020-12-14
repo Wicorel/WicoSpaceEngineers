@@ -309,6 +309,20 @@ namespace IngameScript
                     WicoRemoteBlockChangedHandlers.Add(handler);
             }
 
+            public void LoadLocalGrid()
+            {
+                localCubeGrids.Clear();
+                gtsLocalBlocks.Clear();
+                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, (x1 => x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
+                foreach (var tb in gtsLocalBlocks)
+                {
+                    if (!localCubeGrids.Contains(tb.CubeGrid))
+                    {
+                        localCubeGrids.Add(tb.CubeGrid);
+                    }
+                }
+            }
+
             /// <summary>
             /// Call to initialize the local blocks and all subscribers
             /// </summary>
@@ -317,10 +331,11 @@ namespace IngameScript
                 yield return true;
                 float fper = 0;
 
-                gtsLocalBlocks.Clear();
-                localCubeGrids.Clear();
+                if (gtsLocalBlocks.Count < 1)
+                {
+                    LoadLocalGrid();
+                }
 
-                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, (x1 => x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
                 fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
                 if (fper > 0.75f) yield return true;
 
@@ -328,10 +343,6 @@ namespace IngameScript
 //                _program.EchoInstructions("WBM:LBI: #Handlers=" + WicoLocalBlockParseHandlers.Count);
                 foreach (var tb in gtsLocalBlocks)
                 {
-                    if(!localCubeGrids.Contains(tb.CubeGrid))
-                    {
-                        localCubeGrids.Add(tb.CubeGrid);
-                    }
                     fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
                     if (fper > 0.75f)
                     {
