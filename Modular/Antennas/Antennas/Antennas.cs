@@ -175,7 +175,6 @@ namespace IngameScript
                 return (antennaList.Count);
             }
 
-
         }
     }
 }
