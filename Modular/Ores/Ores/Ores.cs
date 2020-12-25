@@ -19,7 +19,7 @@ namespace IngameScript
 {
     partial class Program
     {
-        public class Ores : CargoCheck
+        public class OresLocal : CargoCheck
         {
             readonly Program _program;
             readonly WicoBlockMaster _wicoBlockMaster;
@@ -27,8 +27,9 @@ namespace IngameScript
             readonly WicoIGC _wicoIGC;
             readonly Asteroids _asteroids;
             readonly Displays _displays;
+            readonly OreInfoLocs _oreInfoLocs;
 
-            public Ores(Program program, WicoBlockMaster wbm, WicoControl wicoControl, WicoIGC wicoIGC, Asteroids asteroids, Displays displays):base(program,wbm,null)
+            public OresLocal(Program program, WicoBlockMaster wbm, WicoControl wicoControl, WicoIGC wicoIGC, Asteroids asteroids, OreInfoLocs orelocs, Displays displays) : base(program, wbm, null)
             {
                 _program = program;
                 _wicoBlockMaster = wbm;
@@ -36,18 +37,169 @@ namespace IngameScript
                 _wicoIGC = wicoIGC;
                 _asteroids = asteroids;
                 _displays = displays;
+                _oreInfoLocs = orelocs;
+                if(_oreInfoLocs==null)
+                {
+                    _oreInfoLocs = new OreInfoLocs(program, wbm, wicoIGC, asteroids,displays);
+                }
+
+//                _program.AddLoadHandler(LoadHandler);
+//                _program.AddSaveHandler(SaveHandler);
+
+                //                _wicoIGC.AddPublicHandler(sOreTag, BroadcastHandler);
+
+ //               if (_displays != null) _displays.AddSurfaceHandler("ORELOCS", SurfaceHandler);
+
+            }
+
+            void BroadcastHandler(MyIGCMessage msg)
+            {
+            }
+
+            public void OreDoCargoCheck(bool bInit = false)
+            {
+                _oreInfoLocs.OreClearAmounts();
+
+                var itemsL = new List<MyInventoryItem>();
+                for (int i = 0; i < lContainers.Count; i++)
+                {
+                    var inv = lContainers[i].GetInventory(0);
+                    if (inv == null) continue;
+                    //                var itemsL = inv.GetItems();
+                    inv.GetItems(itemsL);
+                    // go through all itemsL
+                    for (int i2 = 0; i2 < itemsL.Count; i2++)
+                    {
+                        var item = itemsL[i2];
+
+                        if (item.Type.ToString().Contains("Ore"))
+                        {
+                            //                        Echo("Adding " + item.Content.SubtypeId.ToString());
+                            _oreInfoLocs.OreAddAmount(item.Type.SubtypeId.ToString(), (double)item.Amount, bInit);
+                        }
+                    }
+
+                }
+                for (int i = 0; i < localEjectors.Count; i++)
+                {
+                    var inv = localEjectors[i].GetInventory(0);
+                    if (inv == null) continue;
+                    //                var itemsL = inv.GetItems();
+                    inv.GetItems(itemsL);
+                    // go through all itemsL
+                    for (int i2 = 0; i2 < itemsL.Count; i2++)
+                    {
+                        var item = itemsL[i2];
+
+                        if (item.Type.ToString().Contains("Ore"))
+                        {
+                            //                        Echo("Adding " + item.Content.SubtypeId.ToString());
+                            _oreInfoLocs.OreAddAmount(item.Type.SubtypeId.ToString(), (double)item.Amount, bInit);
+                        }
+                    }
+
+                }
+            }
+
+        }
+
+        public class OreInfoLocs
+        {
+            readonly Program _program;
+            readonly WicoBlockMaster _wicoBlockMaster;
+            readonly WicoIGC _wicoIGC;
+            readonly Asteroids _asteroids;
+            readonly Displays _displays;
+
+            protected List<OreLocInfo> _oreLocs = new List<OreLocInfo>();
+
+            const string sOreSection = "ORE";
+            const string sOreDesirabilitySection = "OREDESIREABILITY";
+            protected const string sOreTag = "WICOORE";
+
+            public OreInfoLocs(Program program, WicoBlockMaster wbm, WicoIGC igc, Asteroids asteroids, Displays displays)
+            {
+                _program = program;
+                _wicoBlockMaster = wbm;
+                _wicoIGC = igc;
+                _asteroids = asteroids;
+                _displays = displays;
 
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
-                _wicoIGC.AddPublicHandler(sOreTag, BroadcastHandler);
 
-                if(_displays!=null) _displays.AddSurfaceHandler("ORELOCS", SurfaceHandler);
+                OreInitInfo(_program._CustomDataIni);
 
+                if (_displays != null) _displays.AddSurfaceHandler("ORELOCS", SurfaceHandler);
+            }
+
+            public class OreLocInfo
+            {
+                public long AstEntityId;
+                public int oreId;
+                public Vector3D position;
+                public Vector3D vector;
+                public long detectionType;
+                // detection types:
+                // pointed at by player with camera
+                // from ore detector (!)
+                // 69  from 'tasting' with drills
+                // player given GPS
+            }
+            void LoadHandler(MyIni ini)
+            {
+                int iCount;
+
+                iCount = ini.Get(sOreSection, "count").ToInt32();
+
+                _oreLocs.Clear();
+                long eId = 0;
+                int oreID = 0;
+                Vector3D position = new Vector3D(0, 0, 0);
+                Vector3D vector = new Vector3D(0, 0, 0);
+                long detectionType = 0;
+
+                for (int j1 = 0; j1 < iCount; j1++)
+                {
+                    eId = ini.Get(sOreSection, "AsteroidId" + j1.ToString()).ToInt32(0);
+
+                    oreID = ini.Get(sOreSection, "oreId" + j1.ToString()).ToInt32(0);
+
+                    Vector3D.TryParse(ini.Get(sOreSection, "position" + j1.ToString()).ToString(), out position);
+                    Vector3D.TryParse(ini.Get(sOreSection, "vector" + j1.ToString()).ToString(), out vector);
+                    detectionType = ini.Get(sOreSection, "detectiontype" + j1.ToString()).ToInt32();
+
+                    OreLocInfo ore = new OreLocInfo
+                    {
+                        AstEntityId = eId,
+                        oreId = oreID,
+                        position = position,
+                        vector = vector,
+                        detectionType = detectionType
+                    };
+                    _oreLocs.Add(ore);
+                }
+            }
+
+            void SaveHandler(MyIni ini)
+            {
+                var count = _oreLocs.Count;
+                ini.Set(sOreSection, "count", count);
+                //            Echo("OreSerialize Count=" + count);
+                //            if (count > 0) sInitResults += "\nOSerialize count>0";
+                for (int i1 = 0; i1 < _oreLocs.Count; i1++)
+                {
+                    ini.Set(sOreSection, "AsteroidId" + i1.ToString(), _oreLocs[i1].AstEntityId);
+                    ini.Set(sOreSection, "oreId" + i1.ToString(), _oreLocs[i1].oreId);
+                    ini.Set(sOreSection, "position" + i1.ToString(), _program.Vector3DToString(_oreLocs[i1].position));
+                    ini.Set(sOreSection, "vector" + i1.ToString(), _program.Vector3DToString(_oreLocs[i1].vector));
+                    ini.Set(sOreSection, "detectiontype" + i1.ToString(), _oreLocs[i1].detectionType);
+                }
             }
             StringBuilder sbNotices = new StringBuilder(300);
             StringBuilder sbModeInfo = new StringBuilder(100);
 
-            new public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
+            public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
             {
                 if (tag == "ORELOCS")
                 {
@@ -58,7 +210,7 @@ namespace IngameScript
                         sbNotices.AppendLine(_oreLocs.Count + " Ore Locations");
 
                         {
-                            foreach(var oreloc in _oreLocs)
+                            foreach (var oreloc in _oreLocs)
                             {
                                 sbNotices.AppendLine(oreloc.AstEntityId.ToString("N0") + " " + (_program.Me.GetPosition() - oreloc.position).Length().ToString("N0") + "Meters");
                             }
@@ -95,125 +247,6 @@ namespace IngameScript
                 }
             }
 
-            void LoadHandler(MyIni ini)
-            {
-                int iCount;
-
-                iCount=ini.Get(sOreSection, "count").ToInt32();
-
-                _oreLocs.Clear();
-                long eId = 0;
-                int oreID = 0;
-                Vector3D position = new Vector3D(0, 0, 0);
-                Vector3D vector = new Vector3D(0, 0, 0);
-                long detectionType = 0;
-
-                for (int j1 = 0; j1 < iCount; j1++)
-                {
-                    eId = ini.Get(sOreSection, "AsteroidId" + j1.ToString()).ToInt32(0);
-
-                    oreID=ini.Get(sOreSection, "oreId" + j1.ToString()).ToInt32(0);
-
-                    Vector3D.TryParse(ini.Get(sOreSection, "position" + j1.ToString()).ToString(), out position);
-                    Vector3D.TryParse(ini.Get(sOreSection, "vector" + j1.ToString()).ToString(), out vector);
-                    detectionType=ini.Get(sOreSection, "detectiontype" + j1.ToString()).ToInt32();
-
-                    OreLocInfo ore = new OreLocInfo
-                    {
-                        AstEntityId = eId,
-                        oreId = oreID,
-                        position = position,
-                        vector = vector,
-                        detectionType = detectionType
-                    };
-                    _oreLocs.Add(ore);
-                }
-            }
-
-            void SaveHandler(MyIni ini)
-            {
-                var count = _oreLocs.Count;
-                ini.Set(sOreSection, "count", count);
-                //            Echo("OreSerialize Count=" + count);
-                //            if (count > 0) sInitResults += "\nOSerialize count>0";
-                for (int i1 = 0; i1 < _oreLocs.Count; i1++)
-                {
-                    ini.Set(sOreSection, "AsteroidId" + i1.ToString(), _oreLocs[i1].AstEntityId);
-                    ini.Set(sOreSection, "oreId" + i1.ToString(), _oreLocs[i1].oreId);
-                    ini.Set(sOreSection, "position" + i1.ToString(), _program.Vector3DToString(_oreLocs[i1].position));
-                    ini.Set(sOreSection, "vector" + i1.ToString(), _program.Vector3DToString(_oreLocs[i1].vector));
-                    ini.Set(sOreSection, "detectiontype" + i1.ToString(), _oreLocs[i1].detectionType);
-                }
-            }
-
-            void BroadcastHandler(MyIGCMessage msg)
-            {
-                // NOTE: called on ALL received messages; not just 'our' tag
-                if (msg.Tag == sOreTag)
-                {
-                    if (msg.Data is string)
-                    {
-                        string[] aMessage = ((string)msg.Data).Trim().Split(':');
-                        double x1, y1, z1;
-
-                        int iOffset = 0;
-
-                        //  antSend("WICO:ORE:" + Me.CubeGrid.EntityId.ToString() + ":" + asteroidId + ":" + OreID + ":" + Vector3DToString(Position) + ":" + Vector3DToString(vVec) + ":" + detectionType.ToString());
-                        //  antSend("WICO:ORE:" + asteroidId + ":" + OreID + ":" + Vector3DToString(Position) + ":" + Vector3DToString(vVec) + ":" + detectionType.ToString());
-
-                        long asteroidID = 0;
-                        long.TryParse(aMessage[iOffset++], out asteroidID);
-
-                        int oreID = 0;
-                        int.TryParse(aMessage[iOffset++], out oreID);
-
-                        x1 = Convert.ToDouble(aMessage[iOffset++]);
-                        y1 = Convert.ToDouble(aMessage[iOffset++]);
-                        z1 = Convert.ToDouble(aMessage[iOffset++]);
-                        Vector3D position = new Vector3D(x1, y1, z1);
-
-                        x1 = Convert.ToDouble(aMessage[iOffset++]);
-                        y1 = Convert.ToDouble(aMessage[iOffset++]);
-                        z1 = Convert.ToDouble(aMessage[iOffset++]);
-                        Vector3D vector = new Vector3D(x1, y1, z1);
-
-                        long detectionType = 0;
-                        long.TryParse(aMessage[iOffset++], out detectionType);
-
-                        OreLocInfo ore = new OreLocInfo
-                        {
-                            AstEntityId = asteroidID,
-                            oreId = oreID,
-                            position = position,
-                            vector = vector,
-                            detectionType = detectionType
-                        };
-                        _oreLocs.Add(ore);
-                    }
-
-                }
-            }
-
-            const string sOreSection = "ORE";
-            const string sOreDesirabilitySection = "OREDESIREABILITY";
-            const string sOreTag = "WICOORE";
-
-            List<OreLocInfo> _oreLocs = new List<OreLocInfo>();
-
-            public class OreLocInfo
-            {
-                public long AstEntityId;
-                public int oreId;
-                public Vector3D position;
-                public Vector3D vector;
-                public long detectionType;
-                // detection types:
-                // pointed at by player with camera
-                // from ore detector (!)
-                // 69  from 'tasting' with drills
-                // player given GPS
-            }
-
             public void OreAddLoc(long asteroidId, int OreID, Vector3D Position, Vector3D vVec, long detectionType)
             {
                 OreLocInfo oli = new OreLocInfo();
@@ -225,12 +258,8 @@ namespace IngameScript
                 //TODO:
                 // search by position and only add if NOT 'near' another entry
                 _oreLocs.Add(oli);
-                //should be done by caller            OreSerialize();
-                // transmit found location...
-                //            antSend("WICO:ORE:" + Me.CubeGrid.EntityId.ToString() + ":" + asteroidId + ":" + OreID + ":" + Vector3DToString(Position) + ":" + Vector3DToString(vVec) + ":" + detectionType.ToString());
-//                antSend("ORE", Me.CubeGrid.EntityId.ToString() + ":" + asteroidId + ":" + OreID + ":" + Vector3DToString(Position) + ":" + Vector3DToString(vVec) + ":" + detectionType.ToString());
+                
                 _program.IGC.SendBroadcastMessage(sOreTag, asteroidId + ":" + OreID + ":" + _program.Vector3DToString(Position) + ":" + _program.Vector3DToString(vVec) + ":" + detectionType.ToString());
-                //            sInitResults += "\nAdded Ore id=" + OreID + " count=" + oreLocs.Count();
             }
 
             public void OreDumpLocs()
@@ -289,8 +318,8 @@ namespace IngameScript
                             long desireability = -1;
                             bool bFound = false;
                             double localAmount = 0;
-                            oreID=ini.Get(sOreDesirabilitySection, "oreId" + j1.ToString()).ToInt32();
- //                           iniWicoCraftSave.GetValue(sOreDesirabilitySection, "oreId" + j1.ToString(), ref oreID);
+                            oreID = ini.Get(sOreDesirabilitySection, "oreId" + j1.ToString()).ToInt32();
+                            //                           iniWicoCraftSave.GetValue(sOreDesirabilitySection, "oreId" + j1.ToString(), ref oreID);
                             oreName = ini.Get(sOreDesirabilitySection, "oreName" + j1.ToString()).ToString();
                             //                            iniWicoCraftSave.GetValue(sOreDesirabilitySection, "oreName" + j1.ToString(), ref oreName);
                             desireability = ini.Get(sOreDesirabilitySection, "desireability" + j1.ToString()).ToInt64();
@@ -298,7 +327,7 @@ namespace IngameScript
                             bFound = ini.Get(sOreDesirabilitySection, "bFound" + j1.ToString()).ToBoolean();
                             //iniWicoCraftSave.GetValue(sOreDesirabilitySection, "bFound" + j1.ToString(), ref bFound);
                             localAmount = ini.Get(sOreDesirabilitySection, "localAmount" + j1.ToString()).ToDouble();
-//                            iniWicoCraftSave.GetValue(sOreDesirabilitySection, "localAmount" + j1.ToString(), ref localAmount);
+                            //                            iniWicoCraftSave.GetValue(sOreDesirabilitySection, "localAmount" + j1.ToString(), ref localAmount);
 
                             OreInfo oi = new OreInfo();
                             oi.oreID = oreID;
@@ -443,53 +472,7 @@ namespace IngameScript
                         _program.Echo(oreInfos[i].oreName + " " + oreInfos[i].localAmount.ToString("N0"));
                 }
             }
-
-            public void OreDoCargoCheck(bool bInit = false)
-            {
-                OreClearAmounts();
-
-                var itemsL = new List<MyInventoryItem>();
-                for (int i = 0; i < lContainers.Count; i++)
-                {
-                    var inv = lContainers[i].GetInventory(0);
-                    if (inv == null) continue;
-                    //                var itemsL = inv.GetItems();
-                    inv.GetItems(itemsL);
-                    // go through all itemsL
-                    for (int i2 = 0; i2 < itemsL.Count; i2++)
-                    {
-                        var item = itemsL[i2];
-
-                        if (item.Type.ToString().Contains("Ore"))
-                        {
-                            //                        Echo("Adding " + item.Content.SubtypeId.ToString());
-                            OreAddAmount(item.Type.SubtypeId.ToString(), (double)item.Amount, bInit);
-                        }
-                    }
-
-                }
-                for (int i = 0; i < localEjectors.Count; i++)
-                {
-                    var inv = localEjectors[i].GetInventory(0);
-                    if (inv == null) continue;
-                    //                var itemsL = inv.GetItems();
-                    inv.GetItems(itemsL);
-                    // go through all itemsL
-                    for (int i2 = 0; i2 < itemsL.Count; i2++)
-                    {
-                        var item = itemsL[i2];
-
-                        if (item.Type.ToString().Contains("Ore"))
-                        {
-                            //                        Echo("Adding " + item.Content.SubtypeId.ToString());
-                            OreAddAmount(item.Type.SubtypeId.ToString(), (double)item.Amount, bInit);
-                        }
-                    }
-
-                }
-
-            }
-
         }
+
     }
 }
