@@ -223,6 +223,7 @@ namespace IngameScript
                             }
                         }
                         if (et.dElapsedSeconds < 0) et.dElapsedSeconds = 0;
+                        // TODO: calculate remaining time and request faster trigger..  but only if timer is set to 'accuracy' mode
                         _wicoControl.WantSlow();
                     }
                 }
