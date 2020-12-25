@@ -29,6 +29,10 @@ namespace IngameScript
         Add menu system to send ships to ores/asteroid/ships
         */
         BaseConnectors baseConnectors;
+        Asteroids _asteroids;
+        OreInfoLocs _oreInfoLocs;
+//        OresRemote _ores;
+        Displays _displays;
 
         /// <summary>
         /// The control system for this module.
@@ -45,6 +49,9 @@ namespace IngameScript
         {
             // wicoThrusters = new WicoThrusters(this);
             baseConnectors = new BaseConnectors(this, wicoBlockMaster, wicoIGC, wicoElapsedTime);
+            _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
+            _asteroids = new Asteroids(this, _wicoControl, wicoIGC, _displays);
+            _oreInfoLocs = new OreInfoLocs(this, wicoBlockMaster, wicoIGC, _asteroids, _displays);
 
             // wicoOrbitalLaunch = new OrbitalModes(this);
             // wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
@@ -58,6 +65,7 @@ namespace IngameScript
         {
             if(bInitDone)
             {
+                _displays.EchoInfo();
                 // ensure we run at least at slow speed for updates.
                 _wicoControl.WantSlow(); 
             }
