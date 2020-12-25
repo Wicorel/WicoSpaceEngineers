@@ -36,7 +36,7 @@ namespace IngameScript
                 _wicoElapsedTime = wicoElapsedTime;
 
                 _program.moduleName += " Base Connectors";
-                _program.moduleList += "\nBase Connectors V4.2a";
+                _program.moduleList += "\nBase Connectors V4.2c";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -426,18 +426,18 @@ namespace IngameScript
                 {
                     Vector3D vApproach = vPosition + vVec * 30;
 //                    _program.ErrorLog("Sending CONA:" + _program.Vector3DToString(vApproach));
-                    _program.IGC.SendBroadcastMessage("CONA", incomingID + ":" + connector.EntityId + ":" + _program.Vector3DToString(vApproach));
+                    _program.IGC.SendBroadcastMessage("CONA", incomingID + ":" + _program.Me.EntityId.ToString() + ":" + _program.Vector3DToString(vApproach));
                 }
                 else
                 {
                     if (dockingInfo[iDock].lAlign < 0)
                     {
-                        _program.IGC.SendBroadcastMessage("COND", incomingID + ":" + connector.EntityId + ":" + _program.toGpsName("", connector.CustomName) + ":" + _program.Vector3DToString(vPosition) + ":" + _program.Vector3DToString(vVec));
+                        _program.IGC.SendBroadcastMessage("COND", incomingID + ":" + _program.Me.EntityId.ToString() + ":" + _program.toGpsName("", connector.CustomName) + ":" + _program.Vector3DToString(vPosition) + ":" + _program.Vector3DToString(vVec));
 //                        _program.ErrorLog("Sending COND:" + _program.Vector3DToString(vPosition) + " vec=" + _program.Vector3DToString(vVec));
                     }
                     else
                     {
-                        _program.IGC.SendBroadcastMessage("ACOND", incomingID + ":" + connector.EntityId + ":" + _program.toGpsName("", connector.CustomName)
+                        _program.IGC.SendBroadcastMessage("ACOND", incomingID + ":" + _program.Me.EntityId.ToString() + ":" + _program.toGpsName("", connector.CustomName)
                         + ":" + _program.Vector3DToString(vPosition) + ":" + _program.Vector3DToString(vVec) + ":" + _program.Vector3DToString(vAlign));
                     }
                 }
