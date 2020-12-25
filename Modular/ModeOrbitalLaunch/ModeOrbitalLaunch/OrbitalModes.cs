@@ -62,7 +62,7 @@ namespace IngameScript
                 
 
                 _program.moduleName += " Orbital";
-                _program.moduleList += "\nOrbital V4.2g";
+                _program.moduleList += "\nOrbital V4.2h";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
