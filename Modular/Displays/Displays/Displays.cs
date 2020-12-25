@@ -69,7 +69,6 @@ namespace IngameScript
                 {
                     if (!SurfaceDrawHandlers.Contains(handler))
                         SurfaceDrawHandlers.Add(handler);
-
                 }
 
                 public void CallHandlers(int ActionType)
@@ -168,17 +167,23 @@ namespace IngameScript
             /// <returns>true</returns>
             public bool AddSurfaceHandler(string tag, Action<string,IMyTextSurface, int> handler)
             {
+//                _program.Echo("ASH:" + tag + ":");
+                if (handler == null)
+                    _program.Echo("handler is NULL!");
+
                 bool bFound = false;
                 WicoDisplay FoundDisplay=null;
                 foreach(var display in _wicoDisplays)
                 {
                     if(display.tag==tag)
                     {
+                        FoundDisplay = display;
                         bFound = true;
                         break;
                     }
                 }
-                if(!bFound)
+                _program.Echo("display found="+bFound.ToString());
+                if (!bFound)
                 {
                     FoundDisplay = new WicoDisplay(_SurfaceProviders, tag);
                     FoundDisplay.OfferHandler(handler);
