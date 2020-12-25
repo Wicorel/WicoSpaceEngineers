@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WMDock", "WMDock\WMDock.csproj", "{E014C024-523D-4491-B4C8-00435BFA0089}"
 EndProject
@@ -65,8 +65,15 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Displays", "..\Displays\Dis
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "IGCIFF", "..\IGCIFF\IGCIFF\IGCIFF.shproj", "{6E3114C0-2D7D-403B-8A03-DD140FF4BA1B}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PowerManagement", "..\PowerManagement\PowerManagement\PowerManagement.shproj", "{8842D42F-9F40-4CBD-92D6-0369C047E612}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Docked", "..\Docked\Docked\Docked.shproj", "{2E7E4E49-CBBC-4E18-BA09-1AE649352A69}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SystemsMonitor", "..\SystemsMonitor\SystemsMonitor\SystemsMonitor.shproj", "{0A413EEF-1543-468E-A388-03E471A4E85F}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\SystemsMonitor\SystemsMonitor\SystemsMonitor.projitems*{0a413eef-1543-468e-a388-03e471a4e85f}*SharedItemsImports = 13
 		..\Power\Power\Power.projitems*{11d02c04-292a-4e4d-b6a7-4175fb98a163}*SharedItemsImports = 13
 		..\GasGens\GasGens\GasGens.projitems*{121cbf09-ca3f-465e-beb0-e14c8e22cd35}*SharedItemsImports = 13
 		..\Antennas\Antennas\Antennas.projitems*{14fd351b-b99b-4e0f-9128-250fb3532f36}*SharedItemsImports = 13
@@ -74,6 +81,7 @@ Global
 		..\Sensors\Sensors\Sensors.projitems*{22cb2a2b-7da5-4e54-955b-668721f0c414}*SharedItemsImports = 13
 		..\Timers\Timers\Timers.projitems*{2587e72f-cf86-4b72-b553-06474a810b0d}*SharedItemsImports = 13
 		..\ModularMain\ModularMain\ModularMain.projitems*{2c75ab60-ae98-4544-b151-13769a76c6c4}*SharedItemsImports = 13
+		..\Docked\Docked\Docked.projitems*{2e7e4e49-cbbc-4e18-ba09-1ae649352a69}*SharedItemsImports = 13
 		..\Displays\Displays\Displays.projitems*{33e46b38-c87f-445a-b3a9-3466910deca6}*SharedItemsImports = 13
 		..\Gyros\Gyros\Gyros.projitems*{39d1bda2-1f2e-45ef-b3a6-17215ca7ef6b}*SharedItemsImports = 13
 		..\Tanks\Tanks\Tanks.projitems*{3c377b47-c3d2-487d-bbcd-d9f49adf2208}*SharedItemsImports = 13
@@ -88,6 +96,7 @@ Global
 		..\IGCIFF\IGCIFF\IGCIFF.projitems*{6e3114c0-2d7d-403b-8a03-dd140ff4ba1b}*SharedItemsImports = 13
 		..\HydrogenEngines\HydrogenEngines\HydrogenEngines.projitems*{76c7e306-96e2-4766-8fea-29261ab8f94b}*SharedItemsImports = 13
 		..\DockBase\DockBase\DockBase.projitems*{7c1a6fc6-a618-468f-980b-acde09069953}*SharedItemsImports = 13
+		..\PowerManagement\PowerManagement\PowerManagement.projitems*{8842d42f-9f40-4cbd-92d6-0369c047e612}*SharedItemsImports = 13
 		..\Navigation\Navigation\Navigation.projitems*{88e62142-15b2-40d2-944b-9fd1b0e42ef5}*SharedItemsImports = 13
 		..\NAVRotors\NAVRotors\NAVRotors.projitems*{8f6cbb54-6529-43a9-8641-32af99460465}*SharedItemsImports = 13
 		..\Cameras\Cameras\Cameras.projitems*{8fb811e0-76f1-499f-b6d2-360ee94c5961}*SharedItemsImports = 13
@@ -102,6 +111,7 @@ Global
 		..\Connectors\Connectors\Connectors.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Displays\Displays\Displays.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\DockBase\DockBase\DockBase.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Docked\Docked\Docked.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\GasGens\GasGens\GasGens.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Gyros\Gyros\Gyros.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
@@ -113,9 +123,11 @@ Global
 		..\NavCommon\NavCommon\NavCommon.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\NAVRotors\NAVRotors\NAVRotors.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Parachutes\Parachutes\Parachutes.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\PowerManagement\PowerManagement\PowerManagement.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Power\Power\Power.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Sensors\Sensors\Sensors.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\SpaceDock\SpaceDock\SpaceDock\SpaceDock.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\SystemsMonitor\SystemsMonitor\SystemsMonitor.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Tanks\Tanks\Tanks.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Timers\Timers\Timers.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Wheels\Wheels\Wheels.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4

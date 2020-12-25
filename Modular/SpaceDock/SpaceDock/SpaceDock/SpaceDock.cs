@@ -19,26 +19,25 @@ namespace IngameScript
 {
     partial class Program
     {
-        public class SpaceDock: DockBase
+        public class SpaceDock
         {
             private Program _program;
             private WicoControl _wicoControl;
             private WicoBlockMaster _wicoBlockMaster;
-            private Connectors _connectors;
-            private WicoThrusters _thrusters;
+//            private Connectors _connectors;
+//            private WicoThrusters _thrusters;
             private Antennas _antennas;
-            private GasTanks _tanks;
-            private WicoGyros _gyros;
-            private PowerProduction _power;
+//            private GasTanks _tanks;
+//            private WicoGyros _gyros;
+//            private PowerProduction _power;
             private Timers _timers;
             private WicoIGC _wicoIGC;
             private WicoBases _wicoBases;
             private NavCommon _navCommon;
-            private CargoCheck _cargoCheck;
+//            private CargoCheck _cargoCheck;
             private Displays _displays;
 
-            bool bAutoRelaunch = false;
-            bool bAutoRefuel = true;
+            private SystemsMonitor _systemsMonitor;
 
             Vector3D vDockAlign;
             bool bDoDockAlign = false;
@@ -50,6 +49,8 @@ namespace IngameScript
             bool bValidHome = false;
 
             public bool _Debug = false;
+
+            bool bAutoRefuel = true;
 
             long lTargetBase = -1;
             DateTime dtDockingActionStart;
@@ -63,31 +64,51 @@ namespace IngameScript
             const string CONNECTORDOCKTAG = "COND";
             const string CONNECTORALIGNDOCKTAG = "ACOND";
             const string CONNECTORREQUESTFAILTAG = "CONF";
+            const string CONNECTORREQUEST = "CON?";
+            const string CONNECTORDOCKREQUEST = "COND?";
 
-            public SpaceDock(Program program, WicoControl wc, WicoBlockMaster wbm, WicoThrusters thrusters, Connectors connectors, 
-                Antennas ant, GasTanks gasTanks, WicoGyros wicoGyros, PowerProduction pp, Timers tim, WicoIGC iGC,
-                WicoBases wicoBases, NavCommon navCommon, CargoCheck cargoCheck
-                ,Displays displays): base(program)
+            /*
+             * TODO:
+             * Add 'mother' ship and keep it
+             * Add remembered connector
+             * Support atmo docking
+             * 
+             * Add reasons for docking request (need power, need hydro, dump ore, etc)
+             * 
+             * 
+             */
+            public SpaceDock(Program program, WicoControl wc, WicoBlockMaster wbm
+//                , WicoThrusters thrusters
+//                , Connectors connectors
+                ,Antennas ant
+//                , GasTanks gasTanks, WicoGyros wicoGyros, PowerProduction pp
+                , Timers tim, WicoIGC iGC,
+                WicoBases wicoBases, NavCommon navCommon
+//                , CargoCheck cargoCheck
+                ,Displays displays
+                ,SystemsMonitor systemsMonitor
+                )
 
             {
                 _program = program;
                 _wicoControl = wc;
                 _wicoBlockMaster = wbm;
-                _thrusters = thrusters;
-                _connectors = connectors;
+//                _thrusters = thrusters;
+//                _connectors = connectors;
                 _antennas = ant;
-                _tanks = gasTanks;
-                _gyros = wicoGyros;
-                _power = pp;
+//                _tanks = gasTanks;
+//                _gyros = wicoGyros;
+//                _power = pp;
                 _timers = tim;
                 _wicoIGC = iGC;
                 _wicoBases = wicoBases;
                 _navCommon = navCommon;
-                _cargoCheck = cargoCheck;
+//                _cargoCheck = cargoCheck;
                 _displays = displays;
+                _systemsMonitor = systemsMonitor;
 
                 _program.moduleName += " Space Dock";
-                _program.moduleList += "\nSpaceDock V4.2e";
+                _program.moduleList += "\nSpaceDock V4.2g";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -101,7 +122,7 @@ namespace IngameScript
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
                 _wicoIGC.AddUnicastHandler(DockingUnicastHandler);
-                _wicoIGC.AddPublicHandler(WICOB_DOCKSETRELAUNCH,RelaunchMessagehandler,true);
+//                _wicoIGC.AddPublicHandler(WICOB_DOCKSETRELAUNCH,RelaunchMessagehandler,true);
 
                 // for backward compatibility
                 _wicoIGC.AddPublicHandler(CONNECTORAPPROACHTAG, DockingUnicastHandler);
@@ -111,28 +132,10 @@ namespace IngameScript
                 _Debug = _program._CustomDataIni.Get(sDockingSection, "Debug").ToBoolean(_Debug);
                 _program._CustomDataIni.Set(sDockingSection, "Debug", _Debug);
 
-                bAutoRefuel = _program._CustomDataIni.Get(sDockingSection, "AutoRefuel").ToBoolean(bAutoRefuel);
-                _program._CustomDataIni.Set(sDockingSection, "AutoRefuel", bAutoRefuel);
-
-                bAutoRelaunch = _program._CustomDataIni.Get(sDockingSection, "AutoRelaunch").ToBoolean(bAutoRelaunch);
-                _program._CustomDataIni.Set(sDockingSection, "AutoRelaunch", bAutoRelaunch);
-
                 _displays.AddSurfaceHandler("MODE", SurfaceHandler);
                 _displays.AddSurfaceHandler("FUEL", SurfaceHandler);
             }
 
-            private void RelaunchMessagehandler(MyIGCMessage msg)
-            {
-                if (msg.Tag == WICOB_DOCKSETRELAUNCH && msg.Data is string)
-                {
-                    if (_Debug) _program.ErrorLog("Received DockSet relaunch =" + (string)msg.Data);
-
-                    bool bResult = false;
-                    bool bOK = bool.TryParse((string)msg.Data, out bResult);
-                    if (bOK)
-                        bAutoRelaunch = bResult;
-                }
-            }
 
             StringBuilder sbModeInfo = new StringBuilder(100);
             StringBuilder sbNotices = new StringBuilder(300);
@@ -151,7 +154,7 @@ namespace IngameScript
                         if (
                             iMode == WicoControl.MODE_LAUNCH
                             || iMode == WicoControl.MODE_DOCKING
-                            || iMode == WicoControl.MODE_DOCKED
+//                            || iMode == WicoControl.MODE_DOCKED
                          )
                         {
                             tsurface.WriteText(sbModeInfo);
@@ -190,34 +193,27 @@ namespace IngameScript
                     if (ActionType == Displays.DODRAW)
                     {
 
-                        /*
-                        if (
-                            iMode == WicoControl.MODE_LAUNCH
-                            || iMode == WicoControl.MODE_DOCKING
-                            || iMode == WicoControl.MODE_DOCKED
-                         )
-                         */
                         {
-                            DockAirWorthy(false,false,_cargoCheck.cargohighwater);
+                            _systemsMonitor.DockAirWorthy(false,false, _systemsMonitor.cargohighwater);
                             sbFuelInfo.Clear();
                             sbFuelNotices.Clear();
-                            if(!BatteryGo)
+                            if(!_systemsMonitor.BatteryGo)
                             {
                                 sbFuelInfo.AppendLine("BATTERY LOW");
                             }
-                            if(!TanksGo)
+                            if(!_systemsMonitor.TanksGo)
                             {
                                 sbFuelInfo.AppendLine("HYDRO LOW");
                             }
-                            if(!ReactorsGo)
+                            if(!_systemsMonitor.ReactorsGo)
                             {
                                 sbFuelInfo.AppendLine("REACTORS LOW");
                             }
-                            if(!CargoGo)
+                            if(!_systemsMonitor.CargoGo)
                             {
                                 sbFuelInfo.AppendLine("CARGO FULL");
                             }
-                            if(BatteryGo&&TanksGo&&ReactorsGo&&CargoGo)
+                            if(_systemsMonitor.BatteryGo && _systemsMonitor.TanksGo && _systemsMonitor.ReactorsGo && _systemsMonitor.CargoGo)
                             {
                                 tsurface.BackgroundColor = Color.Black;
                             }
@@ -225,10 +221,20 @@ namespace IngameScript
                             { // need to give fuel warning
                                 tsurface.BackgroundColor = Color.Red;
                             }
-                            if (_tanks.HasHydroTanks())
+                            if (_systemsMonitor.HasHydroTanks())
                             {
-                                sbFuelInfo.AppendLine("H2 Tanks = " + (_tanks.hydroPercent * 100).ToString("0.0")+"%");
+                                sbFuelInfo.AppendLine("H2 Tanks = " + (_systemsMonitor.hydroPercent * 100).ToString("0.0")+"%");
                             }
+                            if(_systemsMonitor.HasBatteries())
+                            {
+                                sbFuelInfo.AppendLine("Batteries = " + (_systemsMonitor.batteryPercentage).ToString("0.0") + "%");
+
+                            }
+                            if (_systemsMonitor.EnginesCount()>0)
+                            {
+                                sbFuelInfo.AppendLine("Engines = " + (_systemsMonitor.EnginesAreOff()?"Off": "ON"));
+                            }
+                            sbFuelNotices.AppendLine("Current Output = " + (_systemsMonitor.currentTotalOutput/ _systemsMonitor.maxTotalPower).ToString("0.00") +"%");
 
                             tsurface.WriteText(sbFuelInfo);
                             if (tsurface.SurfaceSize.Y < 256)
@@ -270,7 +276,7 @@ namespace IngameScript
             void SaveHandler(MyIni Ini)
             {
                 Ini.Set(sDockingSection, "bDoingDocking", bDoingDocking);
-                _program.CustomDataChanged();
+//                _program.CustomDataChanged();
             }
 
             /// <summary>
@@ -288,8 +294,8 @@ namespace IngameScript
                     )
                 {
                     _displays.ClearDisplays("MODE");
-                    _gyros.gyrosOff();
-                    _thrusters.powerDownThrusters();
+
+                    _systemsMonitor.ResetMotion();
                 }
                 if (toMode == WicoControl.MODE_DOCKING)
                 {
@@ -375,15 +381,6 @@ namespace IngameScript
 //                        _program.ErrorLog("godock command");
                         _wicoControl.SetMode(WicoControl.MODE_DOCKING,0);
                     }
-                    if (myCommandLine.Argument(0) == "relaunch")
-                    {
-                        bAutoRelaunch = !bAutoRelaunch;
-                        string s = "AutoRelaunch=" + bAutoRelaunch.ToString();
-                        _program.Echo(s);
-                        _program.ErrorLog(s);
-                        _program._CustomDataIni.Set(sDockingSection, "AutoRelaunch", bAutoRelaunch);
-                        _program.CustomDataChanged();
-                    }
                     if (myCommandLine.Argument(0) == "refuel")
                     {
                         bAutoRefuel = !bAutoRefuel;
@@ -414,9 +411,9 @@ namespace IngameScript
 
                 if (iMode == WicoControl.MODE_LAUNCH) { doModeLaunch(); return; }
                 if (iMode == WicoControl.MODE_DOCKING) { doModeDocking(); return; }
-                if (iMode == WicoControl.MODE_DOCKED) { doModeDocked(); return; }
+//                if (iMode == WicoControl.MODE_DOCKED) { doModeDocked(); return; }
 
-                if (_connectors.AnyConnectorIsConnected() && iMode != WicoControl.MODE_DOCKED)
+                if (_systemsMonitor.AnyConnectorIsConnected() && iMode != WicoControl.MODE_DOCKED)
                 {
                     _wicoControl.SetMode(WicoControl.MODE_DOCKED);
                 }
@@ -430,7 +427,7 @@ namespace IngameScript
                 }
                 else
                 {
-                    _cargoCheck.doCargoCheck();
+                    _systemsMonitor.doCargoCheck();
                 }
 
                 if (
@@ -443,7 +440,7 @@ namespace IngameScript
                     && bAutoRefuel
                   )
                 {
-                    bool bAirWorthy = DockAirWorthy(false, false,_cargoCheck.cargohighwater);
+                    bool bAirWorthy = _systemsMonitor.DockAirWorthy(false, false, _systemsMonitor.cargohighwater);
                     if (!bAirWorthy)
                     {
                         _program.ErrorLog("Gasp! Need to DOCK! Doing="+bDoingDocking + " Mode="+iMode);
@@ -547,12 +544,16 @@ namespace IngameScript
                         int iOffset = 0;
 
                         long id = 0;
+                        // message format is the same for broadcast and unicast. so unicast messages have target ID even though it's in unicast info
                         long.TryParse(aMessage[iOffset++], out id);
                         if (id == _program.Me.EntityId)
                         {
                             // it's a message for us.
                             //                                    sReceivedMessage = ""; // we processed it.
+                            // the sender id.
                             long.TryParse(aMessage[iOffset++], out id);
+                            lTargetBase = id; // who said we could come home.
+
                             double x, y, z;
                             //                                    int iOff = iOffset++;
                             x = Convert.ToDouble(aMessage[iOffset++]);
@@ -570,6 +571,10 @@ namespace IngameScript
                         }
                     }
                     // connector approach response found
+                }
+                if((msg.Tag== CONNECTORREQUESTFAILTAG))
+                {
+                    // base said it could not take us..
                 }
                 if ((msg.Tag == CONNECTORDOCKTAG || msg.Tag == CONNECTORALIGNDOCKTAG) && msg.Data is string)
                 {
@@ -594,9 +599,11 @@ namespace IngameScript
                         string sMessage = (string)msg.Data;
 
                         string[] aMessage = sMessage.Trim().Split(':');
-                        _program.Echo(aMessage.Length + ": Length");
-                        for (int i = 0; i < aMessage.Length; i++)
-                            _program.Echo(i + ":" + aMessage[i]);
+
+//                        _program.Echo(aMessage.Length + ": Length");
+//                        for (int i = 0; i < aMessage.Length; i++)
+//                            _program.Echo(i + ":" + aMessage[i]);
+
                         int iOffset = 0;
                         //                                if (aMessage[1] == "DOCK" || aMessage[1] == "ADOCK")
                         //                               if (aMessage[1] == "COND" || aMessage[1] == "ACOND")
@@ -713,7 +720,7 @@ namespace IngameScript
                                         Echo(i + ":" + localDockConnectors[i].CustomName);
                                     }
                                     */
-                    if (!_connectors.AnyConnectorIsConnected())
+                    if (!_systemsMonitor.AnyConnectorIsConnected())
                     {
 //                        StatusLog("Can't perform action unless docked", textLongStatus, true);
                         _program.ResetMotion();
@@ -723,35 +730,32 @@ namespace IngameScript
                     }
                     else
                     {
-                        IMyTerminalBlock dockingConnector = _connectors.GetConnectedConnector(true);
+                        IMyTerminalBlock dockingConnector = _systemsMonitor.GetConnectedConnector(true);
                         //                    Echo("Using Connector=" + dockingConnector.CustomName);
 
-                        _thrusters.ThrustersCalculateOrientation(dockingConnector, ref thrustLaunchForwardList, ref thrustLaunchBackwardList,
+                        _systemsMonitor.ThrustersCalculateOrientation(dockingConnector, ref thrustLaunchForwardList, ref thrustLaunchBackwardList,
                             ref thrustLaunchDownList, ref thrustLaunchUpList,
                             ref thrustLaunchLeftList, ref thrustLaunchRightList);
                     }
                     vDock = _wicoBlockMaster.CenterOfMass();
-                    _tanks.TanksStockpile(false);
-                    _power.BatterySetNormal();
-                    _connectors.TurnEjectorsOff();
+                    _systemsMonitor.RequestLaunchSettings();
                     //                vDock = shipOrientationBlock.GetPosition();
-                    _thrusters.powerDownThrusters(); // turns ON all thrusters.
                                                        // TODO: allow for relay ships that are NOT bases..
                     float range = _wicoBases.RangeToNearestBase() + 100f + (float)_wicoBlockMaster.GetShipSpeed() * 5f;
                     _antennas.SetMaxPower(false, range);
                     _wicoControl.SetState(100);
                     return;
                 }
-                if (_connectors.AnyConnectorIsLocked() || _connectors.AnyConnectorIsConnected())
+                if (_systemsMonitor.AnyConnectorIsLocked() || _systemsMonitor.AnyConnectorIsConnected())
                 {
 //                    StatusLog(moduleName + ":Awaiting Disconnect", textPanelReport);
                     _program.Echo("Awaiting Disconnect");
-                    _connectors.ConnectAnyConnectors(false, false); // "OnOff_Off");
+                    _systemsMonitor.ConnectAnyConnectors(false, false); // "OnOff_Off");
                     return;
                 }
                 if (iState == 100)
                 {
-                    _thrusters.powerUpThrusters(thrustLaunchBackwardList);
+                    _systemsMonitor.powerUpThrusters(thrustLaunchBackwardList);
 
                     _wicoControl.SetState(1);
                 }
@@ -768,18 +772,18 @@ namespace IngameScript
 
                 if (_wicoBlockMaster.GetShipSpeed() > LaunchMaxVelocity * 0.9)
                 {
-                    _thrusters.powerDownThrusters(thrustLaunchForwardList);
-                    _thrusters.powerDownThrusters(thrustLaunchBackwardList, WicoThrusters.thrustAll, true);
+                    _systemsMonitor.powerDownThrusters(thrustLaunchForwardList);
+                    _systemsMonitor.powerDownThrusters(thrustLaunchBackwardList, WicoThrusters.thrustAll, true);
                 }
                 else if (_wicoBlockMaster.GetShipSpeed() > 2)
                 {
-                    _thrusters.powerUpThrusters(thrustLaunchBackwardList, 25);
+                    _systemsMonitor.powerUpThrusters(thrustLaunchBackwardList, 25);
                 }
-                double stoppingD = _thrusters.calculateStoppingDistance((float)_wicoBlockMaster.GetPhysicalMass(),thrustLaunchBackwardList, _wicoBlockMaster.GetShipSpeed(), 0);
+                double stoppingD = _systemsMonitor.calculateStoppingDistance((float)_wicoBlockMaster.GetPhysicalMass(),thrustLaunchBackwardList, _wicoBlockMaster.GetShipSpeed(), 0);
                 if ((dist + stoppingD) > LaunchDistance)
                 {
                     sbModeInfo.AppendLine("Launch Completed");
-                    _connectors.ConnectAnyConnectors(true, true);
+                    _systemsMonitor.ConnectAnyConnectors(true, true);
                     _program.ResetMotion();
                     _wicoControl.SetMode(WicoControl.MODE_NAVNEXTTARGET);
                 }
@@ -873,18 +877,16 @@ namespace IngameScript
 
                 _wicoControl.WantSlow();
 
-//                IMySensorBlock sb;
-
-                if (dockingConnector == null) _wicoControl.SetState(0);
-
-                //            sInitResults += "DOCKING: state=" + iState+"\n";
-
-                if (dockingConnector == null) dockingConnector = _connectors.GetDockingConnector();
-                if (dockingConnector == null) _wicoControl.SetMode(WicoControl.MODE_ATTENTION);
+                if (dockingConnector == null)
+                {
+                    dockingConnector = _systemsMonitor.GetDockingConnector();
+                    _wicoControl.SetState(0);
+                }
+//                if (dockingConnector == null) _wicoControl.SetMode(WicoControl.MODE_ATTENTION);
                 if (iState == 0)
                 {
                     //                sInitResults = "DOCKING: state=" + iState+"\n";
-                    if (_connectors.AnyConnectorIsConnected())
+                    if (_systemsMonitor.AnyConnectorIsConnected())
                     {
                         _wicoControl.SetMode(WicoControl.MODE_DOCKED);
                         return;
@@ -892,7 +894,7 @@ namespace IngameScript
 
                     _timers.TimerTriggers("[DOCKING]");
 
-                    _thrusters.ThrustersCalculateOrientation(_wicoBlockMaster.GetMainController(),
+                    _systemsMonitor.ThrustersCalculateOrientation(_wicoBlockMaster.GetMainController(),
                         ref thrustForwardList, ref thrustBackwardList,
                         ref thrustDownList, ref thrustUpList,
                         ref thrustLeftList, ref thrustRightList
@@ -911,7 +913,7 @@ namespace IngameScript
                     {
                         _program.ResetMotion(false);
 
-                        _thrusters.ThrustersCalculateOrientation(dockingConnector, ref thrustDockForwardList, ref thrustDockBackwardList,
+                        _systemsMonitor.ThrustersCalculateOrientation(dockingConnector, ref thrustDockForwardList, ref thrustDockBackwardList,
                             ref thrustDockDownList, ref thrustDockUpList,
                             ref thrustDockLeftList, ref thrustDockRightList);
                         _wicoControl.SetState(100);
@@ -921,13 +923,13 @@ namespace IngameScript
 
 
                 Vector3D vPos = dockingConnector.GetPosition();
-                if (!_connectors.AnyConnectorIsConnected() && _connectors.AnyConnectorIsLocked())
+                if (!_systemsMonitor.AnyConnectorIsConnected() && _systemsMonitor.AnyConnectorIsLocked())
                 {
-                    _connectors.ConnectAnyConnectors();
+                    _systemsMonitor.ConnectAnyConnectors();
                     _program.ResetMotion();
                     _wicoControl.SetMode(WicoControl.MODE_DOCKED);
 //                    setMode(MODE_DOCKED);
-                    _thrusters.powerDownThrusters(WicoThrusters.thrustAll, true);
+                    _systemsMonitor.powerDownThrusters(WicoThrusters.thrustAll, true);
                     return;
                 }
                 if (iState == 100)
@@ -952,40 +954,43 @@ namespace IngameScript
                     if (_wicoBlockMaster.GetShipSpeed() < 10)
                     {
                         sbModeInfo.AppendLine("Finding Base");
-                        if (lTargetBase < 0) lTargetBase = _wicoBases.BaseFindBest();
-                        dtDockingActionStart = DateTime.Now;
-                        if (lTargetBase >= 0)
+//                        if (lTargetBase < 0)
                         {
-                            OrientedBoundingBoxFaces orientedBoundingBoxFaces = new OrientedBoundingBoxFaces(dockingConnector);
-                            Vector3D[] points = new Vector3D[4];
-                            orientedBoundingBoxFaces.GetFaceCorners(5, points); // 5 = front
-                                                                                // front output order is BL, BR, TL, TR
-                            double width = (points[0] - points[1]).Length();
-                            double height = (points[0] - points[2]).Length();
-                            orientedBoundingBoxFaces.GetFaceCorners(0, points);
-                            // face 0=right output order is  BL, TL, BR, TR ???
-                            double length = (points[0] - points[2]).Length();
+                            // no base set before
 
-                            string sMessage = "";// = "WICO:CON?:";
-                            string sTag = "CON?"; // TODO: move to static definitions
-                            sMessage += lTargetBase.ToString() + ":";
-                            sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
-                            sMessage += _program.Me.CubeGrid.CustomName + ":";
-                            sMessage += _program.Me.EntityId.ToString() + ":"; // needs to match when receiving messages for 'us'
-                            sMessage += _program.Vector3DToString(_wicoBlockMaster.CenterOfMass());
-
-                            _program.IGC.SendBroadcastMessage(sTag, sMessage);// antSend(sMessage);
-                                                                              //                        antSend("WICO:CON?:" + baseIdOf(iTargetBase).ToString() + ":" + "mini" + ":" + shipOrientationBlock.CubeGrid.CustomName + ":" + SaveFile.EntityId.ToString() + ":" + Vector3DToString(shipOrientationBlock.GetPosition()));
-                            _wicoControl.SetState(120);
-                        }
-                        else // No available base
-                        {
-                            // try to get a base to respond
-                            _wicoBases.checkBases(true);
 
                             // TODO: Change to elapsedtime handler
                             dtDockingActionStart = DateTime.Now;
-                            _wicoControl.SetState(130);
+
+                            List<long> baseList = new List<long>();
+                            _wicoBases.GetDockingBases(ref baseList);
+
+//                            lTargetBase = _wicoBases.BaseFindBest();
+                            if(baseList.Count<1)
+                            {
+                                // try to get a base to respond
+                                _wicoBases.checkBases(true);
+
+                                _wicoControl.SetState(130);
+                            }
+
+                            foreach (var lPossibleBase in baseList)
+                            {
+                                string sMessage = "";// = "WICO:CON?:";
+                                string sTag = CONNECTORREQUEST;
+                                sMessage += lPossibleBase.ToString() + ":";
+                                sMessage += _wicoBlockMaster.HeightInMeters().ToString("0.0") + 
+                                    "," + _wicoBlockMaster.WidthInMeters().ToString("0.0") + 
+                                    "," + _wicoBlockMaster.LengthInMeters().ToString("0.0") + 
+                                    ":";
+                                sMessage += _program.Me.CubeGrid.CustomName + ":";
+                                sMessage += _program.Me.EntityId.ToString() + ":"; // needs to match when receiving messages for 'us'
+                                sMessage += _program.Vector3DToString(_wicoBlockMaster.CenterOfMass());
+
+                                _program.IGC.SendBroadcastMessage(sTag, sMessage);// antSend(sMessage);
+                            }
+                            _wicoControl.SetState(120);
+
                         }
                     }
                     else
@@ -999,6 +1004,8 @@ namespace IngameScript
                     sbModeInfo.AppendLine("Awaiting Response from Base");
 
                     //                    _wicoControl.WantFast();
+
+                    // TODO: Use ET.
                     DateTime dtMaxWait = dtDockingActionStart.AddSeconds(5.0f);
                     DateTime dtNow = DateTime.Now;
                     if (DateTime.Compare(dtNow, dtMaxWait) > 0)
@@ -1104,20 +1111,13 @@ namespace IngameScript
                     if (_wicoBlockMaster.GetShipSpeed() < 1)
                     {
 
-                        OrientedBoundingBoxFaces orientedBoundingBoxFaces = new OrientedBoundingBoxFaces(dockingConnector);
-                        Vector3D[] points = new Vector3D[4];
-                        orientedBoundingBoxFaces.GetFaceCorners(5, points); // 5 = front
-                                                         // front output order is BL, BR, TL, TR
-                        double width = (points[0] - points[1]).Length();
-                        double height = (points[0] - points[2]).Length();
-                        orientedBoundingBoxFaces.GetFaceCorners(0, points);
-                        // face 0=right output order is  BL, TL, BR, TR ???
-                        double length = (points[0] - points[2]).Length();
-
                         string sMessage = "";// "WICO:COND?:";
-                        string sTag = "COND?";
+                        string sTag = CONNECTORDOCKREQUEST;
                         sMessage += lTargetBase.ToString() + ":";
-                        sMessage += height.ToString("0.0") + "," + width.ToString("0.0") + "," + length.ToString("0.0") + ":";
+                        sMessage += _wicoBlockMaster.HeightInMeters().ToString("0.0") +
+                           "," + _wicoBlockMaster.WidthInMeters().ToString("0.0") +
+                           "," + _wicoBlockMaster.LengthInMeters().ToString("0.0") +
+                           ":";
                         //                    sMessage += shipDim.HeightInMeters() + "," + shipDim.WidthInMeters() + "," + shipDim.LengthInMeters() + ":";
                         sMessage += _program.Me.CubeGrid.CustomName + ":";
                         sMessage += _program.Me.EntityId.ToString() + ":";
@@ -1156,6 +1156,7 @@ namespace IngameScript
                     {
                         { // uses timeout from above
                             _program.Echo("Awaiting reply message");
+                            _program.Echo("BaseID=" + lTargetBase.ToString() +":"+_wicoBases.BaseName(lTargetBase));
                         }
                     }
                 }
@@ -1182,7 +1183,7 @@ namespace IngameScript
                 else if (iState == 300)
                 { //300  Start:	Move through locations
                     _wicoControl.SetState(310);
-                    _thrusters.MoveForwardSlowReset();
+                    _systemsMonitor.MoveForwardSlowReset();
                     //                iDockingPushCount = 0;
                     _wicoControl.WantFast();
                 }
@@ -1207,8 +1208,8 @@ namespace IngameScript
                     _program.ResetMotion();
                     sbModeInfo.AppendLine("Waiting for ship to stop");
                     _program.Echo("Waiting for ship to stop");
-                    _connectors.TurnEjectorsOff();
-                    _thrusters.MoveForwardSlowReset();
+                    _systemsMonitor.TurnEjectorsOff();
+                    _systemsMonitor.MoveForwardSlowReset();
                     //                iDockingPushCount = 0;
                     if (_wicoBlockMaster.GetShipSpeed() < 0.1f)
                     {
@@ -1239,7 +1240,7 @@ namespace IngameScript
                     {
                         _program.ResetMotion();
                         _timers.TimerTriggers("[DOCKING:APPROACH]");
-                        _thrusters.MoveForwardSlowReset();
+                        _systemsMonitor.MoveForwardSlowReset();
                         _wicoControl.SetState(400);
                         _wicoControl.WantFast();
                     }
@@ -1263,20 +1264,20 @@ namespace IngameScript
                     // move closer to Launch1
                     sbModeInfo.AppendLine("Moving closer Connector Entry");
                     Vector3D vVec = vLaunch1 - _wicoBlockMaster.CenterOfMass();
-                    bool bAimed = _gyros.AlignGyros("forward", vVec, _wicoBlockMaster.GetMainController());
+                    bool bAimed = _systemsMonitor.AlignGyros("forward", vVec, _wicoBlockMaster.GetMainController());
                     double distanceSQ = (vLaunch1 - _wicoBlockMaster.CenterOfMass()).LengthSquared();
                     _program.Echo("DistanceSQ=" + distanceSQ.ToString("0.0"));
                     if (distanceSQ < _wicoBlockMaster.BlockMultiplier() * 3)
                     {
                         _program.ResetMotion();
-                        _thrusters.MoveForwardSlowReset();
+                        _systemsMonitor.MoveForwardSlowReset();
                         _wicoControl.SetState(430);
                         _wicoControl.WantFast();
                     }
                     if (bAimed)
                     {
                         //                    double stoppingDistance = _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetPhysicalMass(), thrustBackwardList, _wicoBlockMaster.GetShipSpeed(), 0);
-                            _thrusters.MoveForwardSlow(3, 5, thrustForwardList, thrustBackwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
+                            _systemsMonitor.MoveForwardSlow(3, 5, thrustForwardList, thrustBackwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
                             _wicoControl.WantMedium();
                     }
                     else
@@ -1306,10 +1307,10 @@ namespace IngameScript
                     }
                     _program.Echo("Aligning to dock");
                     bool bAimed = false;
-                    _gyros.SetMinAngle(0.03f);
+                    _systemsMonitor.SetMinAngle(0.03f);
 
                     // TODO: need to change direction if non- 'back' connector
-                    bAimed = _gyros.AlignGyros("up", vDockAlign, _wicoBlockMaster.GetMainController());
+                    bAimed = _systemsMonitor.AlignGyros("up", vDockAlign, _wicoBlockMaster.GetMainController());
                     _wicoControl.WantFast();
                     if (iState == 452) _wicoControl.SetState(500);
                     else if (bAimed) _wicoControl.SetState(451); ; // 450->451 
@@ -1329,8 +1330,8 @@ namespace IngameScript
                     //		Vector3D vVec = vTargetLocation - shipOrientationBlock.GetPosition();
                     _program.Echo("Aligning to dock");
                     bool bAimed = false;
-                    _gyros.SetMinAngle(0.03f);
-                    bAimed = _gyros.AlignGyros("forward", vVec, dockingConnector);
+                    _systemsMonitor.SetMinAngle(0.03f);
+                    bAimed = _systemsMonitor.AlignGyros("forward", vVec, dockingConnector);
                     if (bAimed) _wicoControl.SetState(452);
                     else _wicoControl.WantFast();
 
@@ -1346,7 +1347,7 @@ namespace IngameScript
                     //                StatusLog(moduleName + ":Docking: Reversing to dock! Velocity=" + wicoBlockMaster.GetShipSpeed().ToString("0.00"), textPanelReport);
                     _program.Echo("Reversing to Dock");
 // CHECK HERE IF DOCKING SPAZZES                    CTRL_COEFF = 0.75;
-                    _gyros.SetMinAngle(0.01f);
+                    _systemsMonitor.SetMinAngle(0.01f);
 
                     Vector3D vTargetLocation = vDock;
                     Vector3D vVec = vTargetLocation - dockingConnector.GetPosition();
@@ -1366,9 +1367,9 @@ namespace IngameScript
                         _wicoControl.SetState(590);
                     }
                     if (distance > 10)
-                        _gyros.SetMinAngle(0.03f);
+                        _systemsMonitor.SetMinAngle(0.03f);
                     else
-                        _gyros.SetMinAngle(0.05f);
+                        _systemsMonitor.SetMinAngle(0.05f);
 
                     //                debugGPSOutput("DockLocation", vTargetLocation);
 
@@ -1383,9 +1384,9 @@ namespace IngameScript
                             else
                     */
                     if (distance > 15)
-                        bAimed = _gyros.BeamRider(vTargetLocation, vDock, dockingConnector);
+                        bAimed = _systemsMonitor.BeamRider(vTargetLocation, vDock, dockingConnector);
                     else
-                        bAimed = _gyros.AlignGyros("forward", vVec, dockingConnector);
+                        bAimed = _systemsMonitor.AlignGyros("forward", vVec, dockingConnector);
 
                     /*
                     double maxThrust = calculateMaxThrust(thrustDockForwardList);
@@ -1412,7 +1413,7 @@ namespace IngameScript
                         {
                             _wicoControl.WantMedium();
                             _program.Echo(">15");
-                            _thrusters.MoveForwardSlow(5, 10, thrustDockForwardList, thrustDockBackwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
+                            _systemsMonitor.MoveForwardSlow(5, 10, thrustDockForwardList, thrustDockBackwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
                             /*
                             if (wicoBlockMaster.GetShipSpeed() < .5)
                             {
@@ -1431,7 +1432,7 @@ namespace IngameScript
                         {
                             _program.Echo("<=15");
                             _wicoControl.WantFast();
-                            _thrusters.MoveForwardSlow(.5f, 1.5f, thrustDockForwardList, thrustDockBackwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
+                            _systemsMonitor.MoveForwardSlow(.5f, 1.5f, thrustDockForwardList, thrustDockBackwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
                             /*
                             if (wicoBlockMaster.GetShipSpeed() < .5)
                             {
@@ -1451,7 +1452,7 @@ namespace IngameScript
                     else
                     {
                         _program.Echo("Aiming");
-                        _thrusters.powerDownThrusters();
+                        _systemsMonitor.powerDownThrusters();
                         _wicoControl.WantFast();
                     }
                 }
@@ -1468,10 +1469,10 @@ namespace IngameScript
                         _wicoControl.WantFast();
                         return;
                     }
-                    bool bAimed = _gyros.AlignGyros("forward", vVec, dockingConnector);
+                    bool bAimed = _systemsMonitor.AlignGyros("forward", vVec, dockingConnector);
                     if (!bAimed) _wicoControl.WantFast();
                     else _wicoControl.WantMedium();
-                    _thrusters.MoveForwardSlow(5, 10, thrustDockBackwardList, thrustDockForwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
+                    _systemsMonitor.MoveForwardSlow(5, 10, thrustDockBackwardList, thrustDockForwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
                 }
             }
 
@@ -1491,290 +1492,8 @@ namespace IngameScript
 
 
 
-            // 0 = master init
-            // 1 battery check 30%.  If no batteries->4
-            // 2 battery check 40%
-            // 3 battery check 50%
-            // 4 battery check 60%
-            //   75%
-            // 90%
-            //  battery check 100%
-            // 50 no battery checks.. 
 
-            void doModeDocked()
-            {
-                int iMode = _wicoControl.IMode;
-                int iState = _wicoControl.IState;
-                sbNotices.Clear();
-                sbModeInfo.Clear();
 
-                //                StatusLog("clear", textPanelReport);
-                //                StatusLog(moduleName + ":DOCKED!", textPanelReport);
-                sbModeInfo.AppendLine("Docked");
-                _program.Echo("Docked!");
-                sbNotices.AppendLine("Autorelaunch=" + bAutoRelaunch.ToString());
-                _program.Echo("Autorelaunch=" + bAutoRelaunch.ToString());
-
-                _wicoControl.WantSlow();
-                //TODO: autounload
-
-                if (bAutoRelaunch)
-                {
-                    sbModeInfo.AppendLine(" Checking Relaunch");
-                    _program.Echo("Docked. Checking Relaunch");
-                    if (DockAirWorthy())
-                    {
-                        _program.Echo("RELAUNCH!");
-                        _wicoControl.SetMode(WicoControl.MODE_LAUNCH);
-                        return;
-                    }
-                    else
-                    {
-                        sbNotices.AppendLine(" Awaiting Relaunch Criteria");
-                        _program.Echo(" Awaiting Relaunch Criteria");
-                    }
-                }
-                {
-                    //                            StatusLog(" Battery " + batteryPercentage + "% (" + batterypcthigh + "%)", textPanelReport);
-                    sbNotices.AppendLine(" Battery " + _power.batteryPercentage + "% (" + _power.batterypcthigh + "%)");
-                    _program.Echo(" Battery " + _power.batteryPercentage + "% (" + _power.batterypcthigh + "%)");
-                }
-                {
-                    sbNotices.AppendLine(" Cargo: " + _cargoCheck.cargopcent + "% (" + _cargoCheck.cargopctmin + ")");
-                    _program.Echo(" Cargo: " + _cargoCheck.cargopcent + "% (" + _cargoCheck.cargopctmin + ")");
-                }
-                if (_tanks.HasHydroTanks())
-                {
-                    sbNotices.AppendLine(" Hydro: " + (_tanks.hydroPercent*100).ToString("0") + "% (" + _tanks.tankspcthigh + ")");
-                    _program.Echo(" Hydro: " + (_tanks.hydroPercent * 100).ToString("0") + "% (" + _tanks.tankspcthigh + ")");
-                }
-                if (!_connectors.AnyConnectorIsConnected())
-                {
-                    // we magically got disconnected..
-                    // assume user did it.
-                    _wicoControl.SetMode(WicoControl.MODE_IDLE);
-                    
-                    _thrusters.powerDownThrusters(); // turn thrusters ON
-
-                    _tanks.TanksStockpile(false); // turn tanks ON
-
-                    // TODO: allow for relay ships that are NOT bases..
-                    float range = _wicoBases.RangeToNearestBase() + 100f + (float)_wicoBlockMaster.GetShipSpeed() * 5f;
-                    _antennas.SetMaxPower(false, range);
-                    _power.BatterySetNormal();
-                }
-                else
-                {
-
-                    sbModeInfo.AppendLine("Power Saving Mode");
-                    _program.Echo("Power Saving Mode");
-                    if (iState == 0)
-                    {
-                        if(bAutoRefuel)
-                            _tanks.TanksStockpile(true);
-
-                        // make a 'lower power' handler?
-                        _thrusters.powerDownThrusters(WicoThrusters.thrustAll, true);
-                        _antennas.SetLowPower();
-                        //                        SensorsSleepAll();
-                        // TODO: ??? turn gyos off?
-
-                        if (bAutoRefuel)
-                            _power.BatteryCheck(0, true);
-                        
-                        _timers.TimerTriggers("[DOCKED]");
-                        if (_power.HasBatteries() && bAutoRefuel)
-                        {
-                            _wicoControl.SetState(1);
-                        }
-                        else _wicoControl.SetState(50);
-
-                    }
-                    else if (iState == 1)
-                    {
-                        sbNotices.AppendLine("Charging batteries to 10%");
-                        _power.BatteryCheck(0, true);
-                       if (!_power.BatteryCheck(10, true))
-                            _wicoControl.SetState(iState+1);
-                    }
-                    else if (iState == 2)
-                    {
-                        sbNotices.AppendLine("Charging batteries to 30%");
-                        if (!_power.BatteryCheck(30, true))
-                            _wicoControl.SetState(iState + 1);
-                    }
-                    else if (iState == 3)
-                    {
-                        sbNotices.AppendLine("Charging batteries to 40%");
-                        if (!_power.BatteryCheck(40, true))
-                            _wicoControl.SetState(iState + 1);
-                    }
-                    else if (iState == 4)
-                    {
-                        sbNotices.AppendLine("Charging batteries to 50%");
-                        if (!_power.BatteryCheck(50, true))
-                            _wicoControl.SetState(iState + 1);
-                    }
-                    else if (iState == 5)
-                    {
-                        sbNotices.AppendLine("Charging batteries to 60%");
-                        if (!_power.BatteryCheck(60, true))
-                            _wicoControl.SetState(iState + 1);
-                    }
-                    else if (iState == 6)
-                    {
-                        sbNotices.AppendLine("Charging batteries to 75%");
-                        if (!_power.BatteryCheck(75, true))
-                            _wicoControl.SetState(iState + 1);
-                    }
-                    else if (iState == 7)
-                    {
-                        sbNotices.AppendLine("Charging batteries to 90%");
-                        if (!_power.BatteryCheck(90, true))
-                            _wicoControl.SetState(iState + 1);
-                    }
-                    else if (iState == 8)
-                    {
-                        sbNotices.AppendLine("Charging batteries to 100%");
-                        if (!_power.BatteryCheck(100, true))
-                            _wicoControl.SetState(1);
-                    }
-                    else // allow display of info without setting
-                    {
-                        _power.BatteryCheck(0, true); //,textBlock);
-                    }
-
-                    // all states
-                    {
-                        //                    if (bAutoRelaunch)
-                        {
-                            _cargoCheck.doCargoCheck();
-                            _tanks.TanksCalculate();
-                        }
-
-//                        if (power.batteryPercentage >= 0) StatusLog("Bat:" + progressBar(batteryPercentage), textPanelReport);
- //                       else _program.Echo("No Batteries");
-                        if (_tanks.oxyPercent >= 0)
-                        {
-//                            StatusLog("O2:" + progressBar(oxyPercent * 100), textPanelReport);
-                            //Echo("O:" + oxyPercent.ToString("000.0%"));
-                        }
-                        else _program.Echo("No Oxygen Tanks");
-
-                        if (_tanks.hydroPercent >= 0)
-                        {
-//                            StatusLog("Hyd:" + progressBar(hydroPercent * 100), textPanelReport);
-                            // TODO: use setting for 'low' (and 'enough')
-//                            if (hydroPercent < 0.20f)
-//                                StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
-
-                            _program.Echo("H:" + _tanks.hydroPercent.ToString("000.0%"));
-                        }
-                        else _program.Echo("No Hydrogen Tanks");
-                        if (_power.batteryPercentage >= 0 && _power.batteryPercentage < _power.batterypctlow)
-                        {
-//                            StatusLog(" WARNING: Low Battery Power", textPanelReport);
-                        }
-
-                        // TODO: get uranium into reactors; take out excess ingots; turn off conveyor usage (like TIM)
-                        // TODO: get ore OUT of ship and into base (including stone)
-                        // TODO: Handle ore carrier/shuttle
-                    }
-                }
-            }
-
-            bool BatteryGo = true;
-            bool TanksGo = true;
-            bool ReactorsGo = true;
-            bool CargoGo = true;
-            double _airworthyChecksElapsedMs = -1;
-            bool DockAirWorthy(bool bForceCheck = false, bool bLaunchCheck = true, int cargohighwater = 1)
-            {
-                BatteryGo = true;
-                TanksGo = true;
-                ReactorsGo = true;
-                CargoGo = true;
-
-                if (_airworthyChecksElapsedMs >= 0)
-                    _airworthyChecksElapsedMs += _program.Runtime.TimeSinceLastRun.TotalMilliseconds;
-                bool bDoChecks = bForceCheck;
-                if (_airworthyChecksElapsedMs < 0 || _airworthyChecksElapsedMs > 0.5 * 1000)
-                {
-                    _airworthyChecksElapsedMs = 0;
-                    bDoChecks = true;
-                }
-
-                // Check battery charge
-                if (bDoChecks) _power.BatteryCheck(0, false);
-                if (bLaunchCheck)
-                {
-                    if (_power.batteryPercentage >= 0 && _power.batteryPercentage < _power.batterypcthigh)
-                    {
-//                        _program.ErrorLog("Battery not airworthy (launch)");
-                        BatteryGo = false;
-                    }
-
-                }
-                else
-                {
-                    // check if we need to go back and refill
-                    if (_power.batteryPercentage >= 0 && _power.batteryPercentage < _power.batterypctlow)
-                    {
-//                        _program.ErrorLog("Battery not airworthy");
-                        BatteryGo = false;
-                    }
-                }
-
-                // check cargo emptied
-                if (bDoChecks) _cargoCheck.doCargoCheck();
-                if (bLaunchCheck)
-                {
-                    if (_cargoCheck.cargopcent > _cargoCheck.cargopctmin)
-                    {
-//                        _program.ErrorLog("Cargo not airworthy (launch)");
-                        CargoGo = false;
-                    }
-                }
-                else
-                {
-                    if (_cargoCheck.cargopcent > cargohighwater)
-                    {
-//                        _program.ErrorLog("Cargo not airworthy");
-                        CargoGo = false;
-                    }
-                }
-                // TODO: Check H2 tanks
-                if (bDoChecks) _tanks.TanksCalculate();
-                if (bLaunchCheck)
-                {
-                    if (_tanks.HasHydroTanks() && _tanks.hydroPercent * 100 < _tanks.tankspcthigh)
-                    {
-//                        _program.ErrorLog("Tanks not airworthy (launch) "+_tanks.hydroPercent.ToString("0.00"));
-                        TanksGo = false;
-                    }
-                }
-                else
-                {
-                    if (_tanks.HasHydroTanks() && _tanks.hydroPercent * 100 < _tanks.tankspctlow)
-                    {
-//                        _program.ErrorLog("Tanks not airworthy " + _tanks.hydroPercent.ToString("0.00"));
-                        TanksGo = false;
-                    }
-                }
-                // TODO: check reactor fuel
-
-                if (BatteryGo && TanksGo && ReactorsGo && CargoGo)
-                {
-                    return true;
-                }
-                else return false;
-
-            }
-
-            public override void SetRelaunch(bool bRelaunch = true)
-            {
-                bAutoRelaunch = bRelaunch;
-            }
 
         }
     }

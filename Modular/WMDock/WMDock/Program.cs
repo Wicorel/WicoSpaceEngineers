@@ -43,9 +43,11 @@ namespace IngameScript
         Displays _displays;
 
         SpaceDock spaceDock;
+        WhenDocked _whenDocked;
         // OrbitalModes wicoOrbitalLaunch;
         //        Navigation wicoNavigation;
-
+        PowerManagement _powerManagement;
+        SystemsMonitor _systemsMonitor;
 
         //        WicoUpdateModesShared _wicoControl;
         WicoControl _wicoControl;
@@ -84,17 +86,28 @@ namespace IngameScript
             navCommon = new NavCommon(this, _wicoControl);
             _cargoCheck = new CargoCheck(this, wicoBlockMaster,_displays);
 
-            spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster, wicoThrusters, wicoConnectors,
-                wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, wicoTimers, wicoIGC, wicoBases, navCommon, _cargoCheck
-                ,_displays);
+            _powerManagement = new PowerManagement(this, wicoPower, wicoGasTanks, wicoElapsedTime, wicoIGC);
 
-            //wicoOrbitalLaunch = new OrbitalModes(this);
-            //            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
+            _systemsMonitor = new SystemsMonitor(this,  wicoThrusters, wicoConnectors,
+                wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, _cargoCheck);
 
-            /// DEBUG
-//            wicoIGC.SetDebug(true);
-//            _wicoControl.SetDebug(true);
-            // wicoElapsedTime.SetDebug(true);
+            spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster
+//                , wicoThrusters, wicoConnectors,
+                ,wicoAntennas
+//                , wicoGasTanks, wicoGyros, wicoPower
+                , wicoTimers, wicoIGC, wicoBases, navCommon
+//                , _cargoCheck
+                , _displays, _systemsMonitor);
+
+            _whenDocked = new WhenDocked(this, _wicoControl, wicoBlockMaster, wicoIGC
+//                , wicoThrusters, wicoConnectors
+                , wicoAntennas
+//                , wicoGasTanks, wicoGyros, wicoPower
+                , wicoTimers, wicoBases
+//                , _cargoCheck
+                , _displays, _systemsMonitor);
+
+
         }
 
         public void ModulePreMain(string argument, UpdateType updateSource)
