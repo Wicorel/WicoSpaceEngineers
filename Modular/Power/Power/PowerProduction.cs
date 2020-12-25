@@ -155,8 +155,13 @@ namespace IngameScript
                         count++;
                         var pp = tb as IMyPowerProducer;
 
-                        currentEngineOutput += pp.CurrentOutput;
-                        maxHydrogenPower += pp.MaxOutput;
+
+                        var fb = tb as IMyFunctionalBlock;
+                        if (fb.Enabled)
+                        {
+                            currentEngineOutput += pp.CurrentOutput;
+                            maxHydrogenPower += pp.MaxOutput;
+                        }
                     }
                 }
                 return count;
@@ -196,7 +201,20 @@ namespace IngameScript
                 else return -1;
             }
 
-            void EngineControl(bool bOn=true)
+            public bool EnginesAreOff()
+            {
+                foreach (var tb in lHydrogenEngines)
+                {
+                    if (tb is IMyFunctionalBlock)
+                    {
+                        var fb = tb as IMyFunctionalBlock;
+                        if (fb.Enabled) return false;
+                    }
+                }
+                return true;
+            }
+
+            public void EngineControl(bool bOn=true)
             {
                 foreach(var tb in lHydrogenEngines)
                 {
@@ -446,11 +464,6 @@ namespace IngameScript
 
                 maxTotalPower = maxBatteryPower + maxHydrogenPower + maxReactorPower + maxSolarPower +maxTurbinePower;
                 currentTotalOutput = batteryTotalOutput-batteryTotalInput+currentEngineOutput + currentReactorOutput + currentSolarOutput + currentTurbineOutput; 
-            }
-
-            void OptimizePower() // need a FOR....  for recharge.. for long-term.. for launch prep, minimize hydrogen usage, etc.
-            {
-
             }
 
         }
