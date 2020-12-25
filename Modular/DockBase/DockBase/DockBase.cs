@@ -23,12 +23,9 @@ namespace IngameScript
         {
             Program _program;
 
-            public DockBase(Program program) //, WicoIGC igc //,WicoControl wicoControl, )
+            public DockBase(Program program) 
             {
                 _program = program;
-
-                //                wbm.AddLocalBlockHandler(BlockParseHandler);
-                //                wbm.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
             public const string WICOB_DOCKSETRELAUNCH= "WICOB_DOCKSETRELAUNCH";
 
