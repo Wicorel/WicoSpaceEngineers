@@ -293,31 +293,36 @@ namespace IngameScript
             const string IRON = "Iron";
             const string SCRAP = "Scrap";
             const string STONE = "Stone";
-            string[] aOres = { "Unknown", URANIUM, PLATINUM, ICE, COBALT, GOLD, MAGNESIUM, NICKEL, SILICON, SILVER, IRON, STONE };
-            long[] lOreDesirability = { 0, 100, 95, 75, 55, 45, 45, 45, 45, 45, 15, -1 };
+            readonly string[] aOres = { "Unknown", URANIUM, PLATINUM, ICE, COBALT, GOLD, MAGNESIUM, NICKEL, SILICON, SILVER, IRON, STONE };
+            readonly long[] lOreDesirability = { 0, 100, 95, 75, 55, 45, 45, 45, 45, 45, 15, -1 };
 
             void OreInitInfo(MyIni ini)
             {
                 oreInfos.Clear();
-                bool bInfoChanged = false;
-                bool bInforead = false;
+//                bool bInfoChanged = false;
+//                bool bInforead = false;
                 // read from text panel..
 
                 if (ini != null)
                 {
-                    int iCount = 0;
-                    iCount = ini.Get(sOreDesirabilitySection, "count").ToInt32();
-
-                    if (iCount >= lOreDesirability.Length)
+//                    int iCount = ini.Get(sOreDesirabilitySection, "count").ToInt32();
+                    int iCount = aOres.Length;
+//                    if (iCount >= lOreDesirability.Length)
                     {
-                        bInforead = true;
-                        for (int j1 = 0; j1 < iCount; j1++)
+//                        bInforead = true;
+                        for (int j1 = 0; j1 < iCount; j1++) // skip 0-Unknown
                         {
                             int oreID = 0;
                             string oreName = "";
                             long desireability = -1;
                             bool bFound = false;
                             double localAmount = 0;
+
+                            oreID = j1;
+                            oreName = aOres[j1];
+                            desireability = ini.Get(sOreDesirabilitySection, aOres[j1] + "Desireability").ToInt64(lOreDesirability[j1]);
+
+/*                            
                             oreID = ini.Get(sOreDesirabilitySection, "oreId" + j1.ToString()).ToInt32();
                             //                           iniWicoCraftSave.GetValue(sOreDesirabilitySection, "oreId" + j1.ToString(), ref oreID);
                             oreName = ini.Get(sOreDesirabilitySection, "oreName" + j1.ToString()).ToString();
@@ -328,7 +333,7 @@ namespace IngameScript
                             //iniWicoCraftSave.GetValue(sOreDesirabilitySection, "bFound" + j1.ToString(), ref bFound);
                             localAmount = ini.Get(sOreDesirabilitySection, "localAmount" + j1.ToString()).ToDouble();
                             //                            iniWicoCraftSave.GetValue(sOreDesirabilitySection, "localAmount" + j1.ToString(), ref localAmount);
-
+*/
                             OreInfo oi = new OreInfo();
                             oi.oreID = oreID;
                             oi.oreName = oreName;
@@ -336,11 +341,12 @@ namespace IngameScript
                             oi.bFound = bFound;
                             oi.localAmount = localAmount;
                             oreInfos.Add(oi);
+
                         }
 
                     }
                 }
-
+/*
                 if (!bInforead)
                 {
                     //iff empty text panel, init
@@ -357,20 +363,22 @@ namespace IngameScript
                     }
 
                 }
+*/
                 // write data back to text panel if changed.
-                if (bInfoChanged)
+//                if (bInfoChanged)
                 {
                     // we need to write it back out
                     _program.CustomDataChanged();
-                    var count = oreInfos.Count;
-                    ini.Set(sOreDesirabilitySection, "count", count);
-                    for (int i1 = 0; i1 < oreInfos.Count; i1++)
+//                    var count = oreInfos.Count;
+//                    ini.Set(sOreDesirabilitySection, "count", count);
+                    for (int i1 = 1; i1 < oreInfos.Count; i1++)
                     {
-                        ini.Set(sOreDesirabilitySection, "oreId" + i1.ToString(), oreInfos[i1].oreID);
-                        ini.Set(sOreDesirabilitySection, "oreName" + i1.ToString(), oreInfos[i1].oreName);
-                        ini.Set(sOreDesirabilitySection, "desireability" + i1.ToString(), oreInfos[i1].desireability);
-                        ini.Set(sOreDesirabilitySection, "bFound" + i1.ToString(), oreInfos[i1].bFound);
-                        ini.Set(sOreDesirabilitySection, "localAmount" + i1.ToString(), oreInfos[i1].localAmount);
+                        ini.Set(sOreDesirabilitySection, oreInfos[i1].oreName+"Desireability", oreInfos[i1].desireability);
+                        //                        ini.Set(sOreDesirabilitySection, "oreId" + i1.ToString(), oreInfos[i1].oreID);
+                        //                        ini.Set(sOreDesirabilitySection, "oreName" + i1.ToString(), oreInfos[i1].oreName);
+//                        ini.Set(sOreDesirabilitySection, "desireability" + i1.ToString(), oreInfos[i1].desireability);
+//                        ini.Set(sOreDesirabilitySection, "bFound" + i1.ToString(), oreInfos[i1].bFound);
+//                        ini.Set(sOreDesirabilitySection, "localAmount" + i1.ToString(), oreInfos[i1].localAmount);
                     }
                 }
             }
