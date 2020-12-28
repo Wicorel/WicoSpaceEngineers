@@ -88,7 +88,7 @@ namespace IngameScript
 
 
             double _airworthyChecksElapsedMs = -1;
-            public bool DockAirWorthy(bool bForceCheck = false, bool bLaunchCheck = true, int cargohighwater = 1)
+            public bool AirWorthy(bool bForceCheck = false, bool bLaunchCheck = true, int cargohighwater = 1)
             {
                 BatteryGo = true;
                 TanksGo = true;
@@ -310,6 +310,23 @@ namespace IngameScript
                 return _power.EnginesAreOff();
             }
 
+            /*
+             * Gyros
+             * 
+             */
+            public Vector3D VectorRejection(Vector3D a, Vector3D b) //reject a on b    
+            {
+                return _gyros.VectorRejection(a, b);
+            }
+            public bool DoRotate(double rollAngle, string sPlane = "Roll", float maxYPR = -1, float facingFactor = 1f)
+            {
+                return _gyros.DoRotate(rollAngle, sPlane, maxYPR, facingFactor);
+            }
+            public float MaxYPR { get { return _gyros.MaxYPR; } }
+            public double CalculateYaw(Vector3D destination, IMyTerminalBlock Origin)
+            {
+                return _gyros.CalculateYaw(destination, Origin);
+            }
             public void gyrosOff()
             {
                 _gyros.gyrosOff();
@@ -335,6 +352,14 @@ namespace IngameScript
 
             }
 
+            /*
+             * THRUSTERS
+             * 
+             */
+            public double calculateMaxThrust(List<IMyTerminalBlock> thrusters, int iTypes =WicoThrusters.thrustAll)
+            {
+                return _thrusters.calculateMaxThrust(thrusters, iTypes);
+            }
 
             public void ThrustersCalculateOrientation(IMyTerminalBlock orientationBlock, ref List<IMyTerminalBlock> thrustForwardList,
                 ref List<IMyTerminalBlock> thrustBackwardList, ref List<IMyTerminalBlock> thrustDownList, ref List<IMyTerminalBlock> thrustUpList,

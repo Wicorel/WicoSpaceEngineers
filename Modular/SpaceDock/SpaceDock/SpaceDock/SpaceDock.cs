@@ -194,7 +194,7 @@ namespace IngameScript
                     {
 
                         {
-                            _systemsMonitor.DockAirWorthy(false,false, _systemsMonitor.cargohighwater);
+                            _systemsMonitor.AirWorthy(false,false, _systemsMonitor.cargohighwater);
                             sbFuelInfo.Clear();
                             sbFuelNotices.Clear();
                             if(!_systemsMonitor.BatteryGo)
@@ -440,7 +440,7 @@ namespace IngameScript
                     && bAutoRefuel
                   )
                 {
-                    bool bAirWorthy = _systemsMonitor.DockAirWorthy(false, false, _systemsMonitor.cargohighwater);
+                    bool bAirWorthy = _systemsMonitor.AirWorthy(false, false, _systemsMonitor.cargohighwater);
                     if (!bAirWorthy)
                     {
                         _program.ErrorLog("Gasp! Need to DOCK! Doing="+bDoingDocking + " Mode="+iMode);
