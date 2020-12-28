@@ -69,6 +69,7 @@ namespace IngameScript
 
             wicoOrbitalLaunch = new OrbitalModes(this, _wicoControl,wicoBlockMaster
                 , wicoThrusters, wicoGyros,wicoConnectors,wicoLandingGears,wicoGasTanks,wicoGasGens, _timers, _displays
+                , wicoCameras
                 );
             //            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
 
