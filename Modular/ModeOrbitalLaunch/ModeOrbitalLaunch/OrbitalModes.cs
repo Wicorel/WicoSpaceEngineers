@@ -35,17 +35,20 @@ namespace IngameScript
             GasGens _gasGens;
             Timers _timers;
             Displays _displays;
+            Cameras _wicoCameras;
 
             public double MaxLaunchMps = 100f;
             public double MaxDescentMps = 107f;
+            bool bAlignGravityHover = true;
+            bool bOrbitalLaunchDebug = false;
             string sOrbitalSection = "ORBITAL";
-
 
             public OrbitalModes(Program program, WicoControl wicoControl, WicoBlockMaster wicoBlockMaster
                 , WicoThrusters wicoThrusters, WicoGyros gyros
                 , Connectors connectors, LandingGears landingGears
                 , GasTanks gasTanks, GasGens gasGens
                 , Timers timers, Displays displays
+                , Cameras wicoCameras
                 )
             {
                 _program = program;
@@ -59,13 +62,19 @@ namespace IngameScript
                 _gasGens = gasGens;
                 _timers = timers;
                 _displays = displays;
-                
+                _wicoCameras = wicoCameras;
 
                 _program.moduleName += " Orbital";
                 _program.moduleList += "\nOrbital V4.2h";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
+
+                bOrbitalLaunchDebug = _program._CustomDataIni.Get(sOrbitalSection, "OrbitalLaunchDebug").ToBoolean(bOrbitalLaunchDebug);
+                _program._CustomDataIni.Set(sOrbitalSection, "OrbitalLaunchDebug", MaxLaunchMps);
+
+                bAlignGravityHover = _program._CustomDataIni.Get(sOrbitalSection, "AlignGravityHover").ToBoolean(bAlignGravityHover);
+                _program._CustomDataIni.Set(sOrbitalSection, "AlignGravityHover", MaxLaunchMps);
 
                 MaxLaunchMps = _program._CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
                 _program._CustomDataIni.Set(sOrbitalSection, "LaunchSpeedMax", MaxLaunchMps);
@@ -111,6 +120,7 @@ namespace IngameScript
                                 tsurface.WriteText(sbNotices, true);
                             }
                         }
+                        if(bValidOrbitalTransfer) tsurface.WriteText("GPS:" + _program.toGpsName("", "OrbitalTransferPoint") + ":" + _program.Vector3DToString(OrbitalTransferPoint) + ":", false);
                     }
                     else if (ActionType == Displays.SETUPDRAW)
                     {
@@ -134,12 +144,41 @@ namespace IngameScript
                 }
             }
 
+            /// <summary>
+            /// Do we have a vlid TargetLanding location?
+            /// </summary>
+            bool bValidTargetLanding = false;
+            /// <summary>
+            /// The location on the planet we want to land.
+            /// </summary>
+            Vector3D TargetLanding;
+            Vector3D TargetPlanetLocation;
+            Vector3D OrbitalTransferPoint;
+            bool bValidOrbitalTransfer = false;
+
             void LoadHandler(MyIni Ini)
             {
+                string s;
+                s = Ini.Get(sOrbitalSection, "TargetLanding").ToString();
+                Vector3D.TryParse(s, out TargetLanding);
+
+                s = Ini.Get(sOrbitalSection, "TargetPlanetLocation").ToString();
+                Vector3D.TryParse(s, out TargetPlanetLocation);
+
+                s = Ini.Get(sOrbitalSection, "OrbitalTransferPoint").ToString();
+                Vector3D.TryParse(s, out OrbitalTransferPoint);
+
+                bValidTargetLanding = Ini.Get(sOrbitalSection, "ValidTargetLanding").ToBoolean(bValidTargetLanding);
+                bValidOrbitalTransfer = Ini.Get(sOrbitalSection, "ValidOrbitalTransfer").ToBoolean(bValidOrbitalTransfer);
             }
 
             void SaveHandler(MyIni Ini)
             {
+                Ini.Set(sOrbitalSection, "TargetPlanetLocation", TargetPlanetLocation.ToString());
+                Ini.Set(sOrbitalSection, "TargetLanding", TargetLanding.ToString());
+                Ini.Set(sOrbitalSection, "OrbitalTransferPoint", OrbitalTransferPoint.ToString());
+                Ini.Set(sOrbitalSection, "ValidTargetLanding", bValidTargetLanding);
+                Ini.Set(sOrbitalSection, "ValidOrbitalTransfer", bValidOrbitalTransfer);
             }
 
             public void ModeChangeHandler(int fromMode, int fromState, int toMode, int toState)
@@ -296,6 +335,28 @@ namespace IngameScript
 
             void UpdateHandler(UpdateType updateSource)
             {
+                _wicoControl.WantSlow();
+                /*
+                if (bValidOrbitalTransfer)
+                {
+                    Vector3D vBoreEnd = ( OrbitalTransferPoint - _program.wicoBlockMaster.GetMainController().CenterOfMass);
+                    Vector3D vPosition = _program.wicoBlockMaster.GetMainController().CenterOfMass;
+                    Vector3D vForward = vPosition+_program.wicoBlockMaster.GetMainController().WorldMatrix.Forward * vBoreEnd.Length();
+                    Vector3D vAimEnd = vForward - vPosition;
+                    Vector3D vRejectEnd = _gyros.VectorRejection(vBoreEnd, vAimEnd);
+                    Vector3D vCorrectAimPoint = OrbitalTransferPoint + vRejectEnd * 2;
+                    if(_wicoCameras.CameraForwardScan(vCorrectAimPoint))
+                    {
+                        _program.Echo("Scan worked");
+                        _wicoCameras.CameraForwardScan(vForward);
+                    }
+                    else
+                    {
+                        _program.Echo("Scan failed");
+                    }
+//                    _wicoCameras.CameraForwardScan(vRejectEnd);
+                }
+                */
                 int iMode = _wicoControl.IMode;
                 int iState = _wicoControl.IState;
 //                if ((updateSource & UpdateType.Update100) > 0)
@@ -358,6 +419,11 @@ namespace IngameScript
                     }
                     
                 }
+                if (bValidOrbitalTransfer)
+                    _program.Echo("Valid Orbital Transfer");
+                if (bValidTargetLanding)
+                    _program.Echo("Valid Landing Target");
+
                 // need to check if this is us
                 if (iMode == WicoControl.MODE_ORBITALLAUNCH)
                 {
@@ -382,7 +448,7 @@ namespace IngameScript
             }
 
 
-            int retroStartAlt = 1300;
+            int retroStartDistance = 1300;
 
             int descentTargetAlt = 100;
 
@@ -400,11 +466,9 @@ namespace IngameScript
             bool bHasHydro = false;
             bool bHasIon = false;
 
-            bool bOrbitalLaunchDebug = false;
 
             float PhysicalMass;
 
-            bool bAlignGravityHover = true;
 
             //            string sOrbitalUpDirection = "";
             Vector3D vBestThrustOrientation;
@@ -542,6 +606,10 @@ namespace IngameScript
                         //                        bValidOrbitalHome = false; // forget any 'home' waypoint.
 
                         _connectors.ConnectAnyConnectors(false, false);
+                        bValidTargetLanding = true;
+
+                        TargetLanding = shipController.GetPosition();
+                        shipController.TryGetPlanetPosition(out TargetPlanetLocation);
 
                         _landingGears.GearsLock(false);
                         _wicoControl.SetState(150);// = 150;
@@ -553,6 +621,7 @@ namespace IngameScript
                         //                        bValidOrbitalLaunch = false;
                         //                        vOrbitalHome = shipOrientationBlock.GetPosition();
                         //                        bValidOrbitalHome = true;
+                        bValidTargetLanding = false;
 
                         // assume we are hovering; do FULL POWER launch.
                         fOrbitalAtmoPower = 0;
@@ -560,10 +629,8 @@ namespace IngameScript
                         fOrbitalIonPower = 0;
 
                         if (bHasIon)
-                            //                        if (bHasIon)
                             fOrbitalIonPower = 75;
                         if (bHasHydro)
-                        //                            if (bHasHydro)
                         { // only use Hydro power if they are already turned on
                             for (int i = 0; i < thrustOrbitalUpList.Count; i++)
                             {
@@ -818,7 +885,17 @@ namespace IngameScript
                     // we have just reached space
                     sbModeInfo.AppendLine("[Reached-Orbit]");
                     _timers.TimerTriggers("[Reached-Orbit]");
+
+                    OrbitalTransferPoint = shipController.GetPosition(); // save our exit location
+                    bValidOrbitalTransfer = true;
+
                     CheckAttitudeChange(true);
+
+                    _program.ResetMotion();
+                    _gyros.gyrosOff();
+                    _wicoThrusters.powerDownThrusters(); // turn on all thrusters
+                    shipController.DampenersOverride = true;
+
                     _wicoControl.SetState(110);
                     _wicoControl.WantFast();
                     return;
@@ -830,7 +907,6 @@ namespace IngameScript
                     MyShipVelocities myShipVelocities = shipController.GetShipVelocities();
 //                    bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
                     bAligned = _gyros.AlignGyros(vBestThrustOrientation, myShipVelocities.LinearVelocity);
-                    shipController.DampenersOverride = true;
                     if (bAligned)
                     {
                         _gyros.gyrosOff();
@@ -840,61 +916,12 @@ namespace IngameScript
                     return;
                 }
 
-                //               StatusLog("", textPanelReport);
-
-                //	if (bValidExtraInfo)
-                //                StatusLog("Car:" + progressBar(cargopcent), textPanelReport);
-
-                //	batteryCheck(0, false);//,textPanelReport);
-                //	if (bValidExtraInfo)
-                /*
-                if (batteryList.Count > 0)
-                {
-                    StatusLog("Bat:" + progressBar(batteryPercentage), textPanelReport);
-                    //                Echo("BatteryPercentage=" + batteryPercentage);
-                }
-                else StatusLog("Bat: <NONE>", textPanelReport);
-                */
-                /*
-                if (oxyPercent >= 0)
-                {
-                    StatusLog("O2:" + progressBar(oxyPercent * 100), textPanelReport);
-                    //Echo("O:" + oxyPercent.ToString("000.0%"));
-                }
-                else Echo("No Oxygen Tanks");
-                */
-                /*
-                if (hydroPercent >= 0)
-                {
-                    StatusLog("Hyd:" + progressBar(hydroPercent * 100), textPanelReport);
-                    //                Echo("H:" + (hydroPercent*100).ToString("0.0") + "%");
-                    if (hydroPercent < 0.20f)
-                    {
-                        StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
-                        Log(" WARNING: Low Hydrogen Supplies");
-                    }
-                }
-                else Echo("No Hydrogen Tanks");
-                */
-
-                /*
-                if (batteryList.Count > 0 && batteryPercentage < batterypctlow)
-                {
-                    StatusLog(" WARNING: Low Battery Power", textPanelReport);
-                    Log(" WARNING: Low Battery Power");
-                }
-                */
-                //                StatusLog("", textPanelReport);
                 if (dGravity < 0.01)
                 {
                     _wicoThrusters.powerDownThrusters();
                     _gyros.gyrosOff();
-                    //                startNavCommand("!;V"); (this used to be reverse into direction of travel)
                     _wicoControl.SetState(100);
-                    //                    _wicoControl.SetMode(WicoControl.MODE_NAVNEXTTARGET);// setMode(MODE_NAVNEXTTARGET);
                     _wicoControl.WantFast();// bWantFast = true;
-                                                       //                    StatusLog("clear", textPanelReport);
-                                                       //                    Log("clear");
                     return;
                 }
 
@@ -942,36 +969,6 @@ namespace IngameScript
                 {
                     _wicoThrusters.powerDownThrusters(thrustOrbitalDownList, WicoThrusters.thrustAll, true);
                 }
-
-                /*
-                StatusLog("Thrusters", textPanelReport);
-                if (ionThrustCount > 0)
-                {
-                    if (fOrbitalIonPower < .01) StatusLog("ION: Off", textPanelReport);
-                    else if (fOrbitalIonPower < 10) StatusLog("ION:\n/10:" + progressBar(fOrbitalIonPower * 10), textPanelReport);
-                    else StatusLog("ION:" + progressBar(fOrbitalIonPower), textPanelReport);
-                }
-                else StatusLog("ION: None", textPanelReport);
-                if (hydroThrustCount > 0)
-                {
-                    if (fOrbitalHydroPower < .01) StatusLog("HYD: Off", textPanelReport);
-                    else if (fOrbitalHydroPower < 10) StatusLog("HYD\n/10:" + progressBar(fOrbitalHydroPower * 10), textPanelReport);
-                    else StatusLog("HYD:" + progressBar(fOrbitalHydroPower), textPanelReport);
-                }
-                else StatusLog("HYD: None", textPanelReport);
-                if (atmoThrustCount > 0)
-                {
-                    if (fOrbitalAtmoPower < .01) StatusLog("ATM: Off", textPanelReport);
-                    else if (fOrbitalAtmoPower < 10)
-                        StatusLog("ATM\n/10:" + progressBar(fOrbitalAtmoPower * 10), textPanelReport);
-                    else
-                        StatusLog("ATM:" + progressBar(fOrbitalAtmoPower), textPanelReport);
-                }
-                else StatusLog("ATM: None", textPanelReport);
-                if (bOrbitalLaunchDebug)
-                    StatusLog("I:" + fOrbitalIonPower.ToString("0.00") + "H:" + fOrbitalHydroPower.ToString("0.00") + " A:" + fOrbitalAtmoPower.ToString("0.00"), textPanelReport);
-                    */
-                //                current_state = next_state;
 
             }
 
@@ -1464,6 +1461,20 @@ namespace IngameScript
             // 90=wait for zero velocity 
             // 100 descent/landing completed 
             // 200 final descent 
+            // 210 alt>300
+            // 220 alt >100
+            // 230 alt>20
+            // 240 else close
+
+            // 300 get parachute orientation
+            // 310 wait for parachute height
+            // then ->200
+
+
+            // 500 Go to orbitalTransfer point ->10 if close
+            // 510 go/arrive orbital transfer. ->10 when close
+
+
 
             //            https://spaceengineerswiki.com/Parachute_Hatch#Terminal_Velocity
 
@@ -1502,30 +1513,27 @@ namespace IngameScript
                 double velocityShip = shipController.GetShipSpeed();
                 Vector3D vNG = shipController.GetNaturalGravity();
                 double dLength = vNG.Length();
-                double dGravity = dLength / 9.81;
-                //                _program.Echo("Gravity=" + dGravity.ToString());
+                double dGravity = dLength / 9.81; // What the UI shows
+
                 double alt = 0;
-                //                double halt = 0;
+                double distanceToTravel = 0;
 
-                Vector3D vTarget = new Vector3D(0, 0, 0);
-                bool bValidTarget = false;
-
-
-                bValidTarget = false;
-
-                shipController.TryGetPlanetElevation(MyPlanetElevation.Surface, out alt);
-                //                   halt = 0;
-                //                    minAltRotate = 39000;
 
                 if (dGravity > 0)
                 {
-                    double elevation = 0;
+                    shipController.TryGetPlanetElevation(MyPlanetElevation.Surface, out alt);
 
+                    double elevation = 0;
 
                     shipController.TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
                     //                    StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textPanelReport);
                     sbNotices.AppendLine("Elevation: " + elevation.ToString("N0") + " Meters");
                     _program.Echo("Elevation: " + elevation.ToString("N0") + " Meters");
+                    distanceToTravel = alt;
+                }
+                if(bValidTargetLanding)
+                {
+                    distanceToTravel = (shipController.CenterOfMass - TargetLanding).Length();
                 }
                 sbNotices.AppendLine("Velocity=" + velocityShip.ToString("0.00"));
                 _program.Echo("Descent Mode:" + iState.ToString());
@@ -1634,23 +1642,23 @@ namespace IngameScript
                     float fMPS = _wicoControl.fMaxWorldMps;
                     if (velocityShip > fMPS) fMPS = (float)velocityShip;
 
-                    retroStartAlt = (int)_wicoThrusters.calculateStoppingDistance(shipController, thrustOrbitalUpList, fMPS, dGravity);
+                    retroStartDistance = (int)_wicoThrusters.calculateStoppingDistance(shipController, thrustOrbitalUpList, fMPS, dGravity);
                     _program.Echo("dGravity: " + dGravity.ToString("0.00"));
-                    sbNotices.AppendLine("Stopping Distance=" + retroStartAlt.ToString());
-                    _program.Echo("Stopping Distance=" + retroStartAlt.ToString());
+                    sbNotices.AppendLine("Stopping Distance=" + retroStartDistance.ToString());
+                    _program.Echo("Stopping Distance=" + retroStartDistance.ToString());
 
-                    if (retroStartAlt < 0) _program.Echo("WARNING: CRASH!!!");
+                    if (retroStartDistance < 0) _program.Echo("WARNING: CRASH!!!");
 
                     //                    startReverseAlt = Math.Max(retroStartAlt * 5, minAltRotate);
                     //                    _program.Echo("calc retroStartAlt=" + retroStartAlt.ToString());
 
-                    retroStartAlt += (int)((_wicoBlockMaster.HeightInMeters() + 1)); // add calc point of height for altitude.. NOTE 'height' is not necessarily correct..
+                    retroStartDistance += (int)((_wicoBlockMaster.HeightInMeters() + 1)); // add calc point of height for altitude.. NOTE 'height' is not necessarily correct..
                                                                                                 //		retroStartAlt += (int)fMaxMps; // one second of speed (1s timer delay)
 
                     if (iMode == WicoControl.MODE_DESCENT)
-                        retroStartAlt += descentTargetAlt;
+                        retroStartDistance += descentTargetAlt;
 
-                    _program.Echo("adj retroStartAlt=" + retroStartAlt.ToString());
+                    _program.Echo("adj retroStartAlt=" + retroStartDistance.ToString());
                 }
                 //               double finalMaxStop = _wicoThrusters.calculateStoppingDistance(myMass.PhysicalMass, thrustOrbitalUpList, _wicoControl.fMaxWorldMps, 1.0);
                 //                _program.Echo("Final StoppingD=" + finalMaxStop.ToString("0"));
@@ -1681,61 +1689,53 @@ namespace IngameScript
                     {
                         if (iState!=80 && imsc != null && imsc.DampenersOverride)
                             imsc.DampenersOverride = false;
-                        //                        blockApplyAction(shipOrientationBlock, "DampenersOverride"); //DampenersOverride 
-                        //                    ConnectAnyConnectors(false, "OnOff_On");
+
                         _connectors.ConnectAnyConnectors(false, true);
-                        if (!bValidTarget)
+                        if (!bValidOrbitalTransfer)
                         {
-                            //                            StatusLog("No target landing waypoint set.", textPanelReport);
-                            _wicoControl.SetState(10);// current_state = 10;
-                            //			setMode(MODE_IDLE); 
+                            _wicoControl.SetState(10);
                         }
                         else
-                            _wicoControl.SetState(10);// current_state = 10;
+                        {
+                            _wicoControl.SetState(500);
+                        }
                     }
                     _wicoControl.WantFast();
                 }
-                //           _program.Echo("After init check=" + current_state.ToString());
                 if (iState == 10)
                 {
                     sbNotices.AppendLine("Dampeners to on. Aim toward target");
                     _program.Echo("Dampeners to on. Aim toward target");
                     //		bOverTarget=false; 
-                    _wicoThrusters.powerDownThrusters(thrustOrbitalDownList, WicoThrusters.thrustAll, false);
-                    _wicoControl.WantFast();// bWantFast = true;
-                    if (bValidTarget)
+                    //_wicoThrusters.powerDownThrusters(thrustOrbitalDownList, WicoThrusters.thrustAll, false);
+                    _wicoControl.WantFast();
+                    if (bValidTargetLanding)
                     {
-                        //                        GyroMain(sOrbitalUpDirection, vTarget, shipOrientationBlock);
-                        //			startNavWaypoint(vTarget, true);
                         _wicoControl.SetState(11);
                     }
-                    else _wicoControl.SetState(20);// current_state = 20;
+                    else _wicoControl.SetState(20);
                 }
                 if (iState == 11)
                 {
-                    _wicoControl.WantFast();// bWantFast = true;
-                                                       //if (GyroMain(sOrbitalUpDirection, vTarget, shipOrientationBlock))
-                    _wicoControl.SetState(20);//current_state = 20;
+                    _wicoControl.WantFast();
+                    if(bValidTargetLanding)
+                    {
+                        Vector3D vAlign = TargetLanding - shipController.GetPosition();
+                        bool bAimed = _gyros.AlignGyros(vBestThrustOrientation, vAlign);
+                        if(bAimed)
+                            _wicoControl.SetState(20);
+
+                    }
+                    else
+                        _wicoControl.SetState(20);
                 }
                 if (iState == 20)
                 {
-                    // TODO: fix the connector landings
-                    bValidTarget = false; //  just do surface landings..
-                                          //                   bValidOrbitalHome = false;
-                                          //                    bValidOrbitalLaunch = false;
-
-                    /*
-                    if (bValidTarget)
-                        StatusLog("Move towards recorded landing location", textPanelReport);
-                    else
-                        StatusLog("Move towards surface for landing", textPanelReport);
-                    */
-
                     if (imsc != null && !imsc.DampenersOverride)
                         imsc.DampenersOverride = true;
 
                     // push forward (towards) planet
-                    if (dGravity <= 0 || velocityShip < (_wicoControl.fMaxWorldMps * .8))
+                    if (dGravity <= 0 || velocityShip < (MaxDescentMps * .8))
                         _wicoThrusters.powerUpThrusters(thrustForwardList, 5);
                     else _wicoThrusters.powerDownThrusters(thrustForwardList);
                     _wicoThrusters.powerDownThrusters(thrustBackwardList, WicoThrusters.thrustAll, true);
@@ -1773,19 +1773,14 @@ namespace IngameScript
                 }
                 if (iState == 40)
                 {
-                    //                    StatusLog("Free Fall", textPanelReport);
                     sbModeInfo.AppendLine("Free Fall");
                     _program.Echo("Free Fall");
-                    //                    _program.Echo("#UpThrust=" + thrustOrbitalUpList.Count);
-                    //                    _program.Echo("#DownThrust=" + thrustOrbitalDownList.Count);
                     if (dGravity > 0)
                     {
-                        //                        if (CheckAttitudeChange())
                         CheckAttitudeChange(true);
-                        double dG = Math.Max(1.0,dGravity);
+                        double dG = Math.Max(1.0,dGravity); // TODO: assumes earthlike
                        
                         double finalMaxStop = _wicoThrusters.calculateStoppingDistance(PhysicalMass, thrustOrbitalUpList, MaxDescentMps, dG);
-//                        double finalMaxStop = _wicoThrusters.calculateStoppingDistance(PhysicalMass, thrustOrbitalUpList, _wicoControl.fMaxWorldMps, 1.0);
 
                         if (finalMaxStop < 0) // thrusters cannot save us... (but if atmo, then this could change when we get lower)
                         {
@@ -1841,14 +1836,15 @@ namespace IngameScript
                         return;
                     }
                     CheckAttitudeChange(true);
-                    //		string sStatus=navStatus.CustomName; 
-                    //                    StatusLog("Waiting for alignment with gravity", textPanelReport);
 
                     if (imsc != null && imsc.DampenersOverride)
                         imsc.DampenersOverride = false;
 
-                    _gyros.AlignGyros(vBestThrustOrientation, vNG);
-                    //                    _gyros.AlignGyros(vBestThrustOrientation, vNG, shipController);
+                    // todo: Use target location instead of gravity
+                    Vector3D vAlign = vNG;
+                    if (bValidTargetLanding) vAlign = TargetLanding - shipController.GetPosition();
+
+                    _gyros.AlignGyros(vBestThrustOrientation, vAlign);
                     _wicoControl.WantFast();//bWantFast = true;
                     _wicoControl.SetState(61);//current_state = 61;
                     return;
@@ -1856,47 +1852,102 @@ namespace IngameScript
 
                 if (iState == 61)
                 {  // we are rotating ship to gravity..
-                   //                    CheckAttitudeChange();
-                    if ( _gyros.AlignGyros(vBestThrustOrientation, vNG)
-                    //                    _gyros.AlignGyros(vBestThrustOrientation, vNG, shipController) 
-                    || alt < retroStartAlt)
+
+                   // TODO: Use target location instead of gravity
+                   //TODO: if way out of alignment; use side thrusters
+                   // TODO: use beamrider ?when closer..
+
+                    Vector3D vAlign = vNG;
+                    if(bValidTargetLanding) vAlign= TargetLanding - shipController.GetPosition();
+                    if (bValidTargetLanding && bValidOrbitalTransfer)
                     {
-                        _wicoControl.SetState(70);// current_state = 70;
+                        Vector3D vBoreEnd = (TargetLanding - OrbitalTransferPoint);
+                        Vector3D vPosition = shipController.CenterOfMass;
+
+                        Vector3D vAimEnd = (TargetLanding - vPosition);
+                        Vector3D vRejectEnd = _gyros.VectorRejection(vBoreEnd, vAimEnd);
+
+                        Vector3D vCorrectedAim = (TargetLanding - vRejectEnd * 2) - vPosition;
+                        vAlign = vCorrectedAim;
                     }
-                    _wicoControl.WantFast();// bWantFast = true;
+                    bool bAimed = _gyros.AlignGyros(vBestThrustOrientation, vAlign);
+
+                    if ( bAimed
+                    || distanceToTravel < retroStartDistance)
+                    {
+                        _wicoControl.SetState(70);
+                    }
+                    _wicoControl.WantFast();
                 }
                 if (iState == 70)
                 {
-                    sbNotices.AppendLine("Waiting for range for retro-thrust:" + retroStartAlt.ToString("N0") + " meters");
-                    //                   StatusLog("Waiting for range for retro-thrust:" + retroStartAlt.ToString("N0") + " meters", textPanelReport);
+                    sbNotices.AppendLine("Waiting for range for retro-thrust:" + retroStartDistance.ToString("N0") + " meters");
+                    _program.Echo("Waiting for range for retro-thrust:" + retroStartDistance.ToString("N0") + " meters");
+
                     if (CheckAttitudeChange())
                     {
                         _wicoControl.SetState(61);
                         _program.Echo("attitude change");
-                        _wicoControl.WantFast();// bWantFast = true;
+                        _wicoControl.WantFast();
                     }
-                    _program.Echo("#UpThrust=" + thrustOrbitalUpList.Count);
-                    _program.Echo("#DownThrust=" + thrustOrbitalDownList.Count);
 
                     if (velocityShip > MaxDescentMps)
                     {
+                        // TODO: use hoverthrust instead of just turning on thrusters full blast.
                         _wicoThrusters.powerDownThrusters();
                         _wicoControl.SetState(80);
                         _wicoControl.WantFast();
                         return;
                     }
-                    //                    bool bAligned = GyroMain(sOrbitalUpDirection);
-                    bool bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
-                    //                    bool bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG, shipController);
+                    // TODO: Align to target if known.
+                    // TODO: if out of alignment and target, then use side thrusters to correct angle.
+                    Vector3D vAlign = vNG;
+                    if (bValidTargetLanding) vAlign = TargetLanding - shipController.CenterOfMass;
+                    /*
+                    if (bValidTargetLanding && bValidOrbitalTransfer)
+                    {
+                        _program.Echo("Target Align");
+                        Vector3D vPosition = shipController.CenterOfMass;
+                        Vector3D vBoreEnd = (TargetLanding - vPosition);
+                        //                       Vector3D vBoreEnd = (TargetLanding - OrbitalTransferPoint);
+//                        Vector3D vForward = vPosition + vBestThrustOrientation * vBoreEnd.Length();
+                        Vector3D vForward = vPosition + vNG * vBoreEnd.Length();
+
+//                        Vector3D vAimEnd = (vForward - vPosition);
+                        Vector3D vMovement = shipController.GetShipVelocities().LinearVelocity;
+
+                        // if we are going pretty slow, use gravity instead.
+                        if (velocityShip < MaxDescentMps * .5)
+                            vMovement = vNG;
+
+//                        Vector3D vRejectEnd = _gyros.VectorRejection(vBoreEnd, vAimEnd);
+                        Vector3D vRejectEnd = _gyros.VectorRejection(vBoreEnd, vMovement);
+                        _program.Echo("Reject=" + vRejectEnd.ToString());
+
+                        Vector3D vCorrectAimPoint = TargetLanding - vRejectEnd * 2;
+                        _wicoCameras.CameraBackScan(vCorrectAimPoint);
+                        Vector3D vCorrectedAim = vCorrectAimPoint - vPosition;
+                        vAlign = vCorrectedAim;
+                    }
+                    */
+                    bool bAligned=_gyros.AlignGyros(vBestThrustOrientation, vAlign); 
                     if (bAligned)
                     {
+                        _program.Echo("Aligned");
+                        /*
                         if (imsc != null && imsc.DampenersOverride)
                             imsc.DampenersOverride = false;
+                        */
+                        if (imsc != null && !imsc.DampenersOverride)
+                        {
+                            imsc.DampenersOverride = true;
+                        }
+
 
                         _wicoControl.WantMedium();// bWantMedium = true;
                         double scandistance = alt;
-                        if (scandistance > retroStartAlt)
-                            scandistance = retroStartAlt;
+                        if (scandistance > retroStartDistance)
+                            scandistance = retroStartDistance;
                         /*
                                                 if (doCameraScan(cameraOrbitalLandingList, scandistance * 2)) // scan down 2x current alt
                                                 {
@@ -1919,32 +1970,38 @@ namespace IngameScript
                     }
                     else
                     {
+                        _program.Echo("NOT aligned");
+                        // TODO: if way off, use side thrusters
                         if (imsc != null && !imsc.DampenersOverride)
                             imsc.DampenersOverride = true;
-                        _program.Echo("NOT aligned");
-                        _wicoControl.WantFast();// bWantFast = true;
+                        _wicoControl.WantFast();
                         _wicoThrusters.powerDownThrusters();
                         _wicoThrusters.powerDownThrusters(thrustOrbitalUpList, WicoThrusters.thrustAll, true);
                     }
 
-                    if (alt < (retroStartAlt + MaxDescentMps * 2)) _wicoControl.WantFast();// bWantFast = true;
+                    if (distanceToTravel < (retroStartDistance + MaxDescentMps * 2)) _wicoControl.WantFast();// bWantFast = true;
 
-                    if ((alt) < retroStartAlt)
+                    if ((distanceToTravel) < retroStartDistance)
                     {
+                        // we need to stop NOW!
                         if (imsc != null && !imsc.DampenersOverride)
                         {
                             imsc.DampenersOverride = true;
-                            _wicoThrusters.powerDownThrusters();
                         }
-                        //                        blockApplyAction(shipOrientationBlock, "DampenersOverride");
-                        _wicoControl.SetState(90);//current_state = 90;
+                        _wicoThrusters.powerDownThrusters();
+                        _wicoControl.SetState(90);
                         _timers.TimerTriggers("[Landing]");
                     }
                 }
                 if (iState == 80)
                 {
+                    // TODO: use hoverthrust instead of just turning on thrusters full blast.
                     imsc.DampenersOverride = true; // allow dampeners
                     sbModeInfo.AppendLine("Decrease descent speed");
+                    Vector3D vAlign = vNG;
+                    if (bValidTargetLanding) vAlign = TargetLanding - shipController.GetPosition();
+
+                    bool bAligned = _gyros.AlignGyros(vBestThrustOrientation, vAlign);
 
                     if (velocityShip < (MaxDescentMps * .95))
                     {
@@ -1971,6 +2028,7 @@ namespace IngameScript
                 if (iState == 90)
                 {
                     sbModeInfo.AppendLine("RETRO! Waiting for ship to slow");
+                    _program.Echo("RETRO!  Hope we make it!");
                     if (velocityShip < 1)
                     {
                         if (iMode == WicoControl.MODE_DESCENT)
@@ -1978,7 +2036,9 @@ namespace IngameScript
                         else
                             _wicoControl.SetState(200);
                     }
-                    bool bAimed = _gyros.AlignGyros(vBestThrustOrientation, vNG);
+                    Vector3D vAlign = vNG;
+//                    if (bValidTargetLanding) vAlign = TargetLanding - shipController.GetPosition();
+                    bool bAimed = _gyros.AlignGyros(vBestThrustOrientation, vAlign);
                     if (bAimed)
                     {
                         _wicoControl.WantMedium();
@@ -2003,16 +2063,16 @@ namespace IngameScript
                         out fOrbitalAtmoPower, out fOrbitalHydroPower, out fOrbitalIonPower
                         );
                     float fTotalPower = fOrbitalAtmoPower + fOrbitalHydroPower + fOrbitalIonPower;
-                    if (alt > 300 && fTotalPower < 50)
+                    if (distanceToTravel > 300 && fTotalPower < 50)
                     {
                         _wicoControl.SetState(210);
                     }
-                    else if (alt > 100 && fTotalPower < 70)
+                    else if (distanceToTravel > 100 && fTotalPower < 70)
                     {
                         _wicoControl.SetState(220);
 
                     }
-                    else if (alt > 20 && fTotalPower < 80)
+                    else if (distanceToTravel > 20 && fTotalPower < 80)
                     {
                         _wicoControl.SetState(230);
                     }
@@ -2164,12 +2224,72 @@ namespace IngameScript
                     // TODO: calculate parachute deploy height
                     double parachuteTerminal = _program.wicoParachutes.CalculateTerminalVelocity(PhysicalMass, _wicoBlockMaster.gridsize, dLength);
                     _program.Echo("CParachute V: " + parachuteTerminal.ToString("0.00"));
-                    if (parachuteTerminal < 10 || alt < 200)
+                    if (parachuteTerminal < 10 || distanceToTravel < 200)
                     {
                         _program.wicoParachutes.OpenChutes();
                         _wicoControl.SetState(200); // attempt powered landing
                     }
 
+                }
+                if(iState == 500)
+                {
+                    // check going to orbital transfer point
+                    // TODO: Use NAV if installed
+                    // TODO: calculate path to take us outside of gravity of planet.
+                    if (bValidOrbitalTransfer)
+                    {
+                        double distancesq = Vector3D.DistanceSquared(OrbitalTransferPoint, shipController.GetPosition());
+                        if (distancesq < 10 * 10)
+                            _wicoControl.SetState(10);
+                        else
+                        {
+                            _wicoControl.SetState(510);
+                        }
+                    }
+                    else _wicoControl.SetState(10);
+
+                }
+                if (iState == 510)
+                {
+                    // go to orbital transfer location
+                    if (!bValidOrbitalTransfer)
+                        _wicoControl.SetState(10); // we shouldn't be here
+
+                    double distancesq = Vector3D.DistanceSquared(OrbitalTransferPoint, shipController.GetPosition());
+                    if (distancesq < 10 * 10 || dGravity>0.01)
+                    {
+                        _program.ResetMotion();
+                        _wicoThrusters.powerDownThrusters();
+                        _gyros.gyrosOff();
+                        shipController.DampenersOverride = true;
+
+                        _wicoControl.SetState(10);
+                        return;
+                    }
+                    Vector3D vAlign = OrbitalTransferPoint - shipController.GetPosition();
+                    bool bAimed = _gyros.AlignGyros(vBestThrustOrientation, vAlign);
+                    if(bAimed)
+                    {
+                        // TODO: target MPS based on distance.
+                        if (velocityShip< (MaxDescentMps*0.8))
+                        {
+
+                            // push
+                            shipController.DampenersOverride = true;
+                            _wicoThrusters.powerUpThrusters(thrustForwardList);
+                        }
+                        else
+                        {
+                            // coast
+                            shipController.DampenersOverride = false;
+                            _wicoThrusters.powerDownThrusters();
+                            _wicoThrusters.powerDownThrusters(thrustBackwardList, WicoThrusters.thrustAll, true);
+                        }
+                    }
+                    else
+                    {
+                        shipController.DampenersOverride = true;
+                    }
                 }
 
             }
