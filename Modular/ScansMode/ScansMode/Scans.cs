@@ -29,6 +29,11 @@ namespace IngameScript
             Cameras _cameras;
             Asteroids _asteroids;
 
+            long _scanRange = 5000;
+
+            string _CameraSection = "CAMERA";
+            string _NameScanRange = "ScanRange";
+
             public ScansMode(Program program, WicoControl wicoControl, WicoBlockMaster wicoBlockMaster, 
                 WicoIGC igc, Cameras cameras, Asteroids asteroids
                 ) : base(program,wicoControl)
@@ -43,8 +48,10 @@ namespace IngameScript
                 _program.moduleName += " Scans";
                 _program.moduleList += "\nScans V4.1";
 
-//                _program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
-//                _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
+                //                _program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
+                //                _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
+                _scanRange=_program._CustomDataIni.Get(_CameraSection, _NameScanRange).ToInt64(_scanRange);
+                _program._CustomDataIni.Set(_CameraSection, _NameScanRange, _scanRange);
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -56,9 +63,9 @@ namespace IngameScript
                 _wicoControl.AddControlChangeHandler(ModeChangeHandler);
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
-                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVADDTARGET, BroadcastHandler);
-                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVRESET, BroadcastHandler);
-                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVSTART, BroadcastHandler);
+//                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVADDTARGET, BroadcastHandler);
+//                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVRESET, BroadcastHandler);
+//                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVSTART, BroadcastHandler);
 
             }
 
@@ -181,15 +188,18 @@ namespace IngameScript
                     case 0:
                         { // init camera scan for asteroids/objects
                             _program.ResetMotion();
+                            // TODO: Use WicoET
                             scanElapsedMs = 0;
 
+                            _scanRange = _program._CustomDataIni.Get(_CameraSection, _NameScanRange).ToInt64(_scanRange);
+
                             // initialize cameras
-                            scanfrontScanner = new QuadrantCameraScanner(_program,_cameras.GetForwardCameras(), 5000);
-                            scanbackScanner = new QuadrantCameraScanner(_program, _cameras.GetBackwardCameras(), 5000);
-                            scanleftScanner = new QuadrantCameraScanner(_program, _cameras.GetLeftCameras(), 5000);
-                            scanrightScanner = new QuadrantCameraScanner(_program, _cameras.GetRightCameras(), 5000);
-                            scantopScanner = new QuadrantCameraScanner(_program, _cameras.GetUpCameras(), 5000);
-                            scanbottomScanner = new QuadrantCameraScanner(_program, _cameras.GetDownwardCameras(), 5000);
+                            scanfrontScanner = new QuadrantCameraScanner(_program,_cameras.GetForwardCameras(), _scanRange);
+                            scanbackScanner = new QuadrantCameraScanner(_program, _cameras.GetBackwardCameras(), _scanRange);
+                            scanleftScanner = new QuadrantCameraScanner(_program, _cameras.GetLeftCameras(), _scanRange);
+                            scanrightScanner = new QuadrantCameraScanner(_program, _cameras.GetRightCameras(), _scanRange);
+                            scantopScanner = new QuadrantCameraScanner(_program, _cameras.GetUpCameras(), _scanRange);
+                            scanbottomScanner = new QuadrantCameraScanner(_program, _cameras.GetDownwardCameras(), _scanRange);
 
                             _wicoControl.SetState(410);// iState = 410;
                             _wicoControl.WantFast();
