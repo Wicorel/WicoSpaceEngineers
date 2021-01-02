@@ -27,6 +27,9 @@ namespace IngameScript
         Add base requests based on item needed to get or wanted to get rid of
         Add asteroids, ores and known ships
         Add menu system to send ships to ores/asteroid/ships
+        
+        manage local fuel resources like power and hydrogen
+
         */
         BaseConnectors baseConnectors;
         Asteroids _asteroids;
@@ -38,6 +41,10 @@ namespace IngameScript
         /// The control system for this module.
         /// </summary>
         WicoControl _wicoControl;
+
+        PowerProduction _power;
+        GasTanks _tanks;
+        PowerManagement _powerManagement;
 
         void ModuleControlInit()
         {
@@ -52,6 +59,11 @@ namespace IngameScript
             _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
             _asteroids = new Asteroids(this, _wicoControl, wicoIGC, _displays);
             _oreInfoLocs = new OreInfoLocs(this, wicoBlockMaster, wicoIGC, _asteroids, _displays);
+
+            _power = new PowerProduction(this, wicoBlockMaster);
+            _tanks = new GasTanks(this, wicoBlockMaster);
+
+            _powerManagement = new PowerManagement(this, _power, _tanks, wicoElapsedTime, wicoIGC);
 
             // wicoOrbitalLaunch = new OrbitalModes(this);
             // wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
