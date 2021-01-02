@@ -41,9 +41,12 @@ namespace IngameScript
 //        ScanBase _scanBase;
         ScansMode _scanMode;
         Asteroids _asteroids;
-        Ores _ores;
+        OreInfoLocs _oreInfoLocs;
+        OresLocal _ores;
         DockBase _dock;
         Displays _displays;
+        SystemsMonitor _systemsMonitor;
+//        CargoCheck cargoCheck;
 
         Miner _miner;
 //            SpaceDock spaceDock;
@@ -62,7 +65,6 @@ namespace IngameScript
 
         void ModuleProgramInit()
         {
-
             wicoThrusters = new WicoThrusters(this, wicoBlockMaster);
             wicoGyros = new WicoGyros(this, wicoBlockMaster);
             wicoGasTanks = new GasTanks(this, wicoBlockMaster);
@@ -74,34 +76,31 @@ namespace IngameScript
             wicoPower = new PowerProduction(this, wicoBlockMaster);
             wicoTimers = new Timers(this, wicoBlockMaster);
             //            navRemote = new NavRemote(this);
-            navCommon = new NavCommon(this,_wicoControl);
+            navCommon = new NavCommon(this,_wicoControl, wicoIGC);
             _sensors = new Sensors(this, wicoBlockMaster);
             _drills = new Drills(this, wicoBlockMaster);
             _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
-            Echo("_displays");
-//            _cargoCheck = new CargoCheck(this, wicoBlockMaster, _displays);
-            Echo("_cargoCheck");
             _dock = new DockBase(this);
-            Echo("_dock");
 //            _scanBase = new ScanBase(this, _wicoControl);
             _asteroids = new Asteroids(this, _wicoControl, wicoIGC,_displays);
             _scanMode = new ScansMode(this, _wicoControl, wicoBlockMaster, wicoIGC, wicoCameras, _asteroids);
-            _ores = new Ores(this, wicoBlockMaster, _wicoControl, wicoIGC, _asteroids, _displays);
+            _oreInfoLocs = new OreInfoLocs(this, wicoBlockMaster, wicoIGC, _asteroids, _displays);
+            _ores = new OresLocal(this, wicoBlockMaster, _wicoControl, wicoIGC, _asteroids, _oreInfoLocs, _displays);
 
-            Echo("_ores");
+//            cargoCheck = new CargoCheck(this, wicoBlockMaster, _displays);
+            _systemsMonitor = new SystemsMonitor(this, wicoThrusters, wicoConnectors, wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, _ores);
 
             _miner = new Miner(this, _wicoControl, wicoBlockMaster, wicoElapsedTime, wicoIGC
-                , _scanMode, _asteroids, wicoThrusters, wicoConnectors, wicoSensors
-                , wicoCameras, _drills, wicoAntennas, wicoGasTanks, wicoGyros, wicoPower
-                , wicoTimers, navCommon, _ores, _dock
+                , _scanMode, _asteroids
+                , _systemsMonitor
+//                , wicoThrusters, wicoConnectors
+                , wicoSensors
+                , wicoCameras, _drills
+//                , wicoAntennas
+//                , wicoGasTanks, wicoGyros, wicoPower
+                , wicoTimers, navCommon, _oreInfoLocs, _ores, _dock
                 ,_displays
                 );
-            Echo("_miner");
-        //                spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster, wicoThrusters, wicoConnectors,
-        //                    wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, wicoTimers, wicoIGC, wicoBases, navCommon, _cargoCheck);
-        //wicoOrbitalLaunch = new OrbitalModes(this);
-        //            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
-
         /// DEBUG
         // wicoIGC.SetDebug(true);
 //        _wicoControl.SetDebug(true);
@@ -110,9 +109,6 @@ namespace IngameScript
         }
         public void ModulePreMain(string argument, UpdateType updateSource)
         {
-//                Echo("Space Dock Module:");
-            //            Echo(" Main=" + wicoControl.IamMain().ToString());
-            //            Echo("");
         }
 
         public void ModulePostMain()
