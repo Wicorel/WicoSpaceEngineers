@@ -274,7 +274,7 @@ namespace IngameScript
                 {
                     sbModeInfo.AppendLine(" Checking Relaunch");
                     _program.Echo("Docked. Checking Relaunch");
-                    if (_systemsMonitor.DockAirWorthy())
+                    if (_systemsMonitor.AirWorthy())
                     {
                         _program.Echo("RELAUNCH!");
                         _wicoControl.SetMode(WicoControl.MODE_LAUNCH);
