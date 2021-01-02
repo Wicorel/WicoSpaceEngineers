@@ -71,9 +71,6 @@ namespace IngameScript
             float defaultScaleOnMiss = 2, float defaultScanCenterScale = 1, float defaultMinAdjust = 0.5f, double maxScanDist = 5000, bool bScanExit = false)
             {
                 _pg = pg;
-                bDoneScanning = false;
-                bScanForExit = bScanExit;
-                bFoundExit = false;
 
                 cameras.Clear();
                 myLDEI.Clear();
@@ -90,13 +87,25 @@ namespace IngameScript
                     }
 
                 }
-                //                cameras = blocks;
+
+                Reset(startScanDist, defaultYawRange, defaultPitchRange, defaultScaleOnMiss, defaultScanCenterScale, defaultMinAdjust, maxScanDist, bScanExit);
+
+                scansPerCall = cameras.Count;
+            }
+            public void Reset(double startScanDist = 1250, float defaultYawRange = 45f, float defaultPitchRange = 45f,
+            float defaultScaleOnMiss = 2, float defaultScanCenterScale = 1, float defaultMinAdjust = 0.5f, double maxScanDist = 5000, bool bScanExit = false)
+            {
+                bScanForExit = bScanExit;
+                bDoneScanning = false;
+                bScanForExit = bScanExit;
+                bFoundExit = false;
+
                 if (startScanDist > maxScanDist)
                     maxScanDist = startScanDist; // don't stop with zero scans..
 
                 SCAN_DISTANCE = startScanDist;
-                YAWSCANRANGE = defaultYawRange;
-                PITCHSCANRANGE = defaultPitchRange;
+                YAWSCANRANGE = Math.Min(YAWSCANRANGE,defaultYawRange);
+                PITCHSCANRANGE = Math.Min(PITCHSCANRANGE,defaultPitchRange);
                 SCAN_SCALE_ON_MISS = defaultScaleOnMiss;
                 SCAN_CENTER_SCALE_FACTOR = defaultScanCenterScale;
                 SCAN_MINIMUMADJUST = defaultMinAdjust;
@@ -108,7 +117,6 @@ namespace IngameScript
                 NEXTPITCH = 0;
                 quadrant = 0;
 
-                scansPerCall = cameras.Count;
             }
 
             public bool DoneScanning()
