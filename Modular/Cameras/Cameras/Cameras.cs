@@ -46,13 +46,16 @@ namespace IngameScript
 
             List<long> localGrids = new List<long>();
 
-            Program thisProgram;
+            Program _program;
+
+            bool _debug = false;
+
             public Cameras(Program program)
             {
-                thisProgram = program;
+                _program = program;
 
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                _program.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                _program.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             /// <summary>
@@ -89,7 +92,7 @@ namespace IngameScript
                 if (ShipControl == null)
                 {
                     // first time Init
-                    ShipControl = thisProgram.wicoBlockMaster.GetMainController();
+                    ShipControl = _program.wicoBlockMaster.GetMainController();
                     if (ShipControl == null) return;
 
                     ShipControl.Orientation.GetMatrix(out fromGridToReference);
@@ -258,7 +261,7 @@ namespace IngameScript
                     if (localGrids.Contains(lastDetectedInfo.EntityId))
                     {
                         lastDetectedInfo = new MyDetectedEntityInfo();
-                        thisProgram.ErrorLog("Detected Self");
+                        if(_debug) _program.ErrorLog("Detected Self");
                         return true;
                     }
                     lastCamera = camera;
