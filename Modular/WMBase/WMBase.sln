@@ -67,6 +67,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ores", "..\Ores\Ores\Ores.s
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CargoCheck", "..\CargoCheck\CargoCheck\CargoCheck.shproj", "{60F7D439-BB8C-43E7-B950-F552B8026DE0}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PowerManagement", "..\PowerManagement\PowerManagement\PowerManagement.shproj", "{8842D42F-9F40-4CBD-92D6-0369C047E612}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\Power\Power\Power.projitems*{11d02c04-292a-4e4d-b6a7-4175fb98a163}*SharedItemsImports = 13
@@ -91,6 +93,7 @@ Global
 		..\IGCIFF\IGCIFF\IGCIFF.projitems*{6e3114c0-2d7d-403b-8a03-dd140ff4ba1b}*SharedItemsImports = 13
 		..\Asteroids\Asteroids\Asteroids.projitems*{6edafb8c-8813-4aed-8794-b756ec416aa9}*SharedItemsImports = 13
 		..\HydrogenEngines\HydrogenEngines\HydrogenEngines.projitems*{76c7e306-96e2-4766-8fea-29261ab8f94b}*SharedItemsImports = 13
+		..\PowerManagement\PowerManagement\PowerManagement.projitems*{8842d42f-9f40-4cbd-92d6-0369c047e612}*SharedItemsImports = 13
 		..\Navigation\Navigation\Navigation.projitems*{88e62142-15b2-40d2-944b-9fd1b0e42ef5}*SharedItemsImports = 13
 		..\NAVRotors\NAVRotors\NAVRotors.projitems*{8f6cbb54-6529-43a9-8641-32af99460465}*SharedItemsImports = 13
 		..\Cameras\Cameras\Cameras.projitems*{8fb811e0-76f1-499f-b6d2-360ee94c5961}*SharedItemsImports = 13
@@ -109,6 +112,9 @@ Global
 		..\IGC\IGC\IGC.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\ModularMain\ModularMain\ModularMain.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Ores\Ores\Ores.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\PowerManagement\PowerManagement\PowerManagement.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Power\Power\Power.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Tanks\Tanks\Tanks.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e1083276-87da-415b-ab5f-0d24ed85b0e5}*SharedItemsImports = 13
 	EndGlobalSection
