@@ -23,17 +23,40 @@ namespace IngameScript
         {
             Program _program;
             WicoControl _wicoControl;
+            WicoIGC _wicoIGC;
 
-            public NavCommon(Program program, WicoControl wicoControl)
+            protected bool _bLocalNavAvailable = false;
+            long NavLocalID = 0;
+
+            public NavCommon(Program program, WicoControl wicoControl, WicoIGC wicoIGC, bool bAnnounce=true)
             {
                 _program = program;
                 _wicoControl = wicoControl;
+                _wicoIGC = wicoIGC;
 
                 // TODO: talk to NAV module at startup to see if it exists.
                 // If it DOES NOT, then maybe use Keen autopilot?
 
                 //                wbm.AddLocalBlockHandler(BlockParseHandler);
                 //                wbm.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVPRESENT, IGCHandler);
+                _wicoIGC.AddUnicastHandler(IGCHandler);
+
+                // Request any local NAV to tell us it's here..
+                if(bAnnounce) _program.IGC.SendBroadcastMessage(WICOB_NAVHEARTBEAT, "", TransmissionDistance.CurrentConstruct);
+            }
+            void IGCHandler(MyIGCMessage msg)
+            {
+                // NOTE: called on ALL received messages; not just 'our' tag
+                if (msg.Tag == NavCommon.WICOB_NAVPRESENT)
+                {
+                    if (msg.Data is string)
+                    {
+//                        if (_Debug) _program.ErrorLog(msg.Tag);
+                        _bLocalNavAvailable = true;
+                        NavLocalID = msg.Source;
+                    }
+                }
             }
 
             public const string WICOB_NAVADDTARGET = "WICOB_NAVADDTARGET";
@@ -41,6 +64,9 @@ namespace IngameScript
             public const string WICOB_NAVSTART = "WICOB_NAVSTART";
             public const string WICOB_NAVRESET = "WICOB_NAVRESET";
             public const string WICOB_NAVSETMODE = "WICOB_NAVSETMODE";
+
+            public const string WICOB_NAVHEARTBEAT = "WICOB_NAVHEARTBEAT"; // is there a nav available?
+            public const string WICOB_NAVPRESENT = "WICOB_NAVPRESENT"; // a nav is present
 
             public static string NAVSerializeCommand(Vector3D vTarget, int modeArrival = WicoControl.MODE_NAVNEXTTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
@@ -116,6 +142,8 @@ namespace IngameScript
 
             public virtual void NavGoTarget(Vector3D vTarget, int modeArrival = WicoControl.MODE_ARRIVEDTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
+                // TODO: support no local NAV and use remote control instead.
+
                 //                _program.ErrorLog("NavCommon NavGoTarget");
                 string data = NavCommon.NAVSerializeCommand(vTarget, modeArrival, stateArrival, DistanceMin, TargetName, maxSpeed, bGo);
                 _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVIMMEDIATETARGET, data, TransmissionDistance.CurrentConstruct);
@@ -130,8 +158,6 @@ namespace IngameScript
             {
                 _wicoControl.SetMode(WicoControl.MODE_STARTNAV);
             }
-
-
 
         }
     }

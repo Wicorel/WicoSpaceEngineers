@@ -43,7 +43,7 @@ namespace IngameScript
                 Wheels wicoWheels, NavRotors navRotors, WicoThrusters wicoThrusters
                 ,Antennas wicoAntennas
                 ,Displays displays
-                 ): base(program, wc)
+                 ): base(program, wc, wicoIGC, false)
             {
                 _program = program;
                 _wicoControl = wc;
@@ -59,7 +59,7 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " Navigation";
-                _program.moduleList += "\nNavigation V4.2f";
+                _program.moduleList += "\nNavigation V4.2g";
 
                 NAVEmulateOld=_program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
                 _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
@@ -88,9 +88,12 @@ namespace IngameScript
                 _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVIMMEDIATETARGET, BroadcastHandler);
                 _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVRESET,     BroadcastHandler);
                 _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVSTART,     BroadcastHandler);
-                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVSETMODE,   BroadcastHandler);
+                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVSETMODE, BroadcastHandler);
+                _wicoIGC.AddPublicHandler(NavCommon.WICOB_NAVHEARTBEAT, BroadcastHandler);
 
                 _displays.AddSurfaceHandler("MODE", SurfaceHandler);
+
+                _bLocalNavAvailable = true; // we are it.
 
             }
             StringBuilder sbNotices = new StringBuilder(300);
@@ -526,7 +529,7 @@ namespace IngameScript
                         _NavStart();
                     }
                 }
-                if (msg.Tag == NavCommon.WICOB_NAVADDTARGET)
+                else if (msg.Tag == NavCommon.WICOB_NAVADDTARGET)
                 {
                     if (msg.Data is string)
                     {
@@ -572,6 +575,17 @@ namespace IngameScript
                         {
                             _NavQueueMode(iMode);
                         }
+                    }
+                }
+                else if (msg.Tag == NavCommon.WICOB_NAVHEARTBEAT)
+                {
+                    if (msg.Data is string)
+                    {
+                        if (_Debug) _program.ErrorLog("Received: " + msg.Tag + " to mode:" + (string)msg.Data);
+                        // request that we respond that we are alive.
+
+                        // respond with PRESENT
+                        _program.IGC.SendUnicastMessage(msg.Source, WICOB_NAVPRESENT, "");
                     }
                 }
             }
