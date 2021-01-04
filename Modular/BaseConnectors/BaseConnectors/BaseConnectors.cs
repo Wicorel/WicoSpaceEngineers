@@ -25,15 +25,27 @@ namespace IngameScript
             WicoBlockMaster _wicoBlockMaster;
             WicoIGC _wicoIGC;
             WicoElapsedTime _wicoElapsedTime;
+            Timers _timers;
 
-            readonly string _BaseTransmit = "BaseTransmit";
+            readonly string _BaseTransmit = "BaseTransmit"; // Etimer name
 
-            public BaseConnectors(Program program, WicoBlockMaster wbm, WicoIGC wicoIGC, WicoElapsedTime wicoElapsedTime)
+            string DockStartTag = "Dock Start";
+            string DockEndTag = "Dock End";
+
+            bool bHaveIncoming = false;
+            // TODO:
+            // send list of all connectors.
+            // update list when availability changes
+            // allow request for reserving connector
+            // assume reservation when something is docked
+
+            public BaseConnectors(Program program, WicoBlockMaster wbm, WicoIGC wicoIGC, WicoElapsedTime wicoElapsedTime, Timers timers)
             {
                 _program = program;
                 _wicoBlockMaster = wbm;
                 _wicoIGC = wicoIGC;
                 _wicoElapsedTime = wicoElapsedTime;
+                _timers = timers;
 
                 _program.moduleName += " Base Connectors";
                 _program.moduleList += "\nBase Connectors V4.2c";
@@ -210,6 +222,8 @@ namespace IngameScript
                     {
                         _program.Echo("Sending Dock Info");
                         sendDockInfo(i, incomingID, sDroneName, true);
+                        _timers.TimerTriggers(DockStartTag);
+                        bHaveIncoming = true;
                     }
                     else
                     {
@@ -315,7 +329,7 @@ namespace IngameScript
                 public List<IMyTerminalBlock> subBlocks;
                 public long lAlign;
 
-                // TODO:
+                //
                 //           public string sType; // types of drones supported
 
                 // TODO: 
@@ -505,6 +519,8 @@ namespace IngameScript
             Color ASSIGNED_COLOR = new Color(1f, 0f, 0f);
             void processDockingStates()
             {
+                bool bWasIncoming = bHaveIncoming;
+
                 if (dockingInfo.Count == 0)
                 {
                     //        Echo("No connecters assigned to [BASE]");
@@ -552,6 +568,7 @@ namespace IngameScript
                             blinkInterval = 0.5f;
                             if (di.tb is IMyShipConnector)
                             {
+                                bHaveIncoming = true;
                                 IMyShipConnector connector = di.tb as IMyShipConnector;
                                 if (connector.Status == MyShipConnectorStatus.Connected)
                                     di.State = 0;
@@ -576,6 +593,10 @@ namespace IngameScript
                     output += "\n";
                 }
                 _program.Echo(output);
+                if(bWasIncoming && !bHaveIncoming)
+                { // transition from none to some.
+                    _timers.TimerTriggers(DockEndTag);
+                }
             }
 
         }
