@@ -297,8 +297,8 @@ namespace IngameScript
                 }
                 if (_systemsMonitor.HasHydroTanks())
                 {
-                    sbNotices.AppendLine(" Hydro: " + (_systemsMonitor.hydroPercent * 100).ToString("0") + "% (" + _systemsMonitor.tankspcthigh + ")");
-                    _program.Echo(" Hydro: " + (_systemsMonitor.hydroPercent * 100).ToString("0") + "% (" + _systemsMonitor.tankspcthigh + ")");
+                    sbNotices.AppendLine(" Hydro: " + (_systemsMonitor.hydroPercent ).ToString("0") + "% (" + _systemsMonitor.tankspcthigh + ")");
+                    _program.Echo(" Hydro: " + (_systemsMonitor.hydroPercent).ToString("0") + "% (" + _systemsMonitor.tankspcthigh + ")");
                 }
                 if (!_systemsMonitor.AnyConnectorIsConnected())
                 {
@@ -385,7 +385,8 @@ namespace IngameScript
                     {
                         sbNotices.AppendLine("Charging batteries to 100%");
                         if (!_systemsMonitor.BatteryCheck(100, true))
-                            _wicoControl.SetState(1);
+                            if(_systemsMonitor.batteryPercentage<99)
+                                _wicoControl.SetState(1);
                     }
                     else // allow display of info without setting
                     {
