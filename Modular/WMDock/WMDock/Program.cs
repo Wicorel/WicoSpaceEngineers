@@ -83,10 +83,10 @@ namespace IngameScript
             _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
             wicoBases = new WicoBases(this, wicoIGC,_displays);
 //            navRemote = new NavRemote(this);
-            navCommon = new NavCommon(this, _wicoControl);
+            navCommon = new NavCommon(this, _wicoControl, wicoIGC);
             _cargoCheck = new CargoCheck(this, wicoBlockMaster,_displays);
 
-            _powerManagement = new PowerManagement(this, wicoPower, wicoGasTanks, wicoElapsedTime, wicoIGC);
+            _powerManagement = new PowerManagement(this, _wicoControl, wicoPower, wicoGasTanks, wicoElapsedTime,  wicoIGC, _displays);
 
             _systemsMonitor = new SystemsMonitor(this,  wicoThrusters, wicoConnectors,
                 wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, _cargoCheck);
