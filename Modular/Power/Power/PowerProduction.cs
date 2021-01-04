@@ -59,6 +59,7 @@ namespace IngameScript
 
             Program _program;
             WicoBlockMaster _wicoBlockMaster;
+
             public PowerProduction(Program program, WicoBlockMaster wbm)
             {
                 _program = program;
@@ -160,8 +161,8 @@ namespace IngameScript
                         if (fb.Enabled)
                         {
                             currentEngineOutput += pp.CurrentOutput;
-                            maxHydrogenPower += pp.MaxOutput;
                         }
+                        maxHydrogenPower += pp.MaxOutput;
                     }
                 }
                 return count;
@@ -201,6 +202,11 @@ namespace IngameScript
                 else return -1;
             }
 
+
+            /// <summary>
+            /// Returns true if at least one engine is off
+            /// </summary>
+            /// <returns></returns>
             public bool EnginesAreOff()
             {
                 foreach (var tb in lHydrogenEngines)
@@ -221,7 +227,8 @@ namespace IngameScript
                     if(tb is IMyFunctionalBlock)
                     {
                         var fb = tb as IMyFunctionalBlock;
-                        fb.Enabled = bOn;
+                        if(fb.Enabled!=bOn)
+                            fb.Enabled = bOn;
                     }
                 }
             }
@@ -454,6 +461,10 @@ namespace IngameScript
                 }
             }
 
+            
+            /// <summary>
+            /// Calculates current valuse for all power sources.
+            /// </summary>
             public void CalcPower()
             {
                 calcCurrentSolar();
