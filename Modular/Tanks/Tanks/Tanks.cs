@@ -95,14 +95,25 @@ namespace IngameScript
             public int tankspcthigh = 99;
             public int tankspctlow = 25;
 
+            /// <summary>
+            /// Percent full between 0 and 100.  -1 for no tanks.
+            /// </summary>
             public double hydroPercent = -1;
+            /// <summary>
+            /// Percent full between 0 and 100.  -1 for no tanks.
+            /// </summary>
             public double oxyPercent = -1;
             public void TanksCalculate()
             {
-                hydroPercent = tanksFill(iTankHydro);
-                oxyPercent = tanksFill(iTankOxygen);
+                hydroPercent = tanksFill(iTankHydro)*100;
+                oxyPercent = tanksFill(iTankOxygen)*100;
             }
 
+            /// <summary>
+            /// Returns percent full between 0 and 100
+            /// </summary>
+            /// <param name="tankList"></param>
+            /// <returns></returns>
             public double TanksFill(List<IMyTerminalBlock> tankList)
             {
                 double totalPercent = 0;
@@ -125,6 +136,12 @@ namespace IngameScript
                 }
                 else return 0;
             }
+
+            /// <summary>
+            /// returns tank fill for a specified type. Values between 0 and 1
+            /// </summary>
+            /// <param name="iTypes"></param>
+            /// <returns></returns>
             public double tanksFill(int iTypes = 0xff)
             {
                 //                if (tankList.Count < 1) tanksInit();
@@ -150,6 +167,7 @@ namespace IngameScript
                 }
                 else return -1;
             }
+
             const int iTankOxygen = 1;
             const int iTankHydro = 2;
             int TankType(IMyTerminalBlock theBlock)
@@ -169,6 +187,7 @@ namespace IngameScript
                 }
                 return 0;
             }
+
             public void TanksStockpile(bool bStockPile = true, int iTypes = 0xff)
             {
                 //                if (tankList.Count < 1) tanksInit();
@@ -184,7 +203,6 @@ namespace IngameScript
                         tank.Stockpile = bStockPile;
                     }
                 }
-
             }
 
             public bool HasHydroTanks()
@@ -199,7 +217,6 @@ namespace IngameScript
                 }
                 return false;
             }
-
         }
     }
 }
