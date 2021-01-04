@@ -69,6 +69,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CargoCheck", "..\CargoCheck
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PowerManagement", "..\PowerManagement\PowerManagement\PowerManagement.shproj", "{8842D42F-9F40-4CBD-92D6-0369C047E612}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Timers", "..\Timers\Timers\Timers.shproj", "{2587E72F-CF86-4B72-B553-06474A810B0D}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\Power\Power\Power.projitems*{11d02c04-292a-4e4d-b6a7-4175fb98a163}*SharedItemsImports = 13
@@ -78,6 +80,7 @@ Global
 		..\Wheels\Wheels\Wheels.projitems*{16185a11-ab01-459f-b25f-61436d5e4023}*SharedItemsImports = 13
 		..\BaseConnectors\BaseConnectors\BaseConnectors.projitems*{1de93018-b397-4af3-8f6b-d30dba4ea303}*SharedItemsImports = 13
 		..\Sensors\Sensors\Sensors.projitems*{22cb2a2b-7da5-4e54-955b-668721f0c414}*SharedItemsImports = 13
+		..\Timers\Timers\Timers.projitems*{2587e72f-cf86-4b72-b553-06474a810b0d}*SharedItemsImports = 13
 		..\ModularMain\ModularMain\ModularMain.projitems*{2c75ab60-ae98-4544-b151-13769a76c6c4}*SharedItemsImports = 13
 		..\Displays\Displays\Displays.projitems*{33e46b38-c87f-445a-b3a9-3466910deca6}*SharedItemsImports = 13
 		..\Ores\Ores\Ores.projitems*{388cb0a5-49b9-4f62-9a8a-f34b091e6bec}*SharedItemsImports = 13
@@ -115,6 +118,7 @@ Global
 		..\PowerManagement\PowerManagement\PowerManagement.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Power\Power\Power.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Tanks\Tanks\Tanks.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\Timers\Timers\Timers.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e1083276-87da-415b-ab5f-0d24ed85b0e5}*SharedItemsImports = 13
 	EndGlobalSection
