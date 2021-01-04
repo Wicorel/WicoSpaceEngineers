@@ -42,6 +42,7 @@ namespace IngameScript
         /// </summary>
         WicoControl _wicoControl;
 
+        Timers _timers;
         PowerProduction _power;
         GasTanks _tanks;
         PowerManagement _powerManagement;
@@ -54,8 +55,9 @@ namespace IngameScript
 
         void ModuleProgramInit()
         {
-            // wicoThrusters = new WicoThrusters(this);
-            baseConnectors = new BaseConnectors(this, wicoBlockMaster, wicoIGC, wicoElapsedTime);
+            _timers = new Timers(this, wicoBlockMaster);
+
+            baseConnectors = new BaseConnectors(this, wicoBlockMaster, wicoIGC, wicoElapsedTime, _timers);
             _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
             _asteroids = new Asteroids(this, _wicoControl, wicoIGC, _displays);
             _oreInfoLocs = new OreInfoLocs(this, wicoBlockMaster, wicoIGC, _asteroids, _displays);
@@ -63,12 +65,9 @@ namespace IngameScript
             _power = new PowerProduction(this, wicoBlockMaster);
             _tanks = new GasTanks(this, wicoBlockMaster);
 
-            _powerManagement = new PowerManagement(this, _power, _tanks, wicoElapsedTime, wicoIGC);
-
-            // wicoOrbitalLaunch = new OrbitalModes(this);
-            // wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
-
+            _powerManagement = new PowerManagement(this, _wicoControl, _power, _tanks, wicoElapsedTime, wicoIGC, _displays);
         }
+
         public void ModulePreMain(string argument, UpdateType updateSource)
         {
         }
