@@ -223,7 +223,7 @@ namespace IngameScript
                             }
                             if (_systemsMonitor.HasHydroTanks())
                             {
-                                sbFuelInfo.AppendLine("H2 Tanks = " + (_systemsMonitor.hydroPercent * 100).ToString("0.0")+"%");
+                                sbFuelInfo.AppendLine("H2 Tanks = " + (_systemsMonitor.hydroPercent).ToString("0.0")+"%");
                             }
                             if(_systemsMonitor.HasBatteries())
                             {
