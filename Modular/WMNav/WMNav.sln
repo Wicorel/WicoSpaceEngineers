@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WMNav", "WMOrbital\WMNav.csproj", "{E014C024-523D-4491-B4C8-00435BFA0089}"
 EndProject
@@ -61,6 +61,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Displays", "..\Displays\Dis
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "IGCIFF", "..\IGCIFF\IGCIFF\IGCIFF.shproj", "{6E3114C0-2D7D-403B-8A03-DD140FF4BA1B}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoBasicThrusters", "..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.shproj", "{FF8A2CA4-4F9A-42CD-A197-670E0EBCBDCC}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\GasGens\GasGens\GasGens.projitems*{121cbf09-ca3f-465e-beb0-e14c8e22cd35}*SharedItemsImports = 13
@@ -111,9 +113,12 @@ Global
 		..\Tanks\Tanks\Tanks.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\TravelMovement\TravelMovement\TravelMovement.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Wheels\Wheels\Wheels.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoThrust\WicoThrust\WicoThrust.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e1083276-87da-415b-ab5f-0d24ed85b0e5}*SharedItemsImports = 13
+		..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.projitems*{ff8a2ca4-4f9a-42cd-a197-670e0ebcbdcc}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

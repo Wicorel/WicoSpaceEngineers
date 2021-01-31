@@ -120,6 +120,7 @@ Global
 		..\Tanks\Tanks\Tanks.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Timers\Timers\Timers.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e1083276-87da-415b-ab5f-0d24ed85b0e5}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

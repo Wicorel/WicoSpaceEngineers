@@ -63,6 +63,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SystemsMonitor", "..\System
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PowerManagement", "..\PowerManagement\PowerManagement\PowerManagement.shproj", "{8842D42F-9F40-4CBD-92D6-0369C047E612}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoBasicThrusters", "..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.shproj", "{FF8A2CA4-4F9A-42CD-A197-670E0EBCBDCC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoUpdates", "..\WicoUpdates\WicoUpdates\WicoUpdates.shproj", "{C0CDA458-C1B4-45BA-94DE-ADC133813CB0}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\SystemsMonitor\SystemsMonitor\SystemsMonitor.projitems*{0a413eef-1543-468e-a388-03e471a4e85f}*SharedItemsImports = 13
@@ -105,8 +109,10 @@ Global
 		..\SystemsMonitor\SystemsMonitor\SystemsMonitor.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Tanks\Tanks\Tanks.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Timers\Timers\Timers.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
+		..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\WicoThrust\WicoThrust\WicoThrust.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
+		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Connectors\Connectors\Connectors.projitems*{5d612757-2295-45b9-bf2f-f056f3343151}*SharedItemsImports = 13
 		..\CargoCheck\CargoCheck\CargoCheck.projitems*{60f7d439-bb8c-43e7-b950-f552b8026de0}*SharedItemsImports = 13
 		..\WicoThrust\WicoThrust\WicoThrust.projitems*{61eba249-19f3-48b6-a25b-a4cee90168ba}*SharedItemsImports = 13
@@ -120,9 +126,11 @@ Global
 		..\ScansMode\ScansMode\ScansMode.projitems*{a1965c9f-3406-44fd-b829-56382885eea9}*SharedItemsImports = 13
 		..\NavCommon\NavCommon\NavCommon.projitems*{b28d34d0-bfa4-4db3-a4fc-7374d0148092}*SharedItemsImports = 13
 		..\Drills\Drills\Drills.projitems*{ba0127b0-06b7-4573-9d0a-5c1cbf9207e3}*SharedItemsImports = 13
+		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{c0cda458-c1b4-45ba-94de-adc133813cb0}*SharedItemsImports = 13
 		..\QuadrantScanner\QuadrantScanner\QuadrantScanner.projitems*{c15983b8-8c8a-48a8-9fb3-3048d9eeb488}*SharedItemsImports = 13
 		..\IGC\IGC\IGC.projitems*{d641aa70-4a98-4d1b-b594-f38f66938d65}*SharedItemsImports = 13
 		..\WicoControl\WicoControl\WicoControl.projitems*{e1083276-87da-415b-ab5f-0d24ed85b0e5}*SharedItemsImports = 13
+		..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.projitems*{ff8a2ca4-4f9a-42cd-a197-670e0ebcbdcc}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

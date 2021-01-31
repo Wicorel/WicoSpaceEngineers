@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WMOrbital", "WMOrbital\WMOrbital.csproj", "{E014C024-523D-4491-B4C8-00435BFA0089}"
 EndProject
@@ -55,6 +55,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Displays", "..\Displays\Dis
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "IGCIFF", "..\IGCIFF\IGCIFF\IGCIFF.shproj", "{6E3114C0-2D7D-403B-8A03-DD140FF4BA1B}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoBasicThrusters", "..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.shproj", "{FF8A2CA4-4F9A-42CD-A197-670E0EBCBDCC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoUpdates", "..\WicoUpdates\WicoUpdates\WicoUpdates.shproj", "{C0CDA458-C1B4-45BA-94DE-ADC133813CB0}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\Power\Power\Power.projitems*{11d02c04-292a-4e4d-b6a7-4175fb98a163}*SharedItemsImports = 13
@@ -79,6 +83,7 @@ Global
 		..\NAVRotors\NAVRotors\NAVRotors.projitems*{8f6cbb54-6529-43a9-8641-32af99460465}*SharedItemsImports = 13
 		..\Cameras\Cameras\Cameras.projitems*{8fb811e0-76f1-499f-b6d2-360ee94c5961}*SharedItemsImports = 13
 		..\Parachutes\Parachutes\Parachutes.projitems*{9245ae35-2c7c-4b74-9f1a-d82ce464b562}*SharedItemsImports = 13
+		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{c0cda458-c1b4-45ba-94de-adc133813cb0}*SharedItemsImports = 13
 		..\LandingGears\LandingGears\LandingGears.projitems*{c4f99bc9-88c1-474d-b515-3ed79c14225d}*SharedItemsImports = 13
 		..\IGC\IGC\IGC.projitems*{d641aa70-4a98-4d1b-b594-f38f66938d65}*SharedItemsImports = 13
 		..\Antennas\Antennas\Antennas.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
@@ -102,9 +107,12 @@ Global
 		..\Tanks\Tanks\Tanks.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Timers\Timers\Timers.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Wheels\Wheels\Wheels.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoThrust\WicoThrust\WicoThrust.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
+		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e1083276-87da-415b-ab5f-0d24ed85b0e5}*SharedItemsImports = 13
+		..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.projitems*{ff8a2ca4-4f9a-42cd-a197-670e0ebcbdcc}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

@@ -30,6 +30,19 @@ namespace IngameScript
         
         manage local fuel resources like power and hydrogen
 
+        Manage local laser antennas
+            handle connection requests over IGC.  
+            Say no when connected to 'other' within 5000 (settable) meters.  Give location of 'other' in reply
+            Turn off when not in use
+            Control power/range
+            handle 'low power' requests.
+            handle setting regular antenna range to minimum needed
+            heartbeat to verify connection
+            disconnect when get within 5000 (settable) meters and switch to antenna communication
+            handle lost connections (obscured, range issues, etc)
+
+            power off laser antennas when this ship is docked
+        
         */
         BaseConnectors baseConnectors;
         Asteroids _asteroids;
