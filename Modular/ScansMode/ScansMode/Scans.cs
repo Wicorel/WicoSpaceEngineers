@@ -33,13 +33,17 @@ namespace IngameScript
             /// The max range at which we scan. Default.  Value loaded from CustomData
             /// </summary>
             long _scanRange = 5000;
+            string sScansSection = "SCANS";
 
             string _CameraSection = "CAMERA";
             string _NameScanRange = "ScanRange";
 
-            public ScansMode(Program program, WicoControl wicoControl, WicoBlockMaster wicoBlockMaster, 
+            int ScansDoneMode = WicoControl.MODE_NAVNEXTTARGET;
+            int ScansDoneState = 0;
+
+            public ScansMode(Program program, WicoControl wicoControl, WicoBlockMaster wicoBlockMaster,
                 WicoIGC igc, Cameras cameras, Asteroids asteroids
-                ) : base(program,wicoControl)
+                ) : base(program, wicoControl)
             {
                 _program = program;
                 _wicoControl = wicoControl;
@@ -51,7 +55,7 @@ namespace IngameScript
                 _program.moduleName += " Scans";
                 _program.moduleList += "\nScans V4.2a";
 
-                _scanRange=_program._CustomDataIni.Get(_CameraSection, _NameScanRange).ToInt64(_scanRange);
+                _scanRange = _program._CustomDataIni.Get(_CameraSection, _NameScanRange).ToInt64(_scanRange);
                 _program._CustomDataIni.Set(_CameraSection, _NameScanRange, _scanRange);
 
                 _program.AddUpdateHandler(UpdateHandler);
@@ -60,89 +64,111 @@ namespace IngameScript
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
 
+
                 _wicoControl.AddModeInitHandler(ModeInitHandler);
                 _wicoControl.AddControlChangeHandler(ModeChangeHandler);
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
+                _wicoIGC.AddPublicHandler(sScansTag, BroadcastHandler);
+
             }
 
-        void LoadHandler(MyIni Ini)
-        {
+            void LoadHandler(MyIni Ini)
+            {
                 // TODO: Save current scan state and resume
 
-                // Some handled by base class
+                ScansDoneMode = Ini.Get(sScansSection, "ScansDoneMode").ToInt32(ScansDoneMode);
+                ScansDoneState = Ini.Get(sScansSection, "ScansDoneState").ToInt32(ScansDoneState);
 
             }
 
-        void SaveHandler(MyIni Ini)
-        {
+            void SaveHandler(MyIni Ini)
+            {
                 // TODO: Save current scan state and resume.
-                // Some handled by base class
-        }
-
-        /// <summary>
-        /// Modes have changed and we are being called as a handler
-        /// </summary>
-        /// <param name="fromMode"></param>
-        /// <param name="fromState"></param>
-        /// <param name="toMode"></param>
-        /// <param name="toState"></param>
-        public void ModeChangeHandler(int fromMode, int fromState, int toMode, int toState)
-        {
-            // need to check if this is us
-            if (toMode == WicoControl.MODE_DOSCANS
-                )
-            {
-                _wicoControl.WantOnce();
+                Ini.Set(sScansSection, "ScansDoneMode", ScansDoneMode);
+                Ini.Set(sScansSection, "ScansDoneState", ScansDoneState);
             }
-        }
-        /// <summary>
-        /// just after program init, we are starting with these modes
-        /// </summary>
-        void ModeInitHandler()
-        {
-            int iMode = _wicoControl.IMode;
-            int iState = _wicoControl.IState;
 
-            if (iMode == WicoControl.MODE_DOSCANS)
+            /// <summary>
+            /// Modes have changed and we are being called as a handler
+            /// </summary>
+            /// <param name="fromMode"></param>
+            /// <param name="fromState"></param>
+            /// <param name="toMode"></param>
+            /// <param name="toState"></param>
+            public void ModeChangeHandler(int fromMode, int fromState, int toMode, int toState)
             {
-                // TODO: Check state and re-init as needed
-                _wicoControl.WantFast();
+                // need to check if this is us
+                if (toMode == WicoControl.MODE_DOSCANS
+                    )
+                {
+                    _wicoControl.WantOnce();
+                }
             }
-        }
-        void LocalGridChangedHandler()
-        {
-            //               shipController = null;
-        }
+            /// <summary>
+            /// just after program init, we are starting with these modes
+            /// </summary>
+            void ModeInitHandler()
+            {
+                int iMode = _wicoControl.IMode;
+                int iState = _wicoControl.IState;
 
-        /// <summary>
-        /// Handler for processing any of the 'trigger' upatetypes
-        /// </summary>
-        /// <param name="argument"></param>
-        /// <param name="updateSource"></param>
-        public void ProcessTrigger(string sArgument, MyCommandLine myCommandLine, UpdateType updateSource)
-        {
-        }
+                if (iMode == WicoControl.MODE_DOSCANS)
+                {
+                    // TODO: Check state and re-init as needed
+                    _wicoControl.WantFast();
+                }
+            }
+            void LocalGridChangedHandler()
+            {
+                //               shipController = null;
+            }
 
-        void UpdateHandler(UpdateType updateSource)
-        {
-            int iMode = _wicoControl.IMode;
-            int iState = _wicoControl.IState;
+            /// <summary>
+            /// Handler for processing any of the 'trigger' upatetypes
+            /// </summary>
+            /// <param name="argument"></param>
+            /// <param name="updateSource"></param>
+            public void ProcessTrigger(string sArgument, MyCommandLine myCommandLine, UpdateType updateSource)
+            {
+            }
 
-            // need to check if this is us
-            if (iMode == WicoControl.MODE_DOSCANS)  { doModeScans(); }
-        }
+            void UpdateHandler(UpdateType updateSource)
+            {
+                int iMode = _wicoControl.IMode;
+                int iState = _wicoControl.IState;
 
-        void BroadcastHandler(MyIGCMessage msg)
-        {
-            // NOTE: called on ALL received messages; not just 'our' tag
-        }
+                // need to check if this is us
+                if (iMode == WicoControl.MODE_DOSCANS) { doModeScans(); }
+            }
 
+            void BroadcastHandler(MyIGCMessage msg)
+            {
+                // NOTE: called on ALL received messages; not just 'our' tag
+                if (msg.Tag == sScansTag)
+                {
+                    if (msg.Data is string)
+                    {
+                        string sCommand = msg.Data as string;
+                        sCommand = sCommand.Trim();
+                        string[] saArguments = sCommand.Split(':');
+                        if (saArguments[0]== sStartCommand)
+                        {
+                            int iArgument = 1;
+                            int doneMode = WicoControl.MODE_NAVNEXTTARGET;
+                            int doneState = 0;
 
-        int ScansDoneMode = WicoControl.MODE_NAVNEXTTARGET;
-            int ScansDoneState = 0;
+                            if (int.TryParse(saArguments[iArgument++], out doneMode))
+                                ScansDoneMode = doneMode;
 
-//            string sScansSection = "SCANS";
+                            if (int.TryParse(saArguments[iArgument++], out doneState))
+                                ScansDoneState = doneState;
+
+                            _wicoControl.SetMode(WicoControl.MODE_DOSCANS);
+                        }
+                    }
+                }
+            }
 
             // TODO: Flags for other options (TBD)
             // TODO: scan range
@@ -152,10 +178,9 @@ namespace IngameScript
             {
                 ScansDoneMode = doneMode;
                 ScansDoneState = doneState;
-//                current_state = 0;
-                _wicoControl.SetMode(WicoControl.MODE_DOSCANS,0);
+                //                current_state = 0;
+                _wicoControl.SetMode(WicoControl.MODE_DOSCANS, 0);
             }
-
 
 
             QuadrantCameraScanner scanfrontScanner;
@@ -171,8 +196,8 @@ namespace IngameScript
             {
                 int iMode = _wicoControl.IMode;
                 int iState = _wicoControl.IState;
-//                StatusLog("clear", textPanelReport);
-//                StatusLog(moduleName + ":SCAN!", textPanelReport);
+                //                StatusLog("clear", textPanelReport);
+                //                StatusLog(moduleName + ":SCAN!", textPanelReport);
                 _program.Echo("Scan:iState=" + iState.ToString());
 
                 switch (iState)
@@ -216,7 +241,7 @@ namespace IngameScript
                         }
                     case 410:
                         {
-//                            StatusLog("Long Range Scan", textPanelReport);
+                            //                            StatusLog("Long Range Scan", textPanelReport);
                             if (scanfrontScanner == null) // in case we reload/compile in this state..
                             {
                                 _wicoControl.WantFast();
@@ -327,7 +352,7 @@ namespace IngameScript
                                 s += "No Known Asteroid";
                             else s += "FOUND at least one asteroid!";
 
-//                            StatusLog(s, textPanelReport);
+                            //                            StatusLog(s, textPanelReport);
                             _program.Echo(s);
 
                             if (
@@ -340,7 +365,7 @@ namespace IngameScript
                                 )
                             {
                                 _wicoControl.SetMode(ScansDoneMode, ScansDoneState);
- 
+
                                 // reset to default for possible next run
                                 ScansDoneMode = WicoControl.MODE_NAVNEXTTARGET;
                                 ScansDoneState = 0;

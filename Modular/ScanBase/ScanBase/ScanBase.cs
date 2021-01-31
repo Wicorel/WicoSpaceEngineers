@@ -24,35 +24,17 @@ namespace IngameScript
             readonly Program _program;
             readonly WicoControl _wicoControl;
 
-            int ScansDoneMode = WicoControl.MODE_NAVNEXTTARGET;
-            int ScansDoneState = 0;
 
-            string sScansSection = "SCANS";
             public ScanBase(Program program,WicoControl wicoControl)
             {
                 _program = program;
                 _wicoControl = wicoControl;
-                _program.AddLoadHandler(LoadHandler);
-                _program.AddSaveHandler(SaveHandler);
             }
-
-            void LoadHandler(MyIni Ini)
-            {
-                ScansDoneMode = Ini.Get(sScansSection, "ScansDoneMode").ToInt32(ScansDoneMode);
-                ScansDoneState = Ini.Get(sScansSection, "ScansDoneState").ToInt32(ScansDoneState);
-            }
-
-            void SaveHandler(MyIni Ini)
-            {
-                Ini.Set(sScansSection, "ScansDoneMode", ScansDoneMode);
-                Ini.Set(sScansSection, "ScansDoneState", ScansDoneState);
-            }
-
 
             // Module code:
 
-            readonly string sScansTag = "WICOSCANS";
-            readonly string sStartCommand = "START";
+            protected readonly string sScansTag = "WICOSCANS";
+            protected readonly string sStartCommand = "START";
 
             // TODO: Flags for other options (TBD)
             // TODO: scan range
@@ -62,9 +44,7 @@ namespace IngameScript
             {
                 // scans are not in this module with base.
                 // send IGC message to local construct to do scans.
-                ScansDoneMode = doneMode;
-                ScansDoneState = doneState;
-                string sCommand = sStartCommand+":" + ScansDoneMode.ToString() + ":" + ScansDoneState.ToString();
+                string sCommand = sStartCommand+":" + doneMode.ToString() + ":" + doneState.ToString();
                 _wicoControl.SendToAllSubscribers(sScansTag, sCommand);
             }
 
