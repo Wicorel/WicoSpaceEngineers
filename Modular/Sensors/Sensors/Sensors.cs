@@ -75,13 +75,10 @@ namespace IngameScript
 
             public float SensorSettleWait = 0.175f;
 
-            public string SensorInit(IMyShipController orientationBlock, bool bSleep = false)
+            public void SensorInit(IMyShipController orientationBlock, bool bSleep = false)
             {
-                //                sensorsList.Clear();
                 sensorInfos.Clear();
                 shipController = orientationBlock;
-
-                //                List<IMyTerminalBlock> ltb = GetBlocksContains<IMySensorBlock>(sSensorUse);
 
                 OrientedBoundingBoxFaces orientedBoundingBox = new OrientedBoundingBoxFaces(shipController);
                 Vector3D vFTL;
@@ -141,7 +138,7 @@ namespace IngameScript
                     sensorInfos.Add(si);
                 }
                 if (bSleep) SensorsSleepAll();
-                return "S" + sensorsList.Count.ToString("00");
+                return;
             }
 
             public int GetCount()
@@ -239,12 +236,13 @@ namespace IngameScript
             }
             float fMinSensorSetting = 0.1f; //was 1.0f before 1.193.100
 
-            public void SensorSetToShip(IMySensorBlock sb1, float fLeft, float fRight, float fUp, float fDown, float fFront, float fBack)
+            public bool SensorSetToShip(IMySensorBlock sb1, float fLeft, float fRight, float fUp, float fDown, float fFront, float fBack)
             {
+                bool SensorChanged = false;
                 if (sb1 == null)
                 {
                     _program.ErrorLog("SetSensorToShip: Null sensor");
-                    return;
+                    return false;
                 }
 //                _program.ErrorLog("SensorSetShip("+sb1.CustomName+")");
 
@@ -256,35 +254,76 @@ namespace IngameScript
                 }
                 if (iSensor < sensorInfos.Count)
                 {
-                    //                Echo("Using cached location information");
-                    // we found cached info
-                    float fSet = 0;
+//                    _program.ErrorLog("Found cached sensor");
+//                    _program.ErrorLog("L=" + fLeft.ToString() + " R=" + fRight.ToString());
+//                    _program.ErrorLog("L=" + fUp.ToString() + " R=" + fDown.ToString());
+//                    _program.ErrorLog("L=" + fFront.ToString() + " R=" + fBack.ToString());
+
+                    // we found cached sensor location  info
+                    float fSet;
+                    float toSet;
+
                     if (fLeft < 0) fSet = -fLeft;
                     else fSet = (float)Math.Abs(fLeft + Math.Abs(sensorInfos[iSensor].DistanceLeft));
-                    sb1.LeftExtend = Math.Max(fSet, fMinSensorSetting);
+                    toSet= Math.Max(fSet, fMinSensorSetting);
+                    if (toSet != sb1.LeftExtend)
+                    {
+                        sb1.LeftExtend = toSet;
+                        SensorChanged = true;
+                    }
 
                     if (fRight < 0) fSet = -fRight;
                     else fSet = (float)Math.Abs(fRight + Math.Abs(sensorInfos[iSensor].DistanceRight));
-                    sb1.RightExtend = Math.Max(fSet, fMinSensorSetting);
+                    toSet = Math.Max(fSet, fMinSensorSetting);
+                    if (toSet != sb1.RightExtend)
+                    {
+                        sb1.RightExtend = toSet;
+                        SensorChanged = true;
+                    }
 
                     if (fUp < 0) fSet = -fUp;
                     else fSet = (float)Math.Abs(fUp + Math.Abs(sensorInfos[iSensor].DistanceUp));
-                    sb1.TopExtend = Math.Max(fSet, fMinSensorSetting);
+                    toSet = Math.Max(fSet, fMinSensorSetting);
+                    if (toSet != sb1.TopExtend)
+                    {
+                        sb1.TopExtend = toSet;
+                        SensorChanged = true;
+                    }
 
                     if (fDown < 0) fSet = -fDown;
                     else fSet = (float)Math.Abs(fDown + Math.Abs(sensorInfos[iSensor].DistanceDown));
-                    sb1.BottomExtend = Math.Max(fSet, fMinSensorSetting);
+                    toSet = Math.Max(fSet, fMinSensorSetting);
+                    if (toSet != sb1.BottomExtend)
+                    {
+                        sb1.BottomExtend = toSet;
+                        SensorChanged = true;
+                    }
 
+//                    _program.ErrorLog("distancefront="+ sensorInfos[iSensor].DistanceFront);
                     if (fFront < 0) fSet = -fFront;
                     else fSet = (float)Math.Abs(fFront + Math.Abs(sensorInfos[iSensor].DistanceFront));
-                    sb1.FrontExtend = Math.Max(fSet, fMinSensorSetting);
+                    toSet = Math.Max(fSet, fMinSensorSetting);
+                    if (toSet != sb1.FrontExtend)
+                    {
+//                        _program.ErrorLog("Setting Front to:" + toSet);
+                        sb1.FrontExtend = toSet;
+                        SensorChanged = true;
+                    }
+//                    else _program.ErrorLog("Front already set");
 
                     if (fBack < 0) fSet = -fBack;
                     else fSet = (float)Math.Abs(fBack + Math.Abs(sensorInfos[iSensor].DistanceBack));
-                    sb1.BackExtend = Math.Max(fSet, fMinSensorSetting);
+                    toSet = Math.Max(fSet, fMinSensorSetting);
+                    if (toSet != sb1.BackExtend)
+                    {
+                        sb1.BackExtend = toSet;
+                        SensorChanged = true;
+                    }
                 }
                 else
                 {
+//                    _program.ErrorLog("Generating Sensor location\n " + sb1.CustomName);
+                    // creating cache for sensor location information
                     OrientedBoundingBoxFaces orientedBoundingBox = new OrientedBoundingBoxFaces(shipController);
                     Vector3D vFTL;
                     Vector3D vFBL;
@@ -327,12 +366,12 @@ namespace IngameScript
 
                     double distanceFront = PlanarDistance(vPos, vFBL, vFBR, vFTR);
 //                    _program.ErrorLog("DistanceFront=" + distanceFront.ToString("0.00"));
-                    Vector3D vFront = vPos + sb1.WorldMatrix.Forward * distanceFront;
+//                    Vector3D vFront = vPos + sb1.WorldMatrix.Forward * distanceFront;
                     //                    debugGPSOutput("FRONT", vFront);
 
                     double distanceBack = PlanarDistance(vPos, vBBL, vBBR, vBTR);
 //                    _program.ErrorLog("DistanceBack=" + distanceBack.ToString("0.00"));
-                    Vector3D vBack = vPos + sb1.WorldMatrix.Forward * distanceBack; // distance is negative for 'back'
+//                    Vector3D vBack = vPos + sb1.WorldMatrix.Forward * distanceBack; // distance is negative for 'back'
                                                                                     //                    debugGPSOutput("BACK", vBack);
 
                     double distanceLeft = PlanarDistance(vPos, vFBL, vFTL, vBBL);
@@ -353,8 +392,13 @@ namespace IngameScript
                     sb1.FrontExtend = Math.Max(fSet, fMinSensorSetting);
                     fSet = (float)Math.Abs(fBack + Math.Abs(distanceBack));
                     sb1.BackExtend = Math.Max(fSet, fMinSensorSetting);
+
+                    SensorChanged = true; // assuming it changed..
                 }
+                
                 sb1.Enabled = true;
+
+                return SensorChanged;
             }
             // From jTurp on Discord. https://discordapp.com/channels/125011928711036928/216219467959500800/780990284644483122
             public void SetSensorArea(IMySensorBlock s, float fixedDistance)
