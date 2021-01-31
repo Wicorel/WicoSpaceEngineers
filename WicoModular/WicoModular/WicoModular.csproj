@@ -70,6 +70,7 @@
   <Import Project="..\..\Modular\Antennas\Antennas\Antennas.projitems" Label="Shared" />
   <Import Project="..\..\Modular\NAVRotors\NAVRotors\NAVRotors.projitems" Label="Shared" />
   <Import Project="..\..\Modular\ModularMain\ModularMain\ModularMain.projitems" Label="Shared" />
+  <Import Project="..\..\Modular\ElapsedTime\ElapsedTime\ElapsedTime.projitems" Label="Shared" />
   <Import Project="MDK/MDK.options.props" />
   <Import Project="MDK/MDK.paths.props" />
   <Target Name="AfterBuild">

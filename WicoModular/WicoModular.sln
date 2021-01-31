@@ -39,6 +39,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "NAVRotors", "..\Modular\NAV
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModularMain", "..\Modular\ModularMain\ModularMain\ModularMain.shproj", "{2C75AB60-AE98-4544-B151-13769A76C6C4}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ElapsedTime", "..\Modular\ElapsedTime\ElapsedTime\ElapsedTime.shproj", "{69F6E441-D885-42B3-8A7F-E224CC869DA3}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\Modular\GasGens\GasGens\GasGens.projitems*{121cbf09-ca3f-465e-beb0-e14c8e22cd35}*SharedItemsImports = 13
@@ -52,6 +54,7 @@ Global
 		..\Modular\Connectors\Connectors\Connectors.projitems*{5d612757-2295-45b9-bf2f-f056f3343151}*SharedItemsImports = 13
 		..\Modular\WicoThrust\WicoThrust\WicoThrust.projitems*{61eba249-19f3-48b6-a25b-a4cee90168ba}*SharedItemsImports = 13
 		..\Modular\BlockMaster\BlockMaster\BlockMaster.projitems*{6242f17f-6f6a-4721-8475-03a861445dec}*SharedItemsImports = 13
+		..\Modular\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{69f6e441-d885-42b3-8a7f-e224cc869da3}*SharedItemsImports = 13
 		..\Modular\NAVRotors\NAVRotors\NAVRotors.projitems*{8f6cbb54-6529-43a9-8641-32af99460465}*SharedItemsImports = 13
 		..\Modular\Cameras\Cameras\Cameras.projitems*{8fb811e0-76f1-499f-b6d2-360ee94c5961}*SharedItemsImports = 13
 		..\Modular\Parachutes\Parachutes\Parachutes.projitems*{9245ae35-2c7c-4b74-9f1a-d82ce464b562}*SharedItemsImports = 13
@@ -60,6 +63,7 @@ Global
 		..\Modular\BlockMaster\BlockMaster\BlockMaster.projitems*{c8858043-3076-4d69-adbd-090b0a88866e}*SharedItemsImports = 4
 		..\Modular\Cameras\Cameras\Cameras.projitems*{c8858043-3076-4d69-adbd-090b0a88866e}*SharedItemsImports = 4
 		..\Modular\Connectors\Connectors\Connectors.projitems*{c8858043-3076-4d69-adbd-090b0a88866e}*SharedItemsImports = 4
+		..\Modular\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{c8858043-3076-4d69-adbd-090b0a88866e}*SharedItemsImports = 4
 		..\Modular\GasGens\GasGens\GasGens.projitems*{c8858043-3076-4d69-adbd-090b0a88866e}*SharedItemsImports = 4
 		..\Modular\Gyros\Gyros\Gyros.projitems*{c8858043-3076-4d69-adbd-090b0a88866e}*SharedItemsImports = 4
 		..\Modular\IGC\IGC\IGC.projitems*{c8858043-3076-4d69-adbd-090b0a88866e}*SharedItemsImports = 4
