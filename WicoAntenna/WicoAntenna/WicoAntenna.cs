@@ -274,6 +274,7 @@ namespace IngameScript
         /// <param name="message"></param>
         void antSend(string tag, string message)
         {
+//            Echo("AntSend:" + message);
             IGC.SendBroadcastMessage(tag, message);
         }
 
