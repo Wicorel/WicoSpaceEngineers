@@ -15,6 +15,7 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Game;
 using VRageMath;
+using VRage.Game.GUI.TextPanel;
 
 namespace IngameScript
 {
@@ -25,7 +26,7 @@ namespace IngameScript
         WicoBlockMaster wicoBlockMaster;
         WicoElapsedTime wicoElapsedTime;
 
-        IFF igciff;
+//        IFF igciff;
 
         // Handlers
         private List<Action<string,MyCommandLine, UpdateType>> UpdateTriggerHandlers = new List<Action<string,MyCommandLine, UpdateType>>();
@@ -42,6 +43,9 @@ namespace IngameScript
 
         // Post init handlers
         private List<IEnumerator<bool>> PostInitHandlers = new List<IEnumerator<bool>>();
+
+        // Main handlers
+        private List<Action<UpdateType>> MainHandlers = new List<Action<UpdateType>>();
 
         // https://github.com/malware-dev/MDK-SE/wiki/Handling-configuration-and-storage
         private MyIni _SaveIni = new MyIni();
@@ -65,7 +69,7 @@ namespace IngameScript
         bool bAllowPBRename = true;
 
         double tmGridCheckElapsedMs = 0;
-        double tmGridCheckWaitMs = 3.0 * 1000;
+//        double tmGridCheckWaitMs = 3.0 * 1000;
 
         string OurName = "Wico Modular";
         /// <summary>
@@ -77,7 +81,7 @@ namespace IngameScript
         /// The list of modules including version number. Seperate with \n at start.
         /// </summary>
         string moduleList = "";
-        string sVersion = " 4.2";
+        string sVersion = " 4.2b";
 
 
         /// <summary>
@@ -142,7 +146,7 @@ namespace IngameScript
 
             wicoElapsedTime = new WicoElapsedTime(this,_wicoControl);
 
-            igciff = new IFF(this, wicoIGC, wicoElapsedTime);
+//            igciff = new IFF(this, wicoIGC, wicoElapsedTime);
 
             // initialise module specific classes
             ModuleProgramInit();
@@ -158,18 +162,18 @@ namespace IngameScript
                 if (Me.SurfaceCount > 0)
                 {
                     mesurface0 = Me.GetSurface(0);
-                    mesurface0.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
-                    mesurface0.WriteText(OurName + sVersion + moduleList);
-                    mesurface0.FontSize = 2;
-                    mesurface0.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                    mesurface0.ContentType = ContentType.TEXT_AND_IMAGE;
+                    mesurface0.WriteText(OurName + sVersion + "\n" + moduleList);
+                    mesurface0.FontSize = 1.3f;
+                    mesurface0.Alignment = TextAlignment.CENTER;
                 }
 
                 if (Me.SurfaceCount > 1)
                 {
                     mesurface1 = Me.GetSurface(1);
-                    mesurface1.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                    mesurface1.ContentType = ContentType.TEXT_AND_IMAGE;
                     mesurface1.WriteText("Version: " + sVersion);
-                    mesurface1.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                    mesurface0.Alignment = TextAlignment.CENTER;
                     mesurface1.TextPadding = 0.25f;
                     mesurface1.FontSize = 3.5f;
                 }
@@ -230,6 +234,14 @@ namespace IngameScript
             return false; // no need to run again
         }
 
+        void HandleMain(UpdateType updateSource)
+        {
+            foreach(var handler in MainHandlers)
+            {
+                handler(updateSource);
+            }
+        }
+
         void AddUpdateHandler(Action<UpdateType> handler)
         {
             if (!UpdateUpdateHandlers.Contains(handler))
@@ -276,6 +288,15 @@ namespace IngameScript
         {
             if (!PostInitHandlers.Contains(handler))
                 PostInitHandlers.Add(handler);
+        }
+        /// <summary>
+        /// Add a handler that's called on every invocation of Main() after init is completed.
+        /// </summary>
+        /// <param name="handler"></param>
+        void AddMainHandler(Action<UpdateType> handler)
+        {
+            if (!MainHandlers.Contains(handler))
+                MainHandlers.Add(handler);
         }
 
         int postInitIterator = 0;
@@ -392,7 +413,9 @@ namespace IngameScript
 
             ModulePostMain();
 
-            wicoElapsedTime.CheckTimers();
+            HandleMain(updateSource);
+
+//            wicoElapsedTime.CheckTimers();
 
             if (bCustomDataNeedsSave)
             {
@@ -497,6 +520,23 @@ namespace IngameScript
             s = v.X.ToString("0.00") + ":" + v.Y.ToString("0.00") + ":" + v.Z.ToString("0.00");
             return s;
         }
+
+        public Vector3D StringToVector3D(string s)
+        {
+            string[] coordinates = s.Split(',');
+            if (coordinates.Length < 3)
+            {
+                coordinates = s.Split(':');
+            }
+
+            double x, y, z;
+            int iCoordinate = 0;
+            bool xOk = double.TryParse(coordinates[iCoordinate++].Trim(), out x);
+            bool yOk = double.TryParse(coordinates[iCoordinate++].Trim(), out y);
+            bool zOk = double.TryParse(coordinates[iCoordinate++].Trim(), out z);
+            return new Vector3D(x, y, z);
+        }
+
         public bool stringToBool(string txt)
         {
             txt = txt.Trim().ToLower();
