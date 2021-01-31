@@ -42,6 +42,12 @@ namespace IngameScript
 
             readonly string PowerManagementSection="PowerManagement";
             const string ScreenTag = "POWERMANAGEMENT";
+            readonly double PowerManagementCheckSeconds = 1;
+
+            bool _bDebug = false;
+            bool PowerManagementEnable = true;
+
+            const string PowerManagementTimer = "PowerManagementCheck";
 
             public PowerManagement(Program program, WicoControl wicoControl, PowerProduction powerProduction, GasTanks tanks, WicoElapsedTime wicoElapsedTime, WicoIGC wicoIGC, Displays displays)
             {
@@ -54,21 +60,32 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " PowerMgmt";
-                _program.moduleList += "\nPower Management V4.2a";
+                _program.moduleList += "\nPower Management V4.2b";
 
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
 
-//                _program.AddUpdateHandler(UpdateHandler);
-//                _program.AddTriggerHandler(ProcessTrigger);
-
                 _ControlEngines = _program._CustomDataIni.Get(PowerManagementSection, "ControlEngines").ToBoolean(_ControlEngines);
                 _program._CustomDataIni.Set(PowerManagementSection, "ControlEngines", _ControlEngines);
 
-                _elapsedTime.AddTimer("PowerManagementCheck", 1, ElapsedTimeHandler);
-                _elapsedTime.StartTimer("PowerManagementCheck");
+                PowerManagementCheckSeconds = _program._CustomDataIni.Get(_program.OurName, "PowerManagementCheck").ToDouble(PowerManagementCheckSeconds);
+                _program._CustomDataIni.Set(_program.OurName, "PowerManagementCheck", PowerManagementCheckSeconds);
+
+                _elapsedTime.AddTimer(PowerManagementTimer, PowerManagementCheckSeconds, ElapsedTimeHandler);
+                _elapsedTime.StartTimer(PowerManagementTimer);
 
                 _displays.AddSurfaceHandler(ScreenTag, SurfaceHandler);
+
+                _bDebug = _program._CustomDataIni.Get(_program.OurName, "PowerManagementDebug").ToBoolean(_bDebug);
+                _program._CustomDataIni.Set(_program.OurName, "PowerManagementDebug", _bDebug);
+
+                PowerManagementEnable = _program._CustomDataIni.Get(_program.OurName, "PowerManagementEnabled").ToBoolean(PowerManagementEnable);
+                _program._CustomDataIni.Set(_program.OurName, "PowerManagementEnabled", PowerManagementEnable);
+                if (!PowerManagementEnable)
+                {
+                    _elapsedTime.StopTimer(PowerManagementTimer);
+                }
+
 
             }
             void LoadHandler(MyIni Ini)
@@ -83,6 +100,8 @@ namespace IngameScript
 
             public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
             {
+                if (!PowerManagementEnable) return;
+
                 if (tag == ScreenTag)
                 {
                     if (ActionType == Displays.DODRAW)
@@ -90,20 +109,28 @@ namespace IngameScript
                         sbNotices.Clear();
                         sbModeInfo.Clear();
 //                        sbModeInfo.AppendLine("Power Management");
-                        sbModeInfo.AppendLine("Batteries=" + _power.batteryPercentage + " (" + _power.batterypctlow + ")");
-                        sbModeInfo.AppendLine("H Tanks=" + _tanks.hydroPercent.ToString("0") + "%");
+
+                        if(_power.HasBatteries())
+                            sbModeInfo.AppendLine("Batteries=" + _power.batteryPercentage + " (" + _power.batterypctlow + ")");
+                        if(_tanks.HasHydroTanks()) 
+                            sbModeInfo.AppendLine("H Tanks=" + _tanks.hydroPercent.ToString("0") + "%");
 //                        sbModeInfo.AppendLine("Control Engines=" + _ControlEngines);
-                        sbModeInfo.AppendLine("   Engines=" + (_power.EnginesAreOff() ? "Off" : "ON"));
+                        if(_power.EnginesCount()>0) 
+                            sbModeInfo.AppendLine("   Engines=" + (_power.EnginesAreOff() ? "Off" : "ON"));
+
                         if (_power.maxTotalPower > 0)
-                            sbNotices.AppendLine("Batteries=" + (_power.batteryTotalOutput / _power.maxTotalPower * 100).ToString("0") + "%");
-                        if (_power.maxReactorPower > 0)
-                            sbNotices.AppendLine("Reactors=" + (_power.currentReactorOutput / _power.maxTotalPower * 100).ToString("0")+"%");
-                        if (_power.maxSolarPower > 0)
-                            sbNotices.AppendLine("Solar=" + (_power.currentSolarOutput / _power.maxTotalPower * 100).ToString("0") + "%");
-                        if (_power.currentTurbineOutput > 0)
-                            sbNotices.AppendLine("Turbines=" + (_power.currentTurbineOutput / _power.maxTotalPower * 100).ToString("0") + "%");
-                        if (_power.currentEngineOutput > 0)
-                            sbNotices.AppendLine("Engines=" + (_power.currentEngineOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                        {
+                            if(_power.HasBatteries())
+                                sbNotices.AppendLine("Batteries=" + (_power.batteryTotalOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                            if (_power.maxReactorPower > 0)
+                                sbNotices.AppendLine("Reactors=" + (_power.currentReactorOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                            if (_power.maxSolarPower > 0)
+                                sbNotices.AppendLine("Solar=" + (_power.currentSolarOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                            if (_power.currentTurbineOutput > 0)
+                                sbNotices.AppendLine("Turbines=" + (_power.currentTurbineOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                            if (_power.currentEngineOutput > 0)
+                                sbNotices.AppendLine("Engines=" + (_power.currentEngineOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                        }
 
                         tsurface.WriteText(sbModeInfo);
                         if (tsurface.SurfaceSize.Y < 512)
@@ -140,6 +167,7 @@ namespace IngameScript
 
             void ElapsedTimeHandler(string timer)
             {
+                if (!PowerManagementEnable) return;
                 // TODO: Control H2 generators.
                 _power.CalcPower();
                 _tanks.TanksCalculate();
@@ -149,22 +177,25 @@ namespace IngameScript
                     if (_power.batteryPercentage < _power.batterypctlow)
                     { // batteries are low; try to recharge them
                         _power.EngineControl(true); // turn engines on
-                        _program.Echo("Batteries LOW!");
+                        _program.Echo("PWR:Batteries LOW!");
                     }
                     else if (_power.batteryTotalOutput > (_power.maxBatteryPower * .75)
                         && _tanks.hydroPercent>=_tanks.tankspctlow
+                        && _power.batteryPercentage<_power.batterypcthigh
                         )
                     { // batteires are providing > 75% of their power and we are not critically low on hydro
                         _power.EngineControl(true);
-                        _program.Echo("Batteries need help on output");
+                        _program.Echo("PWR:Batteries need help on output");
                     }
-                    else if (_power.batteryPercentage < _power.batterypcthigh
+                    else if (
+                        _power.HasBatteries()
+                        && _power.batteryPercentage < _power.batterypcthigh
                         && _tanks.hydroPercent >= _tanks.tankspcthigh
                         )
                     {
                         // if we have tons of hydro and batteries are not maxed
                         _power.EngineControl(true);
-                        _program.Echo("Extra hydro fuel; using for charging batteries to max");
+                        _program.Echo("PWR:Extra hydro fuel; using for charging batteries to max");
                     }
                     else
                     {
@@ -174,7 +205,7 @@ namespace IngameScript
                         {
                             if(_power.batteryPercentage < (_power.batterypcthigh*1.1))
                             {
-                                _program.Echo("Keep running for a bit with extra hydro");
+                                _program.Echo("PWR:Keep running for a bit with extra hydro");
                                 return;
                             }
                         }
