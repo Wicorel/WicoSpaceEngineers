@@ -59,8 +59,8 @@ namespace IngameScript
                 )
             {
                 _program = program;
-//                _wicoControl = wc;
-//                _wicoBlockMaster = wbm;
+                //                _wicoControl = wc;
+                //                _wicoBlockMaster = wbm;
                 _thrusters = thrusters;
                 _connectors = connectors;
                 _antennas = ant;
@@ -356,7 +356,7 @@ namespace IngameScript
              * THRUSTERS
              * 
              */
-            public double calculateMaxThrust(List<IMyTerminalBlock> thrusters, int iTypes =WicoThrusters.thrustAll)
+            public double calculateMaxThrust(List<IMyTerminalBlock> thrusters, int iTypes = WicoThrusters.thrustAll)
             {
                 return _thrusters.calculateMaxThrust(thrusters, iTypes);
             }
@@ -391,10 +391,34 @@ namespace IngameScript
             {
                 _thrusters.MoveForwardSlowReset();
             }
+            /// <summary>
+            /// Move using specified thrusters at slow speed.
+            /// </summary>
+            /// <param name="fTarget">Target speed in mps</param>
+            /// <param name="fAbort">Abort speed in mps.  Emergency stop if above this speed</param>
+            /// <param name="mfsForwardThrust">thrusters for 'forward'</param>
+            /// <param name="mfsBackwardThrust">reverse thrusters to slow down. 'Back'</param>
+            /// <param name="effectiveMass"></param>
+            /// <param name="shipSpeed"></param>
             public void MoveForwardSlow(float fTarget, float fAbort, List<IMyTerminalBlock> mfsForwardThrust,
                 List<IMyTerminalBlock> mfsBackwardThrust, double effectiveMass, double shipSpeed)
             {
                 _thrusters.MoveForwardSlow(fTarget, fAbort, mfsForwardThrust, mfsBackwardThrust, effectiveMass, shipSpeed);
+            }
+
+            public void GetBestThrusters(Vector3D v1,
+                List<IMyTerminalBlock> thrustForwardList, List<IMyTerminalBlock> thrustBackwardList,
+                List<IMyTerminalBlock> thrustDownList, List<IMyTerminalBlock> thrustUpList,
+                List<IMyTerminalBlock> thrustLeftList, List<IMyTerminalBlock> thrustRightList,
+                out List<IMyTerminalBlock> thrustTowards, out List<IMyTerminalBlock> thrustAway
+                )
+            {
+                _thrusters.GetBestThrusters(v1,
+                    thrustForwardList, thrustBackwardList,
+                    thrustDownList, thrustUpList,
+                    thrustLeftList, thrustRightList,
+                    out thrustTowards, out thrustAway
+                    );
             }
         }
     }
