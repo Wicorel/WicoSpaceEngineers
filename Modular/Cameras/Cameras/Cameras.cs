@@ -48,7 +48,7 @@ namespace IngameScript
 
             Program _program;
 
-            bool _debug = false;
+//            bool _debug = false;
 
             public Cameras(Program program)
             {
@@ -56,6 +56,9 @@ namespace IngameScript
 
                 _program.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
                 _program.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+
+//                _debug = _program._CustomDataIni.Get(_program.OurName, "CameraDebug").ToBoolean(_debug);
+//                _program._CustomDataIni.Set(_program.OurName, "CameraDebug", _debug);
             }
 
             /// <summary>
@@ -235,13 +238,13 @@ namespace IngameScript
             bool doCameraScan(List<IMyTerminalBlock> cameraList, Vector3D targetPos)
             {
                 CamerasInit();
-                //           Echo("target Scan");
+//                if(_debug) _program.Echo("target Scan");
                 double foundmax = 0;
                 lastCamera = null;
                 for (int i = 0; i < cameraList.Count; i++)
                 {
                     double thismax = ((IMyCameraBlock)cameraList[i]).AvailableScanRange;
-                    //		Echo(cameraList[i].CustomName + ":maxRange:" + thismax.ToString("N0"));
+//                    if (_debug) _program.Echo(cameraList[i].CustomName + ":maxRange:" + thismax.ToString("N0"));
                     // find camera with highest scan range.
                     if (thismax > foundmax)
                     {
@@ -261,7 +264,7 @@ namespace IngameScript
                     if (localGrids.Contains(lastDetectedInfo.EntityId))
                     {
                         lastDetectedInfo = new MyDetectedEntityInfo();
-                        if(_debug) _program.ErrorLog("Detected Self");
+//                        if(_debug) _program.ErrorLog("Detected Self");
                         return true;
                     }
                     lastCamera = camera;
