@@ -1479,6 +1479,8 @@ namespace IngameScript
             //            https://spaceengineerswiki.com/Parachute_Hatch#Terminal_Velocity
 
             //bool bOverTarget=false; 
+            List<IMyTerminalBlock> thrustToward = new List<IMyTerminalBlock>();
+            List<IMyTerminalBlock> thrustAway = new List<IMyTerminalBlock>();
             void doModeDescent(UpdateType updateSource)
             {
                 // todo: handle parachutes.  
@@ -1517,18 +1519,12 @@ namespace IngameScript
 
                 double alt = 0;
                 double distanceToTravel = 0;
-
+                Vector3D planetposition;
 
                 if (dGravity > 0)
                 {
+                    shipController.TryGetPlanetPosition(out planetposition);
                     shipController.TryGetPlanetElevation(MyPlanetElevation.Surface, out alt);
-
-                    double elevation = 0;
-
-                    shipController.TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
-                    //                    StatusLog("Elevation: " + elevation.ToString("N0") + " Meters", textPanelReport);
-                    sbNotices.AppendLine("Elevation: " + elevation.ToString("N0") + " Meters");
-                    _program.Echo("Elevation: " + elevation.ToString("N0") + " Meters");
                     distanceToTravel = alt;
                 }
                 if(bValidTargetLanding)
@@ -1649,11 +1645,8 @@ namespace IngameScript
 
                     if (retroStartDistance < 0) _program.Echo("WARNING: CRASH!!!");
 
-                    //                    startReverseAlt = Math.Max(retroStartAlt * 5, minAltRotate);
-                    //                    _program.Echo("calc retroStartAlt=" + retroStartAlt.ToString());
-
-                    retroStartDistance += (int)((_wicoBlockMaster.HeightInMeters() + 1)); // add calc point of height for altitude.. NOTE 'height' is not necessarily correct..
-                                                                                                //		retroStartAlt += (int)fMaxMps; // one second of speed (1s timer delay)
+                    retroStartDistance += (int)((_wicoBlockMaster.LargestSideInMeters() + 1)); // add calc point of height for altitude.. 
+                    retroStartDistance += 5;
 
                     if (iMode == WicoControl.MODE_DESCENT)
                         retroStartDistance += descentTargetAlt;
@@ -1853,7 +1846,6 @@ namespace IngameScript
                 if (iState == 61)
                 {  // we are rotating ship to gravity..
 
-                   // TODO: Use target location instead of gravity
                    //TODO: if way out of alignment; use side thrusters
                    // TODO: use beamrider ?when closer..
 
@@ -1861,6 +1853,7 @@ namespace IngameScript
                     if(bValidTargetLanding) vAlign= TargetLanding - shipController.GetPosition();
                     if (bValidTargetLanding && bValidOrbitalTransfer)
                     {
+                        // this is essentially beam rider..
                         Vector3D vBoreEnd = (TargetLanding - OrbitalTransferPoint);
                         Vector3D vPosition = shipController.CenterOfMass;
 
@@ -1890,6 +1883,8 @@ namespace IngameScript
                         _program.Echo("attitude change");
                         _wicoControl.WantFast();
                     }
+                    _wicoThrusters.powerDownThrusters();
+                    _wicoThrusters.powerDownThrusters(thrustOrbitalUpList, WicoThrusters.thrustAll, true);
 
                     if (velocityShip > MaxDescentMps)
                     {
@@ -1902,38 +1897,95 @@ namespace IngameScript
                     // TODO: Align to target if known.
                     // TODO: if out of alignment and target, then use side thrusters to correct angle.
                     Vector3D vAlign = vNG;
-                    if (bValidTargetLanding) vAlign = TargetLanding - shipController.CenterOfMass;
-                    /*
-                    if (bValidTargetLanding && bValidOrbitalTransfer)
-                    {
-                        _program.Echo("Target Align");
-                        Vector3D vPosition = shipController.CenterOfMass;
-                        Vector3D vBoreEnd = (TargetLanding - vPosition);
-                        //                       Vector3D vBoreEnd = (TargetLanding - OrbitalTransferPoint);
-//                        Vector3D vForward = vPosition + vBestThrustOrientation * vBoreEnd.Length();
-                        Vector3D vForward = vPosition + vNG * vBoreEnd.Length();
+                    if (bValidTargetLanding) vAlign = TargetLanding - shipController.GetPosition();
+                    Vector3D vTargetLine = OrbitalTransferPoint - TargetLanding;
+                    Vector3D vVec = TargetLanding - shipController.GetPosition();
+                    double distance = vVec.Length();
 
-//                        Vector3D vAimEnd = (vForward - vPosition);
-                        Vector3D vMovement = shipController.GetShipVelocities().LinearVelocity;
 
-                        // if we are going pretty slow, use gravity instead.
-                        if (velocityShip < MaxDescentMps * .5)
-                            vMovement = vNG;
-
-//                        Vector3D vRejectEnd = _gyros.VectorRejection(vBoreEnd, vAimEnd);
-                        Vector3D vRejectEnd = _gyros.VectorRejection(vBoreEnd, vMovement);
-                        _program.Echo("Reject=" + vRejectEnd.ToString());
-
-                        Vector3D vCorrectAimPoint = TargetLanding - vRejectEnd * 2;
-                        _wicoCameras.CameraBackScan(vCorrectAimPoint);
-                        Vector3D vCorrectedAim = vCorrectAimPoint - vPosition;
-                        vAlign = vCorrectedAim;
-                    }
-                    */
-                    bool bAligned=_gyros.AlignGyros(vBestThrustOrientation, vAlign); 
+                    bool bAligned =_gyros.AlignGyros(vBestThrustOrientation, vAlign); 
                     if (bAligned)
                     {
                         _program.Echo("Aligned");
+                        /*
+                        if (distance < 1000)
+                        {
+                            Vector3D vNTLine = vTargetLine;
+                            double dLineDist = vNTLine.Normalize();
+                            Vector3D vTargetCalc = TargetLanding + vNTLine * distance;
+                            Vector3D vOffset = vTargetCalc - shipController.GetPosition();
+                            double offsetL = vOffset.Length();
+                            _program.Echo("offsetL=" + offsetL.ToString("0.00"));
+                            if (offsetL > _wicoBlockMaster.gridsize)
+                            { // we are farther then desired point that we want to be.
+                                _program.Echo("Farther than desired");
+
+                                //_systemsMonitor.powerDownThrusters();
+                                _wicoThrusters.powerDownThrusters();
+                                _wicoThrusters.powerDownThrusters(thrustOrbitalUpList, WicoThrusters.thrustAll, true);
+
+                                if (thrustToward.Count == 0) // first time we should reset movement
+                                    _wicoThrusters.MoveForwardSlowReset();
+                                else
+                                {
+                                    _wicoThrusters.powerDownThrusters(thrustToward);
+                                    _wicoThrusters.powerDownThrusters(thrustAway);
+                                }
+
+                                if (thrustForwardList.Count < 1)
+                                {
+                                    _wicoThrusters.ThrustersCalculateOrientation(_wicoBlockMaster.GetMainController(),
+                                        ref thrustForwardList, ref thrustBackwardList, ref thrustDownList, ref thrustUpList,
+                                        ref thrustLeftList, ref thrustRightList);
+                                }
+                                _wicoThrusters.GetBestThrusters(vOffset,
+                                    thrustForwardList, thrustBackwardList, thrustDownList, thrustUpList, thrustLeftList, thrustRightList,
+                                    out thrustToward, out thrustAway);
+                                _program.Echo("FW #=" + thrustToward.Count);
+                                if (thrustToward.Count > 0)
+                                {
+                                    _program.Echo("Toward#1=" + thrustToward[0].CustomName);
+                                }
+                                if (offsetL > 100)
+                                {
+                                    _wicoThrusters.powerDownThrusters(thrustAway);
+                                    _wicoThrusters.powerUpThrusters(thrustToward, 100);
+                                }
+                                else if (offsetL > 50)
+                                {
+                                    _wicoThrusters.powerDownThrusters(thrustAway);
+                                    _wicoThrusters.powerUpThrusters(thrustToward, 50);
+                                }
+                                else if (offsetL > 20)
+                                {
+                                    _wicoThrusters.powerDownThrusters(thrustAway);
+                                    _wicoThrusters.powerUpThrusters(thrustToward, 20);
+                                }
+                                else if (offsetL > 5)
+                                {
+                                    _wicoControl.WantFast();
+                                    _wicoThrusters.powerDownThrusters(thrustAway);
+                                    _wicoThrusters.powerUpThrusters(thrustToward, 10);
+                                }
+                                else if (offsetL > _wicoBlockMaster.gridsize)
+                                {
+                                    _wicoControl.WantFast();
+                                    _wicoThrusters.powerDownThrusters(thrustAway);
+                                    _wicoThrusters.powerUpThrusters(thrustToward, 2);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (thrustToward.Count > 0)
+                            {
+                                _wicoThrusters.powerDownThrusters(thrustToward);
+                                _wicoThrusters.powerDownThrusters(thrustAway);
+                                thrustToward.Clear();
+                                thrustAway.Clear();
+                            }
+                        }
+                        */
                         /*
                         if (imsc != null && imsc.DampenersOverride)
                             imsc.DampenersOverride = false;
@@ -1965,8 +2017,6 @@ namespace IngameScript
                                                     }
                                                 }
                                                 */
-                        _wicoThrusters.powerDownThrusters();
-                        _wicoThrusters.powerDownThrusters(thrustOrbitalUpList, WicoThrusters.thrustAll, true);
                     }
                     else
                     {
@@ -1979,7 +2029,7 @@ namespace IngameScript
                         _wicoThrusters.powerDownThrusters(thrustOrbitalUpList, WicoThrusters.thrustAll, true);
                     }
 
-                    if (distanceToTravel < (retroStartDistance + MaxDescentMps * 2)) _wicoControl.WantFast();// bWantFast = true;
+                    if (distanceToTravel < (retroStartDistance + MaxDescentMps * 2)) _wicoControl.WantFast();
 
                     if ((distanceToTravel) < retroStartDistance)
                     {
