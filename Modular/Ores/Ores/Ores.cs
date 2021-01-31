@@ -56,16 +56,17 @@ namespace IngameScript
             {
             }
 
+            List<MyInventoryItem> itemsL = new List<MyInventoryItem>();
             public void OreDoCargoCheck(bool bInit = false)
             {
                 _oreInfoLocs.OreClearAmounts();
 
-                var itemsL = new List<MyInventoryItem>();
                 for (int i = 0; i < lContainers.Count; i++)
                 {
                     var inv = lContainers[i].GetInventory(0);
                     if (inv == null) continue;
                     //                var itemsL = inv.GetItems();
+                    itemsL.Clear();
                     inv.GetItems(itemsL);
                     // go through all itemsL
                     for (int i2 = 0; i2 < itemsL.Count; i2++)
@@ -85,6 +86,7 @@ namespace IngameScript
                     var inv = localEjectors[i].GetInventory(0);
                     if (inv == null) continue;
                     //                var itemsL = inv.GetItems();
+                    itemsL.Clear();
                     inv.GetItems(itemsL);
                     // go through all itemsL
                     for (int i2 = 0; i2 < itemsL.Count; i2++)
