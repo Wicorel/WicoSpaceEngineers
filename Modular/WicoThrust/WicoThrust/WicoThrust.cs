@@ -21,69 +21,17 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-        #region THRUSTERS
 
-        public class WicoThrusters
+        public class WicoThrusters: WicoBasicThrusters
         {
-            List<IMyTerminalBlock> thrustAllList = new List<IMyTerminalBlock>();
 
-            Program _program;
-            WicoBlockMaster _wicoBlockMaster;
-
-            string sThrusterSection = "THRUSTERS";
-
-            string sCutterThruster = "cutter";
-
-            public int ThrusterCount()
-            {
-                return thrustAllList.Count;
-            }
-
-            public WicoThrusters(Program program, WicoBlockMaster wicoBlockMaster)
+            public WicoThrusters(Program program, WicoBlockMaster wicoBlockMaster): base(program,wicoBlockMaster)
             {
                 _program = program;
                 _wicoBlockMaster = wicoBlockMaster;
 
                 ThrustersInit();
             }
-            public void ThrustersInit()
-            {
-                // TODO: change to handler. pay attention to execution sequence that results. (we may need this defined before getting blocks)
-                sCutterThruster=_program._CustomDataIni.Get(sThrusterSection, "CutterThruster").ToString(sCutterThruster);
-                _program._CustomDataIni.Set(sThrusterSection, "CutterThruster", sCutterThruster);
-
-                // Minimal init; just add handlers
-                thrustAllList.Clear();
-                _wicoBlockMaster.AddLocalBlockHandler(ThrusterParseHandler);
-                _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
-                _program.AddResetMotionHandler(ResetMotionHandler);
-            }
-
-            void ResetMotionHandler(bool bNoDrills = false)
-            {
-                powerDownThrusters();
-            }
-
-        public void ThrusterParseHandler(IMyTerminalBlock tb)
-            {
-                if (tb is IMyThrust)
-                {
-                    if (tb.CustomName.ToLower().Contains(sCutterThruster))
-                        return; // don't add it.
-                    thrustAllList.Add(tb);
-                }
-            }
-
-            void LocalGridChangedHandler()
-            {
-                thrustAllList.Clear();
-            }
-
-            public const int thrustatmo = 1;
-            public const int thrusthydro = 2;
-            public const int thrustion = 4;
-            public const int thrusthover = 8;
-            public const int thrustAll = 0xff;
 
             readonly Matrix thrustIdentityMatrix = new Matrix(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
@@ -137,26 +85,6 @@ namespace IngameScript
                 }
             }
 
-            public int ThrusterType(IMyTerminalBlock theBlock)
-            {
-                if (theBlock is IMyThrust)
-                {
-                    // HoverEngines  http://steamcommunity.com/sharedfiles/filedetails/?id=1225107070
-                    if (theBlock.BlockDefinition.SubtypeId.Contains("AtmosphericHover"))
-                        return thrusthover;
-                    else if (theBlock.BlockDefinition.SubtypeId.Contains("Atmo"))
-                        return thrustatmo;
-                    else if (theBlock.BlockDefinition.SubtypeId.Contains("Hydro"))
-                        return thrusthydro;
-                    // Hover Engines. SmallBlock_HoverEngine http://steamcommunity.com/sharedfiles/filedetails/?id=560731791 (last updated Dec 29, 2015)
-                    else if (theBlock.BlockDefinition.SubtypeId.Contains("SmallBlock_HoverEngine"))
-                        return thrusthover;
-                    // assume ion since its name is generic
-                    else return thrustion;
-                }
-                // else
-                return 0;
-            }
             public double ThrustersCalculateMax(List<IMyTerminalBlock> thrusters, int iTypes = thrustAll)
             {
                 double thrust = 0;
@@ -193,30 +121,6 @@ namespace IngameScript
                 return null;
             }
 
-            public int powerDownThrusters(int iTypes = thrustAll, bool bForceOff = false)
-            {
-                return powerDownThrusters(thrustAllList, iTypes, bForceOff);
-            }
-            public int powerDownThrusters(List<IMyTerminalBlock> thrusters, int iTypes = thrustAll, bool bForceOff = false)
-            {
-                int iCount = 0;
-                for (int thrusterIndex = 0; thrusterIndex < thrusters.Count; thrusterIndex++)
-                {
-                    int iThrusterType = ThrusterType(thrusters[thrusterIndex]);
-                    if ((iThrusterType & iTypes) > 0)
-                    {
-                        iCount++;
-                        IMyThrust thruster = thrusters[thrusterIndex] as IMyThrust;
-                        thruster.ThrustOverride = 0;
-                        //                    thruster.SetValueFloat("Override", 0);
-                        if (thruster.IsWorking && bForceOff && thruster.Enabled == true)  // Yes, the check is worth it
-                            thruster.Enabled = false;// ApplyAction("OnOff_Off");
-                        else if (!thruster.IsWorking && !bForceOff && thruster.Enabled == false)
-                            thruster.Enabled = true;// ApplyAction("OnOff_On");
-                    }
-                }
-                return iCount;
-            }
             /// <summary>
             /// Turns on thrusters and sets the override.
             /// </summary>
@@ -267,6 +171,7 @@ namespace IngameScript
 
                 return thrust;
             }
+            double cos45 = MathHelper.Sqrt2 * 0.5;
 
             public void GetBestThrusters(Vector3D v1,
                 List<IMyTerminalBlock> thrustForwardList, List<IMyTerminalBlock> thrustBackwardList,
@@ -280,7 +185,6 @@ namespace IngameScript
                 Vector3D vThrustAim;
                 Vector3D vNGN = v1;
                 vNGN.Normalize();
-                double cos45 = MathHelper.Sqrt2 * 0.5;
 //                _program.sMasterReporting += "GBT: Checking cos45=" + cos45.ToString("0.00")+"\n";
 
                 // default selection to assign out parameters in main-line code
@@ -564,14 +468,13 @@ namespace IngameScript
             }
 
             int _iMFSWiggle = 0;
-            //        double mmfLastVelocity = -1;
             /// <summary>
-            /// 
+            /// Move using specified thrusters at slow speed.
             /// </summary>
-            /// <param name="fTarget"></param>
-            /// <param name="fAbort"></param>
-            /// <param name="mfsForwardThrust"></param>
-            /// <param name="mfsBackwardThrust"></param>
+            /// <param name="fTarget">Target speed in mps</param>
+            /// <param name="fAbort">Abort speed in mps.  Emergency stop if above this speed</param>
+            /// <param name="mfsForwardThrust">thrusters for 'forward'</param>
+            /// <param name="mfsBackwardThrust">reverse thrusters to slow down. 'Back'</param>
             /// <param name="effectiveMass"></param>
             /// <param name="shipSpeed"></param>
             public void MoveForwardSlow(float fTarget, float fAbort, List<IMyTerminalBlock> mfsForwardThrust,
@@ -579,27 +482,22 @@ namespace IngameScript
             {
                 if (_iMFSWiggle < 0) _iMFSWiggle = 0;
 
-                //            Echo("mMF " + iMMFWiggle.ToString());
                 double maxThrust = calculateMaxThrust(mfsForwardThrust);
                 //            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
- //               MyShipMass myMass;
-                //                myMass = ((IMyShipController)shipOrientationBlock).CalculateShipMass();
-//                double effectiveMass = wicoBlockMaster.GetPhysicalMass();// myMass.PhysicalMass;
                 float thrustPercent = 100f;
                 if (effectiveMass > 0)
                 {
                     double maxDeltaV = (maxThrust) / effectiveMass;
                     //           Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
                     if (maxDeltaV > 0) thrustPercent = (float)(fTarget / maxDeltaV);
-                    //                Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
+                    _program.Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
                 }
                 //            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
                 if (shipSpeed > fAbort)
                 {
-                    //               Echo("ABORT");
+                    _program.Echo("ABROT!");
                     powerDownThrusters(thrustAllList);
-                    //               iMMFWiggle/=2;
                 }
                 else if (shipSpeed < (fTarget * 0.90))
                 {
@@ -610,7 +508,6 @@ namespace IngameScript
                     //                Echo("Push ");
                     //                Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
                     powerUpThrusters(mfsForwardThrust, thrustPercent + _iMFSWiggle / 5);
-                    //                powerUpThrusters(thrustForwardList, 15f + iMMFWiggle);
                 }
                 else if (shipSpeed < (fTarget * 1.1))
                 {
@@ -635,10 +532,7 @@ namespace IngameScript
             {
                 _iMFSWiggle = 0;
             }
-
-
         }
-        #endregion
 
     }
 }
