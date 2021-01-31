@@ -68,29 +68,23 @@ namespace IngameScript
             public const string WICOB_NAVHEARTBEAT = "WICOB_NAVHEARTBEAT"; // is there a nav available?
             public const string WICOB_NAVPRESENT = "WICOB_NAVPRESENT"; // a nav is present
 
+            static StringBuilder sbNav = new StringBuilder(100);
             public static string NAVSerializeCommand(Vector3D vTarget, int modeArrival = WicoControl.MODE_NAVNEXTTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
-                string command = "";
-                command += Vector3DToString(vTarget);
-                command += "\n";
-                command += modeArrival.ToString();
-                command += "\n";
-                command += stateArrival.ToString();
-                command += "\n";
-                command += DistanceMin.ToString();
-                command += "\n";
-                command += TargetName;
-                command += "\n";
-                command += maxSpeed.ToString();
-                command += "\n";
-                command += bGo.ToString();
-                command += "\n";
-
-                return command;
+                sbNav.Clear();
+                sbNav.AppendLine(Vector3DToString(vTarget));
+                sbNav.AppendLine(modeArrival.ToString());
+                sbNav.AppendLine(stateArrival.ToString());
+                sbNav.AppendLine(DistanceMin.ToString());
+                sbNav.AppendLine(TargetName);
+                sbNav.AppendLine(maxSpeed.ToString());
+                sbNav.AppendLine(bGo.ToString());
+                return sbNav.ToString();
             }
 
             public static void NAVDeserializeCommand(string command, out Vector3D vTarget, out int modeArrival, out int stateArrival, out double DistanceMin, out string TargetName, out double maxSpeed, out bool bGo)
             {
+                sbNav.Clear();
                 command = command.Trim();
                 string[] strlines = command.Split('\n');
                 string[] coordinates = strlines[0].Split(',');
@@ -143,11 +137,9 @@ namespace IngameScript
             public virtual void NavGoTarget(Vector3D vTarget, int modeArrival = WicoControl.MODE_ARRIVEDTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
                 // TODO: support no local NAV and use remote control instead.
-
                 //                _program.ErrorLog("NavCommon NavGoTarget");
                 string data = NavCommon.NAVSerializeCommand(vTarget, modeArrival, stateArrival, DistanceMin, TargetName, maxSpeed, bGo);
                 _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVIMMEDIATETARGET, data, TransmissionDistance.CurrentConstruct);
-//                _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVSTART, "", TransmissionDistance.CurrentConstruct);
             }
             public virtual void NavQueueMode(int theMode)
             {
