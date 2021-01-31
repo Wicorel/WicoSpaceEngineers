@@ -70,6 +70,7 @@ namespace IngameScript
 
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
+
                 batterypcthigh = _program._CustomDataIni.Get(sPowerSection, "batterypcthigh").ToInt32(batterypcthigh);
                 _program._CustomDataIni.Set(sPowerSection, "batterypcthigh", batterypcthigh);
 
@@ -345,6 +346,8 @@ namespace IngameScript
                     IMyBatteryBlock b;
 
                     b = batteryList[ib] as IMyBatteryBlock;
+
+                    if (maxBatteryPower < 0) maxBatteryPower = 0;
 
                     maxBatteryPower += b.MaxOutput;
                     f1 = b.MaxStoredPower;
