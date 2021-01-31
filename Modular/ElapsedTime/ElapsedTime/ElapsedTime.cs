@@ -22,16 +22,18 @@ namespace IngameScript
         public class WicoElapsedTime
         {
             readonly Program _program;
-            readonly WicoControl _wicoControl;
+            readonly WicoUpdates _wicoUpdates;
 
             bool _bDebug = false;
 
             string wicoETString = "WicoET";
 
-            public WicoElapsedTime(Program program, WicoControl wicoControl)
+            public WicoElapsedTime(Program program, WicoUpdates wicoUpdates)
             {
                 _program = program;
-                _wicoControl = wicoControl;
+                _wicoUpdates = wicoUpdates;
+
+                _program.AddMainHandler(CheckTimers);
 
                 _bDebug = _program._CustomDataIni.Get(wicoETString, "Debug").ToBoolean(_bDebug);
                 _program._CustomDataIni.Set(wicoETString, "Debug", _bDebug);
@@ -45,18 +47,20 @@ namespace IngameScript
                 public double dWaitSeconds;
                 public double dElapsedSeconds;
                 public bool bActive;
+                public bool AutoRestart;
                 public Action<string> handler;
             }
 
-            public bool AddTimer(string sName, double dDefaultWaitSeconds=1, Action<string> handler = null, bool bAllowPlayerControl=true)
+            public bool AddTimer(string sName, double dDefaultWaitSeconds = 1, Action<string> handler = null, bool AutoRestart = true)
             {
                 ElapsedTimers et = new ElapsedTimers
                 {
-                    sName = sName,
-                    dWaitSeconds = dDefaultWaitSeconds,
-                    dElapsedSeconds = -1,
-                    bActive = false,
-                    handler = handler
+                    sName = sName
+                    , dWaitSeconds = dDefaultWaitSeconds
+                    , dElapsedSeconds = -1
+                    , bActive = false
+                    , AutoRestart = AutoRestart
+                    , handler = handler
                 };
 
                 foreach (var et1 in TimerList)
@@ -65,6 +69,7 @@ namespace IngameScript
                     {
                         et1.dWaitSeconds = dDefaultWaitSeconds;
                         et1.dElapsedSeconds = -1;
+                        et1.AutoRestart = AutoRestart;
                         et1.handler = handler;
                         return false;
                     }
@@ -132,6 +137,7 @@ namespace IngameScript
                     if (et.sName == sName)
                     {
                         et.dElapsedSeconds = 0;
+                        et.bActive = true;
                         return true;
                     }
                 }
@@ -201,7 +207,7 @@ namespace IngameScript
             /// <summary>
             /// Call from main loop for EVERY update source type.
             /// </summary>
-            public void CheckTimers()
+            public void CheckTimers(UpdateType updateSource)
             {
                 if (_bDebug) _program.Echo("CheckTimers() " + TimerList.Count.ToString() + " Timers");
                 foreach (var et in TimerList)
@@ -213,18 +219,21 @@ namespace IngameScript
                         {
                             et.dElapsedSeconds += _program.Runtime.TimeSinceLastRun.TotalMilliseconds/1000;
                         }
-                        if (et.dElapsedSeconds<0 || et.dElapsedSeconds>et.dWaitSeconds)
+                        if (et.dElapsedSeconds > et.dWaitSeconds)
                         {
                             if (_bDebug) _program.Echo("Trigger:" + et.sName);
                             if (et.handler != null)
                             {
-                                et.dElapsedSeconds = 0;
                                 et.handler(et.sName);
                             }
                         }
-                        if (et.dElapsedSeconds < 0) et.dElapsedSeconds = 0;
+                        if(et.dElapsedSeconds<0)
+                        { 
+                            if (et.AutoRestart)
+                                et.dElapsedSeconds = 0;
+                        }
                         // TODO: calculate remaining time and request faster trigger..  but only if timer is set to 'accuracy' mode
-                        _wicoControl.WantSlow();
+                        _wicoUpdates.WantSlow();
                     }
                 }
             }
