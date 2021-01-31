@@ -21,6 +21,15 @@ namespace IngameScript
     {
         public class Miner
         {
+            /* BUGS
+             * sensors seem to be swapped or front not being set correctly
+             * 
+             * TODO
+             * size is getting large.. 97k
+             *    need to seperate functionality 
+             *       or otherwise reduce (Echo and other text check)
+             * Add go mine command/functionality
+             */
             private Program _program;
             private WicoControl _wicoControl;
             private WicoBlockMaster _wicoBlockMaster;
@@ -93,10 +102,7 @@ namespace IngameScript
                 _systemsMonitor = systemsMonitor;
 
                 _program.moduleName += " Space Miner";
-                _program.moduleList += "\nSpaceMiner V4.2b";
-
-                //                thisProgram._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
-                //                thisProgram._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
+                _program.moduleList += "\nSpaceMiner V4.2j";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -117,12 +123,11 @@ namespace IngameScript
                 MiningCargopctlowwater = _program._CustomDataIni.Get(_program.OurName, "MiningCargopctlowwater").ToInt32(MiningCargopctlowwater);
                 _program._CustomDataIni.Set(_program.OurName, "MiningCargopctlowwater", MiningCargopctlowwater);
 
-                //                _wicoIGC.AddUnicastHandler(UnicastHandler);
-
-                //                _wicoIGC.AddPublicHandler(CONNECTORAPPROACHTAG, BroadcastHandler);
-
                 _elapsedTime.AddTimer(miningChecksElapsed);
                 _elapsedTime.AddTimer(miningElapsed);
+                _elapsedTime.AddTimer(EjectorWait, EjectorWaitSeconds, null, false);
+                _elapsedTime.AddTimer(MaxEjectorWait, MaxEjectorWaitSeconds, null, false);
+
                 _displays.AddSurfaceHandler("MODE", SurfaceHandler);
             }
 
@@ -215,15 +220,21 @@ namespace IngameScript
             /// <param name="toState"></param>
             public void ModeChangeHandler(int fromMode, int fromState, int toMode, int toState)
             {
-                if (fromMode == WicoControl.MODE_MINE)
+                if (
+                    fromMode == WicoControl.MODE_MINE 
+                    || fromMode == WicoControl.MODE_BORESINGLE
+                    )
                 {
                     _systemsMonitor.ResetMotion();
                     _drills.turnDrillsOff();
                     _elapsedTime.StopTimer(miningElapsed);
                     _elapsedTime.StopTimer(miningChecksElapsed);
+                    _elapsedTime.ResetTimer(EjectorWait);
+                    _elapsedTime.ResetTimer(MaxEjectorWait);
                 }
                 // need to check if this is us
-                if (toMode == WicoControl.MODE_MINE
+                if (
+                    toMode == WicoControl.MODE_MINE
                     || toMode == WicoControl.MODE_GOTOORE
                     || toMode == WicoControl.MODE_BORESINGLE
                     )
@@ -241,7 +252,10 @@ namespace IngameScript
                 int iMode= _wicoControl.IMode;
                 int iState=_wicoControl.IState;
 
-                if (iState== WicoControl.MODE_MINE)
+                if (
+                    iState== WicoControl.MODE_MINE
+                    || iState == WicoControl.MODE_BORESINGLE
+                    )
                 {
                     _wicoControl.WantFast();
                 }
@@ -258,6 +272,38 @@ namespace IngameScript
             /// <param name="updateSource"></param>
             public void ProcessTrigger(string sArgument, MyCommandLine myCommandLine, UpdateType updateSource)
             {
+                /* 
+                 * triggers from V3
+                 * nextbore - skip this bore and move to the next
+                 * resetasteroid - forget the remembered asteroid
+                 * masterreset - clears all saved state (mode, etc)
+                 * 
+                 * missing triggers from V1
+                 * const string BUTTON0="Action Miner Reset";
+                 * const string BUTTON1="Action Start Mining";
+                 * const string BUTTON2="Action Start Search";
+                 * const string BUTTON3="Action Master Reset";
+                 * const string BUTTON4="Action Launch";
+                 * const string BUTTON5="Action Target Ranged";
+                 * const string BUTTON6="Action Go Home";
+                 * const string BUTTON7="Action Set Home";
+                 * const string BUTTON8="Action Go Mine";
+                 * const string BUTTON9="Action Toggle Autopilot";
+                 * const string BUTTON10="Action Toggle Relaunch";
+                 * const string BUTTON11="M11";
+                 * const string BUTTON12="M12";
+                 * 
+                 */
+                /* TODO: Add following triggers
+                 * set asteroid <id>
+                 * set asteroid <gps> (read from CustomData)
+                 * (dock) set home dock
+                 * (dock) forget home dock
+                 * (dock) set fixed approach location (V1 'home')
+                 * Go mine the set asteroid (including launch)
+                 * 
+                 * Add: remember the current asteroid ID.  Use it for "go mine" (even if single bore)
+                 */
                 _program.Echo("Miner TriggerHandler:" + sArgument);
                 string[] varArgs = sArgument.Trim().Split(';');
 
@@ -272,6 +318,14 @@ namespace IngameScript
                     if (myCommandLine.Argument(0) == "mine")
                     {
                         _wicoControl.SetMode(WicoControl.MODE_MINE);
+                    }
+                    if (myCommandLine.Argument(0) == "gomine")
+                    {
+                        // launch and then go mine
+                        _navCommon.NavReset();
+                        _navCommon.NavQueueMode(WicoControl.MODE_LAUNCH);
+                        _navCommon.NavQueueMode(WicoControl.MODE_MINE);
+                        _navCommon.NavStartNav();
                     }
                     if (myCommandLine.Argument(0) == "dockmine")
                     {
@@ -318,16 +372,13 @@ namespace IngameScript
                 // NOTE: Called for ALL received unicast messages
                 int iMode= _wicoControl.IMode;
                 int iState=_wicoControl.IState;
-
-                //                _program.sMasterReporting+="\nMsg Received:"+msg.Tag;
-
-//                if (msg.Tag == CONNECTORAPPROACHTAG && msg.Data is string)
             }
 
             void ResetMotionHandler(bool bNoDrills = false)
             {
-//                _thrusters.powerDownThrusters();
-//                _gyros.gyrosOff();
+                _systemsMonitor.powerDownThrusters();
+                _systemsMonitor.gyrosOff();
+
                 IMyShipController shipController = _wicoBlockMaster.GetMainController();
                 if (shipController is IMyRemoteControl) ((IMyRemoteControl)shipController).SetAutoPilotEnabled(false);
                 if (shipController is IMyShipController) ((IMyShipController)shipController).DampenersOverride = true;
@@ -435,7 +486,7 @@ namespace IngameScript
              *  set exit
              *  ->31
              *  
-             *  31 set sensor for mining run 
+             *  31 set sensor for mining run  START HERE; NEVER 35
              *  calculate asteroid vectors 
              *  ->32
              *  
@@ -503,6 +554,13 @@ namespace IngameScript
              * 
              */
 
+            const string EjectorWait = "EjectorWait";
+            const double EjectorWaitSeconds = 5;
+            const string MaxEjectorWait = "MaxEjectorWait";
+            const double MaxEjectorWaitSeconds = 20;
+            const string MaxScansWait = "MaxScansWait";
+            const double MaxScansWaitSeconds = 120;
+
                 int BoreHoleScanMode = -1;
             Vector3D[] BoreScanFrontPoints = new Vector3D[4];
 
@@ -569,16 +627,7 @@ namespace IngameScript
 //                    if (miningChecksElapsedMs >= 0) miningChecksElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
                     if (_elapsedTime.IsExpired(miningChecksElapsed))
                     {
-                        _elapsedTime.ResetTimer(miningChecksElapsed);
-
-                        // DEBUG: generate a ray at what we're suposed to be pointing at.
-                        /*
-                        double scanDistance= (_wicoBlockMaster.GetMainController().GetPosition()-vAsteroidBoreEnd).Length();
-                        if (_cameras.CameraForwardScan(scanDistance))
-                        {
-
-                        }
-                        */
+                        _elapsedTime.RestartTimer(miningChecksElapsed);
                         _ores.doCargoCheck();
                         _ores.OreDoCargoCheck();
                         _systemsMonitor.BatteryCheck(0, false);
@@ -690,7 +739,11 @@ namespace IngameScript
                                     {
                                         //                                   vTargetAsteroid = AsteroidGetPosition(miningAsteroidID);
                                         //                                    bValidAsteroid = true;
-                                        AsteroidMineMode = 1;// drill exactly where we're aimed for.
+                                        //                                        AsteroidMineMode = 1;// drill exactly where we're aimed for.
+                                        if(iState== WicoControl.MODE_BORESINGLE)
+                                            AsteroidMineMode = 1; // Just what we're aiming at.
+                                        else
+                                            AsteroidMineMode = 0; // mine the whole thing
                                         MinerCalculateAsteroidVector(miningAsteroidID);
 
                                         // reset bore hole info to current location
@@ -728,6 +781,20 @@ namespace IngameScript
                         }
                     case 6:
                         // waiting for scan to start remotely
+                        _elapsedTime.AddTimer(MaxScansWait, MaxScansWaitSeconds, null, false);
+                        if(!_elapsedTime.IsActive(MaxScansWait))
+                        {
+                            _elapsedTime.RestartTimer(MaxScansWait);
+
+                        }
+                        if(_elapsedTime.IsExpired(MaxScansWait))
+                        {
+                            // timeout: it's taken too long
+                            _wicoControl.SetMode(WicoControl.MODE_ATTENTION);
+                            sbModeInfo.AppendLine("Scan Timeout");
+                            _program.Echo("Scan Timeout");
+
+                        }
                         sbModeInfo.AppendLine("Waiting for scan start");
                         _program.Echo("Waiting for Scans to start");
                         break;
@@ -790,7 +857,6 @@ namespace IngameScript
                             for (int i = 0; i < aSensors.Count; i++)
                             {
                                 IMySensorBlock s = aSensors[i] as IMySensorBlock;
-                                //                            //StatusLog(aSensors[i].CustomName + " ACTIVE!", txtPanel);
                                 _program.Echo(aSensors[i].CustomName + " ACTIVE!");
 
                                 List<MyDetectedEntityInfo> lmyDEI = new List<MyDetectedEntityInfo>();
@@ -869,18 +935,22 @@ namespace IngameScript
 
                         //                        miningElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
                         //                        _elapsedTime.StartTimer(miningElapsed);
+                        _program.Echo("IsActive=" + _elapsedTime.IsActive(miningElapsed));
                         if (!_elapsedTime.IsActive(miningElapsed))
                         {
-                            _elapsedTime.ResetTimer(miningElapsed);
-                            _elapsedTime.StartTimer(miningElapsed);
+                            _program.Echo("Restarting Timer:" + miningElapsed);
+                            _elapsedTime.RestartTimer(miningElapsed);
                         }
+                        _program.Echo("Elapsed=" + _elapsedTime.GetElapsed(miningElapsed).ToString("0.00"));
                         if (_elapsedTime.GetElapsed(miningElapsed) < _sensors.SensorSettleWait)
                         {
+                            _program.Echo("Waiting for Sensor to Settle");
                             sbNotices.AppendLine("Waiting for sensor settle");
                             _wicoControl.WantMedium();
                             return; // delay for sensor settling
                         }
                         // else:
+                        _elapsedTime.StopTimer(miningElapsed);
                         _wicoControl.WantFast();
                         //                    vAsteroidBoreStart = AsteroidCalculateBoreStart();
                         _wicoControl.SetState(35);
@@ -909,6 +979,8 @@ namespace IngameScript
                             // TODO: Make sensors optional (and just always do runs and use distance to know when done with bore.
                             //                        echoInstructions("S=" + iState + "S " + eoicount++);
                             _sensors.SensorIsActive(sb1, ref bForwardAsteroid, ref bLarge, ref bSmall);
+                            if(!bForwardAsteroid) _sensors.SensorIsActive(sb2, ref bForwardAsteroid, ref bLarge, ref bSmall);
+
                             _sensors.SensorIsActive(sb2, ref bSourroundAsteroid, ref bLarge, ref bSmall);
                             //                        echoInstructions("S=" + iState + "ES " + eoicount++);
                             //                        _program.Echo("FW=" + bForwardAsteroid.ToString() + " AR=" + bSourroundAsteroid.ToString());
@@ -959,57 +1031,77 @@ namespace IngameScript
                                 _wicoControl.WantFast();
                                 return;
                             }
-                            //                        echoInstructions("S=" + iState + "bfacheck " + eoicount++);
                             if (bForwardAsteroid)
                             { // asteroid in front of us
                                 _systemsMonitor.TurnEjectorsOn();
-                                //                            blockApplyAction(ejectorList, "OnOff_On");
-                                if (!_systemsMonitor.AirWorthy(false, false, MiningCargopcthighwater) || maxDeltaV < fMiningMinThrust || _ores.cargopcent > MiningCargopcthighwater && !bMiningWaitingCargo) //
+                                if (!bMiningWaitingCargo)
                                 {
-                                    _program.ResetMotion();
-                                    // already done                                turnEjectorsOn();
-
-                                    bMiningWaitingCargo = true;
+                                    if (
+                                        !_systemsMonitor.AirWorthy(false, false, MiningCargopcthighwater)
+                                        || maxDeltaV < fMiningMinThrust
+                                        || _ores.cargopcent > MiningCargopcthighwater
+                                        )
+                                    {
+                                        _program.Echo("Waiting Cargo Start");
+                                        _program.ResetMotion();
+                                        bMiningWaitingCargo = true;
+                                        _elapsedTime.RestartTimer(EjectorWait);
+                                        _elapsedTime.RestartTimer(MaxEjectorWait);
+                                    }
                                 }
-                                //                            echoInstructions("S=" + iState + "bmwc check " + eoicount++);
+                             
                                 if (bMiningWaitingCargo)
                                 { // continue to wait
                                     _wicoControl.WantSlow();
+                         _program.Echo("Waiting Cargo Continue");
                                     _program.ResetMotion();
                                     // need to check how much stone we have.. if zero(ish), then we're full.. go exit.
-                                    //                                echoInstructions("S=" + iState + "ODCC " + eoicount++);
-                                    //                                OreDoCargoCheck(); redundant
-                                    //                                echoInstructions("S=" + iState + "EDOCC " + eoicount++);
 
                                     double currUndesireable = _oreInfoLocs.CurrentUndesireableAmount();
-                                    _program.ErrorLog("MINE35:undesireable = " + currUndesireable);
+                                    _program.Echo("MaxWait active=" + _elapsedTime.IsActive(MaxEjectorWait));
+
+                                    _program.Echo("MaxElapsed=" + (_elapsedTime.GetElapsed(MaxEjectorWait)).ToString("0.00"));
+                                    _program.Echo("EjectorElapsed=" + (_elapsedTime.GetElapsed(EjectorWait)).ToString("0.00"));
+
+                                    //                                    _program.ErrorLog("MINE35:undesireable = " + currUndesireable);
                                     _program.Echo("undesireable=" + currUndesireable);
-                                    if (currUndesireable < 15  // we having nothing left to wait for to eject.
-                                        && 
-                                        ( // we are 'fat'
-                                            !_systemsMonitor.AirWorthy(false, false, MiningCargopctlowwater) 
-                                            || maxDeltaV < fMiningMinThrust 
-       //                                     || _ores.cargopcent >= MiningCargopctlowwater
+                                    if (
+                                        _elapsedTime.IsExpired(MaxEjectorWait)
+                                        || (
+                                            _elapsedTime.IsExpired(EjectorWait)
+                                            && currUndesireable < 15  // we having nothing left to wait for to eject.
+                                            &&
+                                            ( // we are 'fat'
+                                                !_systemsMonitor.AirWorthy(false, false, MiningCargopctlowwater)
+                                                || maxDeltaV < fMiningMinThrust
+                                            //                                     || _ores.cargopcent >= MiningCargopctlowwater
+                                            )
                                         )
                                        )
                                     {
-                                        _program.ErrorLog("MINE35:wanting to exit");
-                                        if (currUndesireable < 15) _program.ErrorLog("currUndesireable<15");
-                                        if (!_systemsMonitor.AirWorthy(false, false, MiningCargopctlowwater)) _program.ErrorLog("!MinerAirWorthy()");
-                                        if (maxDeltaV < fMiningMinThrust) _program.ErrorLog("maxDeltaV < fMiningMinThrust " + maxDeltaV.ToString("0.00") + " < "+ fMiningMinThrust.ToString("0.00"));
-       //                                 if (_ores.cargopcent >= MiningCargopctlowwater) _program.ErrorLog("_ores.cargopcent >= MiningCargopctlowwater " + _ores.cargopcent.ToString() + " >= " + MiningCargopctlowwater.ToString(""));
                                         // we are full/getting fat and not much undesireable ore in us...
-                                        _program.ResetMotion();
-                                        _systemsMonitor.TurnEjectorsOff();
-                                        _elapsedTime.StopTimer(miningChecksElapsed);//miningChecksElapsedMs = -1;
+// already done                                        _program.ResetMotion();
+                                        _systemsMonitor.TurnEjectorsOff(); // we don't want this is reset motion
                                         _wicoControl.SetMode(WicoControl.MODE_EXITINGASTEROID);
                                     }
                                     // TODO: Needs time-out
                                     //StatusLog("Waiting for cargo and thrust to be available", textPanelReport);
                                     sbNotices.AppendLine("Waiting for cargo and thrust to be available");
                                     _program.Echo("Cargo above low water: Waiting");
-                                    if (maxDeltaV > fMiningMinThrust && _ores.cargopcent < MiningCargopctlowwater && currUndesireable < 1000)
+                                    if (
+                                        maxDeltaV > fMiningMinThrust 
+                                        && _ores.cargopcent < MiningCargopctlowwater 
+                                        && currUndesireable < 1000
+                                        )
+                                    {
+                                        _program.Echo("MaxDelvaV" + (maxDeltaV > fMiningMinThrust).ToString());
+                                        _program.Echo("Cargo%Good=" + (_ores.cargopcent < MiningCargopctlowwater).ToString());
+                                        _program.Echo("Undesireablegood enough=" + (currUndesireable < 1000));
+                                        _program.Echo("resetting cargo wait");
                                         bMiningWaitingCargo = false; // can now move.
+                                        _elapsedTime.ResetTimer(EjectorWait);
+                                        _elapsedTime.ResetTimer(MaxEjectorWait);
+                                    }
                                 }
                                 else
                                 {
@@ -1031,7 +1123,6 @@ namespace IngameScript
                                     //                                echoInstructions("S=" + iState + "BR " + eoicount++);
                                     bAimed = _systemsMonitor.BeamRider(vAsteroidBoreStart, vAsteroidBoreEnd, _wicoBlockMaster.GetMainController());
 
-                                    _drills.turnDrillsOn();
                                     //                                echoInstructions("S=" + iState + "EOtDO " + eoicount++);
                                     //                                _program.Echo("bAimed=" + bAimed.ToString());
                                     //                                _program.Echo("minAngleRad=" + minAngleRad);
@@ -1051,6 +1142,7 @@ namespace IngameScript
                                         _systemsMonitor.powerDownThrusters();
                                         _wicoControl.WantFast();
                                     }
+                                    _drills.turnDrillsOn();
                                     //                                _program.Echo("bAimed=" + bAimed.ToString());
                                     /*
                                     if (!bAimed) _wicoControl.WantFast();
@@ -1060,6 +1152,7 @@ namespace IngameScript
                             }
                             else
                             {
+                                _program.Echo("No asteroid in front range");
                                 // we have nothing in front, but are still close
                                 //StatusLog("Exiting Asteroid", textPanelReport);
                                 _drills.turnDrillsOff();
@@ -1077,10 +1170,10 @@ namespace IngameScript
                     case 100:
                         _drills.turnDrillsOff();
                         _sensors.SensorsSleepAll();
-                        sb1 = _sensors.GetForwardSensor();// sensorsList[0];
+                        sb1 = _sensors.GetForwardSensor();
                         _sensors.SensorSetToShip(sb1, 0, 0, 0, 0, 50, 0);
                         _wicoControl.SetState(101);
-                        _elapsedTime.RestartTimer(miningElapsed);//miningElapsedMs = 0;
+                        _elapsedTime.RestartTimer(miningElapsed);
                         break;
                     case 101:
                         //                        miningElapsedMs += _program.Runtime.TimeSinceLastRun.TotalMilliseconds;
@@ -1151,7 +1244,7 @@ namespace IngameScript
 
                             _sensors.SensorsSleepAll();
                             _sensors.SensorSetToShip(sb1, 50, 50, 50, 50, 50, 50);
-                            _elapsedTime.ResetTimer(miningElapsed);
+                            _elapsedTime.RestartTimer(miningElapsed);
                             _wicoControl.SetState(111);
                             _program.Echo("iState now=" + iState.ToString());
                         }
@@ -1159,11 +1252,11 @@ namespace IngameScript
                     case 111:
                         if (!_elapsedTime.IsActive(miningElapsed))
                         {
-                            _elapsedTime.ResetTimer(miningElapsed);
-                            _elapsedTime.StartTimer(miningElapsed);
+                            // should have already been done.
+                            _elapsedTime.RestartTimer(miningElapsed);
                         }
                         if (_elapsedTime.GetElapsed(miningElapsed) < _sensors.SensorSettleWait) return;
-                        _wicoControl.SetState(iState + 0);
+                        _wicoControl.SetState(iState + 1);
 //                        iState++;
                         break;
                     case 112:
@@ -1219,12 +1312,12 @@ namespace IngameScript
                                 _wicoControl.SetMode(WicoControl.MODE_DOCKING);
                             }
                             else
-                            if (_wicoBlockMaster.GetShipSpeed() < fAsteroidApproachMps)
-                            {
-                                _wicoControl.SetState(121);
-                                _wicoControl.WantFast();
-                            }
-                            else _wicoControl.WantMedium();
+                                if (_wicoBlockMaster.GetShipSpeed() < fAsteroidApproachMps)
+                                {
+                                    _wicoControl.SetState(121);
+                                    _wicoControl.WantFast();
+                                }
+                                else _wicoControl.WantMedium();
                         }
                         break;
 
@@ -1236,6 +1329,7 @@ namespace IngameScript
                             _program.Echo("DistanceSQ=" + distanceSQ.ToString("0.0"));
                             // Go to start location.  possible far travel
                             _wicoControl.WantFast();
+                            // always do 'far' travel so we get collision avoidance.
                             if (distanceSQ > 75 * 75)
                             {
                                 // do far travel.
@@ -1249,7 +1343,6 @@ namespace IngameScript
                         {
                             sbModeInfo.AppendLine("Move to Bore Start");
                             //StatusLog("Move to Bore Start", textPanelReport);
-
                             double distanceSQ = (vAsteroidBoreStart - ((IMyShipController)_wicoBlockMaster.GetMainController()).CenterOfMass).LengthSquared();
                             sbNotices.AppendLine("DistanceSQ=" + distanceSQ.ToString("0.0"));
                             _program.Echo("DistanceSQ=" + distanceSQ.ToString("0.0"));
@@ -1259,10 +1352,21 @@ namespace IngameScript
                             if ((distanceSQ - stoppingDistance * 2) > 2)
                             {
                                 // set aim to ending location
-                                Vector3D vAim = (vAsteroidBoreStart - ((IMyShipController)_wicoBlockMaster.GetMainController()).CenterOfMass);
+                                Vector3D vAim = (vAsteroidBoreStart - _wicoBlockMaster.CenterOfMass());
                                 bool bAimed = _systemsMonitor.AlignGyros("forward", vAim, _wicoBlockMaster.GetMainController());
                                 if (bAimed)
                                 {
+                                    if(_cameras.CameraForwardScan(vAsteroidBoreStart))
+                                    {
+                                        if(!_cameras.lastDetectedInfo.IsEmpty())
+                                        {
+                                            // we hit something
+                                            // use NAV movement to get collision avoidance.
+                                            _wicoControl.SetMode(190);
+                                            _wicoControl.WantFast();
+                                            return;
+                                        }
+                                    }
                                     //                                _program.Echo("Aimed");
                                     //bWantFast = false;
                                     _wicoControl.WantMedium();
@@ -1859,7 +1963,8 @@ namespace IngameScript
                                 }
                                 else
                                 {
-                                    _wicoControl.SetState(500);
+                                    _program.ErrorLog("No Bores Remaining; Return to dock");
+                                    _wicoControl.SetState(500); // search for any remaining voxels..
                                 }
                             }
                             else
@@ -1882,7 +1987,7 @@ namespace IngameScript
                     case 500:
                         {
                             // TODO: do a final search pass for any missed voxels.
-                            // TODO: remove asteroid after final pass
+                            // TODO: remove asteroid from announced lists after final pass
 
                             // Go home.
                             _dock.SetRelaunch(false);
@@ -1920,22 +2025,22 @@ namespace IngameScript
 
                 double maxThrust = _systemsMonitor.calculateMaxThrust(thrustForwardList);
 
-                _program.Echo("effectiveMass=" + effectiveMass.ToString("N0"));
-                sbNotices.AppendLine("effectiveMass=" + effectiveMass.ToString("N0"));
-                _program.Echo("maxThrust=" + maxThrust.ToString("N0"));
+//                _program.Echo("effectiveMass=" + effectiveMass.ToString("N0"));
+//                sbNotices.AppendLine("effectiveMass=" + effectiveMass.ToString("N0"));
+//                _program.Echo("maxThrust=" + maxThrust.ToString("N0"));
 
-                double maxDeltaV = (maxThrust) / effectiveMass;
+//                double maxDeltaV = (maxThrust) / effectiveMass;
 
-                _program.Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
-                _program.Echo("Cargo=" + _ores.cargopcent.ToString() + "%");
-                sbNotices.AppendLine("Cargo=" + _ores.cargopcent.ToString() + "%");
+//                _program.Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
+//                _program.Echo("Cargo=" + _ores.cargopcent.ToString() + "%");
+//                sbNotices.AppendLine("Cargo=" + _ores.cargopcent.ToString() + "%");
 
-                _program.Echo("velocity=" + _wicoBlockMaster.GetShipSpeed().ToString("0.00"));
-                sbNotices.AppendLine("velocity=" + _wicoBlockMaster.GetShipSpeed().ToString("0.00"));
+//                _program.Echo("velocity=" + _wicoBlockMaster.GetShipSpeed().ToString("0.00"));
+//                sbNotices.AppendLine("velocity=" + _wicoBlockMaster.GetShipSpeed().ToString("0.00"));
 //                _program.Echo("#Sensors=" + _sensors.sensorsList.Count);
-                _program.Echo("width=" + _wicoBlockMaster.WidthInMeters().ToString("0.0"));
-                _program.Echo("height=" + _wicoBlockMaster.HeightInMeters().ToString("0.0"));
-                _program.Echo("length=" + _wicoBlockMaster.LengthInMeters().ToString("0.0"));
+//                _program.Echo("width=" + _wicoBlockMaster.WidthInMeters().ToString("0.0"));
+//                _program.Echo("height=" + _wicoBlockMaster.HeightInMeters().ToString("0.0"));
+//                _program.Echo("length=" + _wicoBlockMaster.LengthInMeters().ToString("0.0"));
 
                 //            IMyTextPanel txtPanel = getTextBlock("Sensor Report");
                 //            //StatusLog("clear", txtPanel);
