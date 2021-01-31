@@ -45,8 +45,8 @@ namespace IngameScript
                 _program.AddPostInitHandler(LocalBlocksInit());
                 _program.AddPostInitHandler(RemoteBlocksInit());
 
-                DesiredMinTravelElevation = (float)_program._CustomDataIni.Get("Ship", "MinTravelElevation").ToDouble(DesiredMinTravelElevation);
-                _program._CustomDataIni.Set("Ship", "MinTravelElevation", DesiredMinTravelElevation);
+                DesiredMinTravelElevation = (float)_program._CustomDataIni.Get(_program.OurName, "MinTravelElevation").ToDouble(DesiredMinTravelElevation);
+                _program._CustomDataIni.Set(_program.OurName, "MinTravelElevation", DesiredMinTravelElevation);
             }
             void LoadHandler(MyIni theINI)
             {
@@ -183,7 +183,7 @@ namespace IngameScript
                     }
                     else
                     {
-                        _program.Echo("GetMainController:No ship controller found");
+//                        _program.Echo("GetMainController:No ship controller found");
 //                        _program.ErrorLog("No Ship Controller Found");
                     }
                 }
@@ -198,6 +198,11 @@ namespace IngameScript
                 var shipcontroller = GetMainController();
                 if(shipcontroller!=null)
                     com= shipcontroller.CenterOfMass;
+                else
+                {
+                    // No ship controller.
+                    com=_program.Me.CubeGrid.GetPosition();
+                }
                 return com;
             }
             public double GetShipSpeed()
@@ -207,6 +212,17 @@ namespace IngameScript
                 if (shipcontroller != null)
                     shipspeed = shipcontroller.GetShipSpeed();
                 return shipspeed;
+            }
+            public Vector3D GetShipVelocity()
+            {
+                Vector3D velocity = _emptyV3D;
+                var shipcontroller = GetMainController();
+                if (shipcontroller != null)
+                {
+                    MyShipVelocities velocities = shipcontroller.GetShipVelocities();
+                    velocity = velocities.LinearVelocity;
+                }
+                return velocity;
             }
 
             public Vector3D GetNaturalGravity()
@@ -578,6 +594,16 @@ namespace IngameScript
             {
                 if (shipdimController == null) ShipDimensions(GetMainController());
                 return _height;
+            }
+            public double LargestSideInMeters()
+            {
+                if (shipdimController == null) ShipDimensions(GetMainController());
+                double largest = _height;
+                if (_length > largest)
+                    largest = _length;
+                if (_width > largest)
+                    largest = _width;
+                return largest;
             }
             public double BlockMultiplier()
             {
