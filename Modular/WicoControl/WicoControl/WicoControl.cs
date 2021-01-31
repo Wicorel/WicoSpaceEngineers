@@ -22,16 +22,16 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
 
-        public class WicoControl
+        public class WicoControl : WicoUpdates
         {
-            public float fMaxWorldMps = 100f;
-
-            bool _bDebug = false;
+            bool _bControlDebug = false;
 
             #region MODES
             const string MODECHANGETAG = "[WICOMODECHANGE]";
             int _iMode = -1;
             int _iState = -1;
+
+            string ControlSection = "WicoControl";
             public int IMode
             {
                 get
@@ -93,21 +93,22 @@ namespace IngameScript
 
             public const int MODE_ATTENTION = 9999;
 
+            StringBuilder sbData = new StringBuilder(100);
             public void SetMode(int theNewMode, int theNewState = 0)
             {
                 // do nothing if we are already in that mode
                 if (_iMode == theNewMode)
                     return;
-                if(_bDebug) _program.ErrorLog("Set M=" + theNewMode + " S=" + theNewState+" OM="+IMode+" OS="+_iState);
+//                if(_bControlDebug) _program.ErrorLog("Set M=" + theNewMode + " S=" + theNewState+" OM="+IMode+" OS="+_iState);
 
                 // possible optimization.. make modules register for what modes they care about...
-                string sData = "";
-                sData += _iMode.ToString() + "\n";
-                sData += _iState.ToString() + "\n";
-                sData += theNewMode.ToString() + "\n";
-                sData += theNewState.ToString() + "\n";
+                sbData.Clear();
+                sbData.AppendLine(_iMode.ToString());
+                sbData.AppendLine(_iState.ToString());
+                sbData.AppendLine(theNewMode.ToString());
+                sbData.AppendLine(theNewState.ToString());
 
-                SendToAllSubscribers(MODECHANGETAG, sData);
+                SendToAllSubscribers(MODECHANGETAG, sbData.ToString());
                 HandleModeChange(_iMode, _iState, theNewMode, theNewState);
 
                 _iMode = theNewMode;
@@ -118,7 +119,7 @@ namespace IngameScript
             public void SetState(int theNewState)
             {
                 // not synced..
-                if (_bDebug) _program.ErrorLog("Set S=" + theNewState);
+//                if (_bControlDebug) _program.ErrorLog("Set S=" + theNewState);
 
                 _iState = theNewState;
             }
@@ -144,8 +145,8 @@ namespace IngameScript
             }
             public void ModeAfterInit(MyIni theIni)
             {
-                _iState = theIni.Get("WicoControl", "State").ToInt32(_iState);
-                _iMode = theIni.Get("WicoControl", "Mode").ToInt32(_iMode);
+                _iState = theIni.Get(ControlSection, "State").ToInt32(_iState);
+                _iMode = theIni.Get(ControlSection, "Mode").ToInt32(_iMode);
 
 //                _program.ErrorLog("MAI:M=" + _iMode.ToString() + " S=" + _iState.ToString());
 //                _program.ErrorLog(_program.Storage);
@@ -160,57 +161,18 @@ namespace IngameScript
             {
 //                _program.ErrorLog("wicocontrol save handler");
 //                _program.ErrorLog("WCSH:M=" + _iMode.ToString() + " S=" + _iState.ToString());
-                theIni.Set("WicoControl", "Mode", _iMode);
-                theIni.Set("WicoControl", "State", _iState);
+                theIni.Set(ControlSection, "Mode", _iMode);
+                theIni.Set(ControlSection, "State", _iState);
             }
 
             #endregion
 
-            #region Updates
-            bool bWantOnce = false;
-            bool bWantFast = false;
-            bool bWantMedium = false;
-            bool bWantSlow = false;
 
-            public void ResetUpdates()
-            {
-                bWantOnce = false;
-                bWantFast = false;
-                bWantMedium = false;
-                bWantSlow = false;
-            }
-            public void WantOnce()
-            {
-                bWantOnce = true;
-            }
-            public void WantFast()
-            {
-                bWantFast = true;
-            }
-            public void WantMedium()
-            {
-                bWantMedium = true;
-            }
-            public void WantSlow()
-            {
-                bWantSlow = true;
-            }
-            public UpdateFrequency GenerateUpdate()
-            {
-                UpdateFrequency desired = 0;
-                if (bWantOnce) desired |= UpdateFrequency.Once;
-                if (bWantFast) desired |= UpdateFrequency.Update1;
-                if (bWantMedium) desired |= UpdateFrequency.Update10;
-                if (bWantSlow) desired |= UpdateFrequency.Update100;
-                return desired;
-            }
-            #endregion
-
-            Program _program;
+//            Program _program;
             WicoIGC _wicoIGC;
 
             readonly TransmissionDistance localConstructs = TransmissionDistance.CurrentConstruct;
-            public WicoControl(Program program, WicoIGC wicoIGC)
+            public WicoControl(Program program, WicoIGC wicoIGC): base(program)
             {
                 _program = program;
                 _wicoIGC = wicoIGC;
@@ -224,9 +186,7 @@ namespace IngameScript
             List<long> _WicoMainSubscribers = new List<long>();
             bool bIAmMain = true; // assume we are main
 
-            readonly string WicoControlSection = "WicoControl";
-
-            // WIco Main/Config stuff
+            // Wico Main/Config stuff
             readonly string WicoMainTag = "WicoTagMain";
             readonly string YouAreSub = "YOUARESUB";
             readonly string UnicastTagTrigger = "TRIGGER";
@@ -237,9 +197,6 @@ namespace IngameScript
                 // Wico Configuration system
                 _WicoMainSubscribers.Clear();
 
-                _bDebug = _program._CustomDataIni.Get(WicoControlSection, "Debug").ToBoolean(_bDebug);
-                _program._CustomDataIni.Set(WicoControlSection, "Debug", _bDebug);
-
                 // send a messge to all local 'Wico' PBs to get configuration.  
                 // This will be used to determine the 'master' PB and to know who to send requests to
                 _program.IGC.SendBroadcastMessage(WicoMainTag, "Configure", localConstructs);
@@ -248,7 +205,9 @@ namespace IngameScript
                 _wicoIGC.AddUnicastHandler(WicoConfigUnicastListener);
 
                 _program.AddTriggerHandler(ProcessTrigger);
-//                thisProgram.UpdateTriggerHandlers.Add(ProcessTrigger);
+
+                _bControlDebug = _program._CustomDataIni.Get(_program.OurName, "ControlDebug").ToBoolean(_bControlDebug);
+                _program._CustomDataIni.Set(_program.OurName, "ControlDebug", _bControlDebug);
 
                 // ModeAfterInit gets called by main
                 _program.AddSaveHandler(SaveHandler);
@@ -302,7 +261,7 @@ namespace IngameScript
                 var src = msg.Source;
                 if (tag == WicoMainTag)
                 {
-                    if (_bDebug) _program.ErrorLog("WCC:WMT Rvcd from " + src.ToString("X"));
+//                    if (_bControlDebug) _program.ErrorLog("WCC:WMT Rvcd from " + src.ToString("X"));
                     if (msg.Data is string)
                     {
                         string data = (string)msg.Data;
@@ -328,7 +287,7 @@ namespace IngameScript
                 }
                 else if (tag == UnicastAnnounce)
                 {
-                    if (_bDebug) _program.ErrorLog("WCC:UCA Rvcd from " + src.ToString("X"));
+//                    if (_bControlDebug) _program.ErrorLog("WCC:UCA Rvcd from " + src.ToString("X"));
                     // another block announces themselves as one of our collective
                     if (_WicoMainSubscribers.Contains(src))
                     {
@@ -354,7 +313,7 @@ namespace IngameScript
                 else if (tag == UnicastTagTrigger)
                 {
                     // we are being informed that we were wanted to run for some reason (misc)
-                    _program.Echo("Trigger Received:" + msg.Data);
+//                    _program.Echo("Trigger Received:" + msg.Data);
                 }
                 else if (tag == MODECHANGETAG)
                 {
@@ -363,7 +322,7 @@ namespace IngameScript
                     int theNewMode = Convert.ToInt32(aLines[2]);
                     int theNewState = Convert.ToInt32(aLines[3]);
 
-                    if (_bDebug) _program.ErrorLog("IGCS M=" + theNewMode + " S=" + theNewState + " OM=" + IMode + " OS=" + _iState);
+//                    if (_bControlDebug) _program.ErrorLog("IGCS M=" + theNewMode + " S=" + theNewState + " OM=" + IMode + " OS=" + _iState);
                     if (_iMode != theNewMode)
                         HandleModeChange(_iMode, _iState, theNewMode, theNewState);
 
@@ -373,17 +332,12 @@ namespace IngameScript
                 // TODO: add more messages as needed
             }
 
-            public void SetDebug(bool bDebug)
+            public new void AnnounceState()
             {
-                _bDebug = bDebug;
-            }
-
-            public void AnnounceState()
-            {
-                if (_bDebug)
+                if (_bControlDebug)
                 {
-                    _program.Echo("Me=" + _program.Me.EntityId.ToString("X"));
-                    _program.Echo("Subscribers=" + _WicoMainSubscribers.Count());
+//                    _program.Echo("Me=" + _program.Me.EntityId.ToString("X"));
+//                    _program.Echo("Subscribers=" + _WicoMainSubscribers.Count());
                 }
                 if (bIAmMain) _program.Echo("MAIN. Mode=" + IMode.ToString() + " S=" + IState.ToString());
                 else _program.Echo("SUB. Mode=" + IMode.ToString() + " S=" + IState.ToString());
