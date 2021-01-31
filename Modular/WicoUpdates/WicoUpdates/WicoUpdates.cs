@@ -21,18 +21,18 @@ namespace IngameScript
     {
         public class WicoUpdates
         {
-            protected Program thisProgram;
+            protected Program _program;
+
+            internal bool _bUpdateDebug = false;
 
             public WicoUpdates(Program program)
             {
-                thisProgram = program;
+                _program = program;
 
-                WicoControlInit();
+                _bUpdateDebug = _program._CustomDataIni.Get(_program.OurName, "UpdateDebug").ToBoolean(_bUpdateDebug);
+                _program._CustomDataIni.Set(_program.OurName, "UpdateDebug", _bUpdateDebug);
             }
 
-            internal void WicoControlInit()
-            {
-            }
             public float fMaxWorldMps = 100f;
 
             bool bWantOnce = false;
@@ -40,6 +40,9 @@ namespace IngameScript
             bool bWantMedium = false;
             bool bWantSlow = false;
 
+            /// <summary>
+            /// clear all requested updates.  Usually needs to be called on each run
+            /// </summary>
             public void ResetUpdates()
             {
                 bWantOnce = false;
@@ -47,22 +50,41 @@ namespace IngameScript
                 bWantMedium = false;
                 bWantSlow = false;
             }
+
+            /// <summary>
+            /// Set the update to Once
+            /// </summary>
             public void WantOnce()
             {
                 bWantOnce = true;
             }
+
+            /// <summary>
+            /// Set the update to Update1
+            /// </summary>
             public void WantFast()
             {
                 bWantFast = true;
             }
+            /// <summary>
+            /// Set the update to Update10
+            /// </summary>
             public void WantMedium()
             {
                 bWantMedium = true;
             }
+            /// <summary>
+            /// Set the update to update100
+            /// </summary>
             public void WantSlow()
             {
                 bWantSlow = true;
             }
+
+            /// <summary>
+            /// Generate the desired updatefrequency from the settings
+            /// </summary>
+            /// <returns>desired updatefrequency </returns>
             public UpdateFrequency GenerateUpdate()
             {
                 UpdateFrequency desired = 0;
@@ -73,20 +95,9 @@ namespace IngameScript
                 return desired;
             }
 
-            public void ModeAfterInit(MyIni LoadIni)
-            {
-            }
-
             public void AnnounceState()
             {
-                thisProgram.Echo("Standalone Control");
-            }
-
-            internal bool _bDebug = false;
-
-            public void SetDebug(bool bDebug)
-            {
-                _bDebug = bDebug;
+                _program.Echo("Standalone Control");
             }
 
         }
