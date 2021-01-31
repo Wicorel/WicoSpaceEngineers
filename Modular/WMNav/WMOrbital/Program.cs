@@ -57,8 +57,6 @@ namespace IngameScript
 
         void ModuleProgramInit()
         {
-            wicoTravelMovement = new TravelMovement(this, _wicoControl);
-
             wicoThrusters = new WicoThrusters(this, wicoBlockMaster);
             wicoGyros = new WicoGyros(this, wicoBlockMaster);
             wicoGasTanks = new GasTanks(this,wicoBlockMaster);
@@ -68,11 +66,14 @@ namespace IngameScript
             wicoCameras = new Cameras(this);
             wicoParachutes = new Parachutes(this);
             wicoNavRotors = new NavRotors(this);
-            wicoAntennas = new Antennas(this);
+            wicoAntennas = new Antennas(this, wicoBlockMaster);
             wicoSensors = new Sensors(this, wicoBlockMaster);
             wicoWheels = new Wheels(this);
 
             _wicoDisplays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
+
+            wicoTravelMovement = new TravelMovement(this, _wicoControl, wicoBlockMaster,wicoGyros, wicoThrusters, wicoSensors, wicoCameras, wicoWheels, wicoNavRotors);
+
 
             wicoNavigation = new Navigation(this,_wicoControl,wicoBlockMaster, wicoIGC, wicoTravelMovement, wicoElapsedTime,
                 wicoGyros,wicoWheels,wicoNavRotors, wicoThrusters,wicoAntennas,_wicoDisplays);

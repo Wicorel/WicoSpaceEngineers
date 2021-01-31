@@ -59,7 +59,7 @@ namespace IngameScript
             wicoCameras = new Cameras(this);
             wicoParachutes = new Parachutes(this);
             wicoNavRotors = new NavRotors(this);
-            wicoAntennas = new Antennas(this);
+            wicoAntennas = new Antennas(this, wicoBlockMaster);
             wicoSensors = new Sensors(this, wicoBlockMaster);
             wicoWheels = new Wheels(this);
             wicoEngines = new HydrogenEngines(this);

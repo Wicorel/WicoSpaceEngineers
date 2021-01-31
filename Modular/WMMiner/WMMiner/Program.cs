@@ -71,7 +71,7 @@ namespace IngameScript
             wicoGasGens = new GasGens(this);
             wicoConnectors = new Connectors(this);
             wicoCameras = new Cameras(this);
-            wicoAntennas = new Antennas(this);
+            wicoAntennas = new Antennas(this, wicoBlockMaster);
             wicoSensors = new Sensors(this, wicoBlockMaster);
             wicoPower = new PowerProduction(this, wicoBlockMaster);
             wicoTimers = new Timers(this, wicoBlockMaster);

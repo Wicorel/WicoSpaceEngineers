@@ -28,18 +28,19 @@ namespace IngameScript
             bool bGotAntennaName = false;
             public string AntennaName;
 
-            List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
-            List<IMyLaserAntenna> antennaLList = new List<IMyLaserAntenna>();
+            protected List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
+            protected List<IMyLaserAntenna> antennaLList = new List<IMyLaserAntenna>();
 
+            protected Program _program;
+            protected WicoBlockMaster _wicoBlockMaster;
 
-            Program thisProgram;
-
-            public Antennas(Program program)
+            public Antennas(Program program, WicoBlockMaster wicoBlockMaster)
             {
-                thisProgram = program;
+                _program = program;
+                _wicoBlockMaster = wicoBlockMaster;
 
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                _wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             /// <summary>
@@ -129,7 +130,7 @@ namespace IngameScript
             /// <summary>
             /// Internal: desired range of antennas when transmitting.
             /// </summary>
-            float fAntennaDesiredRange = float.MaxValue;
+            protected float fAntennaDesiredRange = float.MaxValue;
 
             /// <summary>
             /// Sets the desired max power of the antenna(s)
