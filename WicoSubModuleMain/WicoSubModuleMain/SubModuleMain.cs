@@ -270,9 +270,9 @@ namespace IngameScript
                     if (!moduleProcessIGCMessage(sArgument))
                     {
                     }
-                    SetUpdateFrequency();
-                    Serialize();
-                    UpdateAllPanels();
+//                    SetUpdateFrequency();
+//                    Serialize();
+//                    UpdateAllPanels();
                 }
 //                else
                 {
@@ -299,6 +299,7 @@ namespace IngameScript
 //                echoInstructions("H");
             }
             SetUpdateFrequency();
+//            Echo("SUF: Speed =" + Runtime.UpdateFrequency.ToString());
 
             modulePostProcessing();
 //            echoInstructions("I");
@@ -307,6 +308,8 @@ namespace IngameScript
 
             bWasInit = false;
             UpdateAllPanels();
+//            Echo("EOMAIN: Speed =" + Runtime.UpdateFrequency.ToString());
+
 //          echoInstructions("K");
         }
 
