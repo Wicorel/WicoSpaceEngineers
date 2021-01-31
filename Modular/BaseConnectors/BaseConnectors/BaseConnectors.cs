@@ -340,6 +340,8 @@ namespace IngameScript
             {
                 List<IMyTerminalBlock> subBlocks = new List<IMyTerminalBlock>();
 
+                // TODO: Convert to MyIni
+
                 DockingInfo di = new DockingInfo();
                 di.tb = tb;
                 di.State = State;
@@ -438,7 +440,11 @@ namespace IngameScript
 
                 if (bApproach)
                 {
-                    Vector3D vApproach = vPosition + vVec * 30;
+                    double size=_wicoBlockMaster.HeightInMeters() + _wicoBlockMaster.WidthInMeters() + _wicoBlockMaster.LengthInMeters();
+                    size = Math.Max(size, 30);
+
+                    // todo: choose approach location based on position and size of requesting ship; don't try to run them through ourselves.
+                    Vector3D vApproach = vPosition + vVec * size;
 //                    _program.ErrorLog("Sending CONA:" + _program.Vector3DToString(vApproach));
                     _program.IGC.SendBroadcastMessage("CONA", incomingID + ":" + _program.Me.EntityId.ToString() + ":" + _program.Vector3DToString(vApproach));
                 }
