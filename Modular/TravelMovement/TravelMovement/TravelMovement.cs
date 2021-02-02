@@ -1505,7 +1505,7 @@ namespace IngameScript
                     {
                         // full power, captain!
                         CurrentStatus += "\n Start Movement";
-                        _thrusters.powerUpThrusters(thrustTmForwardList, maxThrust);
+                        _thrusters.powerUpThrusters(thrustTmForwardList, maxThrust*1.2f);
                     }
                     // if we need to go much faster or we are FAR and not near max speed
                     else if (velocityShip < maxSpeed * .75 || (!btmApproach && velocityShip < maxSpeed * .98))
