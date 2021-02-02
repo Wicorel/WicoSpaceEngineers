@@ -63,13 +63,10 @@
   <Import Project="..\..\IGC\IGC\IGC.projitems" Label="Shared" />
   <Import Project="..\..\ModularMain\ModularMain\ModularMain.projitems" Label="Shared" />
   <Import Project="..\..\NAVRotors\NAVRotors\NAVRotors.projitems" Label="Shared" />
-  <Import Project="..\..\Sensors\Sensors\Sensors.projitems" Label="Shared" />
   <Import Project="..\..\Parachutes\Parachutes\Parachutes.projitems" Label="Shared" />
   <Import Project="..\..\Tanks\Tanks\Tanks.projitems" Label="Shared" />
-  <Import Project="..\..\Wheels\Wheels\Wheels.projitems" Label="Shared" />
   <Import Project="..\..\WicoControl\WicoControl\WicoControl.projitems" Label="Shared" />
   <Import Project="..\..\WicoThrust\WicoThrust\WicoThrust.projitems" Label="Shared" />
-  <Import Project="..\..\HydrogenEngines\HydrogenEngines\HydrogenEngines.projitems" Label="Shared" />
   <Import Project="..\..\Power\Power\Power.projitems" Label="Shared" />
   <Import Project="..\..\SpaceDock\SpaceDock\SpaceDock\SpaceDock.projitems" Label="Shared" />
   <Import Project="..\..\Timers\Timers\Timers.projitems" Label="Shared" />

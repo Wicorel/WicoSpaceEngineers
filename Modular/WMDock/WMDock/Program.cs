@@ -31,9 +31,9 @@ namespace IngameScript
         Parachutes wicoParachutes;
         NavRotors wicoNavRotors;
         Antennas wicoAntennas;
-        Sensors wicoSensors;
-        Wheels wicoWheels;
-        HydrogenEngines wicoEngines;
+//        Sensors wicoSensors;
+//        Wheels wicoWheels;
+//        HydrogenEngines wicoEngines;
         PowerProduction wicoPower;
         Timers wicoTimers;
         WicoBases wicoBases;
@@ -75,9 +75,9 @@ namespace IngameScript
             wicoParachutes = new Parachutes(this);
             wicoNavRotors = new NavRotors(this);
             wicoAntennas = new Antennas(this, wicoBlockMaster);
-            wicoSensors = new Sensors(this, wicoBlockMaster);
-            wicoWheels = new Wheels(this);
-            wicoEngines = new HydrogenEngines(this);
+//            wicoSensors = new Sensors(this, wicoBlockMaster);
+//            wicoWheels = new Wheels(this);
+//            wicoEngines = new HydrogenEngines(this);
             wicoPower = new PowerProduction(this,wicoBlockMaster);
             wicoTimers = new Timers(this, wicoBlockMaster);
             _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
@@ -86,26 +86,28 @@ namespace IngameScript
             navCommon = new NavCommon(this, _wicoControl, wicoIGC);
             _cargoCheck = new CargoCheck(this, wicoBlockMaster,_displays);
 
-            _powerManagement = new PowerManagement(this, _wicoControl, wicoPower, wicoGasTanks, wicoElapsedTime,  wicoIGC, _displays);
+            _powerManagement = new PowerManagement(this, _wicoControl
+                , wicoPower, wicoGasTanks, wicoElapsedTime
+                ,  wicoIGC, _displays
+                );
 
-            _systemsMonitor = new SystemsMonitor(this,  wicoThrusters, wicoConnectors,
-                wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, _cargoCheck);
+            _systemsMonitor = new SystemsMonitor(this, wicoElapsedTime
+                , wicoThrusters, wicoConnectors
+                , wicoAntennas, wicoGasTanks, wicoGyros, wicoPower
+                , _cargoCheck
+                );
 
             spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster
-//                , wicoThrusters, wicoConnectors,
-                ,wicoAntennas
-//                , wicoGasTanks, wicoGyros, wicoPower
+                , wicoAntennas
                 , wicoTimers, wicoIGC, wicoBases, navCommon
-//                , _cargoCheck
-                , _displays, _systemsMonitor);
+                , _displays, _systemsMonitor
+                );
 
             _whenDocked = new WhenDocked(this, _wicoControl, wicoBlockMaster, wicoIGC
-//                , wicoThrusters, wicoConnectors
                 , wicoAntennas
-//                , wicoGasTanks, wicoGyros, wicoPower
                 , wicoTimers, wicoBases
-//                , _cargoCheck
-                , _displays, _systemsMonitor);
+                , _displays, _systemsMonitor
+                );
 
 
         }

@@ -120,7 +120,6 @@ Global
 		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\GasGens\GasGens\GasGens.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Gyros\Gyros\Gyros.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
-		..\HydrogenEngines\HydrogenEngines\HydrogenEngines.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\IGCIFF\IGCIFF\IGCIFF.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\IGC\IGC\IGC.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\LandingGears\LandingGears\LandingGears.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
@@ -130,12 +129,10 @@ Global
 		..\Parachutes\Parachutes\Parachutes.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\PowerManagement\PowerManagement\PowerManagement.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Power\Power\Power.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
-		..\Sensors\Sensors\Sensors.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\SpaceDock\SpaceDock\SpaceDock\SpaceDock.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\SystemsMonitor\SystemsMonitor\SystemsMonitor.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Tanks\Tanks\Tanks.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\Timers\Timers\Timers.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
-		..\Wheels\Wheels\Wheels.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoBases\WicoBases\WicoBases.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{e014c024-523d-4491-b4c8-00435bfa0089}*SharedItemsImports = 4

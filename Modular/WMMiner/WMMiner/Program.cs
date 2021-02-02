@@ -88,7 +88,7 @@ namespace IngameScript
             _ores = new OresLocal(this, wicoBlockMaster, _wicoControl, wicoIGC, _asteroids, _oreInfoLocs, _displays);
 
 //            cargoCheck = new CargoCheck(this, wicoBlockMaster, _displays);
-            _systemsMonitor = new SystemsMonitor(this, wicoThrusters, wicoConnectors, wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, _ores);
+            _systemsMonitor = new SystemsMonitor(this, wicoElapsedTime, wicoThrusters, wicoConnectors, wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, _ores);
 
             _miner = new Miner(this, _wicoControl, wicoBlockMaster, wicoElapsedTime, wicoIGC
                 , _scanMode, _asteroids
