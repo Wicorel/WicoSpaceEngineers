@@ -126,7 +126,7 @@ namespace IngameScript
             }
 
             /// <summary>
-            /// reset the timer to zero elapsed time
+            /// reset the timer to zero elapsed time and activates
             /// </summary>
             /// <param name="sName"></param>
             /// <returns></returns>
@@ -146,10 +146,10 @@ namespace IngameScript
             }
 
             /// <summary>
-            /// Returns if the timer is epxired.  False if the timer is not active.
+            /// Returns if the timer is epxired.
             /// </summary>
             /// <param name="sName"></param>
-            /// <returns></returns>
+            /// <returns>False if the timer is not active. True if the timer is expired or doesn't exist</returns>
             public bool IsExpired(string sName)
             {
                 foreach (var et in TimerList)
@@ -162,7 +162,7 @@ namespace IngameScript
                         else return false;
                     }
                 }
-                return false;
+                return true;
             }
 
             public bool IsActive(string sName)
