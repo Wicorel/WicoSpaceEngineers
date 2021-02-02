@@ -269,22 +269,29 @@ namespace IngameScript
 
                 _wicoControl.WantSlow();
                 //TODO: autounload
+                bool bAirWorthy = _systemsMonitor.AirWorthy(false, true);
 
                 if (bAutoRelaunch)
                 {
                     sbModeInfo.AppendLine(" Checking Relaunch");
                     _program.Echo("Docked. Checking Relaunch");
-                    if (_systemsMonitor.AirWorthy())
+                    if (bAirWorthy)
                     {
                         _program.Echo("RELAUNCH!");
                         _wicoControl.SetMode(WicoControl.MODE_LAUNCH);
                         return;
                     }
-                    else
-                    {
-                        sbNotices.AppendLine(" Awaiting Relaunch Criteria");
-                        _program.Echo(" Awaiting Relaunch Criteria");
-                    }
+                }
+                if (!bAirWorthy)
+                {
+                    sbNotices.AppendLine(" Awaiting Relaunch Criteria");
+                    _program.Echo(" Awaiting Relaunch Criteria");
+                }
+                else
+                {
+                    sbNotices.AppendLine(" Worthy of relaunch");
+                    _program.Echo(" Worthy of relaunch");
+
                 }
                 {
                     //                            StatusLog(" Battery " + batteryPercentage + "% (" + batterypcthigh + "%)", textPanelReport);
