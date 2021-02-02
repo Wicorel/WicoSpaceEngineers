@@ -22,6 +22,7 @@ namespace IngameScript
         public class SystemsMonitor
         {
             private Program _program;
+            private WicoElapsedTime _elapsedTime;
             //            private WicoControl _wicoControl;
             //            private WicoBlockMaster _wicoBlockMaster;
             private Connectors _connectors;
@@ -43,6 +44,7 @@ namespace IngameScript
             const string SystemsSection = "SYSTEMS";
 
             public SystemsMonitor(Program program
+                ,WicoElapsedTime elapsedTime
                 //                , WicoControl wc, WicoBlockMaster wbm
                 , WicoThrusters thrusters
                 , Connectors connectors
@@ -59,6 +61,7 @@ namespace IngameScript
                 )
             {
                 _program = program;
+                _elapsedTime = elapsedTime;
                 //                _wicoControl = wc;
                 //                _wicoBlockMaster = wbm;
                 _thrusters = thrusters;
@@ -86,8 +89,8 @@ namespace IngameScript
             public bool ReactorsGo = true;
             public bool CargoGo = true;
 
+            const string AirWorthyTimerName = "AirWorthyCheck";
 
-            double _airworthyChecksElapsedMs = -1;
             public bool AirWorthy(bool bForceCheck = false, bool bLaunchCheck = true, int cargohighwater = 1)
             {
                 BatteryGo = true;
@@ -95,12 +98,12 @@ namespace IngameScript
                 ReactorsGo = true;
                 CargoGo = true;
 
-                if (_airworthyChecksElapsedMs >= 0)
-                    _airworthyChecksElapsedMs += _program.Runtime.TimeSinceLastRun.TotalMilliseconds;
                 bool bDoChecks = bForceCheck;
-                if (_airworthyChecksElapsedMs < 0 || _airworthyChecksElapsedMs > 0.5 * 1000)
+
+                if (_elapsedTime.IsExpired(AirWorthyTimerName))
                 {
-                    _airworthyChecksElapsedMs = 0;
+                    _elapsedTime.AddTimer(AirWorthyTimerName,1);
+                    _elapsedTime.RestartTimer(AirWorthyTimerName);
                     bDoChecks = true;
                 }
 
@@ -143,11 +146,10 @@ namespace IngameScript
                         CargoGo = false;
                     }
                 }
-                // TODO: Check H2 tanks
                 if (bDoChecks) _tanks.TanksCalculate();
                 if (bLaunchCheck)
                 {
-                    if (_tanks.HasHydroTanks() && _tanks.hydroPercent * 100 < _tanks.tankspcthigh)
+                    if (_tanks.HasHydroTanks() && _tanks.hydroPercent < _tanks.tankspcthigh)
                     {
                         //                        _program.ErrorLog("Tanks not airworthy (launch) "+_tanks.hydroPercent.ToString("0.00"));
                         TanksGo = false;
@@ -155,7 +157,7 @@ namespace IngameScript
                 }
                 else
                 {
-                    if (_tanks.HasHydroTanks() && _tanks.hydroPercent * 100 < _tanks.tankspctlow)
+                    if (_tanks.HasHydroTanks() && _tanks.hydroPercent < _tanks.tankspctlow)
                     {
                         //                        _program.ErrorLog("Tanks not airworthy " + _tanks.hydroPercent.ToString("0.00"));
                         TanksGo = false;
