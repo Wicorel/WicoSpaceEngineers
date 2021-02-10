@@ -38,6 +38,13 @@ namespace IngameScript
             // update list when availability changes
             // allow request for reserving connector
             // assume reservation when something is docked
+            // time-out an assigned dock if aborted or no response after a set time
+            // what connector can supply/take
+            //    Take Ore
+            //    give power
+            //    Give Hydrogen
+            //    Give Uranium
+
 
             public BaseConnectors(Program program, WicoBlockMaster wbm, WicoIGC wicoIGC, WicoElapsedTime wicoElapsedTime, Timers timers)
             {
@@ -230,7 +237,7 @@ namespace IngameScript
                         _program.Echo("Sending Dock Fail");
                         // docking request failed
                         // need to have 'target' for message based on request message.
-                        _program.IGC.SendBroadcastMessage("CONF", incomingID + ":" + _program.Me.CubeGrid.CustomName + ":" + _program.Me.EntityId.ToString() + ":" + _program.Vector3DToString(_program.Me.GetPosition()));
+                        _program.IGC.SendBroadcastMessage("CONF", incomingID + ":" + _wicoBlockMaster.GetShipName().ToString() + ":" + _program.Me.EntityId.ToString() + ":" + _program.Vector3DToString(_program.Me.GetPosition()));
                     }
                 }
                 if(msg.Tag=="COND?") 
@@ -275,7 +282,7 @@ namespace IngameScript
                     else
                     {
                         // docking request failed
-                        _program.IGC.SendBroadcastMessage("CONF", incomingID + ":" + _program.Me.CubeGrid.CustomName + ":" + _program.Me.EntityId.ToString() + ":" + _program.Vector3DToString(_program.Me.GetPosition()));
+                        _program.IGC.SendBroadcastMessage("CONF", incomingID + ":" + _wicoBlockMaster.GetShipName().ToString() + ":" + _program.Me.EntityId.ToString() + ":" + _program.Vector3DToString(_program.Me.GetPosition()));
                     }
                 }
 
@@ -299,7 +306,7 @@ namespace IngameScript
                 if (dockingInfo.Count > 0)
                 {
                     bool bJumpCapable = false;
-                    string sname = _program.Me.CubeGrid.CustomName;
+                    string sname = _wicoBlockMaster.GetShipName().ToString();
                     Vector3D vPosition = _program.Me.CubeGrid.GetPosition();// antennaPosition();
 
                     _program.IGC.SendBroadcastMessage("BASE", _program.toGpsName("", sname) + ":" + _program.Me.EntityId.ToString() +
