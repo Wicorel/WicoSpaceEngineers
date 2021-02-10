@@ -31,6 +31,8 @@ namespace IngameScript
             protected List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
             protected List<IMyLaserAntenna> antennaLList = new List<IMyLaserAntenna>();
 
+            protected List<IMyBeacon> beaconList = new List<IMyBeacon>();
+
             protected Program _program;
             protected WicoBlockMaster _wicoBlockMaster;
 
@@ -63,6 +65,10 @@ namespace IngameScript
                 if (tb is IMyLaserAntenna)
                 {
                     antennaLList.Add(tb as IMyLaserAntenna);
+                }
+                if (tb is IMyBeacon)
+                {
+                    beaconList.Add(tb as IMyBeacon);
                 }
             }
             void LocalGridChangedHandler()
@@ -174,6 +180,48 @@ namespace IngameScript
             public int AntennaCount()
             {
                 return (antennaList.Count);
+            }
+
+            public void SetAnnouncement(string sMessage)
+            {
+                if(beaconList.Count>0)
+                {
+                    IMyBeacon beacon = beaconList[0];
+                    beacon.Enabled = true;
+                    beacon.HudText = sMessage;
+                    return;
+                }
+                IMyRadioAntenna theAntenna = null;
+                foreach(var antenna in antennaList)
+                {
+                    if(theAntenna==null || (antenna.Enabled && antenna.Radius>theAntenna.Radius))
+                    {
+                        theAntenna = antenna;
+                        continue;
+                    }
+                }
+                if(theAntenna!=null)
+                {
+                    theAntenna.Enabled = true;
+                    theAntenna.HudText = sMessage;
+                }
+            }
+
+            public void ClearAnnouncement()
+            {
+                foreach(var beacon in beaconList)
+                {
+                    if(beacon.Enabled)
+                    {
+                        beacon.Enabled = false;
+                        beacon.HudText = "";
+
+                    }
+                }
+                foreach(var antenna in antennaList)
+                {
+                    antenna.HudText = "";
+                }
             }
 
         }
