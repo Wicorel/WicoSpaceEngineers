@@ -114,7 +114,14 @@ namespace IngameScript
                     bool bResult = false;
                     bool bOK = bool.TryParse((string)msg.Data, out bResult);
                     if (bOK)
+                    {
+                        if(bResult!=bAutoRelaunch)
+                        {
+                            _program._CustomDataIni.Set(sDockingSection, "AutoRelaunch", bResult);
+                            _program.CustomDataChanged();
+                        }
                         bAutoRelaunch = bResult;
+                    }
                 }
             }
 
@@ -144,6 +151,12 @@ namespace IngameScript
                     _displays.ClearDisplays("MODE");
                     _systemsMonitor.ResetMotion();
                 }
+                if (toMode == 0
+                    || toMode== WicoControl.MODE_ATTENTION
+                    )
+                {
+                    bAutoRelaunch = false;
+                }
             }
             /// <summary>
             /// Handler for processing any of the 'trigger' upatetypes
@@ -165,9 +178,9 @@ namespace IngameScript
                     if (myCommandLine.Argument(0) == "relaunch")
                     {
                         bAutoRelaunch = !bAutoRelaunch;
-                        string s = "AutoRelaunch=" + bAutoRelaunch.ToString();
-                        _program.Echo(s);
-                        _program.ErrorLog(s);
+//                        string s = "AutoRelaunch=" + bAutoRelaunch.ToString();
+ //                       _program.Echo(s);
+//                        _program.ErrorLog(s);
                         _program._CustomDataIni.Set(sDockingSection, "AutoRelaunch", bAutoRelaunch);
                         _program.CustomDataChanged();
                     }
@@ -187,6 +200,8 @@ namespace IngameScript
             {
                 int iMode = _wicoControl.IMode;
                 int iState = _wicoControl.IState;
+
+                _program.Echo("Autorelaunch=" + bAutoRelaunch.ToString());
 
                 if (iMode == WicoControl.MODE_DOCKED) { doModeDocked(); return; }
 
@@ -317,14 +332,15 @@ namespace IngameScript
 
                     _systemsMonitor.TanksStockPile(false); // turn tanks ON
 
+                    // Communications manager does this now..
+
                     // TODO: allow for relay ships that are NOT bases..
-                    float range = _wicoBases.RangeToNearestBase() + 100f + (float)_wicoBlockMaster.GetShipSpeed() * 5f;
-                    _antennas.SetMaxPower(false, range);
+//                    float range = _wicoBases.RangeToNearestBase() + 100f + (float)_wicoBlockMaster.GetShipSpeed() * 5f;
+//                    _antennas.SetMaxPower(false, range);
                     _systemsMonitor.BatterySetNormal();
                 }
                 else
                 {
-
                     sbModeInfo.AppendLine("Power Saving Mode");
                     _program.Echo("Power Saving Mode");
                     if (iState == 0)
@@ -424,7 +440,7 @@ namespace IngameScript
                             //                            if (hydroPercent < 0.20f)
                             //                                StatusLog(" WARNING: Low Hydrogen Supplies", textPanelReport);
 
-                            _program.Echo("H:" + _systemsMonitor.hydroPercent.ToString("000.0%"));
+                            _program.Echo("H:" + _systemsMonitor.hydroPercent.ToString("000.0")+"%");
                         }
                         else _program.Echo("No Hydrogen Tanks");
                         if (_systemsMonitor.batteryPercentage >= 0 && _systemsMonitor.batteryPercentage < _systemsMonitor.batterypctlow)
