@@ -74,6 +74,8 @@ namespace IngameScript
                         return false;
                     }
                 }
+                if (bCheckingTimers)
+                    _program.Echo("ERROR: Adding while checking");
                 TimerList.Add(et);
 
                 return true;
@@ -164,6 +166,25 @@ namespace IngameScript
                 }
                 return true;
             }
+            /// <summary>
+            /// Returns if the timer is epxired or inactive.
+            /// </summary>
+            /// <param name="sName"></param>
+            /// <returns>False if the timer is not active. True if the timer is expired or doesn't exist</returns>
+            public bool IsInActiveOrExpired(string sName)
+            {
+                foreach (var et in TimerList)
+                {
+                    if (et.sName == sName)
+                    {
+                        if (!et.bActive) return true;
+                        if (et.dElapsedSeconds < 0) return true;
+                        if (et.dElapsedSeconds > et.dWaitSeconds) return true;
+                        else return false;
+                    }
+                }
+                return true;
+            }
 
             public bool IsActive(string sName)
             {
@@ -204,12 +225,13 @@ namespace IngameScript
                 return -1;
             }
 
+            bool bCheckingTimers = false;
             /// <summary>
             /// Call from main loop for EVERY update source type.
             /// </summary>
             public void CheckTimers(UpdateType updateSource)
             {
-                if (_bDebug) _program.Echo("CheckTimers() " + TimerList.Count.ToString() + " Timers");
+                bCheckingTimers = true;
                 foreach (var et in TimerList)
                 {
                     if (_bDebug) _program.Echo("Timer:" + et.sName + " Active="+ et.bActive+" " + et.dElapsedSeconds.ToString("0.00") + "/" + et.dWaitSeconds.ToString("0.00"));
@@ -221,10 +243,11 @@ namespace IngameScript
                         }
                         if (et.dElapsedSeconds > et.dWaitSeconds)
                         {
-                            if (_bDebug) _program.Echo("Trigger:" + et.sName);
                             if (et.handler != null)
                             {
                                 et.handler(et.sName);
+                                if (et.AutoRestart)
+                                    et.dElapsedSeconds = 0;
                             }
                         }
                         if(et.dElapsedSeconds<0)
@@ -236,6 +259,7 @@ namespace IngameScript
                         _wicoUpdates.WantSlow();
                     }
                 }
+                bCheckingTimers = false;
             }
 
             public void SetDebug(bool bDebug=false)
