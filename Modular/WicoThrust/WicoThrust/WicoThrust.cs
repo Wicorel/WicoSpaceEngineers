@@ -439,13 +439,6 @@ namespace IngameScript
                 return stoppingM;
             }
 
-            //            [Obsolete]
-            public double calculateStoppingDistance(IMyTerminalBlock ShipController, List<IMyTerminalBlock> thrustStopList, double currentV, double dGrav)
-            {
-                var myMass = ((IMyShipController)ShipController).CalculateShipMass();
-                return calculateStoppingDistance(myMass.PhysicalMass, thrustStopList, currentV, dGrav);
-            }
-
             public double CalculateTotalEffectiveThrust(List<IMyTerminalBlock> thrusters, float atmoMult = 5f, float ionMult = 2f, float hydroMult = 1f)
             {
                 double totalThrust = 0;
@@ -475,13 +468,16 @@ namespace IngameScript
             /// <param name="fAbort">Abort speed in mps.  Emergency stop if above this speed</param>
             /// <param name="mfsForwardThrust">thrusters for 'forward'</param>
             /// <param name="mfsBackwardThrust">reverse thrusters to slow down. 'Back'</param>
-            /// <param name="effectiveMass"></param>
-            /// <param name="shipSpeed"></param>
+            /// <param name="effectiveMass">ship's effective mass</param>
+            /// <param name="shipSpeed">the ship's current speed</param>
             public void MoveForwardSlow(float fTarget, float fAbort, List<IMyTerminalBlock> mfsForwardThrust,
                 List<IMyTerminalBlock> mfsBackwardThrust, double effectiveMass, double shipSpeed)
             {
                 if (_iMFSWiggle < 0) _iMFSWiggle = 0;
 
+                // todo: only do every so often
+                // TODO: 1. Cache for the list 2. Don't take list and cache (assume forward?)
+                // 3. make other directions(used in docking in direction of connector)
                 double maxThrust = calculateMaxThrust(mfsForwardThrust);
                 //            Echo("maxThrust=" + maxThrust.ToString("N0"));
 
@@ -491,23 +487,44 @@ namespace IngameScript
                     double maxDeltaV = (maxThrust) / effectiveMass;
                     //           Echo("maxDeltaV=" + maxDeltaV.ToString("0.00"));
                     if (maxDeltaV > 0) thrustPercent = (float)(fTarget / maxDeltaV);
-                    _program.Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
+//                    _program.Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
                 }
                 //            Echo("effectiveMass=" + effectiveMass.ToString("N0"));
                 if (shipSpeed > fAbort)
                 {
-                    _program.Echo("ABROT!");
+//                    _program.Echo("ABORT!");
                     powerDownThrusters(thrustAllList);
                 }
                 else if (shipSpeed < (fTarget * 0.90))
                 {
                     if (shipSpeed < 0.09)
+                    {
+                        // we have not started moving yet
                         _iMFSWiggle++;
+                        thrustPercent *= 1.25f;
+                    }
                     if (shipSpeed < fTarget * 0.25)
+                    {   
+                        // we are not yet moving fast enough
                         _iMFSWiggle++;
+                    }
                     //                Echo("Push ");
                     //                Echo("thrustPercent=" + thrustPercent.ToString("0.00"));
-                    powerUpThrusters(mfsForwardThrust, thrustPercent + _iMFSWiggle / 5);
+//                    _program.Echo("Wiggle=" + _iMFSWiggle);
+                    if (_iMFSWiggle < 500) // 100*5
+                    {
+                        powerUpThrusters(mfsForwardThrust, thrustPercent + _iMFSWiggle / 5);
+                    }
+                    else
+                    {
+//                        _program.Echo("WIGGLE DELAY");
+                        powerDownThrusters();
+                    }
+                    if (_iMFSWiggle > 700) // number is higher to have a delay
+                    {
+//                        _program.Echo("WIGGLE RESET");
+                        _iMFSWiggle = 0; // reset
+                    }
                 }
                 else if (shipSpeed < (fTarget * 1.1))
                 {
