@@ -305,9 +305,9 @@ namespace IngameScript
 
                 if (!(btmWheels || btmRotor))
                 {
-                    dtmPrecision = _thrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmPrecisionSpeed, 0);
-                    dtmApproach = dtmPrecision + _thrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmApproachSpeed, 0);
-                    dtmFar = dtmApproach + _thrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmFarSpeed, 0); 
+                    dtmPrecision = _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustTmBackwardList, dtmPrecisionSpeed, 0);
+                    dtmApproach = dtmPrecision + _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustTmBackwardList, dtmApproachSpeed, 0);
+                    dtmFar = dtmApproach + _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustTmBackwardList, dtmFarSpeed, 0); 
 //                  dtmApproach = _thrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmApproachSpeed + (dtmFarSpeed - dtmApproachSpeed) / 2, 0);
 //                  dtmPrecision = _thrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmPrecisionSpeed + (dtmApproachSpeed - dtmPrecisionSpeed) / 2, 0);
 
@@ -1506,6 +1506,7 @@ namespace IngameScript
                         // full power, captain!
                         CurrentStatus += "\n Start Movement";
                         _thrusters.powerUpThrusters(thrustTmForwardList, maxThrust*1.2f);
+                        _thrusters.powerDownThrusters(thrustTmBackwardList, WicoThrusters.thrustAll, true);
                     }
                     // if we need to go much faster or we are FAR and not near max speed
                     else if (velocityShip < maxSpeed * .75 || (!btmApproach && velocityShip < maxSpeed * .98))
@@ -1514,6 +1515,7 @@ namespace IngameScript
 
                         float delta = (float)maxSpeed / _wicoControl.fMaxWorldMps * maxThrust;
                         _thrusters.powerUpThrusters(thrustTmForwardList, delta);
+                        _thrusters.powerDownThrusters(thrustTmBackwardList, WicoThrusters.thrustAll, true);
                     }
                     else if (velocityShip < maxSpeed * .85)
                     {
