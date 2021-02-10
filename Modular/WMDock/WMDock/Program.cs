@@ -126,12 +126,12 @@ namespace IngameScript
                 wicoPower.CalcPower();
                 int engines = 0;
                 engines = wicoPower.EnginesCount();
-                Echo("H Engines: " + engines.ToString());
                 if (engines > 0)
                 {
- //                   Echo("Maxoutput=" + wicoPower.maxHydrogenPower.ToString() + " Current=" + wicoPower.currentEngineOutput.ToString());
+                    Echo("H Engines: " + engines.ToString());
+                    //                   Echo("Maxoutput=" + wicoPower.maxHydrogenPower.ToString() + " Current=" + wicoPower.currentEngineOutput.ToString());
                     var tanksfill = wicoPower.EnginesTanksFill();
-                    Echo(" Tanks Filled=" + (tanksfill * 100).ToString() + "%");
+                    Echo(" Engine Tanks Filled=" + (tanksfill * 100).ToString() + "%");
                 }
                 // ensure we run at least at slow speed for updates.
                 _wicoControl.WantSlow();
