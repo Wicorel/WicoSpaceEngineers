@@ -194,7 +194,7 @@ namespace IngameScript
             /// Align the direction of the ship to the aim at the target
             /// </summary>
             /// <param name="vDirection">GRID orientation to use for aiming</param>
-            /// <param name="vTarget">VECTOR to aim the grid</param>
+            /// <param name="vTarget">World VECTOR to aim the grid</param>
             /// <param name="gyroControlPoint"></param>
             /// <returns></returns>
             public bool AlignGyros(Vector3D vDirection, Vector3D vTarget )//, IMyTerminalBlock gyroControlPoint)
@@ -228,7 +228,7 @@ namespace IngameScript
                         g1.GyroOverride = false;
                         continue;
                     }
-                    _program.Echo("Auto-Level:Off level: " + (ang * 180.0 / 3.14).ToString("0.0") + " deg");
+//                    _program.Echo("Auto-Level:Off level: " + (ang * 180.0 / 3.14).ToString("0.0") + " deg");
 
                     float yawMax = (float)(2 * Math.PI);
 
@@ -476,6 +476,13 @@ namespace IngameScript
                 return Vector3D.Distance(a, b);
             }
 
+            public double VectorAngleBetween(Vector3D a, Vector3D b) //returns radians  
+            {
+                if (a.LengthSquared() == 0 || b.LengthSquared() == 0)
+                    return 0;
+                else
+                    return Math.Acos(MathHelper.Clamp(a.Dot(b) / a.Length() / b.Length(), -1, 1));
+            }
 
             #region Grid2World
             // from http://forums.keenswh.com/threads/library-grid-to-world-coordinates.7284828/
