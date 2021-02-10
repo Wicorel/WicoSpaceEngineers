@@ -74,6 +74,10 @@ namespace IngameScript
              * Add remembered connector
              * Support atmo docking
              * 
+            * (dock) set home dock
+            * (dock) forget home dock
+            * (dock) set fixed approach location (V1 'home')
+            * 
              * Add reasons for docking request (need power, need hydro, dump ore, etc)
              * 
              * 
@@ -415,43 +419,34 @@ namespace IngameScript
 
                 //                if (iMode == 0 || iMode == WicoControl.MODE_ATTENTION) return;
 
+                bool bAirWorthy = _systemsMonitor.AirWorthy(false, false, _systemsMonitor.cargohighwater);
+
                 if (iMode == WicoControl.MODE_LAUNCH) { doModeLaunch(); return; }
                 if (iMode == WicoControl.MODE_DOCKING) { doModeDocking(); return; }
-//                if (iMode == WicoControl.MODE_DOCKED) { doModeDocked(); return; }
+                //                if (iMode == WicoControl.MODE_DOCKED) { doModeDocked(); return; }
 
                 if (_systemsMonitor.AnyConnectorIsConnected() && iMode != WicoControl.MODE_DOCKED)
                 {
                     _wicoControl.SetMode(WicoControl.MODE_DOCKED);
                 }
-                if (iMode == WicoControl.MODE_MINE
-                    || iMode == WicoControl.MODE_GOTOORE
-                    || iMode== WicoControl.MODE_EXITINGASTEROID
-                    )
-                {
-                    // we expect them to do cargo checks.
-
-                }
-                else
-                {
-                    _systemsMonitor.doCargoCheck();
-                }
-
                 if (
                     (
-                    iMode==WicoControl.MODE_GOINGTARGET
+                    iMode == WicoControl.MODE_GOINGTARGET
                     || iMode == WicoControl.MODE_ARRIVEDTARGET
                     || iMode == WicoControl.MODE_NAVNEXTTARGET
                     )
-                    && !bDoingDocking 
+                    && !bDoingDocking
                     && bAutoRefuel
                   )
                 {
-                    bool bAirWorthy = _systemsMonitor.AirWorthy(false, false, _systemsMonitor.cargohighwater);
-                    if (!bAirWorthy)
+                    if (_systemsMonitor.AnyConnectorIsConnected() && iMode != WicoControl.MODE_DOCKED)
                     {
-                        _program.ErrorLog("Gasp! Need to DOCK! Doing="+bDoingDocking + " Mode="+iMode);
+                        if (!bAirWorthy)
+                        {
+                            _program.ErrorLog("Gasp! Need to DOCK! Doing=" + bDoingDocking + " Mode=" + iMode);
 
-                        _wicoControl.SetMode(WicoControl.MODE_DOCKING);
+                            _wicoControl.SetMode(WicoControl.MODE_DOCKING);
+                        }
                     }
                 }
             }
@@ -790,6 +785,9 @@ namespace IngameScript
                     // TODO: handle other connection methods.
                     _systemsMonitor.ConnectAnyConnectors(true, true);
                     _program.ResetMotion();
+
+                    _program.ErrorLog("Auto Launch");
+
                     _wicoControl.SetMode(WicoControl.MODE_NAVNEXTTARGET);
                 }
             }
@@ -1299,7 +1297,12 @@ namespace IngameScript
                     bool bAimed = _systemsMonitor.AlignGyros("forward", vVec, _wicoBlockMaster.GetMainController());
                     double distanceSQ = (vLaunch1 - _wicoBlockMaster.CenterOfMass()).LengthSquared();
                     _program.Echo("DistanceSQ=" + distanceSQ.ToString("0.0"));
-                    if (distanceSQ < _wicoBlockMaster.BlockMultiplier() * 3)
+                    if (distanceSQ < 
+                          (
+                          _wicoBlockMaster.BlockMultiplier() * 3 
+                          + _systemsMonitor.calculateStoppingDistance(_wicoBlockMaster.GetPhysicalMass(), thrustBackwardList, _wicoBlockMaster.GetShipSpeed(), 0)*2
+                          )
+                       )
                     {
 //                        _program.ErrorLog("410 Moving foward for ship position");
                         _program.ResetMotion();
@@ -1359,11 +1362,18 @@ namespace IngameScript
                 }
                 else if (iState == 430)
                 {
+                    sbModeInfo.AppendLine("arrived at launch1");
+                    _program.ResetMotion();
                     // arrived at launch1
-                    _wicoControl.WantFast();
-                    dockingLastDistance = -1;
-                    _wicoControl.SetState(450);
+                    //                    _wicoControl.WantFast();
                     // TODO: do/waitfor mechanical changes needed for docking
+                    if (_wicoBlockMaster.GetShipSpeed() < 0.2)
+                    {
+                        dockingLastDistance = -1;
+                        _wicoControl.SetState(450);
+                    }
+                    else sbModeInfo.AppendLine("Waiting for stop");
+
                 }
                 else if (iState == 450 || iState == 452)
                 { //450 452 'reverse' to dock, aiming connector at dock location
@@ -1371,7 +1381,6 @@ namespace IngameScript
                     sbModeInfo.AppendLine("Align Up to Docking Connector");
                     //                    StatusLog("Align Up to Docking Connector", textPanelReport);
                     _wicoControl.WantFast();
-                    //                turnEjectorsOff();
                     if (!bDoDockAlign)
                     {
                         _wicoControl.SetState(500);
@@ -1383,14 +1392,16 @@ namespace IngameScript
 
                     // TODO: need to change direction if non- 'back' connector
                     bAimed = _systemsMonitor.AlignGyros("up", vDockAlign, _wicoBlockMaster.GetMainController());
-                    _wicoControl.WantFast();
-                    if (iState == 452) _wicoControl.SetState(500);
-                    else if (bAimed) _wicoControl.SetState(451); ; // 450->451 
+                    if (bAimed)
+                    {
+                        if (iState == 452) _wicoControl.SetState(500);
+                        else _wicoControl.SetState(451); ; // 450->451 
+                    }
                 }
                 else if (iState == 451)
                 { //451 align to dock
                   //                    StatusLog("Align to Docking Connector", textPanelReport);
-                    sbModeInfo.AppendLine("Align to Docking Connector");
+                    sbModeInfo.AppendLine("Align to Docking Connector 2");
                     _wicoControl.WantFast();
                     Vector3D vTargetLocation = vDock;
                     Vector3D vVec = vTargetLocation - dockingConnector.GetPosition();
@@ -1405,8 +1416,6 @@ namespace IngameScript
                     _systemsMonitor.SetMinAngle(0.03f);
                     bAimed = _systemsMonitor.AlignGyros("forward", vVec, dockingConnector);
                     if (bAimed) _wicoControl.SetState(452);
-                    else _wicoControl.WantFast();
-
                 }
                 else if (iState == 500)
                 { //500 'reverse' to dock, aiming connector at dock location (really it's connector-forward)
@@ -1450,8 +1459,8 @@ namespace IngameScript
                     //                    _program.Echo("rot=" + rot.ToString());
                     //                    _program.Echo("dot2=" + (dot2).ToString("0.00"));
 
-                    if (dockingLastDistance < 0) dockingLastDistance = distance;
-                    if (dockingLastDistance < distance)
+                    if (dockingLastDistance < 0) dockingLastDistance = distance+1;
+                    if (dockingLastDistance < distance || offsetL>(distance+_wicoBlockMaster.gridsize))
                     {
                         // we are farther away than last time... something is wrong..
                         _wicoControl.SetState(590);
@@ -1470,7 +1479,9 @@ namespace IngameScript
 
                     if (bAimed)
                     { // only check if we are aimed at desired connector
-                        if (offsetL > _wicoBlockMaster.gridsize)
+//                        _program.Echo("Angle Between=" + _systemsMonitor._gyros.VectorAngleBetween(dockingConnector.WorldMatrix.Forward, -vTargetLine));
+
+                        if (offsetL > _wicoBlockMaster.gridsize*2)
                         { // we are farther then desired point that we want to be.
                             _program.Echo("Farther than desired");
 
@@ -1536,6 +1547,7 @@ namespace IngameScript
                 }
                 else if (iState == 590)
                 {
+                    sbModeInfo.AppendLine("Abort and try again");
                     // abort dock and try again
                     _program.ResetMotion();
                     Vector3D vVec = vDock - dockingConnector.GetPosition();
