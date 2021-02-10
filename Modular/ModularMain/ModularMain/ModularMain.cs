@@ -341,6 +341,7 @@ namespace IngameScript
                 Echo(OurName + sVersion + moduleList);
 //                Echo(moduleList.Trim());
             }
+            if (_wicoControl != null && _wicoControl._bUpdateDebug) Echo("Update=" + updateSource.ToString());
             ModulePreMain(argument, updateSource);
             if (tmGridCheckElapsedMs >= 0) tmGridCheckElapsedMs += Runtime.TimeSinceLastRun.TotalMilliseconds;
             if (!bInitDone)
