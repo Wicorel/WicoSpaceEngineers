@@ -37,6 +37,10 @@ namespace IngameScript
             Displays _displays;
 
             string sCargoSection = "CARGO";
+            string DisplayCargoCheck = "CARGOCHECK";
+            string KeyCargoPcent = "cargopctmin";
+            string KeyCargoHighwater = "cargohighwater";
+
             public CargoCheck(Program program, WicoBlockMaster wbm, Displays displays)
             {
                 _program = program;
@@ -49,13 +53,13 @@ namespace IngameScript
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
 
-                cargopctmin = _program._CustomDataIni.Get(sCargoSection, "cargopctmin").ToInt32(cargopctmin);
-                _program._CustomDataIni.Set(sCargoSection, "cargopctmin", cargopctmin);
+                cargopctmin = _program._CustomDataIni.Get(sCargoSection, KeyCargoPcent).ToInt32(cargopctmin);
+                _program._CustomDataIni.Set(sCargoSection, KeyCargoPcent, cargopctmin);
 
-                cargohighwater = _program._CustomDataIni.Get(sCargoSection, "cargohighwater").ToInt32(cargohighwater);
-                _program._CustomDataIni.Set(sCargoSection, "cargohighwater", cargohighwater);
+                cargohighwater = _program._CustomDataIni.Get(sCargoSection, KeyCargoHighwater).ToInt32(cargohighwater);
+                _program._CustomDataIni.Set(sCargoSection, KeyCargoHighwater, cargohighwater);
 
-                if (_displays!=null) _displays.AddSurfaceHandler("CARGOCHECK", SurfaceHandler);
+                if (_displays!=null) _displays.AddSurfaceHandler(DisplayCargoCheck, SurfaceHandler);
             }
 
             StringBuilder sbNotices = new StringBuilder(300);
@@ -63,7 +67,7 @@ namespace IngameScript
 
             public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
             {
-                if (tag == "CARGOCHECK")
+                if (tag == DisplayCargoCheck)
                 {
                     if (ActionType == Displays.DODRAW)
                     {
@@ -145,12 +149,13 @@ namespace IngameScript
 //                Ini.Set(sCargoSection, "cargopctmin", cargopctmin);
             }
 
-
+            public bool bHasDrills=false;
+            public bool bCargoFull = true;
+            public bool bDrillFull = false;
             //
             // Start of custom routines
             public void doCargoCheck()
             {
-
                 sbNotices.Clear();
                 sbModeInfo.Clear();
                 if (lContainers.Count < 1)
@@ -165,9 +170,9 @@ namespace IngameScript
                 double totalMax = 0.0;
                 double ratio = 0;
 
-                bool bCargoFull = true;
-                bool bDrillFull = false;
-                bool bHasDrills = false;
+                bCargoFull = true;
+                bDrillFull = false;
+                bHasDrills = false;
 
                 sbNotices.AppendLine(lContainers.Count+ " Cargo Containers");
                 for (int i = 0; i < lContainers.Count; i++)
