@@ -225,6 +225,18 @@ namespace IngameScript
                 return velocity;
             }
 
+            readonly StringBuilder ShipName = new StringBuilder(42);
+
+            public StringBuilder GetShipName()
+            {
+                ShipName.Clear();
+                if (GetMainController() != null)
+                    ShipName.Append(GetMainController().CubeGrid.CustomName);
+                else
+                    ShipName.Append(_program.Me.CubeGrid.CustomName);
+                return ShipName;
+            }
+
             public Vector3D GetNaturalGravity()
             {
                 Vector3D vNG = _emptyV3D;
