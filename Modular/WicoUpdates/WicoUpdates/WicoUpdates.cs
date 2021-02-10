@@ -23,7 +23,7 @@ namespace IngameScript
         {
             protected Program _program;
 
-            internal bool _bUpdateDebug = false;
+            public bool _bUpdateDebug = false;
 
             public WicoUpdates(Program program)
             {
