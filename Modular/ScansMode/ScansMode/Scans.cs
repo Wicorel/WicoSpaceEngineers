@@ -28,6 +28,7 @@ namespace IngameScript
             WicoBlockMaster _wicoBlockMaster;
             Cameras _cameras;
             Asteroids _asteroids;
+            Displays _displays;
 
             /// <summary>
             /// The max range at which we scan. Default.  Value loaded from CustomData
@@ -43,6 +44,7 @@ namespace IngameScript
 
             public ScansMode(Program program, WicoControl wicoControl, WicoBlockMaster wicoBlockMaster,
                 WicoIGC igc, Cameras cameras, Asteroids asteroids
+                , Displays displays
                 ) : base(program, wicoControl)
             {
                 _program = program;
@@ -51,6 +53,7 @@ namespace IngameScript
                 _wicoIGC = igc;
                 _cameras = cameras;
                 _asteroids = asteroids;
+                _displays = displays;
 
                 _program.moduleName += " Scans";
                 _program.moduleList += "\nScans V4.2a";
@@ -70,6 +73,8 @@ namespace IngameScript
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
                 _wicoIGC.AddPublicHandler(sScansTag, BroadcastHandler);
+
+                _displays.AddSurfaceHandler("MODE", SurfaceHandler);
 
             }
 
@@ -169,6 +174,53 @@ namespace IngameScript
                     }
                 }
             }
+            StringBuilder sbNotices = new StringBuilder(300);
+            StringBuilder sbModeInfo = new StringBuilder(100);
+
+            public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
+            {
+                if (tag == "MODE")
+                {
+                    if (ActionType == Displays.DODRAW)
+                    {
+                        int iMode = _wicoControl.IMode;
+                        int iState = _wicoControl.IState;
+
+                        if (iMode == WicoControl.MODE_DOSCANS
+                            )
+                        {
+                            tsurface.WriteText(sbModeInfo);
+                            if (tsurface.SurfaceSize.Y < 256)
+                            { // small/corner LCD
+
+                            }
+                            else
+                            {
+                                tsurface.WriteText(sbNotices, true);
+                            }
+                        }
+                    }
+                    else if (ActionType == Displays.SETUPDRAW)
+                    {
+                        tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                        tsurface.WriteText("");
+                        if (tsurface.SurfaceSize.Y < 256)
+                        {
+                            tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                            tsurface.FontSize = 2;
+                        }
+                        else
+                        {
+                            tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
+                            tsurface.FontSize = 1.5f;
+                        }
+                    }
+                    else if (ActionType == Displays.CLEARDISPLAY)
+                    {
+                        tsurface.WriteText("");
+                    }
+                }
+            }
 
             // TODO: Flags for other options (TBD)
             // TODO: scan range
@@ -199,6 +251,9 @@ namespace IngameScript
                 //                StatusLog("clear", textPanelReport);
                 //                StatusLog(moduleName + ":SCAN!", textPanelReport);
                 _program.Echo("Scan:iState=" + iState.ToString());
+                sbModeInfo.Clear();
+                sbNotices.Clear();
+                sbModeInfo.AppendLine("Raycast Scanning");
 
                 switch (iState)
                 {
@@ -293,7 +348,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scanfrontScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                                s += scanfrontScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scanfrontScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -303,7 +358,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scanbackScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                                s += scanbackScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scanbackScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -313,7 +368,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scanleftScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                                s += scanleftScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scanleftScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -323,7 +378,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scanrightScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                                s += scanrightScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scanrightScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -333,7 +388,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scantopScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                                s += scantopScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scantopScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -343,7 +398,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scanbottomScanner.SCAN_DISTANCE.ToString("0") + " meters";
+                                s += scanbottomScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scanbottomScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -353,6 +408,8 @@ namespace IngameScript
                             else s += "FOUND at least one asteroid!";
 
                             //                            StatusLog(s, textPanelReport);
+                            sbNotices.AppendLine(s);
+
                             _program.Echo(s);
 
                             if (
