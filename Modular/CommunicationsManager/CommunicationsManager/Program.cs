@@ -23,6 +23,7 @@ namespace IngameScript
     {
         WicoControl _wicoControl;
         Communications _communications;
+        ModeAttention _modeAttention;
         //        Antennas wicoAntennas;
         IFF _iff;
 
@@ -42,6 +43,7 @@ namespace IngameScript
 //            wicoAntennas = new Antennas(this, wicoBlockMaster);
             _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
             _communications = new Communications(this, wicoBlockMaster, wicoElapsedTime, wicoIGC, _displays);
+            _modeAttention = new ModeAttention(this, _wicoControl, _communications);
         }
 
         public void ModulePreMain(string argument, UpdateType updateSource)

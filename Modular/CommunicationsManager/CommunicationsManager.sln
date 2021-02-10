@@ -25,6 +25,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Communications", "..\Commun
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoUpdates", "..\WicoUpdates\WicoUpdates\WicoUpdates.shproj", "{C0CDA458-C1B4-45BA-94DE-ADC133813CB0}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeAttention", "..\ModeAttention\ModeAttention\ModeAttention.shproj", "{977EC68D-9D9E-43CF-999C-350840784279}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\Antennas\Antennas\Antennas.projitems*{14fd351b-b99b-4e0f-9128-250fb3532f36}*SharedItemsImports = 13
@@ -37,6 +39,7 @@ Global
 		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{4c6c75c6-157f-452b-900d-3d5dbb135793}*SharedItemsImports = 4
 		..\IGCIFF\IGCIFF\IGCIFF.projitems*{4c6c75c6-157f-452b-900d-3d5dbb135793}*SharedItemsImports = 4
 		..\IGC\IGC\IGC.projitems*{4c6c75c6-157f-452b-900d-3d5dbb135793}*SharedItemsImports = 4
+		..\ModeAttention\ModeAttention\ModeAttention.projitems*{4c6c75c6-157f-452b-900d-3d5dbb135793}*SharedItemsImports = 4
 		..\ModularMain\ModularMain\ModularMain.projitems*{4c6c75c6-157f-452b-900d-3d5dbb135793}*SharedItemsImports = 4
 		..\WicoControl\WicoControl\WicoControl.projitems*{4c6c75c6-157f-452b-900d-3d5dbb135793}*SharedItemsImports = 4
 		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{4c6c75c6-157f-452b-900d-3d5dbb135793}*SharedItemsImports = 4
@@ -44,6 +47,7 @@ Global
 		..\BlockMaster\BlockMaster\BlockMaster.projitems*{6242f17f-6f6a-4721-8475-03a861445dec}*SharedItemsImports = 13
 		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{69f6e441-d885-42b3-8a7f-e224cc869da3}*SharedItemsImports = 13
 		..\IGCIFF\IGCIFF\IGCIFF.projitems*{6e3114c0-2d7d-403b-8a03-dd140ff4ba1b}*SharedItemsImports = 13
+		..\ModeAttention\ModeAttention\ModeAttention.projitems*{977ec68d-9d9e-43cf-999c-350840784279}*SharedItemsImports = 13
 		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{c0cda458-c1b4-45ba-94de-adc133813cb0}*SharedItemsImports = 13
 		..\IGC\IGC\IGC.projitems*{d641aa70-4a98-4d1b-b594-f38f66938d65}*SharedItemsImports = 13
 		..\WicoControl\WicoControl\WicoControl.projitems*{e1083276-87da-415b-ab5f-0d24ed85b0e5}*SharedItemsImports = 13
