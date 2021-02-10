@@ -29,7 +29,7 @@ namespace IngameScript
             private WicoThrusters _thrusters;
             private Antennas _antennas;
             private GasTanks _tanks;
-            private WicoGyros _gyros;
+            public WicoGyros _gyros;
             private PowerProduction _power;
             //            private Timers _timers;
             //            private WicoIGC _wicoIGC;
@@ -82,6 +82,8 @@ namespace IngameScript
 
                 _program.AddTriggerHandler(ProcessTrigger);
 
+                _elapsedTime.AddTimer(AirWorthyTimerName, 1);
+
             }
 
             public bool BatteryGo = true;
@@ -100,12 +102,14 @@ namespace IngameScript
 
                 bool bDoChecks = bForceCheck;
 
-                if (_elapsedTime.IsExpired(AirWorthyTimerName))
+                if (_elapsedTime.IsInActiveOrExpired(AirWorthyTimerName))
                 {
-                    _elapsedTime.AddTimer(AirWorthyTimerName,1);
+//                    _program.Echo("Restarting " + AirWorthyTimerName);
                     _elapsedTime.RestartTimer(AirWorthyTimerName);
                     bDoChecks = true;
                 }
+//                else _program.Echo(AirWorthyTimerName + ": Not Expired");
+//                _program.Echo("AirWorthy:DoChecks=" + bDoChecks);
 
                 // Check battery charge
                 if (bDoChecks) _power.BatteryCheck(0, false);
