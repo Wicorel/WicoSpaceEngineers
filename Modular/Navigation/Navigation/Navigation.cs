@@ -23,6 +23,19 @@ namespace IngameScript
     {
         public class Navigation : NavCommon
         {
+            /*
+             * Bugs: 
+             * Large Starter Miner only does 1ms.. why?
+             * 
+             * ScanEscape not working. Needs testing
+             * 
+             * TODO: 
+             *   Change scanescape to use ET instead of DateTime (350,360)
+             *   
+             *   
+             *   
+             * 
+             */
             Program _program;
             WicoControl _wicoControl;
             WicoBlockMaster _wicoBlockMaster;
@@ -59,7 +72,7 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " Navigation";
-                _program.moduleList += "\nNavigation V4.2g";
+                _program.moduleList += "\nNavigation V4.2h";
 
                 NAVEmulateOld=_program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
                 _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
@@ -925,7 +938,7 @@ namespace IngameScript
 //                    _program.EchoInstructions("NAV:160");
                     sbNotices.AppendLine("Moving to Target");
                     _program.Echo("Moving to Target");
-                    _program.Echo("Target="+VNavTarget.ToString());
+ //                   _program.Echo("Target="+VNavTarget.ToString());
                     Vector3D vTargetLocation = VNavTarget;
                     double velocityShip = shipController.GetShipSpeed();
 
@@ -980,9 +993,9 @@ namespace IngameScript
                         double stopD = 0;
                         if (vertVel < 0)
                         {
-                            stopD = _wicoThrusters.calculateStoppingDistance(shipController, thrustUpList, Math.Abs(vertVel), dGravity);
+                            stopD = _wicoThrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustUpList, Math.Abs(vertVel), dGravity);
                         }
-                        double maxStopD = _wicoThrusters.calculateStoppingDistance(shipController, thrustUpList, _wicoControl.fMaxWorldMps, dGravity);
+                        double maxStopD = _wicoThrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustUpList, _wicoControl.fMaxWorldMps, dGravity);
 
                         float atmo;
                         float hydro;
@@ -1101,6 +1114,7 @@ namespace IngameScript
 //                        _travelMovement.InitDoTravelMovement(vTargetLocation, ShipSpeedMax, (float)ArrivalDistanceMin, _wicoBlockMaster.GetMainController());
 //                        _wicoControl.SetState(161);
                         _travelMovement.doTravelMovement(_wicoElapsedTime, vTargetLocation, (float)ArrivalDistanceMin, 500, 300, ShipSpeedMax);
+                        sbNotices.AppendLine(_travelMovement.CurrentStatus);
                     }
                     else
                     {
@@ -1153,9 +1167,11 @@ namespace IngameScript
                     sbModeInfo.AppendLine("distance=" + _program.niceDoubleMeters(distance));
                     sbNotices.AppendLine("velocity=" + velocityShip.ToString("0.00"));
                     _travelMovement.doTravelMovement(_wicoElapsedTime, vAvoid, 5.0f, 160, 340, ShipSpeedMax);
+                    sbNotices.AppendLine(_travelMovement.CurrentStatus);
                 }
                 else if (iState == 340)
                 {       // secondary collision
+                    _program.ErrorLog("Secondary Collision with "+ _travelMovement.LastDetectedInfo.Type.ToString());
                     if (
                         _travelMovement.LastDetectedInfo.Type == MyDetectedEntityType.LargeGrid
                         || _travelMovement.LastDetectedInfo.Type == MyDetectedEntityType.SmallGrid
@@ -1218,8 +1234,10 @@ namespace IngameScript
                 }
                 else if (iState == 350)
                 {
+                    _program.ErrorLog("350: initescape");
                     _travelMovement.ResetTravelMovement(_wicoElapsedTime);
                     _travelMovement.initEscapeScan(shipController,_travelMovement.bCollisionWasSensor);
+                    // TODO: Change to use ET.
                     dtNavStartShip = DateTime.Now;
                     _wicoControl.SetState(360);
                     _wicoControl.WantFast();
@@ -1230,10 +1248,12 @@ namespace IngameScript
                     sbNotices.AppendLine(" Scan for escape route");
                     _program.Echo("Collision Avoid");
                     //                    StatusLog("Collision Avoid\nScan for escape route", textPanelReport);
+                    //
                     DateTime dtMaxWait = dtNavStartShip.AddSeconds(5.0f);
                     DateTime dtNow = DateTime.Now;
                     if (DateTime.Compare(dtNow, dtMaxWait) > 0)
                     {
+                        _program.ErrorLog("scanescape timeout!");
                         _wicoControl.SetMode(WicoControl.MODE_ATTENTION);
                         return;
                     }
@@ -1257,6 +1277,7 @@ namespace IngameScript
                     sbModeInfo.AppendLine("distance=" + _program.niceDoubleMeters(distance));
                     sbNotices.AppendLine("velocity=" + velocityShip.ToString("0.00"));
                     _travelMovement.doTravelMovement(_wicoElapsedTime, vAvoid, 1f, 160, 340, ShipSpeedMax);
+                    sbNotices.AppendLine(_travelMovement.CurrentStatus);
                 }
                 else if (iState == 500)
                 { // we have arrived at target
@@ -1440,6 +1461,7 @@ namespace IngameScript
                 //            _program.sMasterReporting += " Name=:" + wicoNavCommand.NAVTargetName;
                 //            _program.sMasterReporting += " Loc=" + Vector3DToString(wicoNavCommand.vNavTarget);
                 wicoNavCommands.Insert(0, wicoNavCommand);
+                if(_Debug) _program.ErrorLog("Adding Nav command to front of queue");
             }
 
             void _NavQueueMode(int theMode)
@@ -1454,6 +1476,7 @@ namespace IngameScript
                 };
 
                 wicoNavCommands.Add(wicoNavCommand);
+                if (_Debug) _program.ErrorLog("Adding setmode command to queue="+theMode);
             }
 
             void _NavGoTarget(Vector3D vTarget, int modeArrival = WicoControl.MODE_ARRIVEDTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
