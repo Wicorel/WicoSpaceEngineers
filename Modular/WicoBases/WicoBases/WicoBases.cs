@@ -172,6 +172,7 @@ namespace IngameScript
             void BaseAdd(long baseId, string baseName, Vector3D Position, bool bJumpCapable = false)
             {
 
+                // TODO: Add age of knowledge
                 BaseInfo basei = new BaseInfo
                 {
                     baseId = baseId,
@@ -187,6 +188,7 @@ namespace IngameScript
                 {
                     if (baseList[i].baseId == baseId)
                     {
+                        // TODO: update age of knowledge
                         // update information on existing entry (TODO: STRUCTURE! so this probably dosn't work
                         baseList[i].baseName = baseName;
                         baseList[i].position = Position;
@@ -209,7 +211,7 @@ namespace IngameScript
 
                 for (int i = 0; i < baseList.Count; i++)
                 {
-                    //                s += baseList[i].baseId + ":";
+//                    s1 += baseList[i].baseId + ":";
                     s1 += baseList[i].baseName + ":";
                     s1 += _program.Vector3DToString(baseList[i].position) + ":";
                     s1 += "\n";
@@ -279,14 +281,28 @@ namespace IngameScript
                 }
                 if (iBest < 0) return iBest;
                 else return baseList[iBest].baseId;
-
             }
+
 
             public long BaseFindBest()
             {
                 return BaseFindNearest();
             }
 
+            public int GetDockingBases(ref List<long> dockingBaseList)
+            {
+                int count=0;
+                if (dockingBaseList == null) return 0;
+                dockingBaseList.Clear();
+                foreach(var baseinfo in baseList)
+                {
+                    count++;
+                    dockingBaseList.Add(baseinfo.baseId);
+                }
+
+                return count;
+
+            }
 
             public int BaseIndexOf(long baseID)
             {
@@ -305,6 +321,13 @@ namespace IngameScript
                     if (baseList[i1].baseId == baseId)
                         return baseList[i1].position;
                 return vPos;
+            }
+            public string BaseName(long baseId)
+            {
+                for (int i1 = 0; i1 < baseList.Count; i1++)
+                    if (baseList[i1].baseId == baseId)
+                        return baseList[i1].baseName;
+                return "INVALID";
             }
 
             void BaseBroadcastHandler(MyIGCMessage msg)
