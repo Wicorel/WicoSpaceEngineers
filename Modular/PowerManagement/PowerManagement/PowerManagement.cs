@@ -47,7 +47,11 @@ namespace IngameScript
             bool _bDebug = false;
             bool PowerManagementEnable = true;
 
-            const string PowerManagementTimer = "PowerManagementCheck";
+            const string PowerManagementName = "PowerManagement";
+            const string PowerManagementTimer = PowerManagementName+"Check";
+            const string ControlEngines = "ControlEngines";
+            const string PowerManagementeDebug = PowerManagementName + "Debug";
+            const string PowerManagementeEnabled = PowerManagementName + "Enabled";
 
             public PowerManagement(Program program, WicoControl wicoControl, PowerProduction powerProduction, GasTanks tanks, WicoElapsedTime wicoElapsedTime, WicoIGC wicoIGC, Displays displays)
             {
@@ -65,22 +69,22 @@ namespace IngameScript
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
 
-                _ControlEngines = _program._CustomDataIni.Get(PowerManagementSection, "ControlEngines").ToBoolean(_ControlEngines);
-                _program._CustomDataIni.Set(PowerManagementSection, "ControlEngines", _ControlEngines);
+                _ControlEngines = _program._CustomDataIni.Get(PowerManagementSection, ControlEngines).ToBoolean(_ControlEngines);
+                _program._CustomDataIni.Set(PowerManagementSection, ControlEngines, _ControlEngines);
 
-                PowerManagementCheckSeconds = _program._CustomDataIni.Get(_program.OurName, "PowerManagementCheck").ToDouble(PowerManagementCheckSeconds);
-                _program._CustomDataIni.Set(_program.OurName, "PowerManagementCheck", PowerManagementCheckSeconds);
+                PowerManagementCheckSeconds = _program._CustomDataIni.Get(_program.OurName, PowerManagementTimer).ToDouble(PowerManagementCheckSeconds);
+                _program._CustomDataIni.Set(_program.OurName, PowerManagementTimer, PowerManagementCheckSeconds);
 
                 _elapsedTime.AddTimer(PowerManagementTimer, PowerManagementCheckSeconds, ElapsedTimeHandler);
                 _elapsedTime.StartTimer(PowerManagementTimer);
 
                 _displays.AddSurfaceHandler(ScreenTag, SurfaceHandler);
 
-                _bDebug = _program._CustomDataIni.Get(_program.OurName, "PowerManagementDebug").ToBoolean(_bDebug);
-                _program._CustomDataIni.Set(_program.OurName, "PowerManagementDebug", _bDebug);
+                _bDebug = _program._CustomDataIni.Get(_program.OurName, PowerManagementeDebug).ToBoolean(_bDebug);
+                _program._CustomDataIni.Set(_program.OurName, PowerManagementeDebug, _bDebug);
 
-                PowerManagementEnable = _program._CustomDataIni.Get(_program.OurName, "PowerManagementEnabled").ToBoolean(PowerManagementEnable);
-                _program._CustomDataIni.Set(_program.OurName, "PowerManagementEnabled", PowerManagementEnable);
+                PowerManagementEnable = _program._CustomDataIni.Get(_program.OurName, PowerManagementeEnabled).ToBoolean(PowerManagementEnable);
+                _program._CustomDataIni.Set(_program.OurName, PowerManagementeEnabled, PowerManagementEnable);
                 if (!PowerManagementEnable)
                 {
                     _elapsedTime.StopTimer(PowerManagementTimer);
@@ -171,7 +175,7 @@ namespace IngameScript
                 // TODO: Control H2 generators.
                 _power.CalcPower();
                 _tanks.TanksCalculate();
-                if (_ControlEngines)
+                if (_ControlEngines && _power.EnginesCount()>0)
                 {
                     // check if engines are needed to charge batteries
                     if (_power.batteryPercentage < _power.batterypctlow)
