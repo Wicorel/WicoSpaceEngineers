@@ -92,7 +92,8 @@ namespace IngameScript
 
             GridRole _gridRole;
 
-            public Communications(Program program, WicoBlockMaster wicoBlockMaster, WicoElapsedTime wicoElapsedTime, WicoIGC wicoIGC, Displays displays): base(program,wicoBlockMaster)
+            public Communications(Program program, WicoBlockMaster wicoBlockMaster, WicoElapsedTime wicoElapsedTime, WicoIGC wicoIGC, Displays displays
+                ): base(program,wicoBlockMaster)
             {
                 _program = program;
                 _wicoBlockMaster = wicoBlockMaster;
@@ -165,7 +166,7 @@ namespace IngameScript
 
                 sbMessages.Clear();
                 sbMessages.AppendLine(_program.Me.CubeGrid.EntityId.ToString());
-                sbMessages.AppendLine(_program.Me.CubeGrid.CustomName);
+                sbMessages.AppendLine(_wicoBlockMaster.GetShipName().ToString());
                 sbMessages.AppendLine(_program.Vector3DToString(tb.GetPosition()));
                 sbMessages.AppendLine(_program.Vector3DToString(_wicoBlockMaster.GetShipVelocity()));
                 sbMessages.AppendLine(((int)_gridRole).ToString());
@@ -423,6 +424,7 @@ namespace IngameScript
 
             void UpdateHandler(UpdateType updateSource)
             {
+                // TODO: Change to use elapsedtime
 
                 if ((updateSource & UpdateType.Update100) > 0)
                 {
@@ -492,7 +494,7 @@ namespace IngameScript
                         }
                         else
                         {
-                            fAntennaDesiredRange = nearestAreaController + 100 + (float)(_wicoBlockMaster.GetShipSpeed()* AnnounceSeconds);
+                            fAntennaDesiredRange = nearestAreaController + 200 + (float)(_wicoBlockMaster.GetShipSpeed()* AnnounceSeconds);
                         }
 
                     } // else leave range alone.
@@ -571,6 +573,7 @@ namespace IngameScript
 
 
 
+                    // TODO: Seperate from antenna range update on seperate elapsed timer
                     sbComInfo.Clear();
                     sbComNotices.Clear();
                     sbComInfo.AppendLine("Communications");
@@ -587,7 +590,6 @@ namespace IngameScript
                         sbComInfo.AppendLine(laser.CustomName + " (" + laser.Range.ToString("N0") + "M)");
                     }
                     sbComNotices.AppendLine("# Thrusters=" + numberLocalThrust);
-
 
                 }
             }
