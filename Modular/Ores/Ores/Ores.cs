@@ -473,14 +473,21 @@ namespace IngameScript
                 }
             }
 
-            void OreDumpFound()
+            StringBuilder sbFound = new StringBuilder(100);
+            public StringBuilder OreFoundInfo()
             {
-                _program.Echo("Ore Contents:");
+                sbFound.Clear();
+                sbFound.AppendLine("Ore Content:");
+//                _program.Echo("Ore Contents:");
                 for (int i = 0; i < oreInfos.Count; i++)
                 {
                     if (oreInfos[i].localAmount > 0 || oreInfos[i].bFound)
-                        _program.Echo(oreInfos[i].oreName + " " + oreInfos[i].localAmount.ToString("N0"));
+                    {
+                        sbFound.AppendLine(oreInfos[i].oreName + " " + oreInfos[i].localAmount.ToString("N0"));
+                    }
+//                        _program.Echo(oreInfos[i].oreName + " " + oreInfos[i].localAmount.ToString("N0"));
                 }
+                return sbFound;
             }
         }
 
