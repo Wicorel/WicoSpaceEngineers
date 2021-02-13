@@ -440,7 +440,11 @@ namespace IngameScript
                     _program.Echo("dTM:velocity=" + velocityShip.ToString("0.00"));
                     _program.Echo("dTM:tmMaxSpeed=" + tmMaxSpeed.ToString("0.00"));
                 }
-                if (distance < arrivalDistance)
+                if (
+                    distance < arrivalDistance // COM is close to desired location
+                    // ASSUMES direction is front
+                    || (distance-_wicoBlockMaster.LengthInMeters()/2) < arrivalDistance // or front of ship has crossed the line
+                    )
                     bArrived = true;
 
                 if (bArrived)
@@ -715,37 +719,42 @@ namespace IngameScript
                         // May 29, 2018 do a BB forward scan instead of just center..
                         bool bDidScan = false;
                         Vector3D vTarget;
+                        double halfshipsize = (points[2] - tmShipController.CenterOfMass).Length()/2;
+
                         switch (dtmRayCastQuadrant)
                         {
                             case 0:
-                                if (_cameras.CameraForwardScan(scanDistance))
+                                // need to subtract off position of the camera from the scan distance (for larger ships)
+//                                if (_cameras.CameraForwardScan(scanDistance - halfshipsize))
+                                if (_cameras.CameraForwardScan(tmShipController.CenterOfMass + tmShipController.WorldMatrix.Forward * scanDistance ))
+                                        
                                 { // center scan.
                                     bDidScan = true;
                                 }
                                 break;
                             case 1:
-                                vTarget = points[2] + tmShipController.WorldMatrix.Forward * distance;
+                                vTarget = points[2] + tmShipController.WorldMatrix.Forward * (scanDistance-halfshipsize);
                                 if (_cameras.CameraForwardScan(vTarget))
                                 {
                                     bDidScan = true;
                                 }
                                 break;
                             case 2:
-                                vTarget = points[3] + tmShipController.WorldMatrix.Forward * distance;
+                                vTarget = points[3] + tmShipController.WorldMatrix.Forward * (scanDistance - halfshipsize);
                                 if (_cameras.CameraForwardScan(vTarget))
                                 {
                                     bDidScan = true;
                                 }
                                 break;
                             case 3:
-                                vTarget = points[0] + tmShipController.WorldMatrix.Forward * distance;
+                                vTarget = points[0] + tmShipController.WorldMatrix.Forward * (scanDistance - halfshipsize);
                                 if (_cameras.CameraForwardScan(vTarget))
                                 {
                                     bDidScan = true;
                                 }
                                 break;
                             case 4:
-                                vTarget = points[1] + tmShipController.WorldMatrix.Forward * distance;
+                                vTarget = points[1] + tmShipController.WorldMatrix.Forward * (scanDistance - halfshipsize);
                                 if (_cameras.CameraForwardScan(vTarget))
                                 {
                                     bDidScan = true;
@@ -753,34 +762,34 @@ namespace IngameScript
                                 break;
                             case 5:
                                 // check center again.  always full length
-                                if (_cameras.CameraForwardScan(scanDistance))
+                                if (_cameras.CameraForwardScan(tmShipController.CenterOfMass + tmShipController.WorldMatrix.Forward * scanDistance))
                                 {
                                     bDidScan = true;
                                 }
                                 break;
                             case 6:
-                                vTarget = points[2] + tmShipController.WorldMatrix.Forward * distance / 2;
+                                vTarget = points[2] + tmShipController.WorldMatrix.Forward * (scanDistance - halfshipsize) / 2;
                                 if (_cameras.CameraForwardScan(vTarget))
                                 {
                                     bDidScan = true;
                                 }
                                 break;
                             case 7:
-                                vTarget = points[3] + tmShipController.WorldMatrix.Forward * distance / 2;
+                                vTarget = points[3] + tmShipController.WorldMatrix.Forward * (scanDistance - halfshipsize) / 2;
                                 if (_cameras.CameraForwardScan(vTarget))
                                 {
                                     bDidScan = true;
                                 }
                                 break;
                             case 8:
-                                vTarget = points[0] + tmShipController.WorldMatrix.Forward * distance / 2;
+                                vTarget = points[0] + tmShipController.WorldMatrix.Forward * (scanDistance - halfshipsize) / 2;
                                 if (_cameras.CameraForwardScan(vTarget))
                                 {
                                     bDidScan = true;
                                 }
                                 break;
                             case 9:
-                                vTarget = points[1] + tmShipController.WorldMatrix.Forward * distance / 2;
+                                vTarget = points[1] + tmShipController.WorldMatrix.Forward * (scanDistance - halfshipsize) / 2;
                                 if (_cameras.CameraForwardScan(vTarget))
                                 {
                                     bDidScan = true;
@@ -833,6 +842,10 @@ namespace IngameScript
                                 {
                                     //                            Echo(s);
                                     _program.Echo("raycast hit:" + lastDetectedInfo.Type.ToString());
+                                    _program.ErrorLog("raycast hit:" + lastDetectedInfo.Type.ToString());
+                                    _program.ErrorLog("Scandistance=" + scanDistance.ToString("0.00"));
+                                    _program.ErrorLog("adjScandistance=" + (scanDistance - halfshipsize).ToString("0.00"));
+                                    _program.ErrorLog("quadrant=" + dtmRayCastQuadrant);
                                     //                                    StatusLog("Camera Trigger collision", textPanelReport);
                                 }
                                 if (bValidCollision)

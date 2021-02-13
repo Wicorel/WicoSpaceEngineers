@@ -25,7 +25,7 @@ namespace IngameScript
         {
             /*
              * Bugs: 
-             * Large Starter Miner only does 1ms.. why?
+             * Fixed: backwards thrusters where stopping acceleration. Large Starter Miner only does 1ms.. why? 
              * 
              * ScanEscape not working. Needs testing
              * 
@@ -72,7 +72,7 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " Navigation";
-                _program.moduleList += "\nNavigation V4.2h";
+                _program.moduleList += "\nNavigation V4.2i";
 
                 NAVEmulateOld=_program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
                 _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
@@ -1133,7 +1133,7 @@ namespace IngameScript
                     }
                 }
                 else if(iState==161)
-                    {
+                {
                     // Holding
                     _program.Echo("Hodling for DEBUG");
                 }
