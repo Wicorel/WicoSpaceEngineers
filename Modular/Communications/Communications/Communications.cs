@@ -218,13 +218,13 @@ namespace IngameScript
                 {
                     if (ActionType == Displays.DODRAW)
                     {
-                        tsurface.WriteText(sbComInfo);
                         if (tsurface.SurfaceSize.Y < 256)
                         { // small/corner LCD
-
+                            tsurface.WriteText(sbComInfo);
                         }
                         else
                         {
+                            tsurface.WriteText(sbComInfo);
                             tsurface.WriteText(sbComNotices, true);
                         }
                     }
@@ -235,12 +235,12 @@ namespace IngameScript
                         if (tsurface.SurfaceSize.Y < 256)
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
-                            tsurface.FontSize = 2;
+                            tsurface.FontSize = 3;
                         }
                         else
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
-                            tsurface.FontSize = 1.5f;
+                            tsurface.FontSize = 2f;
                         }
                     }
                     else if (ActionType == Displays.CLEARDISPLAY)
@@ -252,29 +252,29 @@ namespace IngameScript
                 {
                     if (ActionType == Displays.DODRAW)
                     {
-                        tsurface.WriteText(sbRSInfo);
                         if (tsurface.SurfaceSize.Y < 256)
                         { // small/corner LCD
-
+                            tsurface.WriteText(sbRSInfo);
                         }
                         else
                         {
+                            tsurface.WriteText(sbRSInfo);
                             tsurface.WriteText(sbRSNotices, true);
                         }
                     }
                     else if (ActionType == Displays.SETUPDRAW)
                     {
                         tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
-                        tsurface.WriteText("");
+//                        tsurface.WriteText("");
                         if (tsurface.SurfaceSize.Y < 256)
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
-                            tsurface.FontSize = 2;
+                            tsurface.FontSize = 3.5f;
                         }
                         else
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
-                            tsurface.FontSize = 1.5f;
+                            tsurface.FontSize = 1.75f;
                         }
                     }
                     else if (ActionType == Displays.CLEARDISPLAY)
@@ -434,10 +434,13 @@ namespace IngameScript
 
                     float farthestShip = 0;
                     float nearestAreaController = float.MaxValue;
+                    string interestingName = "";
+                    bool bAreaControllerFound = false;
 
-                    if (bAreaController) sbRSInfo.AppendLine("I am area controller");
-                    if (bRelay) sbRSInfo.AppendLine("I am a relay");
-                    sbRSInfo.AppendLine("Remote Ships");
+
+//                    if (bAreaController) sbRSInfo.AppendLine("I am area controller");
+//                    if (bRelay) sbRSInfo.AppendLine("I am a relay");
+//                    sbRSInfo.AppendLine("Remote Ships");
 
                     foreach (var remoteship in RemoteShips)
                     {
@@ -470,6 +473,7 @@ namespace IngameScript
                                 if (range > farthestShip && range <= AreaOfControl)
                                 {
                                     farthestShip = (float)range;
+                                    interestingName = remoteship.sName;
                                 }
                             }
                             else
@@ -478,8 +482,12 @@ namespace IngameScript
                                 // but I do need to find the nearest area controller and make sure to maintain connection to it
                                 if (remoteship.IsAreaController)
                                 {
+                                    bAreaControllerFound = true;
                                     if (range < nearestAreaController)
+                                    {
                                         nearestAreaController = (float)range;
+                                        interestingName = remoteship.sName;
+                                    }
                                 }
                             }
                         }
@@ -498,8 +506,34 @@ namespace IngameScript
                         }
 
                     } // else leave range alone.
+                    if(!bAreaController)
+                    {
+                        // I am not an area controller
 
-                    sbRSInfo.AppendLine("# ships=" + RemoteShips.Count);
+                        if(!bAreaControllerFound)
+                        {
+                            sbRSInfo.AppendLine("No local area controller");
+                        }
+                        else
+                        {
+                            sbRSInfo.AppendLine("Closest Area Controller");
+                            sbRSInfo.AppendLine(" "+ interestingName);
+                            sbRSInfo.AppendLine(" " + _program.niceDoubleMeters(nearestAreaController));
+                        }
+                    }
+                    else
+                    {
+                        // I AM an area controller
+                        if(RemoteShips.Count>0)
+                        {
+                            sbRSInfo.AppendLine("Farthest Ship");
+                            sbRSInfo.AppendLine(" "+ interestingName);
+                            sbRSInfo.AppendLine(" " + _program.niceDoubleMeters(farthestShip));
+                        }
+                    }
+                    //                    sbRSNotices.AppendLine("# ships=" + RemoteShips.Count);
+                    sbRSNotices.AppendLine("");
+
                     foreach (var remoteship in RemoteShips)
                     {
                         string sAge = " ";
@@ -571,13 +605,13 @@ namespace IngameScript
                         }
                     }
 
-
-
                     // TODO: Seperate from antenna range update on seperate elapsed timer
                     sbComInfo.Clear();
                     sbComNotices.Clear();
                     sbComInfo.AppendLine("Communications");
-                    sbComInfo.AppendLine("Ship Role=" + _gridRole.ToString());
+//                    sbComInfo.AppendLine("Ship Role=" + _gridRole.ToString());
+                    if (bAreaController) sbComNotices.AppendLine("I am area controller");
+                    if (bRelay) sbComNotices.AppendLine("I am a relay");
 
                     sbComNotices.AppendLine(antennaList.Count + " Radio Antennas");
                     sbComNotices.AppendLine(antennaLList.Count + " Laser Antennas");
@@ -589,7 +623,7 @@ namespace IngameScript
                     {
                         sbComInfo.AppendLine(laser.CustomName + " (" + laser.Range.ToString("N0") + "M)");
                     }
-                    sbComNotices.AppendLine("# Thrusters=" + numberLocalThrust);
+//                    sbComNotices.AppendLine("# Thrusters=" + numberLocalThrust);
 
                 }
             }

@@ -81,20 +81,42 @@ namespace IngameScript
                     {
                         sbNotices.Clear();
                         sbModeInfo.Clear();
-                        sbNotices.AppendLine(baseList.Count + " Known bases");
-
+                        if (baseList.Count == 0) sbModeInfo.AppendLine("No Known bases");
+                        //                        sbNotices.AppendLine(baseList.Count + " Known bases");
+                        double nearest = double.MaxValue;
+                        string closestName = "";
                         {
                             foreach (var myBase in baseList)
                             {
-                                sbNotices.AppendLine(myBase.baseName + " " + (_program.Me.GetPosition() - myBase.position).Length().ToString("N0") + " Meters");
+                                double distance = (_program.Me.GetPosition() - myBase.position).Length();
+                                if(distance<nearest)
+                                {
+                                    nearest = distance;
+                                    closestName = myBase.baseName;
+                                }
+                                if (myBase.baseName.Length > 30)
+                                {
+                                    sbNotices.AppendLine(myBase.baseName);
+                                    sbNotices.AppendLine(" " + _program.niceDoubleMeters(distance));
+                                }
+                                else
+                                {
+                                    sbNotices.AppendLine(myBase.baseName + " " + _program.niceDoubleMeters(distance));
+                                }
                             }
-                            tsurface.WriteText(sbModeInfo);
+                            if(nearest>0)
+                            {
+                                sbModeInfo.AppendLine("Closest");
+                                sbModeInfo.AppendLine(" "+closestName );
+                            }
                             if (tsurface.SurfaceSize.Y < 256)
                             { // small/corner LCD
-
+                                tsurface.WriteText(sbModeInfo);
                             }
                             else
                             {
+                                tsurface.WriteText(sbModeInfo);
+                                if (nearest > 0) tsurface.WriteText("", true);
                                 tsurface.WriteText(sbNotices, true);
                             }
                         }

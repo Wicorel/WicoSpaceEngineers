@@ -115,34 +115,37 @@ namespace IngameScript
 //                        sbModeInfo.AppendLine("Power Management");
 
                         if(_power.HasBatteries())
-                            sbModeInfo.AppendLine("Batteries=" + _power.batteryPercentage + " (" + _power.batterypctlow + ")");
+                            sbModeInfo.AppendLine("Batteries=" + _power.batteryPercentage + "% (" + _power.batterypctlow + ")");
                         if(_tanks.HasHydroTanks()) 
                             sbModeInfo.AppendLine("H Tanks=" + _tanks.hydroPercent.ToString("0") + "%");
 //                        sbModeInfo.AppendLine("Control Engines=" + _ControlEngines);
                         if(_power.EnginesCount()>0) 
                             sbModeInfo.AppendLine("   Engines=" + (_power.EnginesAreOff() ? "Off" : "ON"));
+                        // TODO: Add reactors
 
                         if (_power.maxTotalPower > 0)
                         {
+                            sbNotices.AppendLine("Power Supply");
                             if(_power.HasBatteries())
-                                sbNotices.AppendLine("Batteries=" + (_power.batteryTotalOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                                sbNotices.AppendLine(" Batteries=" + (_power.batteryTotalOutput / _power.maxTotalPower * 100).ToString("0") + "%");
                             if (_power.maxReactorPower > 0)
-                                sbNotices.AppendLine("Reactors=" + (_power.currentReactorOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                                sbNotices.AppendLine(" Reactors=" + (_power.currentReactorOutput / _power.maxTotalPower * 100).ToString("0") + "%");
                             if (_power.maxSolarPower > 0)
-                                sbNotices.AppendLine("Solar=" + (_power.currentSolarOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                                sbNotices.AppendLine(" Solar=" + (_power.currentSolarOutput / _power.maxTotalPower * 100).ToString("0") + "%");
                             if (_power.currentTurbineOutput > 0)
-                                sbNotices.AppendLine("Turbines=" + (_power.currentTurbineOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                                sbNotices.AppendLine(" Turbines=" + (_power.currentTurbineOutput / _power.maxTotalPower * 100).ToString("0") + "%");
                             if (_power.currentEngineOutput > 0)
-                                sbNotices.AppendLine("Engines=" + (_power.currentEngineOutput / _power.maxTotalPower * 100).ToString("0") + "%");
+                                sbNotices.AppendLine(" Engines=" + (_power.currentEngineOutput / _power.maxTotalPower * 100).ToString("0") + "%");
                         }
 
-                        tsurface.WriteText(sbModeInfo);
                         if (tsurface.SurfaceSize.Y < 512)
                         { // small/corner LCD
-
+                            tsurface.WriteText(sbModeInfo);
                         }
                         else
                         {
+                            tsurface.WriteText("Power Managemenet");
+                            tsurface.WriteText(sbModeInfo);
                             tsurface.WriteText(sbNotices, true);
                         }
 
@@ -154,12 +157,12 @@ namespace IngameScript
                         if (tsurface.SurfaceSize.Y < 512)
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
-                            tsurface.FontSize = 2;
+                            tsurface.FontSize = 3.5f;
                         }
                         else
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
-                            tsurface.FontSize = 1.5f;
+                            tsurface.FontSize = 2f;
                         }
                     }
                     else if (ActionType == Displays.CLEARDISPLAY)

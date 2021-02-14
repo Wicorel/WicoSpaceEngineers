@@ -71,7 +71,8 @@ namespace IngameScript
                 {
                     if (ActionType == Displays.DODRAW)
                     {
-                        tsurface.WriteText(sbModeInfo);
+                        tsurface.WriteText("Cargo");
+                        tsurface.WriteText(sbModeInfo,true);
                         if (tsurface.SurfaceSize.Y < 256)
                         { // small/corner LCD
 
@@ -85,16 +86,16 @@ namespace IngameScript
                     else if (ActionType == Displays.SETUPDRAW)
                     {
                         tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
-                        tsurface.WriteText("");
+//                        tsurface.WriteText("");
                         if (tsurface.SurfaceSize.Y < 256)
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
-                            tsurface.FontSize = 2;
+                            tsurface.FontSize = 5f;
                         }
                         else
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
-                            tsurface.FontSize = 1.5f;
+                            tsurface.FontSize = 2f;
                         }
                     }
                     else if (ActionType == Displays.CLEARDISPLAY)

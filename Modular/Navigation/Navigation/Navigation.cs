@@ -72,7 +72,7 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " Navigation";
-                _program.moduleList += "\nNavigation V4.2i";
+                _program.moduleList += "\nNavigation V4.2j";
 
                 NAVEmulateOld=_program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
                 _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
@@ -144,12 +144,12 @@ namespace IngameScript
                         if (tsurface.SurfaceSize.Y < 256)
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
-                            tsurface.FontSize = 2;
+                            tsurface.FontSize = 3;
                         }
                         else
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
-                            tsurface.FontSize = 1.5f;
+                            tsurface.FontSize = 2f;
                         }
                     }
                     else if (ActionType == Displays.CLEARDISPLAY)
@@ -725,13 +725,15 @@ namespace IngameScript
                 sbNotices.Clear();
                 sbModeInfo.Clear();
 
-                sbModeInfo.AppendLine("Going to Target");
+                sbNotices.AppendLine("Going to Target");
                 _program.Echo("Going Target: state=" + iState.ToString());
+                /*
                 if (NAVTargetName != "")
                 {
                     sbModeInfo.AppendLine(" " + NAVTargetName);
                     _program.Echo(NAVTargetName);
                 }
+                */
 
                 string sNavDebug = "";
                 sNavDebug += "GT:S=" + iState;
@@ -935,16 +937,21 @@ namespace IngameScript
                 }
                 else if (iState == 160)
                 { //	160 move to Target
-//                    _program.EchoInstructions("NAV:160");
-                    sbNotices.AppendLine("Moving to Target");
+                  //                    _program.EchoInstructions("NAV:160");
                     _program.Echo("Moving to Target");
+//                    sbModeInfo.AppendLine("Moving to Target");
+                    if (NAVTargetName != "")
+                    {
+                        sbModeInfo.AppendLine(" " + NAVTargetName);
+                        _program.Echo(NAVTargetName);
+                    }
  //                   _program.Echo("Target="+VNavTarget.ToString());
                     Vector3D vTargetLocation = VNavTarget;
                     double velocityShip = shipController.GetShipSpeed();
 
                     Vector3D vVec = vTargetLocation - shipController.GetPosition();
                     double distance = vVec.Length();
-                    sbModeInfo.AppendLine("distance=" + _program.niceDoubleMeters(distance));
+                    sbNotices.AppendLine("distance=" + _program.niceDoubleMeters(distance));
                     _program.Echo("distance=" + _program.niceDoubleMeters(distance));
 //                    sbNotices.AppendLine("ArrivalDistanceMin=" + _program.niceDoubleMeters(ArrivalDistanceMin));
                     _program.Echo("ArrivalDistanceMin=" + _program.niceDoubleMeters(ArrivalDistanceMin));
@@ -960,7 +967,7 @@ namespace IngameScript
                     {
                         _wicoControl.SetState(500);
 
-                        sbNotices.AppendLine("We have arrived");
+                        sbModeInfo.AppendLine("We have arrived");
                         _program.Echo("we have arrived");
                         _wicoControl.WantFast();
                         return;
@@ -1114,7 +1121,7 @@ namespace IngameScript
 //                        _travelMovement.InitDoTravelMovement(vTargetLocation, ShipSpeedMax, (float)ArrivalDistanceMin, _wicoBlockMaster.GetMainController());
 //                        _wicoControl.SetState(161);
                         _travelMovement.doTravelMovement(_wicoElapsedTime, vTargetLocation, (float)ArrivalDistanceMin, 500, 300, ShipSpeedMax);
-                        sbNotices.AppendLine(_travelMovement.CurrentStatus);
+                        sbModeInfo.AppendLine(_travelMovement.CurrentStatus);
                     }
                     else
                     {
@@ -1156,7 +1163,7 @@ namespace IngameScript
 
                 else if (iState == 320)
                 {
-                    sbNotices.AppendLine("Primary Collision Avoid");
+                    sbModeInfo.AppendLine("Primary Collision Avoid");
                     _program.Echo("Primary Collision Avoid");
                     //                    StatusLog("clear", sledReport);
                     //                    StatusLog("Collision Avoid", sledReport);
@@ -1244,7 +1251,7 @@ namespace IngameScript
                 }
                 else if (iState == 360)
                 {
-                    sbNotices.AppendLine("Collision Avoid");
+                    sbModeInfo.AppendLine("Collision Avoid");
                     sbNotices.AppendLine(" Scan for escape route");
                     _program.Echo("Collision Avoid");
                     //                    StatusLog("Collision Avoid\nScan for escape route", textPanelReport);
@@ -1269,15 +1276,15 @@ namespace IngameScript
                 else if (iState == 380)
                 {
                     //                    StatusLog("Collision Avoid Travel", textPanelReport);
-                    sbNotices.AppendLine("Escape Collision Avoid");
+                    sbModeInfo.AppendLine("Escape Collision Avoid");
                     _program.Echo("Escape Collision Avoid");
                     Vector3D vVec = vAvoid - shipController.GetPosition();
                     double distance = vVec.Length();
                     double velocityShip = shipController.GetShipSpeed();
-                    sbModeInfo.AppendLine("distance=" + _program.niceDoubleMeters(distance));
+                    sbNotices.AppendLine("distance=" + _program.niceDoubleMeters(distance));
                     sbNotices.AppendLine("velocity=" + velocityShip.ToString("0.00"));
                     _travelMovement.doTravelMovement(_wicoElapsedTime, vAvoid, 1f, 160, 340, ShipSpeedMax);
-                    sbNotices.AppendLine(_travelMovement.CurrentStatus);
+                    sbModeInfo.AppendLine(_travelMovement.CurrentStatus);
                 }
                 else if (iState == 500)
                 { // we have arrived at target
@@ -1288,7 +1295,7 @@ namespace IngameScript
                         //                        StatusLog("Arrived at Target", sledReport);
                         //                        StatusLog("Arrived at Target", textPanelReport);
                         sNavDebug += " ARRIVED!";
-                        sbNotices.AppendLine("Arrived at Target");
+                        sbModeInfo.AppendLine("Arrived at Target");
                         _program.ResetMotion();
                         BValidNavTarget = false; // we used this one up.
                                                  //                float range = RangeToNearestBase() + 100f + (float)velocityShip * 5f;

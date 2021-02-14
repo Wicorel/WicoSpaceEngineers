@@ -21,6 +21,23 @@ namespace IngameScript
     {
         public class WhenDocked: DockBase
         {
+            /*
+             * BUGS:
+             * 
+             * 
+             * TODO:
+             *   Pull U if needed
+             *   Push ore/etc if configured
+             *   
+             *   
+             * 
+             * Transport mode:
+             *  load from one dock and unload at another dock
+             *  Pull ore/whatever when loading
+             *  Handle 'loading' power into batteries
+             *  handle some batteries emptied as 'cargo'
+             *  
+             */
             private Program _program;
             private WicoControl _wicoControl;
             private WicoBlockMaster _wicoBlockMaster;
@@ -83,7 +100,7 @@ namespace IngameScript
                 _systemsMonitor = systemsMonitor;
 
                 _program.moduleName += " Docked";
-                _program.moduleList += "\nDocked V4.2f";
+                _program.moduleList += "\nDocked V4.2h";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -243,12 +260,12 @@ namespace IngameScript
                         if (tsurface.SurfaceSize.Y < 256)
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
-                            tsurface.FontSize = 2;
+                            tsurface.FontSize = 3;
                         }
                         else
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
-                            tsurface.FontSize = 1.5f;
+                            tsurface.FontSize = 2f;
                         }
                     }
                     else if (ActionType == Displays.CLEARDISPLAY)
@@ -279,7 +296,7 @@ namespace IngameScript
                 //                StatusLog(moduleName + ":DOCKED!", textPanelReport);
                 sbModeInfo.AppendLine("Docked");
                 _program.Echo("Docked!");
-                sbNotices.AppendLine("Autorelaunch=" + bAutoRelaunch.ToString());
+                if(bAutoRelaunch) sbNotices.AppendLine("Will Autorelaunch");
                 _program.Echo("Autorelaunch=" + bAutoRelaunch.ToString());
 
                 _wicoControl.WantSlow();
@@ -297,17 +314,17 @@ namespace IngameScript
                         return;
                     }
                 }
-                if (!bAirWorthy)
+                if (!bAirWorthy && bAutoRelaunch)
                 {
-                    sbNotices.AppendLine(" Awaiting Relaunch Criteria");
+                    sbModeInfo.AppendLine(" Awaiting Relaunch Criteria");
                     _program.Echo(" Awaiting Relaunch Criteria");
                 }
-                else
+                else if(bAirWorthy)
                 {
-                    sbNotices.AppendLine(" Worthy of relaunch");
+                    sbModeInfo.AppendLine(" Worthy of relaunch");
                     _program.Echo(" Worthy of relaunch");
-
                 }
+                if(_systemsMonitor.HasBatteries())
                 {
                     //                            StatusLog(" Battery " + batteryPercentage + "% (" + batterypcthigh + "%)", textPanelReport);
                     sbNotices.AppendLine(" Battery " + _systemsMonitor.batteryPercentage + "% (" + _systemsMonitor.batterypcthigh + "%)");
@@ -363,50 +380,50 @@ namespace IngameScript
                     }
                     else if (iState == 1)
                     {
-                        sbNotices.AppendLine("Charging batteries to 10%");
+                        sbNotices.AppendLine("Charging to 10%");
                         _systemsMonitor.BatteryCheck(0, true);
                         if (!_systemsMonitor.BatteryCheck(10, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 2)
                     {
-                        sbNotices.AppendLine("Charging batteries to 30%");
+                        sbNotices.AppendLine("Charging to 30%");
                         if (!_systemsMonitor.BatteryCheck(30, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 3)
                     {
-                        sbNotices.AppendLine("Charging batteries to 40%");
+                        sbNotices.AppendLine("Charging to 40%");
                         if (!_systemsMonitor.BatteryCheck(40, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 4)
                     {
-                        sbNotices.AppendLine("Charging batteries to 50%");
+                        sbNotices.AppendLine("Charging to 50%");
                         if (!_systemsMonitor.BatteryCheck(50, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 5)
                     {
-                        sbNotices.AppendLine("Charging batteries to 60%");
+                        sbNotices.AppendLine("Charging to 60%");
                         if (!_systemsMonitor.BatteryCheck(60, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 6)
                     {
-                        sbNotices.AppendLine("Charging batteries to 75%");
+                        sbNotices.AppendLine("Charging to 75%");
                         if (!_systemsMonitor.BatteryCheck(75, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 7)
                     {
-                        sbNotices.AppendLine("Charging batteries to 90%");
+                        sbNotices.AppendLine("Charging to 90%");
                         if (!_systemsMonitor.BatteryCheck(90, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 8)
                     {
-                        sbNotices.AppendLine("Charging batteries to 100%");
+                        sbNotices.AppendLine("Charging to 100%");
                         if (!_systemsMonitor.BatteryCheck(100, true))
                             if(_systemsMonitor.batteryPercentage<99)
                                 _wicoControl.SetState(1);
