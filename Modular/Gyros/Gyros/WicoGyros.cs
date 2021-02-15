@@ -161,7 +161,7 @@ namespace IngameScript
             /// Try to align the ship/grid with the given vector. Returns true if the ship is within minAngleRad of being aligned
             /// </summary>
             /// <param name="argument">The direction to point. "rocket" (backward),  "backward", "up","forward"</param>
-            /// <param name="vDirection">the vector for the aim.</param>
+            /// <param name="vDirection">the world vector for the aim.</param>
             /// <param name="gyroControlPoint">the terminal block to use for orientation</param>
             /// <returns>true if aligned. Meaning the angle of error is less than minAngleRad</returns>
             public bool AlignGyros(string argument, Vector3D vDirection, IMyTerminalBlock gyroControlPoint)
@@ -195,9 +195,8 @@ namespace IngameScript
             /// </summary>
             /// <param name="vDirection">GRID orientation to use for aiming</param>
             /// <param name="vTarget">World VECTOR to aim the grid</param>
-            /// <param name="gyroControlPoint"></param>
             /// <returns></returns>
-            public bool AlignGyros(Vector3D vDirection, Vector3D vTarget )//, IMyTerminalBlock gyroControlPoint)
+            public bool AlignGyros(Vector3D vDirection, Vector3D vTarget )
             {
                 bool bAligned = true;
                 if (gyroControl == null)
@@ -223,6 +222,7 @@ namespace IngameScript
                     double ang = rot.Length();
                     ang = Math.Atan2(ang, Math.Sqrt(Math.Max(0.0, 1.0 - ang * ang)));
                     if (dot2 < 0) ang = Math.PI - ang; // compensate for >+/-90
+//                    _program.Echo("Ang=" + ang);
                     if (ang < minAngleRad)
                     { // close enough 
                         g1.GyroOverride = false;
@@ -233,6 +233,8 @@ namespace IngameScript
                     float yawMax = (float)(2 * Math.PI);
 
                     double ctrl_vel = yawMax * (ang / Math.PI) * CTRL_COEFF;
+
+                    bAligned = false;
 
                     ctrl_vel = Math.Min(yawMax, ctrl_vel);
                     ctrl_vel = Math.Max(0.01, ctrl_vel);
