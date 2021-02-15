@@ -98,6 +98,7 @@ namespace IngameScript
                 );
 
             spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster
+                , wicoElapsedTime
                 , wicoAntennas
                 , wicoTimers, wicoIGC, wicoBases, navCommon
                 , _displays, _systemsMonitor
