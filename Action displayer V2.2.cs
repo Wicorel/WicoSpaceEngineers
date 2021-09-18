@@ -1,10 +1,10 @@
 ﻿//V 2.3 Mar 14 2018
 // V2.4 May 15 2018.  Min/Max values
-
-
 // V 2.5 Jan 13-24, 2019 SE V 1.189 
- 
 
+// V2.6 Sep 17, 2021 
+
+//MyDefinitionId electricDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Electricity");
 MyDefinitionId oxygenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Oxygen");
 MyDefinitionId hydrogenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
 
@@ -34,8 +34,8 @@ void Main(string sArgument)
             GridTerminalSystem.SearchBlocksOfName(sArgument, blocks);
         }
 
-        values.Append("\n" + Me.CubeGrid.CustomName + ":" + Me.CubeGrid.EntityId.ToString());
-        values.Append(Me.GetPosition().ToString());
+        values.Append("\n" + Me.CubeGrid.CustomName + ":" + Me.CubeGrid.EntityId.ToString()+"\n");
+        values.Append(Me.GetPosition().ToString()+"\n");
 
         Echo("Found :" + blocks.Count.ToString());
         if (blocks.Count > 0)
@@ -232,43 +232,6 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
             values.Append("\n");
 
         }
-        /* Old PowerProducer
-        if(unit is IMyPowerProducer)
-        {
-            IMyPowerProducer ipp=unit as IMyPowerProducer;
-            values.Append("\nIMyPowerProducer");
-            values.Append("\n CurrentPowerOutput="+ipp.CurrentPowerOutput.ToString());
-            values.Append("\n DefinedPowerOutput="+ipp.DefinedPowerOutput.ToString());
-            values.Append("\n MaxPowerOutput="+ipp.MaxPowerOutput.ToString());
-            values.Append("\n ProductionEnabled="+ipp.ProductionEnabled.ToString());	
-            values.Append("\n");
-        }
-        */
-        /* Handled by HasInventory now
-                   if(unit is IMyCargoContainer)
-                   {
-                       IMyCargoContainer ipp=unit as IMyCargoContainer;
-
-                       values.Append("\nIMyCargoContainer");
-
-                       var count = ipp.InventoryCount; // GetInventoryCount(); // Multiple inventories in Refineriers, Assemblers, Arc Furnances.
-                       values.Append("\n InventoryCount="+count.ToString());
-
-                       for (var invcount = 0; invcount < count; invcount++)
-                       {
-                           values.Append("\n Inventory Item=="+invcount.ToString());
-
-                           IMyInventory inv = unit.GetInventory(invcount);
-
-                           if (inv != null) // null means, no items in inventory.
-                           {
-                               values.Append("\n MaxVolume="+inv.MaxVolume.ToString());
-                           }
-                       }
-
-                       values.Append("\n");
-                   }
-               */
         if (unit is IMyBatteryBlock)
     {
         IMyBatteryBlock ipp = unit as IMyBatteryBlock;
@@ -336,9 +299,34 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n Status=" + ipp.Status.ToString());
         values.Append("\n");
     }
+    if (unit is IMyDoor)
+    {
+        IMyDoor imd = unit as IMyDoor;
+        values.Append("\nIMyDoor ");
+        values.Append("\n Status=" + imd.Status.ToString());
+        values.Append("\n OpenRatio=" + imd.OpenRatio.ToString());
+        values.Append("\n");
+    }
+    if (unit is IMyAdvancedDoor)
+    {
+        IMyAdvancedDoor imd = unit as IMyAdvancedDoor;
+        values.Append("\nIMyAdvancedDoor ");
+        values.Append("\n");
+    }
+    
+    if (unit is IMyAirtightHangarDoor)
+    {
+        IMyAirtightHangarDoor imd = unit as IMyAirtightHangarDoor;
+        values.Append("\nIMyAirtightHangarDoor ");
+        values.Append("\n");
+    }
 
-
-
+    if (unit is IMyAirtightSlideDoor)
+    {
+        IMyAirtightSlideDoor imd = unit as IMyAirtightSlideDoor;
+        values.Append("\nIMyAirtightSlideDoor ");
+        values.Append("\n");
+    }
     if (unit is IMyMotorSuspension)
     {
         IMyMotorSuspension ipp = unit as IMyMotorSuspension;
@@ -534,8 +522,8 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n MinLimit=" + io.MinLimit.ToString());
         values.Append("\n Status=" + io.Status.ToString());
         values.Append("\n Velocity=" + io.Velocity.ToString());
-         values.Append("\n");
-   }
+        values.Append("\n");
+    }
 
     Echo("Accepted resources:");
     values.Append("\nAccepted resources:");
@@ -592,11 +580,20 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
             Echo(list[j].SubtypeId.ToString());
         }
         */
-        float o2 = source.DefinedOutputByType(oxygenDefId);
-        float h2 = source.DefinedOutputByType(hydrogenDefId);
-        values.Append("\n O2=" + o2.ToString() + " H2=" + h2.ToString());
-//        values.Append("\n Source:"+source.Group.ToString()); Prohibited
-        
+        if (source.ProductionEnabledByType(oxygenDefId))
+        {
+            float maxoutput = source.DefinedOutputByType(oxygenDefId);
+            float currentoutput= source.CurrentOutputByType(oxygenDefId);
+            values.Append("\n O2 Current=" + currentoutput + " Max=" + maxoutput);
+        }
+        if (source.ProductionEnabledByType(hydrogenDefId))
+        {
+            float maxoutput = source.DefinedOutputByType(hydrogenDefId);
+            float currentoutput = source.CurrentOutputByType(hydrogenDefId);
+            values.Append("\n H2 Current=" + currentoutput + " Max=" + maxoutput);
+        }
+        //        values.Append("\n Source:"+source.Group.ToString()); Prohibited
+
     }
     else
     {
@@ -607,17 +604,3 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
     values.Append("\n-------------\n");
 }
 
-
-// 1.192 
-/*
- * 
- * LG ONLY
-TyepID=MyObjectBuilder_StoreBlock
-SubtyepID=StoreBlock
-
-TyepID=MyObjectBuilder_SafeZoneBlock
-SubtyepID=SafeZoneBlock
-
-TyepID=MyObjectBuilder_ContractBlock
-SubtyepID=ContractBlock
-*/
