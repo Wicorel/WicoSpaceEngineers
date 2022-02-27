@@ -59,7 +59,9 @@ namespace IngameScript
             public bool _Debug = false;
 
             bool bAutoRelaunch = false;
-//            bool bAutoRefuel = true;
+            //            bool bAutoRefuel = true;
+            bool bFastRecharge = true;
+            
 
             StringBuilder sbModeInfo = new StringBuilder(100);
             StringBuilder sbNotices = new StringBuilder(300);
@@ -100,7 +102,7 @@ namespace IngameScript
                 _systemsMonitor = systemsMonitor;
 
                 _program.moduleName += " Docked";
-                _program.moduleList += "\nDocked V4.2h";
+                _program.moduleList += "\nDocked V4.2i";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -110,11 +112,14 @@ namespace IngameScript
 
                 _wicoIGC.AddPublicHandler(WICOB_DOCKSETRELAUNCH, RelaunchMessagehandler, true);
 
-                _Debug = _program._CustomDataIni.Get(sDockingSection, "Debug").ToBoolean(_Debug);
-                _program._CustomDataIni.Set(sDockingSection, "Debug", _Debug);
+                _Debug = _program.CustomDataIni.Get(sDockingSection, "Debug").ToBoolean(_Debug);
+                _program.CustomDataIni.Set(sDockingSection, "Debug", _Debug);
 
-                bAutoRelaunch = _program._CustomDataIni.Get(sDockingSection, "AutoRelaunch").ToBoolean(bAutoRelaunch);
-                _program._CustomDataIni.Set(sDockingSection, "AutoRelaunch", bAutoRelaunch);
+                bAutoRelaunch = _program.CustomDataIni.Get(sDockingSection, "AutoRelaunch").ToBoolean(bAutoRelaunch);
+                _program.CustomDataIni.Set(sDockingSection, "AutoRelaunch", bAutoRelaunch);
+
+                bFastRecharge = _program.CustomDataIni.Get(sDockingSection, "FastRecharge").ToBoolean(bFastRecharge);
+                _program.CustomDataIni.Set(sDockingSection, "FastRecharge", bFastRecharge);
 
                 if (_displays != null)
                     _displays.AddSurfaceHandler("MODE", SurfaceHandler);
@@ -134,7 +139,7 @@ namespace IngameScript
                     {
                         if(bResult!=bAutoRelaunch)
                         {
-                            _program._CustomDataIni.Set(sDockingSection, "AutoRelaunch", bResult);
+                            _program.CustomDataIni.Set(sDockingSection, "AutoRelaunch", bResult);
                             _program.CustomDataChanged();
                         }
                         bAutoRelaunch = bResult;
@@ -198,7 +203,7 @@ namespace IngameScript
 //                        string s = "AutoRelaunch=" + bAutoRelaunch.ToString();
  //                       _program.Echo(s);
 //                        _program.ErrorLog(s);
-                        _program._CustomDataIni.Set(sDockingSection, "AutoRelaunch", bAutoRelaunch);
+                        _program.CustomDataIni.Set(sDockingSection, "AutoRelaunch", bAutoRelaunch);
                         _program.CustomDataChanged();
                     }
                     if (myCommandLine.Argument(0) == "launch")
@@ -382,43 +387,43 @@ namespace IngameScript
                     {
                         sbNotices.AppendLine("Charging to 10%");
                         _systemsMonitor.BatteryCheck(0, true);
-                        if (!_systemsMonitor.BatteryCheck(10, true))
+                        if (!_systemsMonitor.BatteryCheck(10, true, false, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 2)
                     {
                         sbNotices.AppendLine("Charging to 30%");
-                        if (!_systemsMonitor.BatteryCheck(30, true))
+                        if (!_systemsMonitor.BatteryCheck(30, true, false, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 3)
                     {
                         sbNotices.AppendLine("Charging to 40%");
-                        if (!_systemsMonitor.BatteryCheck(40, true))
+                        if (!_systemsMonitor.BatteryCheck(40, true, false, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 4)
                     {
                         sbNotices.AppendLine("Charging to 50%");
-                        if (!_systemsMonitor.BatteryCheck(50, true))
+                        if (!_systemsMonitor.BatteryCheck(50, true, false, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 5)
                     {
                         sbNotices.AppendLine("Charging to 60%");
-                        if (!_systemsMonitor.BatteryCheck(60, true))
+                        if (!_systemsMonitor.BatteryCheck(60, true, false, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 6)
                     {
                         sbNotices.AppendLine("Charging to 75%");
-                        if (!_systemsMonitor.BatteryCheck(75, true))
+                        if (!_systemsMonitor.BatteryCheck(75, true, false, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 7)
                     {
                         sbNotices.AppendLine("Charging to 90%");
-                        if (!_systemsMonitor.BatteryCheck(90, true))
+                        if (!_systemsMonitor.BatteryCheck(90, true, false, true))
                             _wicoControl.SetState(iState + 1);
                     }
                     else if (iState == 8)
