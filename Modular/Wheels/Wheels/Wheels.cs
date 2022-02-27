@@ -36,12 +36,12 @@ namespace IngameScript
             List<IMyTerminalBlock> wheelRightList = new List<IMyTerminalBlock>();
 
             Program thisProgram;
-            public Wheels(Program program)
+            public Wheels(Program program, WicoBlockMaster wicoBlockMaster)
             {
                 thisProgram = program;
 
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
                 thisProgram.AddResetMotionHandler(ResetMotionHandler);
             }
 
