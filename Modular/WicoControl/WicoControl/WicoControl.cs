@@ -91,6 +91,10 @@ namespace IngameScript
 
             public const int MODE_DOSCANS = 900; // Start scanning
 
+            public const int MODE_UNDERCONSTRUCTION = 1000;
+
+            public const int MODE_ATTACKDRONE = 2000;
+
             public const int MODE_ATTENTION = 9999;
 
             StringBuilder sbData = new StringBuilder(100);
@@ -196,6 +200,7 @@ namespace IngameScript
             {
                 // Wico Configuration system
                 _WicoMainSubscribers.Clear();
+                bIAmMain = true;
 
                 // send a messge to all local 'Wico' PBs to get configuration.  
                 // This will be used to determine the 'master' PB and to know who to send requests to
@@ -206,8 +211,8 @@ namespace IngameScript
 
                 _program.AddTriggerHandler(ProcessTrigger);
 
-                _bControlDebug = _program._CustomDataIni.Get(_program.OurName, "ControlDebug").ToBoolean(_bControlDebug);
-                _program._CustomDataIni.Set(_program.OurName, "ControlDebug", _bControlDebug);
+                _bControlDebug = _program.CustomDataIni.Get(_program.OurName, "ControlDebug").ToBoolean(_bControlDebug);
+                _program.CustomDataIni.Set(_program.OurName, "ControlDebug", _bControlDebug);
 
                 // ModeAfterInit gets called by main
                 _program.AddSaveHandler(SaveHandler);
