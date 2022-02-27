@@ -21,6 +21,11 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
+        WicoIGC _wicoIGC;
+        WicoBlockMaster _wicoBlockMaster;
+        WicoElapsedTime _wicoElapsedTime;
+        WicoControl _wicoControl;
+
         WicoThrusters wicoThrusters;
         WicoGyros wicoGyros;
         GasTanks wicoGasTanks;
@@ -40,47 +45,45 @@ namespace IngameScript
         Displays _displays;
 
         OrbitalModes wicoOrbitalLaunch;
-        //        Navigation wicoNavigation;
 
 
         void ModuleProgramInit()
         {
-            //            wicoTravelMovement = new TravelMovement(this);
-            //OurName = "";
-            //moduleName += "\nOrbital V4";
-            //sVersion = "4";
+            _wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
 
-            wicoThrusters = new WicoThrusters(this,wicoBlockMaster);
-            wicoGyros = new WicoGyros(this, wicoBlockMaster);
-            wicoGasTanks = new GasTanks(this,wicoBlockMaster);
-            wicoGasGens = new GasGens(this);
-            wicoConnectors = new Connectors(this);
-            wicoLandingGears = new LandingGears(this);
-            wicoCameras = new Cameras(this);
-            wicoParachutes = new Parachutes(this);
-            wicoNavRotors = new NavRotors(this);
-            wicoAntennas = new Antennas(this, wicoBlockMaster);
-            wicoSensors = new Sensors(this, wicoBlockMaster);
-            wicoWheels = new Wheels(this);
-            wicoEngines = new HydrogenEngines(this);
-            wicoPower = new PowerProduction(this,wicoBlockMaster);
-            _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
-            _timers = new Timers(this, wicoBlockMaster);
+            _wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
+            _wicoBlockMaster.LoadLocalGrid();
 
-            wicoOrbitalLaunch = new OrbitalModes(this, _wicoControl,wicoBlockMaster
-                , wicoThrusters, wicoGyros,wicoConnectors,wicoLandingGears,wicoGasTanks,wicoGasGens, _timers, _displays
+            _wicoControl = new WicoControl(this, _wicoIGC);
+
+            _wicoElapsedTime = new WicoElapsedTime(this, _wicoControl);
+
+
+            wicoThrusters = new WicoThrusters(this, _wicoBlockMaster);
+            wicoGyros = new WicoGyros(this, _wicoBlockMaster);
+            wicoGasTanks = new GasTanks(this, _wicoBlockMaster);
+            wicoGasGens = new GasGens(this, _wicoBlockMaster);
+            wicoConnectors = new Connectors(this, _wicoBlockMaster);
+            wicoLandingGears = new LandingGears(this, _wicoBlockMaster);
+            wicoCameras = new Cameras(this, _wicoBlockMaster);
+            wicoParachutes = new Parachutes(this, _wicoBlockMaster);
+            wicoNavRotors = new NavRotors(this, _wicoBlockMaster);
+            wicoAntennas = new Antennas(this, _wicoBlockMaster);
+            wicoSensors = new Sensors(this, _wicoBlockMaster);
+            wicoWheels = new Wheels(this, _wicoBlockMaster);
+            wicoEngines = new HydrogenEngines(this, _wicoBlockMaster);
+            wicoPower = new PowerProduction(this, _wicoBlockMaster);
+            _displays = new Displays(this, _wicoBlockMaster, _wicoElapsedTime);
+            _timers = new Timers(this, _wicoBlockMaster);
+
+            wicoOrbitalLaunch = new OrbitalModes(this, _wicoControl, _wicoBlockMaster
+                , wicoThrusters, wicoGyros, wicoConnectors, wicoLandingGears
+                , wicoGasTanks, wicoGasGens
+                , _timers
+                , _displays
                 , wicoCameras
                 );
-            //            wicoNavigation = new Navigation(this, wicoBlockMaster.GetMainController());
 
-        }
-        //        WicoUpdateModesShared _wicoControl;
-        WicoControl _wicoControl;
-
-        void ModuleControlInit()
-        {
-            //            _wicoControl = new WicoUpdateModesShared(this);
-            _wicoControl = new WicoControl(this, wicoIGC);
         }
 
         public void ModulePreMain(string argument, UpdateType updateSource)
@@ -91,9 +94,11 @@ namespace IngameScript
             Echo(" descend [#]: descend to land or # meters");
             Echo(" orbitalland: land on planet in front of ship");
             Echo("");
+            if (_wicoControl != null)
+                _wicoControl.AnnounceState();
         }
 
-        public void ModulePostMain()
+        public void ModulePostMain(UpdateType updateSource)
         {
             if(bInitDone)
             {
@@ -126,8 +131,17 @@ namespace IngameScript
 //                wicoBlockMaster.DisplayInfo();
 
                 // ensure we run at least at slow speed for updates.
-                _wicoControl.WantSlow(); 
+                _wicoControl.WantSlow();
+
+                Runtime.UpdateFrequency = _wicoControl.GenerateUpdate();
             }
+        }
+        public void ModulePostInit()
+        {
+            if (_wicoControl != null)
+                _wicoControl.ModeAfterInit(SaveIni);
+
+            //            _wicoSensors.SensorInit(_wicoBlockMaster.GetMainController());
         }
 
     }
