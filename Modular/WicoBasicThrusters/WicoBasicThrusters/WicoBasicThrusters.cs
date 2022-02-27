@@ -25,6 +25,8 @@ namespace IngameScript
             protected Program _program;
             protected WicoBlockMaster _wicoBlockMaster;
 
+            bool MeGridOnly = false;
+
             protected string sThrusterSection = "THRUSTERS";
 
             protected string sCutterThruster = "cutter";
@@ -34,7 +36,7 @@ namespace IngameScript
                 return thrustAllList.Count;
             }
 
-            public WicoBasicThrusters(Program program, WicoBlockMaster wicoBlockMaster)
+            public WicoBasicThrusters(Program program, WicoBlockMaster wicoBlockMaster, bool bMeGridOnly=false)
             {
                 _program = program;
                 _wicoBlockMaster = wicoBlockMaster;
@@ -44,8 +46,8 @@ namespace IngameScript
             public void ThrustersInit()
             {
                 // TODO: change to handler. pay attention to execution sequence that results. (we may need this defined before getting blocks)
-                sCutterThruster = _program._CustomDataIni.Get(sThrusterSection, "CutterThruster").ToString(sCutterThruster);
-                _program._CustomDataIni.Set(sThrusterSection, "CutterThruster", sCutterThruster);
+                sCutterThruster = _program.CustomDataIni.Get(sThrusterSection, "CutterThruster").ToString(sCutterThruster);
+                _program.CustomDataIni.Set(sThrusterSection, "CutterThruster", sCutterThruster);
 
                 // Minimal init; just add handlers
                 thrustAllList.Clear();
@@ -61,6 +63,9 @@ namespace IngameScript
 
             public void ThrusterParseHandler(IMyTerminalBlock tb)
             {
+                if (MeGridOnly
+                    && !(tb.CubeGrid.EntityId == _program.Me.CubeGrid.EntityId))
+                    return;
                 if (tb is IMyThrust)
                 {
                     if (tb.CustomName.ToLower().Contains(sCutterThruster))
@@ -90,7 +95,6 @@ namespace IngameScript
                 for (int thrusterIndex = 0; thrusterIndex < thrusters.Count; thrusterIndex++)
                 {
                     int iThrusterType = ThrusterType(thrusters[thrusterIndex]);
-                    if ((iThrusterType & iTypes) > 0)
                     {
                         iCount++;
                         IMyThrust thruster = thrusters[thrusterIndex] as IMyThrust;
@@ -110,15 +114,18 @@ namespace IngameScript
                     // HoverEngines  http://steamcommunity.com/sharedfiles/filedetails/?id=1225107070
                     if (theBlock.BlockDefinition.SubtypeId.Contains("AtmosphericHover"))
                         return thrusthover;
-                    else if (theBlock.BlockDefinition.SubtypeId.Contains("Atmo"))
+
+                    if (theBlock.BlockDefinition.SubtypeId.Contains("Atmo"))
                         return thrustatmo;
-                    else if (theBlock.BlockDefinition.SubtypeId.Contains("Hydro"))
+                    if (theBlock.BlockDefinition.SubtypeId.Contains("Hydro"))
                         return thrusthydro;
+
                     // Hover Engines. SmallBlock_HoverEngine http://steamcommunity.com/sharedfiles/filedetails/?id=560731791 (last updated Dec 29, 2015)
-                    else if (theBlock.BlockDefinition.SubtypeId.Contains("SmallBlock_HoverEngine"))
+                    if (theBlock.BlockDefinition.SubtypeId.Contains("SmallBlock_HoverEngine"))
                         return thrusthover;
+
                     // assume ion since its name is generic
-                    else return thrustion;
+                    return thrustion;
                 }
                 // else
                 return 0;
