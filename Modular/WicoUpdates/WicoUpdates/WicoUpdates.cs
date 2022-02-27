@@ -29,8 +29,8 @@ namespace IngameScript
             {
                 _program = program;
 
-                _bUpdateDebug = _program._CustomDataIni.Get(_program.OurName, "UpdateDebug").ToBoolean(_bUpdateDebug);
-                _program._CustomDataIni.Set(_program.OurName, "UpdateDebug", _bUpdateDebug);
+                _bUpdateDebug = _program.CustomDataIni.Get(_program.OurName, "UpdateDebug").ToBoolean(_bUpdateDebug);
+                _program.CustomDataIni.Set(_program.OurName, "UpdateDebug", _bUpdateDebug);
             }
 
             public float fMaxWorldMps = 100f;
