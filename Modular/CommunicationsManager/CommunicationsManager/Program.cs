@@ -21,36 +21,44 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        WicoIGC _wicoIGC;
+        WicoBlockMaster _wicoBlockMaster;
+        WicoElapsedTime _wicoElapsedTime;
+
+
         WicoControl _wicoControl;
         Communications _communications;
         ModeAttention _modeAttention;
-        //        Antennas wicoAntennas;
+
         IFF _iff;
 
         Displays _displays;
-
-        void ModuleControlInit()
-        {
-            //            _wicoControl = new WicoUpdateModesShared(this);
-            _wicoControl = new WicoControl(this, wicoIGC);
-        }
 
         void ModuleProgramInit()
         {
             moduleList += "\nCommunications Manager";
 
-            _iff = new IFF(this, wicoIGC, wicoElapsedTime);
-//            wicoAntennas = new Antennas(this, wicoBlockMaster);
-            _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
-            _communications = new Communications(this, wicoBlockMaster, wicoElapsedTime, wicoIGC, _displays);
+            _wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
+
+            _wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
+            _wicoBlockMaster.LoadLocalGrid();
+
+            _wicoControl = new WicoControl(this, _wicoIGC);
+            _wicoElapsedTime = new WicoElapsedTime(this, _wicoControl);
+
+            _iff = new IFF(this, _wicoIGC, _wicoElapsedTime);
+            _displays = new Displays(this, _wicoBlockMaster, _wicoElapsedTime);
+            _communications = new Communications(this, _wicoBlockMaster, _wicoElapsedTime, _wicoIGC, _displays);
             _modeAttention = new ModeAttention(this, _wicoControl, _communications);
         }
 
         public void ModulePreMain(string argument, UpdateType updateSource)
         {
+            if (_wicoControl != null)
+                _wicoControl.AnnounceState();
         }
 
-        public void ModulePostMain()
+        public void ModulePostMain(UpdateType updateSource)
         {
             if (bInitDone)
             {
@@ -58,10 +66,17 @@ namespace IngameScript
                 _wicoControl.WantSlow();
             }
 
+            Runtime.UpdateFrequency = _wicoControl.GenerateUpdate();
             Echo("LastRun=" + LastRunMs.ToString("0.00") + "ms Max=" + MaxRunMs.ToString("0.00") + "ms");
             EchoInstructions();
         }
 
+        public void ModulePostInit()
+        {
+            if (_wicoControl != null)
+                _wicoControl.ModeAfterInit(SaveIni);
+
+        }
 
     }
 }
