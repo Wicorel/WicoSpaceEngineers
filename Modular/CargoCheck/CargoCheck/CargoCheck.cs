@@ -53,11 +53,11 @@ namespace IngameScript
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
 
-                cargopctmin = _program._CustomDataIni.Get(sCargoSection, KeyCargoPcent).ToInt32(cargopctmin);
-                _program._CustomDataIni.Set(sCargoSection, KeyCargoPcent, cargopctmin);
+                cargopctmin = _program.CustomDataIni.Get(sCargoSection, KeyCargoPcent).ToInt32(cargopctmin);
+                _program.CustomDataIni.Set(sCargoSection, KeyCargoPcent, cargopctmin);
 
-                cargohighwater = _program._CustomDataIni.Get(sCargoSection, KeyCargoHighwater).ToInt32(cargohighwater);
-                _program._CustomDataIni.Set(sCargoSection, KeyCargoHighwater, cargohighwater);
+                cargohighwater = _program.CustomDataIni.Get(sCargoSection, KeyCargoHighwater).ToInt32(cargohighwater);
+                _program.CustomDataIni.Set(sCargoSection, KeyCargoHighwater, cargohighwater);
 
                 if (_displays!=null) _displays.AddSurfaceHandler(DisplayCargoCheck, SurfaceHandler);
             }

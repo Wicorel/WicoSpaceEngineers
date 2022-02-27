@@ -104,7 +104,7 @@ namespace IngameScript
                 _EntityId = program.Me.CubeGrid.EntityId;
 
                 _program.moduleName += " Communications";
-                _program.moduleList += "\nCommunications V4.2h";
+                _program.moduleList += "\nCommunications V4.2i";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -129,13 +129,13 @@ namespace IngameScript
                 _displays.AddSurfaceHandler(CommunicationsDisplayTag, SurfaceHandler);
                 _displays.AddSurfaceHandler(RemoteShipsDisplayTag, SurfaceHandler);
 
-                AnnounceSeconds = _program._CustomDataIni.Get(_program.OurName, "WicoComAnnounceSeconds").ToDouble(AnnounceSeconds);
-                _program._CustomDataIni.Set(_program.OurName, "WicoComAnnounceSeconds", AnnounceSeconds);
+                AnnounceSeconds = _program.CustomDataIni.Get(_program.OurName, "WicoComAnnounceSeconds").ToDouble(AnnounceSeconds);
+                _program.CustomDataIni.Set(_program.OurName, "WicoComAnnounceSeconds", AnnounceSeconds);
 
-                if(_program._CustomDataIni.ContainsKey(_program.OurName, "AreaController"))
+                if(_program.CustomDataIni.ContainsKey(_program.OurName, "AreaController"))
                 {
-                    bAreaController = _program._CustomDataIni.Get(_program.OurName, "AreaController").ToBoolean(bAreaController);
-                    bRelay = _program._CustomDataIni.Get(_program.OurName, "Relay").ToBoolean(bRelay);
+                    bAreaController = _program.CustomDataIni.Get(_program.OurName, "AreaController").ToBoolean(bAreaController);
+                    bRelay = _program.CustomDataIni.Get(_program.OurName, "Relay").ToBoolean(bRelay);
                     bDefaultsSet = true;
                 }
 
@@ -386,8 +386,8 @@ namespace IngameScript
                 }
                 if (!bDefaultsSet)
                 {
-                    _program._CustomDataIni.Set(_program.OurName, "AreaController", bAreaController);
-                    _program._CustomDataIni.Set(_program.OurName, "Relay", bRelay);
+                    _program.CustomDataIni.Set(_program.OurName, "AreaController", bAreaController);
+                    _program.CustomDataIni.Set(_program.OurName, "Relay", bRelay);
                     bDefaultsSet = true;
                 }
                 _program.CustomDataChanged();
@@ -496,7 +496,7 @@ namespace IngameScript
                     {
                         if (bAreaController)
                         {
-                            fAntennaDesiredRange = farthestShip + 1000;
+                            fAntennaDesiredRange = farthestShip + 420;
                             if (fAntennaDesiredRange > nearestAreaController)
                                 fAntennaDesiredRange = nearestAreaController + 1000;
                         }
