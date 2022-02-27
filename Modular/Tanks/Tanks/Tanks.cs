@@ -40,18 +40,20 @@ namespace IngameScript
             Program _program;
             WicoBlockMaster wbm;
 
-            public GasTanks(Program program, WicoBlockMaster wicoBlockMaster)
+            bool MeGridOnly = false;
+
+            public GasTanks(Program program, WicoBlockMaster wicoBlockMaster, bool bMeGridOnly=false)
             {
                 _program = program;
                 wbm = wicoBlockMaster;
 
                 wbm.AddLocalBlockHandler(BlockParseHandler);
                 wbm.AddLocalBlockChangedHandler(LocalGridChangedHandler);
-                tankspcthigh = _program._CustomDataIni.Get(_tanksSection, "tankspcthigh").ToInt32(tankspcthigh);
-                _program._CustomDataIni.Set(_tanksSection, "tankspcthigh", tankspcthigh);
+                tankspcthigh = _program.CustomDataIni.Get(_tanksSection, "tankspcthigh").ToInt32(tankspcthigh);
+                _program.CustomDataIni.Set(_tanksSection, "tankspcthigh", tankspcthigh);
 
-                tankspctlow = _program._CustomDataIni.Get(_tanksSection, "tankspctlow").ToInt32(tankspctlow);
-                _program._CustomDataIni.Set(_tanksSection, "tankspctlow", tankspctlow);
+                tankspctlow = _program.CustomDataIni.Get(_tanksSection, "tankspctlow").ToInt32(tankspctlow);
+                _program.CustomDataIni.Set(_tanksSection, "tankspctlow", tankspctlow);
             }
 
             /// <summary>
@@ -60,6 +62,9 @@ namespace IngameScript
             /// <param name="tb"></param>
             public void BlockParseHandler(IMyTerminalBlock tb)
             {
+                if (MeGridOnly
+                    && !(tb.CubeGrid.EntityId == _program.Me.CubeGrid.EntityId))
+                    return;
                 if (tb is IMyGasTank)
                 {
                     // TODO: Ignore cutters, etc

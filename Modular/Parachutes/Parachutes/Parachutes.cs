@@ -27,12 +27,12 @@ namespace IngameScript
 
 
             Program thisProgram;
-            public Parachutes(Program program)
+            public Parachutes(Program program, WicoBlockMaster wicoBlockMaster)
             {
                 thisProgram = program;
 
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             /// <summary>

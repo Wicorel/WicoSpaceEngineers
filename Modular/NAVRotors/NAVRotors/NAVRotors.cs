@@ -29,12 +29,13 @@ namespace IngameScript
             List<IMyMotorStator> rotorNavRightList = new List<IMyMotorStator>();
 
             Program _program;
-            public NavRotors(Program program)
+            public NavRotors(Program program, WicoBlockMaster wicoBlockMaster)
             {
                 _program = program;
 
-                _program.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                _program.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+
                 _program.AddResetMotionHandler(ResetMotionHandler);
             }
 

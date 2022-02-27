@@ -60,10 +60,13 @@ namespace IngameScript
             Program _program;
             WicoBlockMaster _wicoBlockMaster;
 
-            public PowerProduction(Program program, WicoBlockMaster wbm)
+            bool MeGridOnly = false;
+
+            public PowerProduction(Program program, WicoBlockMaster wbm, bool bMeGridOnly=false)
             {
                 _program = program;
                 _wicoBlockMaster = wbm;
+                MeGridOnly = bMeGridOnly;
 
                 _wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
@@ -71,11 +74,11 @@ namespace IngameScript
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
 
-                batterypcthigh = _program._CustomDataIni.Get(sPowerSection, "batterypcthigh").ToInt32(batterypcthigh);
-                _program._CustomDataIni.Set(sPowerSection, "batterypcthigh", batterypcthigh);
+                batterypcthigh = _program.CustomDataIni.Get(sPowerSection, "batterypcthigh").ToInt32(batterypcthigh);
+                _program.CustomDataIni.Set(sPowerSection, "batterypcthigh", batterypcthigh);
 
-                batterypctlow = _program._CustomDataIni.Get(sPowerSection, "batterypctlow").ToInt32(batterypctlow);
-                _program._CustomDataIni.Set(sPowerSection, "batterypctlow", batterypctlow);
+                batterypctlow = _program.CustomDataIni.Get(sPowerSection, "batterypctlow").ToInt32(batterypctlow);
+                _program.CustomDataIni.Set(sPowerSection, "batterypctlow", batterypctlow);
 
             }
 
@@ -91,6 +94,10 @@ namespace IngameScript
             /// <param name="tb"></param>
             public void BlockParseHandler(IMyTerminalBlock tb)
             {
+                if (MeGridOnly &&
+                    !(tb.CubeGrid.EntityId == _program.Me.CubeGrid.EntityId)
+                    )
+                    return;
                 if (tb.BlockDefinition.TypeIdString == "MyObjectBuilder_HydrogenEngine")
                 {
                     lHydrogenEngines.Add(tb);
@@ -175,6 +182,7 @@ namespace IngameScript
 
             public double EnginesTanksFill()
             {
+                // TODO: Cache value and only update every N ticks
                 double totalLevel = 0;
                 int iTanksCount = 0;
 
@@ -321,8 +329,9 @@ namespace IngameScript
             /// <param name="targetMax">target max charge %.  0-100</param>
             /// <param name="bEcho">should the results be echoed</param>
             /// <param name="bProgress"></param>
+            /// <param name="bFastRecharge">true to charge all low batteries at once. false (default) means only one at a time is recharge</param>
             /// <returns></returns>
-            public bool BatteryCheck(int targetMax, bool bEcho = true, bool bProgress = false)
+            public bool BatteryCheck(int targetMax, bool bEcho = true, bool bProgress = false, bool bFastRecharge=false)
             {
                 float totalCapacity = 0;
                 float totalCharge = 0;
@@ -395,7 +404,7 @@ namespace IngameScript
                         }
                         else // not set to recharge
                         {
-                            if (percentthisbattery < targetMax && !bFoundRecharging)
+                            if (percentthisbattery < targetMax && (!bFoundRecharging || bFastRecharge))
                             {
                                 // first one found only.
                                 b.ChargeMode = ChargeMode.Recharge;

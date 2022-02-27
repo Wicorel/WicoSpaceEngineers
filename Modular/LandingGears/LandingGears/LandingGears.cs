@@ -25,12 +25,15 @@ namespace IngameScript
         {
             List<IMyTerminalBlock> gearList = new List<IMyTerminalBlock>();
 
-            Program thisProgram;
-            public LandingGears(Program program)
-            {
-                thisProgram = program;
+            Program _Program;
+            WicoBlockMaster _wicoBlockMaster;
 
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+            public LandingGears(Program program, WicoBlockMaster wicoBlockMaster)
+            {
+                _Program = program;
+                _wicoBlockMaster = wicoBlockMaster;
+
+                wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
             }
 
             /// <summary>
@@ -91,7 +94,7 @@ namespace IngameScript
 
             public void BlocksOnOff(bool bOn)
             {
-                thisProgram.wicoBlockMaster.BlocksOnOff(gearList, bOn);
+                _wicoBlockMaster.BlocksOnOff(gearList, bOn);
             }
         }
     }

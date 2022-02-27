@@ -47,15 +47,17 @@ namespace IngameScript
             List<long> localGrids = new List<long>();
 
             Program _program;
+            WicoBlockMaster _wicoBlockMaster;
 
 //            bool _debug = false;
 
-            public Cameras(Program program)
+            public Cameras(Program program, WicoBlockMaster wicoBlockMaster)
             {
                 _program = program;
+                _wicoBlockMaster = wicoBlockMaster;
 
-                _program.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                _program.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                _wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
 //                _debug = _program._CustomDataIni.Get(_program.OurName, "CameraDebug").ToBoolean(_debug);
 //                _program._CustomDataIni.Set(_program.OurName, "CameraDebug", _debug);
@@ -95,7 +97,7 @@ namespace IngameScript
                 if (ShipControl == null)
                 {
                     // first time Init
-                    ShipControl = _program.wicoBlockMaster.GetMainController();
+                    ShipControl = _wicoBlockMaster.GetMainController();
                     if (ShipControl == null) return;
 
                     ShipControl.Orientation.GetMatrix(out fromGridToReference);

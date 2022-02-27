@@ -26,11 +26,13 @@ namespace IngameScript
             List<IMyTerminalBlock> gasgenList = new List<IMyTerminalBlock>();
 
             Program thisProgram;
-            public GasGens(Program program)
+            WicoBlockMaster _wicoBlockMaster;
+            public GasGens(Program program, WicoBlockMaster wicoBlockMaster)
             {
                 thisProgram = program;
+                _wicoBlockMaster = wicoBlockMaster;
 
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                _wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
             }
 
             /// <summary>
@@ -46,7 +48,7 @@ namespace IngameScript
             }
             public void GasGensEnable(bool bOn = true)
             {
-                thisProgram.wicoBlockMaster.BlocksOnOff(gasgenList, bOn);
+                _wicoBlockMaster.BlocksOnOff(gasgenList, bOn);
             }
 
         }

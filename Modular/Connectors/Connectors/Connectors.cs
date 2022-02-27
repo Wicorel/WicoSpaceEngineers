@@ -29,13 +29,15 @@ namespace IngameScript
             List<IMyTerminalBlock> localNondesignatedConnectors = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> localEjectors = new List<IMyTerminalBlock>();
 
-            Program thisProgram;
-            public Connectors(Program program)
+            Program _program;
+            bool MeGridOnly = false;
+            public Connectors(Program program, WicoBlockMaster wicoBlockMaster, bool bMeGridOnly=false)
             {
-                thisProgram = program;
+                _program = program;
+                MeGridOnly = bMeGridOnly;
 
-                thisProgram.wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
-                thisProgram.wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
+                wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);
+                wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
             }
 
             /// <summary>
@@ -44,6 +46,9 @@ namespace IngameScript
             /// <param name="tb"></param>
             public void BlockParseHandler(IMyTerminalBlock tb)
             {
+                if (MeGridOnly
+                    && !(tb.CubeGrid.EntityId == _program.Me.CubeGrid.EntityId))
+                    return;
                 if (tb is IMyShipConnector)
                 {
                     if(tb.BlockDefinition.SubtypeName.Contains("ConnectorSmall"))
@@ -227,12 +232,12 @@ namespace IngameScript
 
             public void DisplayInfo()
             {
-                thisProgram.Echo("localConnectors#=" + localConnectors.Count);
-                thisProgram.Echo("localDockConnectors#=" + localDockConnectors.Count);
-                thisProgram.Echo("localBaseConnectors#=" + localBaseConnectors.Count);
-                thisProgram.Echo("localNDConnectors#=" + localNondesignatedConnectors.Count);
-                thisProgram.Echo("localEjectors#=" + localEjectors.Count);
-                thisProgram.Echo("AnyConnected=" + AnyConnectorIsConnected().ToString());
+                _program.Echo("localConnectors#=" + localConnectors.Count);
+                _program.Echo("localDockConnectors#=" + localDockConnectors.Count);
+                _program.Echo("localBaseConnectors#=" + localBaseConnectors.Count);
+                _program.Echo("localNDConnectors#=" + localNondesignatedConnectors.Count);
+                _program.Echo("localEjectors#=" + localEjectors.Count);
+                _program.Echo("AnyConnected=" + AnyConnectorIsConnected().ToString());
             }
 
         }
