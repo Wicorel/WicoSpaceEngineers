@@ -72,19 +72,19 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " Navigation";
-                _program.moduleList += "\nNavigation V4.2j";
+                _program.moduleList += "\nNavigation V4.2m";
 
-                NAVEmulateOld=_program._CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
-                _program._CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
+                NAVEmulateOld=_program.CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
+                _program.CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
 
-                bAutoPatrol = _program._CustomDataIni.Get(sNavSection, "AutoPatrol").ToBoolean(bAutoPatrol);
-                _program._CustomDataIni.Set(sNavSection, "AutoPatrol", bAutoPatrol);
+                bAutoPatrol = _program.CustomDataIni.Get(sNavSection, "AutoPatrol").ToBoolean(bAutoPatrol);
+                _program.CustomDataIni.Set(sNavSection, "AutoPatrol", bAutoPatrol);
 
-//                bControlAntennaRange = _program._CustomDataIni.Get(sNavSection, "ControlAntennaRange").ToBoolean(bControlAntennaRange);
-//                _program._CustomDataIni.Set(sNavSection, "ControlAntennaRange", bControlAntennaRange);
+//                bControlAntennaRange = _program.CustomDataIni.Get(sNavSection, "ControlAntennaRange").ToBoolean(bControlAntennaRange);
+//                _program.CustomDataIni.Set(sNavSection, "ControlAntennaRange", bControlAntennaRange);
 
-                _Debug = _program._CustomDataIni.Get(sNavSection, "Debug").ToBoolean(_Debug);
-                _program._CustomDataIni.Set(sNavSection, "Debug", _Debug);
+                _Debug = _program.CustomDataIni.Get(sNavSection, "Debug").ToBoolean(_Debug);
+                _program.CustomDataIni.Set(sNavSection, "Debug", _Debug);
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -756,7 +756,7 @@ namespace IngameScript
                     thrustForwardList[0].Orientation.GetMatrix(out or1);
                     vBestThrustOrientation = or1.Forward; // start out aiming at whatever the FW thrusters are aiming at..
 
-                    bControlAntennaRange = _program._CustomDataIni.Get(sNavSection, "ControlAntennaRange").ToBoolean(bControlAntennaRange);
+                    bControlAntennaRange = _program.CustomDataIni.Get(sNavSection, "ControlAntennaRange").ToBoolean(bControlAntennaRange);
 
                     _travelMovement.ResetTravelMovement(_wicoElapsedTime);
 
@@ -1122,6 +1122,7 @@ namespace IngameScript
 //                        _wicoControl.SetState(161);
                         _travelMovement.doTravelMovement(_wicoElapsedTime, vTargetLocation, (float)ArrivalDistanceMin, 500, 300, ShipSpeedMax);
                         sbModeInfo.AppendLine(_travelMovement.CurrentStatus);
+                        _program.Echo(_travelMovement.CurrentStatus);
                     }
                     else
                     {
@@ -1197,11 +1198,13 @@ namespace IngameScript
                 else if (iState == 345)
                 {
                     // we hit a grid.  align to it
-                    Vector3D[] corners = new Vector3D[BoundingBoxD.CornerCount];
+
+                    //                    Vector3D[] corners = new Vector3D[BoundingBoxD.CornerCount];
+                    Vector3D[] corners = new Vector3D[BoundingBox.CornerCount];
 
                     BoundingBoxD bbd = _travelMovement.LastDetectedInfo.BoundingBox;
                     bbd.GetCorners(corners);
-
+                    
                     GridUpVector = _program.wicoSensors.PlanarNormal(corners[3], corners[4], corners[7]);
                     GridRightVector = _program.wicoSensors.PlanarNormal(corners[0], corners[1], corners[4]);
                     _wicoControl.WantFast();

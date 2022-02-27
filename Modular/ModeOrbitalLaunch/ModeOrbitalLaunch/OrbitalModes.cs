@@ -65,22 +65,22 @@ namespace IngameScript
                 _wicoCameras = wicoCameras;
 
                 _program.moduleName += " Orbital";
-                _program.moduleList += "\nOrbital V4.2h";
+                _program.moduleList += "\nOrbital V4.2i";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
 
-                bOrbitalLaunchDebug = _program._CustomDataIni.Get(sOrbitalSection, "OrbitalLaunchDebug").ToBoolean(bOrbitalLaunchDebug);
-                _program._CustomDataIni.Set(sOrbitalSection, "OrbitalLaunchDebug", MaxLaunchMps);
+                bOrbitalLaunchDebug = _program.CustomDataIni.Get(sOrbitalSection, "OrbitalLaunchDebug").ToBoolean(bOrbitalLaunchDebug);
+                _program.CustomDataIni.Set(sOrbitalSection, "OrbitalLaunchDebug", MaxLaunchMps);
 
-                bAlignGravityHover = _program._CustomDataIni.Get(sOrbitalSection, "AlignGravityHover").ToBoolean(bAlignGravityHover);
-                _program._CustomDataIni.Set(sOrbitalSection, "AlignGravityHover", MaxLaunchMps);
+                bAlignGravityHover = _program.CustomDataIni.Get(sOrbitalSection, "AlignGravityHover").ToBoolean(bAlignGravityHover);
+                _program.CustomDataIni.Set(sOrbitalSection, "AlignGravityHover", MaxLaunchMps);
 
-                MaxLaunchMps = _program._CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
-                _program._CustomDataIni.Set(sOrbitalSection, "LaunchSpeedMax", MaxLaunchMps);
+                MaxLaunchMps = _program.CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
+                _program.CustomDataIni.Set(sOrbitalSection, "LaunchSpeedMax", MaxLaunchMps);
 
-                MaxDescentMps = _program._CustomDataIni.Get(sOrbitalSection, "DescentSpeedMax").ToDouble(MaxDescentMps);
-                _program._CustomDataIni.Set(sOrbitalSection, "DescentSpeedMax", MaxDescentMps);
+                MaxDescentMps = _program.CustomDataIni.Get(sOrbitalSection, "DescentSpeedMax").ToDouble(MaxDescentMps);
+                _program.CustomDataIni.Set(sOrbitalSection, "DescentSpeedMax", MaxDescentMps);
 
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
@@ -588,7 +588,7 @@ namespace IngameScript
                 if (iState == 0)
                 {
                     //		dtStartShip = DateTime.Now;
-                    MaxLaunchMps = _program._CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
+                    MaxLaunchMps = _program.CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
 
                     _wicoControl.WantOnce();
                     //                    dLastVelocityShip = 0;
@@ -1638,7 +1638,7 @@ namespace IngameScript
                     float fMPS = _wicoControl.fMaxWorldMps;
                     if (velocityShip > fMPS) fMPS = (float)velocityShip;
 
-                    retroStartDistance = (int)_wicoThrusters.calculateStoppingDistance(shipController, thrustOrbitalUpList, fMPS, dGravity);
+                    retroStartDistance = (int)_wicoThrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustOrbitalUpList, fMPS, dGravity);
                     _program.Echo("dGravity: " + dGravity.ToString("0.00"));
                     sbNotices.AppendLine("Stopping Distance=" + retroStartDistance.ToString());
                     _program.Echo("Stopping Distance=" + retroStartDistance.ToString());
@@ -1655,7 +1655,8 @@ namespace IngameScript
                 }
                 //               double finalMaxStop = _wicoThrusters.calculateStoppingDistance(myMass.PhysicalMass, thrustOrbitalUpList, _wicoControl.fMaxWorldMps, 1.0);
                 //                _program.Echo("Final StoppingD=" + finalMaxStop.ToString("0"));
-                _wicoControl.WantMedium();
+//                _wicoControl.WantMedium();
+                _wicoControl.WantSlow();
 
                 if (iState == 0)
                 {
@@ -1663,7 +1664,7 @@ namespace IngameScript
                     // check for parachutes. if finalParachuteTerminal<10 we are good.  10-20 =dangerous.  >20=nogo
 
                     _program.Echo("Init State");
-                    MaxDescentMps = _program._CustomDataIni.Get(sOrbitalSection, "DescentSpeedMax").ToDouble(MaxDescentMps);
+                    MaxDescentMps = _program.CustomDataIni.Get(sOrbitalSection, "DescentSpeedMax").ToDouble(MaxDescentMps);
                     //powerDownThrusters(thrustAllList,thrustAll,true);
                     if (dGravity > 0)
                     { // we are starting in gravity
@@ -1732,7 +1733,7 @@ namespace IngameScript
                         _wicoThrusters.powerUpThrusters(thrustForwardList, 5);
                     else _wicoThrusters.powerDownThrusters(thrustForwardList);
                     _wicoThrusters.powerDownThrusters(thrustBackwardList, WicoThrusters.thrustAll, true);
-                    if (dGravity > 0)
+                    if (dGravity > 0 && velocityShip>5)
                         _wicoControl.SetState(30);// current_state = 30;
                     return;
                 }
@@ -1777,6 +1778,7 @@ namespace IngameScript
 
                         if (finalMaxStop < 0) // thrusters cannot save us... (but if atmo, then this could change when we get lower)
                         {
+                            // TODO Assumes earthlike gravity
                             double finalParachuteTerminal = _program.wicoParachutes.CalculateTerminalVelocity(PhysicalMass, _wicoBlockMaster.gridsize, 9.81, 0.85f);
                             _program.Echo("FParachute V: " + finalParachuteTerminal.ToString("0.00"));
                             if (finalParachuteTerminal < 10f)
@@ -1868,6 +1870,8 @@ namespace IngameScript
                     if ( bAimed
                     || distanceToTravel < retroStartDistance)
                     {
+                        _wicoThrusters.powerDownThrusters();
+                        _wicoThrusters.powerDownThrusters(thrustOrbitalUpList, WicoThrusters.thrustAll, true);
                         _wicoControl.SetState(70);
                     }
                     _wicoControl.WantFast();
@@ -1883,9 +1887,18 @@ namespace IngameScript
                         _program.Echo("attitude change");
                         _wicoControl.WantFast();
                     }
-                    _wicoThrusters.powerDownThrusters();
-                    _wicoThrusters.powerDownThrusters(thrustOrbitalUpList, WicoThrusters.thrustAll, true);
+//                    _wicoThrusters.powerDownThrusters();
+//                    _wicoThrusters.powerDownThrusters(thrustOrbitalUpList, WicoThrusters.thrustAll, true);
 
+                    if(velocityShip<5)
+                    { // push towards planet
+                        _wicoThrusters.powerUpThrusters(thrustOrbitalDownList);
+//                        _wicoThrusters.powerDownThrusters(thrustOrbitalDownList, WicoThrusters.thrustAll, true);
+                    }
+                    else
+                    {
+                        _wicoThrusters.powerDownThrusters(thrustOrbitalDownList);
+                    }
                     if (velocityShip > MaxDescentMps)
                     {
                         // TODO: use hoverthrust instead of just turning on thrusters full blast.
@@ -1996,7 +2009,7 @@ namespace IngameScript
                         }
 
 
-                        _wicoControl.WantMedium();// bWantMedium = true;
+//                        _wicoControl.WantMedium();// bWantMedium = true;
                         double scandistance = alt;
                         if (scandistance > retroStartDistance)
                             scandistance = retroStartDistance;

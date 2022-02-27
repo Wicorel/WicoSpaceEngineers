@@ -151,8 +151,8 @@ namespace IngameScript
                 _wicoIGC.AddPublicHandler(CONNECTORDOCKTAG, DockingUnicastHandler);
                 _wicoIGC.AddPublicHandler(CONNECTORALIGNDOCKTAG, DockingUnicastHandler);
 
-                _Debug = _program._CustomDataIni.Get(sDockingSection, "Debug").ToBoolean(_Debug);
-                _program._CustomDataIni.Set(sDockingSection, "Debug", _Debug);
+                _Debug = _program.CustomDataIni.Get(sDockingSection, "Debug").ToBoolean(_Debug);
+                _program.CustomDataIni.Set(sDockingSection, "Debug", _Debug);
 
                 _displays.AddSurfaceHandler("MODE", SurfaceHandler);
                 _displays.AddSurfaceHandler("FUEL", SurfaceHandler);
@@ -417,7 +417,7 @@ namespace IngameScript
                         string s = "Autorefuel=" + bAutoRefuel.ToString();
                         _program.Echo(s);
                         _program.ErrorLog(s);
-                        _program._CustomDataIni.Set(sDockingSection, "AutoRefuel", bAutoRefuel);
+                        _program.CustomDataIni.Set(sDockingSection, "AutoRefuel", bAutoRefuel);
                         _program.CustomDataChanged();
                     }
                     if (myCommandLine.Argument(0) == "launch")
@@ -629,6 +629,7 @@ namespace IngameScript
                         //                                if (aMessage[1] == "DOCK" || aMessage[1] == "ADOCK")
                         //                               if (aMessage[1] == "COND" || aMessage[1] == "ACOND")
                         {
+                            // TODO: Add gravity vector at connector location
                             _program.Echo("Docking answer!");
 
                             long id = 0;
@@ -675,10 +676,10 @@ namespace IngameScript
                                 bValidLaunch1 = true;
                                 bValidHome = true;
 
+                                // this is magic.. shouldn't really be here.
                                 _wicoControl.SetState(300);
                             }
                         }
-
                     }
                 }
             }

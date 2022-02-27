@@ -130,7 +130,7 @@ namespace IngameScript
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
 
-                OreInitInfo(_program._CustomDataIni);
+                OreInitInfo(_program.CustomDataIni);
 
                 if (_displays != null) _displays.AddSurfaceHandler("ORELOCS", SurfaceHandler);
             }
@@ -397,7 +397,7 @@ namespace IngameScript
             public void OreClearAmounts()
             {
                 if (oreInfos.Count < 1)
-                    OreInitInfo(_program._CustomDataIni);
+                    OreInitInfo(_program.CustomDataIni);
                 for (int i = 0; i < oreInfos.Count; i++)
                 {
                     oreInfos[i].localAmount = 0;
@@ -408,7 +408,7 @@ namespace IngameScript
             {
                 //            Echo("addOreAmount:" + sOre);// + ":" + lAmount.ToString() + " bNoFind="+bNoFind.ToString());
                 if (oreInfos.Count < 1)
-                    OreInitInfo(_program._CustomDataIni);
+                    OreInitInfo(_program.CustomDataIni);
 
                 for (int i = 0; i < oreInfos.Count; i++)
                 {

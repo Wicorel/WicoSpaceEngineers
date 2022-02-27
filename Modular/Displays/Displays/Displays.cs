@@ -100,8 +100,8 @@ namespace IngameScript
 
                 _program.AddPostInitHandler(PostInitHandler());
 
-                _Debug = _program._CustomDataIni.Get(WicoDisplaySection, "Debug").ToBoolean(_Debug);
-                _program._CustomDataIni.Set(WicoDisplaySection, "Debug", _Debug);
+                _Debug = _program.CustomDataIni.Get(WicoDisplaySection, "Debug").ToBoolean(_Debug);
+                _program.CustomDataIni.Set(WicoDisplaySection, "Debug", _Debug);
 
                 _wicoElapsedTime.AddTimer(DisplayCheckTimer, DisplayInterval, ElapsedTimerHandler);
                 _wicoElapsedTime.StartTimer(DisplayCheckTimer);
@@ -154,9 +154,10 @@ namespace IngameScript
                 // do stuff..
                 foreach(var display in _wicoDisplays)
                 {
+                    if(_Debug) _program.Echo("Display:" + display.tag);
                     display.CallHandlers(DODRAW);
                 }
-                _wicoElapsedTime.RestartTimer(timerName);
+                // auto restart is set to true
             }
 
             /// <summary>
@@ -182,7 +183,7 @@ namespace IngameScript
                         break;
                     }
                 }
-                _program.Echo("display found="+bFound.ToString());
+//                _program.Echo("display found="+bFound.ToString());
                 if (!bFound)
                 {
                     FoundDisplay = new WicoDisplay(_SurfaceProviders, tag);

@@ -69,29 +69,28 @@ namespace IngameScript
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);
 
-                _ControlEngines = _program._CustomDataIni.Get(PowerManagementSection, ControlEngines).ToBoolean(_ControlEngines);
-                _program._CustomDataIni.Set(PowerManagementSection, ControlEngines, _ControlEngines);
+                _ControlEngines = _program.CustomDataIni.Get(PowerManagementSection, ControlEngines).ToBoolean(_ControlEngines);
+                _program.CustomDataIni.Set(PowerManagementSection, ControlEngines, _ControlEngines);
 
-                PowerManagementCheckSeconds = _program._CustomDataIni.Get(_program.OurName, PowerManagementTimer).ToDouble(PowerManagementCheckSeconds);
-                _program._CustomDataIni.Set(_program.OurName, PowerManagementTimer, PowerManagementCheckSeconds);
+                PowerManagementCheckSeconds = _program.CustomDataIni.Get(_program.OurName, PowerManagementTimer).ToDouble(PowerManagementCheckSeconds);
+                _program.CustomDataIni.Set(_program.OurName, PowerManagementTimer, PowerManagementCheckSeconds);
 
                 _elapsedTime.AddTimer(PowerManagementTimer, PowerManagementCheckSeconds, ElapsedTimeHandler);
                 _elapsedTime.StartTimer(PowerManagementTimer);
 
                 _displays.AddSurfaceHandler(ScreenTag, SurfaceHandler);
 
-                _bDebug = _program._CustomDataIni.Get(_program.OurName, PowerManagementeDebug).ToBoolean(_bDebug);
-                _program._CustomDataIni.Set(_program.OurName, PowerManagementeDebug, _bDebug);
+                _bDebug = _program.CustomDataIni.Get(_program.OurName, PowerManagementeDebug).ToBoolean(_bDebug);
+                _program.CustomDataIni.Set(_program.OurName, PowerManagementeDebug, _bDebug);
 
-                PowerManagementEnable = _program._CustomDataIni.Get(_program.OurName, PowerManagementeEnabled).ToBoolean(PowerManagementEnable);
-                _program._CustomDataIni.Set(_program.OurName, PowerManagementeEnabled, PowerManagementEnable);
+                PowerManagementEnable = _program.CustomDataIni.Get(_program.OurName, PowerManagementeEnabled).ToBoolean(PowerManagementEnable);
+                _program.CustomDataIni.Set(_program.OurName, PowerManagementeEnabled, PowerManagementEnable);
                 if (!PowerManagementEnable)
                 {
                     _elapsedTime.StopTimer(PowerManagementTimer);
                 }
-
-
             }
+
             void LoadHandler(MyIni Ini)
             {
             }

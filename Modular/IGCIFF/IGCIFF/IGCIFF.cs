@@ -42,8 +42,8 @@ namespace IngameScript
                 _EntityId = program.Me.CubeGrid.EntityId;
                 _program = program;
 
-                AnnounceSeconds = _program._CustomDataIni.Get(_program.OurName, "IFFAnnounceSeconds").ToDouble(AnnounceSeconds);
-                _program._CustomDataIni.Set(_program.OurName, "IFFAnnounceSeconds", AnnounceSeconds);
+                AnnounceSeconds = _program.CustomDataIni.Get(_program.OurName, "IFFAnnounceSeconds").ToDouble(AnnounceSeconds);
+                _program.CustomDataIni.Set(_program.OurName, "IFFAnnounceSeconds", AnnounceSeconds);
 
                 if (AnnounceSeconds > 0)
                 {

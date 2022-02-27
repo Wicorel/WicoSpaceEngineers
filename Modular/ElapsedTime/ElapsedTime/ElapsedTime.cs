@@ -35,8 +35,8 @@ namespace IngameScript
 
                 _program.AddMainHandler(CheckTimers);
 
-                _bDebug = _program._CustomDataIni.Get(wicoETString, "Debug").ToBoolean(_bDebug);
-                _program._CustomDataIni.Set(wicoETString, "Debug", _bDebug);
+                _bDebug = _program.CustomDataIni.Get(wicoETString, "Debug").ToBoolean(_bDebug);
+                _program.CustomDataIni.Set(wicoETString, "Debug", _bDebug);
             }
 
             List<ElapsedTimers> TimerList = new List<ElapsedTimers>();

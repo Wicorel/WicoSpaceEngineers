@@ -55,9 +55,11 @@ namespace IngameScript
             {
                 _program = myProgram;
 
+                _program.AddMainHandler(ProcessIGCMessages);
+
                 //                _debug = debug;
-                _debug = _program._CustomDataIni.Get(WicoIGCSection, "Debug").ToBoolean(_debug);
-                _program._CustomDataIni.Set(WicoIGCSection, "Debug", _debug);
+                _debug = _program.CustomDataIni.Get(WicoIGCSection, "Debug").ToBoolean(_debug);
+                _program.CustomDataIni.Set(WicoIGCSection, "Debug", _debug);
 
                 _debugTextPanel = _program.GridTerminalSystem.GetBlockWithName("IGC Report") as IMyTextPanel;
                 if (_debug) _debugTextPanel?.WriteText("");
@@ -105,7 +107,7 @@ namespace IngameScript
             /// <summary>
             /// Process all pending IGC messages.
             /// </summary>
-            public void ProcessIGCMessages()
+            public void ProcessIGCMessages(UpdateType updateSource)
             {
                 bool bFoundMessages = false;
                 if (_debug) _program.Echo(_broadcastChannels.Count.ToString() + " broadcast channels");

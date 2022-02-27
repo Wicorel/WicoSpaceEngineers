@@ -129,14 +129,14 @@ namespace IngameScript
                 _wheels = wicoWheels;
                 _navRotors = navRotors;
 
-                dTMDebug = _program._CustomDataIni.Get(sSection, "Debug").ToBoolean(dTMDebug);
-                _program._CustomDataIni.Set(sSection, "Debug", dTMDebug);
+                dTMDebug = _program.CustomDataIni.Get(sSection, "Debug").ToBoolean(dTMDebug);
+                _program.CustomDataIni.Set(sSection, "Debug", dTMDebug);
 
-                dTMUseCameraCollision = _program._CustomDataIni.Get(sSection, "UseCameraCollision").ToBoolean(dTMUseCameraCollision);
-                _program._CustomDataIni.Set(sSection, "UseCameraCollision", dTMUseCameraCollision);
+                dTMUseCameraCollision = _program.CustomDataIni.Get(sSection, "UseCameraCollision").ToBoolean(dTMUseCameraCollision);
+                _program.CustomDataIni.Set(sSection, "UseCameraCollision", dTMUseCameraCollision);
 
-                dTMUseSensorCollision=_program._CustomDataIni.Get(sSection, "UseSensorCollision").ToBoolean(dTMUseSensorCollision);
-                _program._CustomDataIni.Set(sSection, "UseSensorCollision", dTMUseSensorCollision);
+                dTMUseSensorCollision=_program.CustomDataIni.Get(sSection, "UseSensorCollision").ToBoolean(dTMUseSensorCollision);
+                _program.CustomDataIni.Set(sSection, "UseSensorCollision", dTMUseSensorCollision);
 
             }
 
@@ -271,6 +271,12 @@ namespace IngameScript
                         //                        if (dTMUseSensorCollision) sStartupError += "\nNo Sensor for collision detection";
                     }
                 }
+                if (dTMUseCameraCollision && !_cameras.HasForwardCameras())//  cameraForwardList.Count < 1)
+                {
+                    // we want to use cameras, but there are none..
+                    _program.ErrorLog("Warning: No forward cameras");
+                }
+
                 btmApproach = false; // we have reached approach range
                 btmPrecision = false; // we have reached precision range
                 btmClose = false; // we have reached close range
@@ -373,6 +379,14 @@ namespace IngameScript
                 if (dTMDebug) _program.ErrorLog("FarSpeed=" + _program.niceDoubleMeters(dtmFarSpeed) + " ASpeed=" + _program.niceDoubleMeters(dtmApproachSpeed));
                 if (dTMDebug) _program.ErrorLog("Far =" + _program.niceDoubleMeters(dtmFar) + " A=" + _program.niceDoubleMeters(dtmApproach) + " P=" + _program.niceDoubleMeters(dtmPrecision));
                 if (dTMDebug) _program.ErrorLog("BtmA =" + btmApproach + " P=" + btmPrecision + " C=" + btmClose);
+                if(dTMDebug)
+                {
+                    _program.ErrorLog("FW Count=" + thrustTmForwardList.Count());
+                    foreach(var thrust in thrustTmForwardList)
+                    {
+                        _program.ErrorLog(" " + thrust.CustomName);
+                    }
+                }
                 CurrentStatus = "Initialized";
             }
 
@@ -388,14 +402,12 @@ namespace IngameScript
                 double maxSpeed, int iThrustType = WicoThrusters.thrustAll, bool bAsteroidTarget = false)
             {
                 bool bArrived = false;
-//                _program.EchoInstructions("DTM Start");
+                //                _program.EchoInstructions("DTM Start");
                 if (dTMDebug)
                 {
                     _program.Echo("dTM:" + _wicoControl.IState + "->" + arrivalState + "-C>" + colDetectState + " A:" + arrivalDistance);
-                    //                    _program.Echo("dTM:" + current_state + "->" + arrivalState + "-C>" + colDetectState + " A:" + arrivalDistance);
                     _program.Echo("W=" + btmWheels.ToString() + " S=" + btmSled.ToString() + " R=" + btmRotor.ToString());
                 }
-//                _program.EchoInstructions("DTM A");
 
                 if (tmShipController == null)
                 {
@@ -415,6 +427,11 @@ namespace IngameScript
                 Vector3D vVec = vTargetLocation - tmShipController.CenterOfMass;
 
                 double distance = vVec.Length();
+                if (dTMDebug)
+                {
+                    _program.Echo("FW:" + thrustTmForwardList.Count());
+                    _program.Echo("BW:" + thrustTmBackwardList.Count());
+                }
 
                 // TODO: Adjust targetlocation for gravity and min altitude.
                 //                if (NAVGravityMinElevation > 0 && dGravity > 0)
@@ -468,7 +485,6 @@ namespace IngameScript
                     stoppingDistance = _thrusters.calculateStoppingDistance(myMass.PhysicalMass,thrustTmBackwardList, velocityShip, 0);
                 }
                 // TODO: calculate stopping D for wheels
-
 
                 if (tmSB!=null && dTMUseSensorCollision && _sensors.GetCount() > 0)
                 {
@@ -700,6 +716,7 @@ namespace IngameScript
                     }
                     if (
                         dTMUseCameraCollision
+                        && _cameras.HasForwardCameras()
                         && (
                                 (
                                 wicoElapsedTime.IsExpired(CameraTimer) //(tmCameraElapsedMs > tmCameraWaitMs || tmCameraElapsedMs < 0) // it is time to scan..
@@ -890,11 +907,14 @@ namespace IngameScript
                     if (dTMDebug)
                         _program.Echo("dtmPrecision=" + _program.niceDoubleMeters(dtmPrecision));
 
-                    if (dTMDebug) _program.ErrorLog("D=" + _program.niceDoubleMeters(distance) + " AD=" + _program.niceDoubleMeters(arrivalDistance));
+//                    if (dTMDebug) _program.ErrorLog("D=" + _program.niceDoubleMeters(distance) + " AD=" + _program.niceDoubleMeters(arrivalDistance));
 
                     // before starting up full blast thrust, check for CLOSE collision 
 
-                    if (_InitialScanDone || !(dTMUseCameraCollision || dTMUseSensorCollision)  )
+                    if (_InitialScanDone 
+                        || !(dTMUseCameraCollision || dTMUseSensorCollision)  
+                        || (dTMUseCameraCollision && !_cameras.HasForwardCameras())
+                        )
                     {
                         if ((distance + arrivalDistance + velocityShip * 2) > dtmFar && !btmApproach)
                         {
@@ -902,7 +922,7 @@ namespace IngameScript
                             // we are 'far' from target location.  use fastest movement
                             //                    if(dTMDebug)
                             _program.Echo("dtmFar.=" + _program.niceDoubleMeters(dtmFar) + " Target Vel=" + dtmFarSpeed.ToString("N0"));
-                            if (dTMDebug) _program.ErrorLog("dtmFar.=" + _program.niceDoubleMeters(dtmFar) + " Target Vel=" + dtmFarSpeed.ToString("N0"));
+ //                           if (dTMDebug) _program.ErrorLog("dtmFar.=" + _program.niceDoubleMeters(dtmFar) + " Target Vel=" + dtmFarSpeed.ToString("N0"));
                             //                        StatusLog("\"Far\" from target\n Target Speed=" + dtmFarSpeed.ToString("N0") + "m/s", textPanelReport);
 
                             MyShipMass myMass;
@@ -911,7 +931,7 @@ namespace IngameScript
                             double maxDeltaVFW = maxThrust / myMass.PhysicalMass;
                             maxThrust = _thrusters.calculateMaxThrust(thrustTmBackwardList);
                             double maxDeltaVBW = maxThrust / myMass.PhysicalMass;
-                            if (dTMDebug) _program.ErrorLog("BW/FW DV=" + (maxDeltaVBW / maxDeltaVFW).ToString("0.0"));
+//                            if (dTMDebug) _program.ErrorLog("BW/FW DV=" + (maxDeltaVBW / maxDeltaVFW).ToString("0.0"));
                             float fThrustPercent = 100;
                             if (maxDeltaVBW < distance) fThrustPercent = (float)Math.Min(100, (maxDeltaVBW / maxDeltaVFW) * 100);
                             _program.Echo("Far thrust%=" + fThrustPercent.ToString());
@@ -943,7 +963,7 @@ namespace IngameScript
                                 double maxDeltaVFW = maxThrust / myMass.PhysicalMass;
                                 maxThrust = _thrusters.calculateMaxThrust(thrustTmBackwardList);
                                 double maxDeltaVBW = maxThrust / myMass.PhysicalMass;
-                                if (dTMDebug) _program.ErrorLog("BW/FW DV=" + (maxDeltaVBW / maxDeltaVFW).ToString("0.0"));
+//                                if (dTMDebug) _program.ErrorLog("BW/FW DV=" + (maxDeltaVBW / maxDeltaVFW).ToString("0.0"));
 
                                 _gyros.SetMinAngle(0.005f);// minAngleRad = 0.005f;// aim tighter (next time)
                                 btmPrecision = true;

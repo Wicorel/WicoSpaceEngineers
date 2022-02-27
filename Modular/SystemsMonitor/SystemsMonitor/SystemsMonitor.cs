@@ -77,8 +77,8 @@ namespace IngameScript
                 _cargoCheck = cargoCheck;
                 //               _displays = displays;
 
-                bAutoRefuel = _program._CustomDataIni.Get(SystemsSection, AutoRefuel).ToBoolean(bAutoRefuel);
-                _program._CustomDataIni.Set(SystemsSection, AutoRefuel, bAutoRefuel);
+                bAutoRefuel = _program.CustomDataIni.Get(SystemsSection, AutoRefuel).ToBoolean(bAutoRefuel);
+                _program.CustomDataIni.Set(SystemsSection, AutoRefuel, bAutoRefuel);
 
                 _program.AddTriggerHandler(ProcessTrigger);
 
@@ -199,7 +199,7 @@ namespace IngameScript
                         string s = "Autorefuel=" + bAutoRefuel.ToString();
                         _program.Echo(s);
                         _program.ErrorLog(s);
-                        _program._CustomDataIni.Set(SystemsSection, AutoRefuel, bAutoRefuel);
+                        _program.CustomDataIni.Set(SystemsSection, AutoRefuel, bAutoRefuel);
                         _program.CustomDataChanged();
                     }
                     for (int arg = 0; arg < myCommandLine.ArgumentCount; arg++)
@@ -235,9 +235,9 @@ namespace IngameScript
             {
                 _power.BatterySetNormal();
             }
-            public bool BatteryCheck(int targetMax, bool bEcho = true, bool bProgress = false)
+            public bool BatteryCheck(int targetMax, bool bEcho = true, bool bProgress = false, bool bFastRecharge = false)
             {
-                return _power.BatteryCheck(targetMax, bEcho, bProgress);
+                return _power.BatteryCheck(targetMax, bEcho, bProgress, bFastRecharge);
             }
             public bool HasBatteries()
             {
