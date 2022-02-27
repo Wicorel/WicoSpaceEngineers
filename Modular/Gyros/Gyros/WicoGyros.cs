@@ -52,11 +52,11 @@ namespace IngameScript
 
             public void GyrosInit()
             {
-                CTRL_COEFF=_program._CustomDataIni.Get(sGridSection, "CTRL_COEFF").ToDouble(CTRL_COEFF);
-                LIMIT_GYROS = _program._CustomDataIni.Get(sGridSection, "LIMIT_GYROS").ToInt32(LIMIT_GYROS);
+                CTRL_COEFF=_program.CustomDataIni.Get(sGridSection, "CTRL_COEFF").ToDouble(CTRL_COEFF);
+                LIMIT_GYROS = _program.CustomDataIni.Get(sGridSection, "LIMIT_GYROS").ToInt32(LIMIT_GYROS);
 
-                _program._CustomDataIni.Set(sGridSection, "CTRL_COEFF", CTRL_COEFF);
-                _program._CustomDataIni.Set(sGridSection, "LIMIT_GYROS", LIMIT_GYROS);
+                _program.CustomDataIni.Set(sGridSection, "CTRL_COEFF", CTRL_COEFF);
+                _program.CustomDataIni.Set(sGridSection, "LIMIT_GYROS", LIMIT_GYROS);
 
                 // In case we had previous control info; reset it.
                 allLocalGyros.Clear();
@@ -115,7 +115,7 @@ namespace IngameScript
                 useGyros.Clear();
                 if (gyroControl == null)
                 {
-                    gyroControl = _program.wicoBlockMaster.GetMainController();
+                    gyroControl = _wicoBlockMaster.GetMainController();
                 }
                 if (gyroControl == null)
                 {
@@ -195,7 +195,7 @@ namespace IngameScript
             /// </summary>
             /// <param name="vDirection">GRID orientation to use for aiming</param>
             /// <param name="vTarget">World VECTOR to aim the grid</param>
-            /// <returns></returns>
+            /// <returns>true if aimed within tolerances</returns>
             public bool AlignGyros(Vector3D vDirection, Vector3D vTarget )
             {
                 bool bAligned = true;
@@ -246,7 +246,6 @@ namespace IngameScript
                     {
                         g1.Pitch = pitch;
                         g1.GyroOverride = true;
-                        bAligned = false;
                     }
 
                     float yaw = -(float)rot.Y;
@@ -254,7 +253,6 @@ namespace IngameScript
                     { 
                         g1.Yaw = yaw;
                         g1.GyroOverride = true;
-                        bAligned = false;
                     }
 
                     float roll = -(float)rot.Z;
@@ -262,10 +260,7 @@ namespace IngameScript
                     { 
                         g1.Roll = roll;
                         g1.GyroOverride = true;
-                        bAligned = false;
                     }
-
-                    //		g.SetValueFloat("Power", 1.0f); 
                 }
                 return bAligned;
             }
