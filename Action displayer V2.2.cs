@@ -4,9 +4,11 @@
 
 // V2.6 Sep 17, 2021 
 
+// V2.7 Feb 23, 2022 SE 1.200 
+
 //MyDefinitionId electricDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Electricity");
-MyDefinitionId oxygenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Oxygen");
-MyDefinitionId hydrogenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
+//MyDefinitionId oxygenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Oxygen");
+//MyDefinitionId hydrogenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
 
 void Main(string sArgument)
 {
@@ -524,6 +526,24 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n Velocity=" + io.Velocity.ToString());
         values.Append("\n");
     }
+    if (unit is IMyHeatVent)
+    {
+        IMyHeatVent ihv = unit as IMyHeatVent;
+        values.Append("\nIMyHeatVent ");
+        values.Append("\n");
+    }
+    if (unit is IMyLargeGatlingTurret)
+    {
+        IMyLargeGatlingTurret ihv = unit as IMyLargeGatlingTurret;
+        values.Append("\nIMyLargeGatlingTurret ");
+        values.Append("\n");
+    }
+    if (unit is IMyTurretControlBlock)
+    {
+        IMyTurretControlBlock ihv = unit as IMyTurretControlBlock;
+        values.Append("\nIMyTurretControlBlock ");
+        values.Append("\n");
+    }
 
     Echo("Accepted resources:");
     values.Append("\nAccepted resources:");
@@ -565,35 +585,23 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
 
     if (source != null)
     {
+        /*
         float currentOutput = 0;
         float maxOutput = 0;
         currentOutput = source.CurrentOutput;
         maxOutput = source.MaxOutput;
 
-        values.Append("\n Current=" + currentOutput.ToString() + " Max=" + maxOutput.ToString() );
-
-        /*
-        var list = source.ResourceTypes; // PROHIBITED
+        values.Append("\n Current=" + currentOutput.ToString() + " Max=" + maxOutput.ToString());
+        */
+        var list = source.ResourceTypes;
         for (int j = 0; j < list.Count; ++j)
         {
-            values.Append("\n " + list[j].SubtypeId.ToString());
+            values.Append("\n " + /*list[j].TypeId.ToString()+"/" +*/ list[j].SubtypeId.ToString());
             Echo(list[j].SubtypeId.ToString());
+            float maxoutput = source.DefinedOutputByType(list[j]);
+            float currentoutput = source.CurrentOutputByType(list[j]);
+            values.Append(" Current=" + currentoutput + " Max=" + maxoutput);
         }
-        */
-        if (source.ProductionEnabledByType(oxygenDefId))
-        {
-            float maxoutput = source.DefinedOutputByType(oxygenDefId);
-            float currentoutput= source.CurrentOutputByType(oxygenDefId);
-            values.Append("\n O2 Current=" + currentoutput + " Max=" + maxoutput);
-        }
-        if (source.ProductionEnabledByType(hydrogenDefId))
-        {
-            float maxoutput = source.DefinedOutputByType(hydrogenDefId);
-            float currentoutput = source.CurrentOutputByType(hydrogenDefId);
-            values.Append("\n H2 Current=" + currentoutput + " Max=" + maxoutput);
-        }
-        //        values.Append("\n Source:"+source.Group.ToString()); Prohibited
-
     }
     else
     {
