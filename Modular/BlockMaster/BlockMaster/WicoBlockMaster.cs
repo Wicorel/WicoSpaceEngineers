@@ -29,6 +29,8 @@ namespace IngameScript
             Program _program;
             IMyGridTerminalSystem GridTerminalSystem;
 
+            bool bMeGridOnly = false;
+
             public WicoBlockMaster(Program program)
             {
                 _program = program;
@@ -45,8 +47,8 @@ namespace IngameScript
                 _program.AddPostInitHandler(LocalBlocksInit());
                 _program.AddPostInitHandler(RemoteBlocksInit());
 
-                DesiredMinTravelElevation = (float)_program._CustomDataIni.Get(_program.OurName, "MinTravelElevation").ToDouble(DesiredMinTravelElevation);
-                _program._CustomDataIni.Set(_program.OurName, "MinTravelElevation", DesiredMinTravelElevation);
+                DesiredMinTravelElevation = (float)_program.CustomDataIni.Get(_program.OurName, "MinTravelElevation").ToDouble(DesiredMinTravelElevation);
+                _program.CustomDataIni.Set(_program.OurName, "MinTravelElevation", DesiredMinTravelElevation);
             }
             void LoadHandler(MyIni theINI)
             {
@@ -287,11 +289,12 @@ namespace IngameScript
 
             public void DisplayInfo()
             {
+                /*
                 _program.Echo("LBlocks =" + localBlocksCount + " grids=" + localCubeGrids.Count);
                 _program.Echo("RBlocks =" + remoteBlocksCount + " grids=" + remoteCubeGrids.Count);
                 _program.Echo("PM=" + GetPhysicalMass().ToString("N2"));
                 _program.Echo("APM=" + GetAllPhysicalMass().ToString("N2"));
-
+                */
             }
 
             #region BLOCKHANDLING
@@ -313,6 +316,9 @@ namespace IngameScript
             List<Action> WicoLocalBlockChangedHandlers = new List<Action>();
             List<Action> WicoRemoteBlockChangedHandlers = new List<Action>();
 
+            List<Action> WicoLocalBlockDoneParsedHandlers = new List<Action>();
+            List<Action> WicoRemoteBlockDoneParsedHandlers = new List<Action>();
+
 
             public bool AddLocalBlockHandler(Action<IMyTerminalBlock> handler)
             {
@@ -325,6 +331,13 @@ namespace IngameScript
                 if (!WicoLocalBlockChangedHandlers.Contains(handler))
                     WicoLocalBlockChangedHandlers.Add(handler);
             }
+
+            public void AddLocalBlockParseDone(Action handler)
+            {
+                if (!WicoLocalBlockDoneParsedHandlers.Contains(handler))
+                    WicoLocalBlockDoneParsedHandlers.Add(handler);
+            }
+
             public bool AddRemoteBlockHandler(Action<IMyTerminalBlock> handler)
             {
                 if (!WicoRemoteBlockParseHandlers.Contains(handler))
@@ -336,12 +349,20 @@ namespace IngameScript
                 if (!WicoRemoteBlockChangedHandlers.Contains(handler))
                     WicoRemoteBlockChangedHandlers.Add(handler);
             }
-
+            public void AddRemoteBlockParseDone(Action handler)
+            {
+                if (!WicoRemoteBlockDoneParsedHandlers.Contains(handler))
+                    WicoRemoteBlockDoneParsedHandlers.Add(handler);
+            }
+            public void SetMeGridOnly(bool bMeOnly = false)
+            {
+                bMeGridOnly = bMeOnly;
+            }
             public void LoadLocalGrid()
             {
                 localCubeGrids.Clear();
                 gtsLocalBlocks.Clear();
-                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, (x1 => x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
+                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, bLocalCheck);
                 foreach (var tb in gtsLocalBlocks)
                 {
                     if (!localCubeGrids.Contains(tb.CubeGrid))
@@ -349,6 +370,16 @@ namespace IngameScript
                         localCubeGrids.Add(tb.CubeGrid);
                     }
                 }
+            }
+            bool bLocalCheck(IMyTerminalBlock tb)
+            {
+                bool bValid = true;
+                if (!ValidBlock(tb)) return false;
+                if (bMeGridOnly)
+                    bValid = tb.CubeGrid.EntityId == _program.Me.CubeGrid.EntityId;
+                else
+                    bValid = tb.IsSameConstructAs(_program.Me);
+                return bValid;
             }
 
             /// <summary>
@@ -389,7 +420,13 @@ namespace IngameScript
                         handler(tb);
                     }
                 }
-//                yield return true;
+                fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
+                if (fper > 0.75f)
+                   yield return true;
+                foreach(var handler in WicoLocalBlockDoneParsedHandlers)
+                {
+                    handler();
+                }
 //                _program.ErrorLog("WBM: LBI:EOR");
 //                _program.EchoInstructions("WBM:LBI:EOR");
             }
@@ -443,6 +480,13 @@ namespace IngameScript
                             handler(tb);
                         }
                     }
+                    fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
+                    if (fper > 0.75f)
+                        yield return true;
+                    foreach (var handler in WicoRemoteBlockDoneParsedHandlers)
+                    {
+                        handler();
+                    }
                 }
             }
             void RemoteBlocksChanged()
@@ -489,7 +533,7 @@ namespace IngameScript
                 //                _program.Echo("test block count=" + gtsTestBlocks.Count.ToString());
                 if (localBlocksCount != gtsTestBlocks.Count || bForceUpdate)
                 {
-                    _program.Echo("WBM:CGC:CHANGE DETECTED! New="+gtsTestBlocks.Count + " Old="+localBlocksCount);
+//                    _program.Echo("WBM:CGC:CHANGE DETECTED! New="+gtsTestBlocks.Count + " Old="+localBlocksCount);
                     LocalBlocksChanged(); // tell them something changed
                     localBlocksCount = gtsTestBlocks.Count;
                     gtsLocalBlocks = gtsTestBlocks;
@@ -499,6 +543,10 @@ namespace IngameScript
                         { // tell them about the new blocks
                             handler(tb);
                         }
+                    }
+                    foreach (var handler in WicoLocalBlockDoneParsedHandlers)
+                    {
+                        handler();
                     }
                     return true;
                 }
@@ -535,6 +583,10 @@ namespace IngameScript
                         {
                             handler(tb);
                         }
+                    }
+                    foreach (var handler in WicoRemoteBlockDoneParsedHandlers)
+                    {
+                        handler();
                     }
                     return true;
                 }
