@@ -1,0 +1,80 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WMPrintHead", "WMPrintHead\WMPrintHead.csproj", "{FF77B91B-FE73-490B-9421-DD83698439AF}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModularMain", "..\ModularMain\ModularMain\ModularMain.shproj", "{2C75AB60-AE98-4544-B151-13769A76C6C4}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "IGC", "..\IGC\IGC\IGC.shproj", "{D641AA70-4A98-4D1B-B594-F38F66938D65}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BlockMaster", "..\BlockMaster\BlockMaster\BlockMaster.shproj", "{6242F17F-6F6A-4721-8475-03A861445DEC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ElapsedTime", "..\ElapsedTime\ElapsedTime\ElapsedTime.shproj", "{69F6E441-D885-42B3-8A7F-E224CC869DA3}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoControl", "..\WicoControl\WicoControl\WicoControl.shproj", "{E1083276-87DA-415B-AB5F-0D24ED85B0E5}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoUpdates", "..\WicoUpdates\WicoUpdates\WicoUpdates.shproj", "{C0CDA458-C1B4-45BA-94DE-ADC133813CB0}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Projectors", "..\Projectors\Projectors\Projectors.shproj", "{61EBA249-19F3-48B6-A25B-A4CEE90168BA}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoBasicThrusters", "..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.shproj", "{FF8A2CA4-4F9A-42CD-A197-670E0EBCBDCC}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Tanks", "..\Tanks\Tanks\Tanks.shproj", "{3C377B47-C3D2-487D-BBCD-D9F49ADF2208}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Connectors", "..\Connectors\Connectors\Connectors.shproj", "{5D612757-2295-45B9-BF2F-F056F3343151}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Power", "..\Power\Power\Power.shproj", "{11D02C04-292A-4E4D-B6A7-4175FB98A163}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ModeUnderconstruction", "..\ModeUnderconstruction\ModeUnderconstruction\ModeUnderconstruction.shproj", "{F4D55BAB-E2B6-40EA-8342-93229F3896E3}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PrintHeadCutters", "..\PrintHeadCutters\PrintHeadCutters\PrintHeadCutters.shproj", "{45D340E0-456E-4B0C-8E09-830F96DC59CB}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Welders", "..\Welders\Welders\Welders.shproj", "{8386F22B-C9D4-448D-B329-586E9EC75D38}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\Power\Power\Power.projitems*{11d02c04-292a-4e4d-b6a7-4175fb98a163}*SharedItemsImports = 13
+		..\ModularMain\ModularMain\ModularMain.projitems*{2c75ab60-ae98-4544-b151-13769a76c6c4}*SharedItemsImports = 13
+		..\Tanks\Tanks\Tanks.projitems*{3c377b47-c3d2-487d-bbcd-d9f49adf2208}*SharedItemsImports = 13
+		..\PrintHeadCutters\PrintHeadCutters\PrintHeadCutters.projitems*{45d340e0-456e-4b0c-8e09-830f96dc59cb}*SharedItemsImports = 13
+		..\Connectors\Connectors\Connectors.projitems*{5d612757-2295-45b9-bf2f-f056f3343151}*SharedItemsImports = 13
+		..\Projectors\Projectors\Projectors.projitems*{61eba249-19f3-48b6-a25b-a4cee90168ba}*SharedItemsImports = 13
+		..\BlockMaster\BlockMaster\BlockMaster.projitems*{6242f17f-6f6a-4721-8475-03a861445dec}*SharedItemsImports = 13
+		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{69f6e441-d885-42b3-8a7f-e224cc869da3}*SharedItemsImports = 13
+		..\Welders\Welders\Welders.projitems*{8386f22b-c9d4-448d-b329-586e9ec75d38}*SharedItemsImports = 13
+		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{c0cda458-c1b4-45ba-94de-adc133813cb0}*SharedItemsImports = 13
+		..\IGC\IGC\IGC.projitems*{d641aa70-4a98-4d1b-b594-f38f66938d65}*SharedItemsImports = 13
+		..\WicoControl\WicoControl\WicoControl.projitems*{e1083276-87da-415b-ab5f-0d24ed85b0e5}*SharedItemsImports = 13
+		..\ModeUnderconstruction\ModeUnderconstruction\ModeUnderconstruction.projitems*{f4d55bab-e2b6-40ea-8342-93229f3896e3}*SharedItemsImports = 13
+		..\BlockMaster\BlockMaster\BlockMaster.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\Connectors\Connectors\Connectors.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\ElapsedTime\ElapsedTime\ElapsedTime.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\IGC\IGC\IGC.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\ModeUnderconstruction\ModeUnderconstruction\ModeUnderconstruction.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\ModularMain\ModularMain\ModularMain.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\Power\Power\Power.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\PrintHeadCutters\PrintHeadCutters\PrintHeadCutters.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\Projectors\Projectors\Projectors.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\Tanks\Tanks\Tanks.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\Welders\Welders\Welders.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\WicoControl\WicoControl\WicoControl.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{ff77b91b-fe73-490b-9421-dd83698439af}*SharedItemsImports = 4
+		..\WicoBasicThrusters\WicoBasicThrusters\WicoBasicThrusters.projitems*{ff8a2ca4-4f9a-42cd-a197-670e0ebcbdcc}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF77B91B-FE73-490B-9421-DD83698439AF}.Debug|x64.ActiveCfg = Debug|x64
+		{FF77B91B-FE73-490B-9421-DD83698439AF}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {287CA21A-22AC-4D0F-9710-C3CE9AC8DED0}
+	EndGlobalSection
+EndGlobal
