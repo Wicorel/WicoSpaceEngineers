@@ -21,6 +21,10 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
+        WicoIGC _wicoIGC;
+        WicoBlockMaster _wicoBlockMaster;
+        WicoElapsedTime _wicoElapsedTime;
+
         WicoThrusters wicoThrusters;
         WicoGyros wicoGyros;
         GasTanks wicoGasTanks;
@@ -44,67 +48,62 @@ namespace IngameScript
 
         SpaceDock spaceDock;
         WhenDocked _whenDocked;
-        // OrbitalModes wicoOrbitalLaunch;
-        //        Navigation wicoNavigation;
         PowerManagement _powerManagement;
         SystemsMonitor _systemsMonitor;
 
-        //        WicoUpdateModesShared _wicoControl;
         WicoControl _wicoControl;
-
-        void ModuleControlInit()
-        {
-//            _wicoControl = new WicoUpdateModesShared(this);
-            _wicoControl = new WicoControl(this, wicoIGC);
-        }
 
         void ModuleProgramInit()
         {
-            //            wicoTravelMovement = new TravelMovement(this);
-            //OurName = "";
-            //moduleName += "\nOrbital V4";
-            //sVersion = "4";
+            _wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
 
-            wicoThrusters = new WicoThrusters(this, wicoBlockMaster);
-            wicoGyros = new WicoGyros(this, wicoBlockMaster);
-            wicoGasTanks = new GasTanks(this, wicoBlockMaster);
-            wicoGasGens = new GasGens(this);
-            wicoConnectors = new Connectors(this);
-            wicoLandingGears = new LandingGears(this);
-            wicoCameras = new Cameras(this);
-            wicoParachutes = new Parachutes(this);
-            wicoNavRotors = new NavRotors(this);
-            wicoAntennas = new Antennas(this, wicoBlockMaster);
+            _wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
+            _wicoBlockMaster.LoadLocalGrid();
+
+            _wicoControl = new WicoControl(this, _wicoIGC);
+
+            _wicoElapsedTime = new WicoElapsedTime(this, _wicoControl);
+
+            wicoThrusters = new WicoThrusters(this, _wicoBlockMaster);
+            wicoGyros = new WicoGyros(this, _wicoBlockMaster);
+            wicoGasTanks = new GasTanks(this, _wicoBlockMaster);
+            wicoGasGens = new GasGens(this, _wicoBlockMaster);
+            wicoConnectors = new Connectors(this, _wicoBlockMaster);
+            wicoLandingGears = new LandingGears(this, _wicoBlockMaster);
+            wicoCameras = new Cameras(this, _wicoBlockMaster);
+            wicoParachutes = new Parachutes(this, _wicoBlockMaster);
+            wicoNavRotors = new NavRotors(this, _wicoBlockMaster);
+            wicoAntennas = new Antennas(this, _wicoBlockMaster);
 //            wicoSensors = new Sensors(this, wicoBlockMaster);
 //            wicoWheels = new Wheels(this);
 //            wicoEngines = new HydrogenEngines(this);
-            wicoPower = new PowerProduction(this,wicoBlockMaster);
-            wicoTimers = new Timers(this, wicoBlockMaster);
-            _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
-            wicoBases = new WicoBases(this, wicoIGC,_displays);
+            wicoPower = new PowerProduction(this,_wicoBlockMaster);
+            wicoTimers = new Timers(this, _wicoBlockMaster);
+            _displays = new Displays(this, _wicoBlockMaster, _wicoElapsedTime);
+            wicoBases = new WicoBases(this, _wicoIGC,_displays);
 //            navRemote = new NavRemote(this);
-            navCommon = new NavCommon(this, _wicoControl, wicoIGC);
-            _cargoCheck = new CargoCheck(this, wicoBlockMaster,_displays);
+            navCommon = new NavCommon(this, _wicoControl, _wicoIGC);
+            _cargoCheck = new CargoCheck(this, _wicoBlockMaster,_displays);
 
             _powerManagement = new PowerManagement(this, _wicoControl
-                , wicoPower, wicoGasTanks, wicoElapsedTime
-                ,  wicoIGC, _displays
+                , wicoPower, wicoGasTanks, _wicoElapsedTime
+                ,  _wicoIGC, _displays
                 );
 
-            _systemsMonitor = new SystemsMonitor(this, wicoElapsedTime
+            _systemsMonitor = new SystemsMonitor(this, _wicoElapsedTime
                 , wicoThrusters, wicoConnectors
                 , wicoAntennas, wicoGasTanks, wicoGyros, wicoPower
                 , _cargoCheck
                 );
 
-            spaceDock = new SpaceDock(this, _wicoControl, wicoBlockMaster
-                , wicoElapsedTime
+            spaceDock = new SpaceDock(this, _wicoControl, _wicoBlockMaster
+                , _wicoElapsedTime
                 , wicoAntennas
-                , wicoTimers, wicoIGC, wicoBases, navCommon
+                , wicoTimers, _wicoIGC, wicoBases, navCommon
                 , _displays, _systemsMonitor
                 );
 
-            _whenDocked = new WhenDocked(this, _wicoControl, wicoBlockMaster, wicoIGC
+            _whenDocked = new WhenDocked(this, _wicoControl, _wicoBlockMaster, _wicoIGC
                 , wicoAntennas
                 , wicoTimers, wicoBases
                 , _displays, _systemsMonitor
@@ -120,10 +119,11 @@ namespace IngameScript
 //            Echo("UpdateType=" + updateSource.ToString() + " Init=" + bInitDone);
         }
 
-        public void ModulePostMain()
+        public void ModulePostMain(UpdateType updateSource)
         {
-            if(bInitDone)
+            if (bInitDone)
             {
+                // TODO: Add ET
                 wicoPower.CalcPower();
                 int engines = 0;
                 engines = wicoPower.EnginesCount();
@@ -142,8 +142,17 @@ namespace IngameScript
             }
             
             _wicoControl.AnnounceState();
+            Runtime.UpdateFrequency = _wicoControl.GenerateUpdate();
+
             Echo("LastRun=" + LastRunMs.ToString("0.00") + "ms Max=" + MaxRunMs.ToString("0.00") + "ms");
             EchoInstructions();
+        }
+        public void ModulePostInit()
+        {
+            if (_wicoControl != null)
+                _wicoControl.ModeAfterInit(SaveIni);
+
+//            _wicoSensors.SensorInit(_wicoBlockMaster.GetMainController());
         }
 
     }

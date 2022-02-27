@@ -44,6 +44,11 @@ namespace IngameScript
             power off laser antennas when this ship is docked
         
         */
+
+        WicoIGC _wicoIGC;
+        WicoBlockMaster _wicoBlockMaster;
+        WicoElapsedTime _wicoElapsedTime;
+
         BaseConnectors baseConnectors;
         Asteroids _asteroids;
         OreInfoLocs _oreInfoLocs;
@@ -63,36 +68,57 @@ namespace IngameScript
         void ModuleControlInit()
         {
             // create the appropriate control system for this module
-            _wicoControl = new WicoControl(this, wicoIGC);
         }
 
         void ModuleProgramInit()
         {
-            _timers = new Timers(this, wicoBlockMaster);
 
-            baseConnectors = new BaseConnectors(this, wicoBlockMaster, wicoIGC, wicoElapsedTime, _timers);
-            _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
-            _asteroids = new Asteroids(this, _wicoControl, wicoIGC, _displays);
-            _oreInfoLocs = new OreInfoLocs(this, wicoBlockMaster, wicoIGC, _asteroids, _displays);
+            _wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
 
-            _power = new PowerProduction(this, wicoBlockMaster);
-            _tanks = new GasTanks(this, wicoBlockMaster);
+            _wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
+            _wicoBlockMaster.LoadLocalGrid();
 
-            _powerManagement = new PowerManagement(this, _wicoControl, _power, _tanks, wicoElapsedTime, wicoIGC, _displays);
+            _wicoControl = new WicoControl(this, _wicoIGC);
+
+            _wicoElapsedTime = new WicoElapsedTime(this, _wicoControl);
+
+
+            _timers = new Timers(this, _wicoBlockMaster);
+
+            baseConnectors = new BaseConnectors(this, _wicoBlockMaster, _wicoIGC, _wicoElapsedTime, _timers);
+            _displays = new Displays(this, _wicoBlockMaster, _wicoElapsedTime);
+            _asteroids = new Asteroids(this, _wicoControl, _wicoIGC, _displays);
+            _oreInfoLocs = new OreInfoLocs(this, _wicoBlockMaster, _wicoIGC, _asteroids, _displays);
+
+            _power = new PowerProduction(this, _wicoBlockMaster);
+            _tanks = new GasTanks(this, _wicoBlockMaster);
+
+            _powerManagement = new PowerManagement(this, _wicoControl, _power, _tanks, _wicoElapsedTime, _wicoIGC, _displays);
         }
 
         public void ModulePreMain(string argument, UpdateType updateSource)
         {
         }
 
-        public void ModulePostMain()
+        public void ModulePostMain(UpdateType updateSource)
         {
-            if(bInitDone)
+            if (bInitDone)
             {
                 _displays.EchoInfo();
                 // ensure we run at least at slow speed for updates.
                 _wicoControl.WantSlow(); 
             }
+            if (_wicoControl != null)
+                _wicoControl.AnnounceState();
+            Runtime.UpdateFrequency = _wicoControl.GenerateUpdate();
+        }
+
+        public void ModulePostInit()
+        {
+            if (_wicoControl != null)
+                _wicoControl.ModeAfterInit(SaveIni);
+
+            //            _wicoSensors.SensorInit(_wicoBlockMaster.GetMainController());
         }
 
     }

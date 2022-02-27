@@ -27,6 +27,11 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
+
+        WicoIGC _wicoIGC;
+        WicoBlockMaster _wicoBlockMaster;
+        WicoElapsedTime _wicoElapsedTime;
+
         WicoThrusters wicoThrusters;
         WicoGyros wicoGyros;
         GasTanks wicoGasTanks;
@@ -49,33 +54,37 @@ namespace IngameScript
 
         WicoControl _wicoControl;
 
-        void ModuleControlInit()
-        {
-            _wicoControl = new WicoControl(this, wicoIGC);
-//            _wicoControl.SetDebug(true);
-        }
-
         void ModuleProgramInit()
         {
-            wicoThrusters = new WicoThrusters(this, wicoBlockMaster);
-            wicoGyros = new WicoGyros(this, wicoBlockMaster);
-            wicoGasTanks = new GasTanks(this,wicoBlockMaster);
-            wicoGasGens = new GasGens(this);
-            wicoConnectors = new Connectors(this);
-            wicoLandingGears = new LandingGears(this);
-            wicoCameras = new Cameras(this);
-            wicoParachutes = new Parachutes(this);
-            wicoNavRotors = new NavRotors(this);
-            wicoAntennas = new Antennas(this, wicoBlockMaster);
-            wicoSensors = new Sensors(this, wicoBlockMaster);
-            wicoWheels = new Wheels(this);
+            _wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
 
-            _wicoDisplays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
+            _wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
+            _wicoBlockMaster.LoadLocalGrid();
 
-            wicoTravelMovement = new TravelMovement(this, _wicoControl, wicoBlockMaster,wicoGyros, wicoThrusters, wicoSensors, wicoCameras, wicoWheels, wicoNavRotors);
+            _wicoControl = new WicoControl(this, _wicoIGC);
+
+            _wicoElapsedTime = new WicoElapsedTime(this, _wicoControl);
 
 
-            wicoNavigation = new Navigation(this,_wicoControl,wicoBlockMaster, wicoIGC, wicoTravelMovement, wicoElapsedTime,
+            wicoThrusters = new WicoThrusters(this, _wicoBlockMaster);
+            wicoGyros = new WicoGyros(this, _wicoBlockMaster);
+            wicoGasTanks = new GasTanks(this, _wicoBlockMaster);
+            wicoGasGens = new GasGens(this, _wicoBlockMaster);
+            wicoConnectors = new Connectors(this, _wicoBlockMaster);
+            wicoLandingGears = new LandingGears(this, _wicoBlockMaster);
+            wicoCameras = new Cameras(this, _wicoBlockMaster);
+            wicoParachutes = new Parachutes(this, _wicoBlockMaster);
+            wicoNavRotors = new NavRotors(this, _wicoBlockMaster);
+            wicoAntennas = new Antennas(this, _wicoBlockMaster);
+            wicoSensors = new Sensors(this, _wicoBlockMaster);
+            wicoWheels = new Wheels(this, _wicoBlockMaster);
+
+            _wicoDisplays = new Displays(this, _wicoBlockMaster, _wicoElapsedTime);
+
+            wicoTravelMovement = new TravelMovement(this, _wicoControl, _wicoBlockMaster, wicoGyros, wicoThrusters, wicoSensors, wicoCameras, wicoWheels, wicoNavRotors);
+
+
+            wicoNavigation = new Navigation(this,_wicoControl, _wicoBlockMaster, _wicoIGC, wicoTravelMovement, _wicoElapsedTime,
                 wicoGyros,wicoWheels,wicoNavRotors, wicoThrusters,wicoAntennas,_wicoDisplays);
 
             _wicoControl.WantSlow(); // get updates so we can check for things like navigation commands in oldschool format
@@ -88,25 +97,37 @@ namespace IngameScript
         }
         public void ModulePreMain(string argument, UpdateType updateSource)
         {
-//            Echo("UpdateSource=" + updateSource.ToString());
-//            Echo(" Main=" + wicoControl.IamMain().ToString());
+            if (_wicoControl != null && _wicoControl._bUpdateDebug) Echo("Update=" + updateSource.ToString());
+            //            Echo("UpdateSource=" + updateSource.ToString());
+            //            Echo(" Main=" + wicoControl.IamMain().ToString());
+
+            if(bInitDone)
+            {
+                //                Echo("Inited");
+                if (_wicoControl != null)
+                    _wicoControl.AnnounceState();
+            }
         }
 
-        public void ModulePostMain()
+        public void ModulePostMain(UpdateType updateSource)
         {
+
             _wicoControl.WantSlow(); // get updates so we can check for things like navigation commands in oldschool format
-                                     //            Echo("#navRotors=" + wicoNavRotors.NavRotorCount());
             if (bInitDone)
             {
                 _wicoDisplays.EchoInfo();
             }
-//            _wicoControl.AnnounceState();
+            Runtime.UpdateFrequency = _wicoControl.GenerateUpdate();
+
             Echo("LastRun=" + LastRunMs.ToString("0.00")+"ms Max=" + MaxRunMs.ToString("0.00") + "ms");
         }
 
         public void ModulePostInit()
         {
-            wicoSensors.SensorInit(wicoBlockMaster.GetMainController());
+            if (_wicoControl != null)
+                _wicoControl.ModeAfterInit(SaveIni);
+
+            wicoSensors.SensorInit(_wicoBlockMaster.GetMainController());
         }
 
     }

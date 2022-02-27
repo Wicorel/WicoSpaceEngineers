@@ -19,8 +19,15 @@ using VRageMath;
 
 namespace IngameScript
 {
+
+    // TODO: add support for OreDetector Raycast mod
+    // https://steamcommunity.com/profiles/76561198014682032/myworkshopfiles/?appid=244850
+
     partial class Program : MyGridProgram
     {
+        WicoIGC _wicoIGC;
+        WicoBlockMaster _wicoBlockMaster;
+        WicoElapsedTime _wicoElapsedTime;
 
         WicoThrusters wicoThrusters;
         WicoGyros wicoGyros;
@@ -57,40 +64,43 @@ namespace IngameScript
         //        WicoUpdateModesShared _wicoControl;
         WicoControl _wicoControl;
 
-        void ModuleControlInit()
-        {
-            //            _wicoControl = new WicoUpdateModesShared(this);
-            _wicoControl = new WicoControl(this, wicoIGC);
-        }
-
         void ModuleProgramInit()
         {
-            wicoThrusters = new WicoThrusters(this, wicoBlockMaster);
-            wicoGyros = new WicoGyros(this, wicoBlockMaster);
-            wicoGasTanks = new GasTanks(this, wicoBlockMaster);
-            wicoGasGens = new GasGens(this);
-            wicoConnectors = new Connectors(this);
-            wicoCameras = new Cameras(this);
-            wicoAntennas = new Antennas(this, wicoBlockMaster);
-            wicoSensors = new Sensors(this, wicoBlockMaster);
-            wicoPower = new PowerProduction(this, wicoBlockMaster);
-            wicoTimers = new Timers(this, wicoBlockMaster);
+            _wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
+
+            _wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
+            _wicoBlockMaster.LoadLocalGrid();
+
+            _wicoControl = new WicoControl(this, _wicoIGC);
+
+            _wicoElapsedTime = new WicoElapsedTime(this, _wicoControl);
+
+            wicoThrusters = new WicoThrusters(this, _wicoBlockMaster);
+            wicoGyros = new WicoGyros(this, _wicoBlockMaster);
+            wicoGasTanks = new GasTanks(this, _wicoBlockMaster);
+            wicoGasGens = new GasGens(this, _wicoBlockMaster);
+            wicoConnectors = new Connectors(this, _wicoBlockMaster);
+            wicoCameras = new Cameras(this, _wicoBlockMaster);
+            wicoAntennas = new Antennas(this, _wicoBlockMaster);
+            wicoSensors = new Sensors(this, _wicoBlockMaster);
+            wicoPower = new PowerProduction(this, _wicoBlockMaster);
+            wicoTimers = new Timers(this, _wicoBlockMaster);
             //            navRemote = new NavRemote(this);
-            navCommon = new NavCommon(this,_wicoControl, wicoIGC);
-            _sensors = new Sensors(this, wicoBlockMaster);
-            _drills = new Drills(this, wicoBlockMaster);
-            _displays = new Displays(this, wicoBlockMaster, wicoElapsedTime);
+            navCommon = new NavCommon(this,_wicoControl, _wicoIGC);
+            _sensors = new Sensors(this, _wicoBlockMaster);
+            _drills = new Drills(this, _wicoBlockMaster);
+            _displays = new Displays(this, _wicoBlockMaster, _wicoElapsedTime);
             _dock = new DockBase(this);
 //            _scanBase = new ScanBase(this, _wicoControl);
-            _asteroids = new Asteroids(this, _wicoControl, wicoIGC,_displays);
-            _scanMode = new ScansMode(this, _wicoControl, wicoBlockMaster, wicoIGC, wicoCameras, _asteroids);
-            _oreInfoLocs = new OreInfoLocs(this, wicoBlockMaster, wicoIGC, _asteroids, _displays);
-            _ores = new OresLocal(this, wicoBlockMaster, _wicoControl, wicoIGC, _asteroids, _oreInfoLocs, _displays);
+            _asteroids = new Asteroids(this, _wicoControl, _wicoIGC,_displays);
+            _scanMode = new ScansMode(this, _wicoControl, _wicoBlockMaster, _wicoIGC, wicoCameras, _asteroids, _displays);
+            _oreInfoLocs = new OreInfoLocs(this, _wicoBlockMaster, _wicoIGC, _asteroids, _displays);
+            _ores = new OresLocal(this, _wicoBlockMaster, _wicoControl, _wicoIGC, _asteroids, _oreInfoLocs, _displays);
 
 //            cargoCheck = new CargoCheck(this, wicoBlockMaster, _displays);
-            _systemsMonitor = new SystemsMonitor(this, wicoElapsedTime, wicoThrusters, wicoConnectors, wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, _ores);
+            _systemsMonitor = new SystemsMonitor(this, _wicoElapsedTime, wicoThrusters, wicoConnectors, wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, _ores);
 
-            _miner = new Miner(this, _wicoControl, wicoBlockMaster, wicoElapsedTime, wicoIGC
+            _miner = new Miner(this, _wicoControl, _wicoBlockMaster, _wicoElapsedTime, _wicoIGC
                 , _scanMode, _asteroids
                 , _systemsMonitor
 //                , wicoThrusters, wicoConnectors
@@ -100,6 +110,7 @@ namespace IngameScript
 //                , wicoGasTanks, wicoGyros, wicoPower
                 , wicoTimers, navCommon, _oreInfoLocs, _ores, _dock
                 ,_displays
+                , wicoAntennas
                 );
         /// DEBUG
         // wicoIGC.SetDebug(true);
@@ -111,7 +122,7 @@ namespace IngameScript
         {
         }
 
-        public void ModulePostMain()
+        public void ModulePostMain(UpdateType updateSource)
         {
             if (bInitDone)
             {
@@ -145,5 +156,13 @@ namespace IngameScript
             Echo("LastRun=" + LastRunMs.ToString("0.00") + "ms Max=" + MaxRunMs.ToString("0.00") + "ms");
             EchoInstructions();
         }
+        public void ModulePostInit()
+        {
+            if (_wicoControl != null)
+                _wicoControl.ModeAfterInit(_SaveIni);
+
+            //            _wicoSensors.SensorInit(_wicoBlockMaster.GetMainController());
+        }
+
     }
 }
