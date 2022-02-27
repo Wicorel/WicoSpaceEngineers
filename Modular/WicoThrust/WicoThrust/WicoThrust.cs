@@ -136,6 +136,7 @@ namespace IngameScript
                 for (int thrusterIndex = 0; thrusterIndex < thrusters.Count; thrusterIndex++)
                 {
                     int iThrusterType = ThrusterType(thrusters[thrusterIndex]);
+ //                   _program.Echo(thrusterIndex + ":" + iThrusterType);
                     if ((iThrusterType & iTypes) > 0)
                     {
                         IMyThrust thruster = thrusters[thrusterIndex] as IMyThrust;
