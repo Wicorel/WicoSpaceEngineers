@@ -348,7 +348,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scanfrontScanner.SCAN_DISTANCE.ToString("0") + "M";
+//                                s += scanfrontScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scanfrontScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -358,7 +358,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scanbackScanner.SCAN_DISTANCE.ToString("0") + "M";
+//                                s += scanbackScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scanbackScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -368,7 +368,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scanleftScanner.SCAN_DISTANCE.ToString("0") + "M";
+//                                s += scanleftScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scanleftScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -378,7 +378,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scanrightScanner.SCAN_DISTANCE.ToString("0") + "M";
+//                                s += scanrightScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scanrightScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -388,7 +388,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scantopScanner.SCAN_DISTANCE.ToString("0") + "M";
+//                                s += scantopScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scantopScanner.myLDEI.Count + " objects";
                             s += "\n";
@@ -398,7 +398,7 @@ namespace IngameScript
                                 s += "DONE!";
                             else
                             {
-                                s += scanbottomScanner.SCAN_DISTANCE.ToString("0") + "M";
+//                                s += scanbottomScanner.SCAN_DISTANCE.ToString("0") + "M";
                             }
                             s += " " + scanbottomScanner.myLDEI.Count + " objects";
                             s += "\n";
