@@ -39,11 +39,18 @@ namespace IngameScript
             // allow request for reserving connector
             // assume reservation when something is docked
             // time-out an assigned dock if aborted or no response after a set time
-            // what connector can supply/take
+            // what connector can supply/take (from CustomData)
             //    Take Ore
             //    give power
             //    Give Hydrogen
             //    Give Uranium
+            // give gravity vector at (near) connector
+
+            // request docked ship disconnect to allow another (higher priority) ship to use connector
+
+            // display which ships are connected on all connectors
+            // display on connector-specific surface status including what ship is docked/incoming/reserved
+
 
 
             public BaseConnectors(Program program, WicoBlockMaster wbm, WicoIGC wicoIGC, WicoElapsedTime wicoElapsedTime, Timers timers)
@@ -55,7 +62,7 @@ namespace IngameScript
                 _timers = timers;
 
                 _program.moduleName += " Base Connectors";
-                _program.moduleList += "\nBase Connectors V4.2c";
+                _program.moduleList += "\nBase Connectors V4.2d";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -353,7 +360,8 @@ namespace IngameScript
                 di.tb = tb;
                 di.State = State;
                 di.assignedEntity = 0;
-                di.lAlign = -1;
+//                di.lAlign = -1;
+                di.lAlign = 2; // use UP alignmenet by default
 
                 //	Echo(di.tb.CustomName);
 
@@ -416,9 +424,10 @@ namespace IngameScript
 
                 Vector3D vAlign;
                 MatrixD worldtb;
-//                if (shipOrientationBlock != null) worldtb = shipOrientationBlock.WorldMatrix;
-//                else
-                    worldtb = _program.Me.WorldMatrix;
+                //                if (shipOrientationBlock != null) worldtb = shipOrientationBlock.WorldMatrix;
+                //                else
+ //               worldtb = _program.Me.WorldMatrix;
+                worldtb = connector.WorldMatrix;
 
                 vAlign = worldtb.Forward;
                 switch (dockingInfo[iDock].lAlign)
@@ -442,8 +451,9 @@ namespace IngameScript
                         vAlign = worldtb.Backward;
                         break;
                 }
+                _program.ErrorLog("align=" + dockingInfo[iDock].lAlign);
 
-                vAlign.Normalize();
+//                vAlign.Normalize();
 
                 if (bApproach)
                 {
@@ -460,12 +470,13 @@ namespace IngameScript
                     if (dockingInfo[iDock].lAlign < 0)
                     {
                         _program.IGC.SendBroadcastMessage("COND", incomingID + ":" + _program.Me.EntityId.ToString() + ":" + _program.toGpsName("", connector.CustomName) + ":" + _program.Vector3DToString(vPosition) + ":" + _program.Vector3DToString(vVec));
-//                        _program.ErrorLog("Sending COND:" + _program.Vector3DToString(vPosition) + " vec=" + _program.Vector3DToString(vVec));
+                        _program.ErrorLog("Sending COND:" + _program.Vector3DToString(vPosition) + " vec=" + _program.Vector3DToString(vVec));
                     }
                     else
                     {
                         _program.IGC.SendBroadcastMessage("ACOND", incomingID + ":" + _program.Me.EntityId.ToString() + ":" + _program.toGpsName("", connector.CustomName)
                         + ":" + _program.Vector3DToString(vPosition) + ":" + _program.Vector3DToString(vVec) + ":" + _program.Vector3DToString(vAlign));
+                        _program.ErrorLog("Sending ACOND:" + _program.Vector3DToString(vPosition) + " vec=" + _program.Vector3DToString(vVec) + " vAlign="+ _program.Vector3DToString(vAlign));
                     }
                 }
 
