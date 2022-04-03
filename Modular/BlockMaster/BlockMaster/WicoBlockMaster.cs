@@ -363,13 +363,6 @@ namespace IngameScript
                 localCubeGrids.Clear();
                 gtsLocalBlocks.Clear();
                 GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, bLocalCheck);
-                foreach (var tb in gtsLocalBlocks)
-                {
-                    if (!localCubeGrids.Contains(tb.CubeGrid))
-                    {
-                        localCubeGrids.Add(tb.CubeGrid);
-                    }
-                }
             }
             bool bLocalCheck(IMyTerminalBlock tb)
             {
@@ -379,6 +372,14 @@ namespace IngameScript
                     bValid = tb.CubeGrid.EntityId == _program.Me.CubeGrid.EntityId;
                 else
                     bValid = tb.IsSameConstructAs(_program.Me);
+
+                if (bValid)
+                {
+                    if (!localCubeGrids.Contains(tb.CubeGrid))
+                    {
+                        localCubeGrids.Add(tb.CubeGrid);
+                    }
+                }
                 return bValid;
             }
 
