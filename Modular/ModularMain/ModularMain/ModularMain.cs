@@ -51,11 +51,11 @@ namespace IngameScript
         /// <summary>
         /// The combined set of UpdateTypes that count as a 'trigger'
         /// </summary>
-        UpdateType utTriggers = UpdateType.Terminal | UpdateType.Trigger | UpdateType.Mod | UpdateType.Script;
+        readonly UpdateType utTriggers = UpdateType.Terminal | UpdateType.Trigger | UpdateType.Mod | UpdateType.Script;
         /// <summary>
         /// the combined set of UpdateTypes and count as an 'Update'
         /// </summary>
-        UpdateType utUpdates = UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100 | UpdateType.Once;
+        readonly UpdateType utUpdates = UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100 | UpdateType.Once;
 
 
         // Surface stuff
@@ -85,11 +85,14 @@ namespace IngameScript
 
         public Program()
         {
+
+            // special check for clearing on (re)compile
             if(Me.TerminalRunArgument=="--clear")
             {
                 Me.CustomData = "";
                 Storage = "";
             }
+            // initialize and check CustomData
             MyIniParseResult result;
             if (!CustomDataIni.TryParse(Me.CustomData, out result))
             {
@@ -97,6 +100,8 @@ namespace IngameScript
                 CustomDataIni.Clear();
                 Echo(result.ToString());
             }
+
+            // initialize and check Storage (SaveIni)
             if (!SaveIni.TryParse(Storage, out result))
             {
                 Storage = "";
@@ -104,32 +109,10 @@ namespace IngameScript
                 Echo(result.ToString());
             }
 
-            // check if our saved data is for this blueprint
-            long meentityid=0;
-            SaveIni.Get(OurName+sVersion,"MEENITYID").TryGetInt64(out meentityid);
-            if (meentityid != Me.EntityId)
-            { // what's in storage was not created by this blueprint; clear it out.
-                ErrorLog("New instance:Resetting Storage");
-                Storage = "";
-                SaveIni.Clear();
-            }
-            SaveIni.Set(OurName + sVersion, "MEENITYID", Me.EntityId);
+            CheckNewEntity();
 
-            bAddDate = CustomDataIni.Get(OurName, "DebugAddDate").ToBoolean(bAddDate);
-            CustomDataIni.Set(OurName, "DebugAddDate", bAddDate);
-            bAddLogCount = CustomDataIni.Get(OurName, "DebugAddLogCount").ToBoolean(bAddLogCount);
-            CustomDataIni.Set(OurName, "DebugAddLogCount", bAddLogCount);
-            bAddRunCount = CustomDataIni.Get(OurName, "DebugAddRunCount").ToBoolean(bAddRunCount);
-            CustomDataIni.Set(OurName, "DebugAddRunCount", bAddRunCount);
+            LoadDefaults();
 
-            bAllowPBRename = CustomDataIni.Get(OurName, "AllowPBRename").ToBoolean(bAllowPBRename);
-            CustomDataIni.Set(OurName, "AllowPBRename", bAllowPBRename);
-
-            bUsePBSurfaces = CustomDataIni.Get(OurName, "UsePBSurfaces").ToBoolean(bUsePBSurfaces);
-            CustomDataIni.Set(OurName, "UsePBSurfaces", bUsePBSurfaces);
-
-            bEchoOn = CustomDataIni.Get(OurName, "EchoOn").ToBoolean(bEchoOn);
-            CustomDataIni.Set(OurName, "EchoOn", bEchoOn);
 
             // initialise module specific classes
             ModuleProgramInit();
@@ -139,6 +122,23 @@ namespace IngameScript
             OldEcho = Echo;
             Echo = MyEcho;
 
+            PBSurfaceInit();
+ 
+            if (bAllowPBRename && !Me.CustomName.Contains(moduleName))
+                Me.CustomName = "PB" +moduleName;
+
+            // Yes! Program() is run even if PB is turned off.
+            if (!Me.Enabled)
+            {
+                OldEcho("I am turned OFF!");
+            }
+        }
+
+        /// <summary>
+        /// Initialize PB Surface displays (if requested)
+        /// </summary>
+        void PBSurfaceInit()
+        {
             // Local PB Surface Init
             if (bUsePBSurfaces)
             {
@@ -162,13 +162,46 @@ namespace IngameScript
                 }
             }
 
-            if (bAllowPBRename && !Me.CustomName.Contains(moduleName))
-                Me.CustomName = "PB" +moduleName;
+        }
 
-            if (!Me.Enabled)
-            {
-                OldEcho("I am turned OFF!");
+        void CheckNewEntity()
+        {
+            // check if our saved data is for this blueprint
+            long meentityid = 0;
+            SaveIni.Get(OurName + sVersion, "MEENITYID").TryGetInt64(out meentityid);
+            if (meentityid != Me.EntityId)
+            { // what's in storage was not created by this blueprint; clear it out.
+                ErrorLog("New instance:Resetting Storage");
+                Storage = "";
+                SaveIni.Clear();
             }
+            SaveIni.Set(OurName + sVersion, "MEENITYID", Me.EntityId);
+        }
+        
+        /// <summary>
+        /// Load defaults from CustomData. Save out defaults
+        /// </summary>
+        void LoadDefaults()
+        {
+            // debug display control
+            bAddDate = CustomDataIni.Get(OurName, "DebugAddDate").ToBoolean(bAddDate);
+            CustomDataIni.Set(OurName, "DebugAddDate", bAddDate);
+            bAddLogCount = CustomDataIni.Get(OurName, "DebugAddLogCount").ToBoolean(bAddLogCount);
+            CustomDataIni.Set(OurName, "DebugAddLogCount", bAddLogCount);
+            bAddRunCount = CustomDataIni.Get(OurName, "DebugAddRunCount").ToBoolean(bAddRunCount);
+            CustomDataIni.Set(OurName, "DebugAddRunCount", bAddRunCount);
+
+            // pb renaming control
+            bAllowPBRename = CustomDataIni.Get(OurName, "AllowPBRename").ToBoolean(bAllowPBRename);
+            CustomDataIni.Set(OurName, "AllowPBRename", bAllowPBRename);
+
+            // pb surface display control
+            bUsePBSurfaces = CustomDataIni.Get(OurName, "UsePBSurfaces").ToBoolean(bUsePBSurfaces);
+            CustomDataIni.Set(OurName, "UsePBSurfaces", bUsePBSurfaces);
+
+            // echo control
+            bEchoOn = CustomDataIni.Get(OurName, "EchoOn").ToBoolean(bEchoOn);
+            CustomDataIni.Set(OurName, "EchoOn", bEchoOn);
         }
 
         bool bEchoOn = true;
