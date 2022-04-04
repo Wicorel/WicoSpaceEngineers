@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wicorel Script Demo", "Wicorel Script Demo\Wicorel Script Demo.csproj", "{1B4071C4-8634-4BBB-9656-63A79A223BC7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1B4071C4-8634-4BBB-9656-63A79A223BC7}.Debug|x64.ActiveCfg = Debug|x64
+		{1B4071C4-8634-4BBB-9656-63A79A223BC7}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {465F3C7F-361E-4866-B267-9772A4D03CCE}
+	EndGlobalSection
+EndGlobal
