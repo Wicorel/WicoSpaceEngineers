@@ -147,7 +147,7 @@ namespace IngameScript
                     ModeAfterInitHandlers.Add(handler);
                 return true;
             }
-            public void ModeAfterInit(MyIni theIni)
+            new public void ModeAfterInit(MyIni theIni)
             {
                 _iState = theIni.Get(ControlSection, "State").ToInt32(_iState);
                 _iMode = theIni.Get(ControlSection, "Mode").ToInt32(_iMode);

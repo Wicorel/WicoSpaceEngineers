@@ -97,9 +97,13 @@ namespace IngameScript
 
             public void AnnounceState()
             {
-                _program.Echo("Standalone Control");
+//                _program.Echo("Standalone Control");
             }
 
+            public void ModeAfterInit(MyIni theIni)
+            {
+//                _program.Echo("Standalone Control");
+            }
         }
     }
 }
