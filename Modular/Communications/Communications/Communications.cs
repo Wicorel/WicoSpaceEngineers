@@ -61,7 +61,8 @@ namespace IngameScript
 
             const string CommunicationsDisplayTag = "COMMUNICATIONS";
             const string RemoteShipsDisplayTag = "REMOTESHIPS";
-
+            const string RelayShipsDisplayTag = "RELAYSHIPS";
+            
             public string sRemoteAnnounce = "COM_IAMHERE";
             public string sComIGCTag = "COM?";
             public string sLaserConRequestIGCTag = "LASERCON?";
@@ -104,7 +105,7 @@ namespace IngameScript
                 _EntityId = program.Me.CubeGrid.EntityId;
 
                 _program.moduleName += " Communications";
-                _program.moduleList += "\nCommunications V4.2i";
+                _program.moduleList += "\nCommunications V4.2n";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -128,6 +129,7 @@ namespace IngameScript
 
                 _displays.AddSurfaceHandler(CommunicationsDisplayTag, SurfaceHandler);
                 _displays.AddSurfaceHandler(RemoteShipsDisplayTag, SurfaceHandler);
+                _displays.AddSurfaceHandler(RelayShipsDisplayTag, SurfaceHandler);
 
                 AnnounceSeconds = _program.CustomDataIni.Get(_program.OurName, "WicoComAnnounceSeconds").ToDouble(AnnounceSeconds);
                 _program.CustomDataIni.Set(_program.OurName, "WicoComAnnounceSeconds", AnnounceSeconds);
@@ -265,7 +267,7 @@ namespace IngameScript
                     else if (ActionType == Displays.SETUPDRAW)
                     {
                         tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
-//                        tsurface.WriteText("");
+                        //                        tsurface.WriteText("");
                         if (tsurface.SurfaceSize.Y < 256)
                         {
                             tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
@@ -282,6 +284,42 @@ namespace IngameScript
                         tsurface.WriteText("");
                     }
                 }
+                /* WIP
+                else if (tag == RelayShipsDisplayTag)
+                {
+                    if (ActionType == Displays.DODRAW)
+                    {
+                        if (tsurface.SurfaceSize.Y < 256)
+                        { // small/corner LCD
+                            tsurface.WriteText(sbRSInfo);
+                        }
+                        else
+                        {
+                            tsurface.WriteText(sbRSInfo);
+                            tsurface.WriteText(sbRSNotices, true);
+                        }
+                    }
+                    else if (ActionType == Displays.SETUPDRAW)
+                    {
+                        tsurface.ContentType = VRage.Game.GUI.TextPanel.ContentType.TEXT_AND_IMAGE;
+                        //                        tsurface.WriteText("");
+                        if (tsurface.SurfaceSize.Y < 256)
+                        {
+                            tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.CENTER;
+                            tsurface.FontSize = 3.5f;
+                        }
+                        else
+                        {
+                            tsurface.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
+                            tsurface.FontSize = 1.75f;
+                        }
+                    }
+                    else if (ActionType == Displays.CLEARDISPLAY)
+                    {
+                        tsurface.WriteText("");
+                    }
+                }
+                */
             }
 
             void LoadHandler(MyIni Ini)
