@@ -321,16 +321,97 @@ namespace IngameScript
                     }
                 }
             }
-            //Whip's ApplyGyroOverride Method v9 - 8/19/17
-            void ApplyGyroOverride(double pitch_speed, double yaw_speed, double roll_speed, List<IMyGyro> gyro_list, IMyTerminalBlock reference)
+
+            /*
+            Whip's GetRotationAnglesSimultaneous - Last modified: 2020/08/27
+
+            Gets axis angle rotation and decomposes it upon each cardinal axis.
+            Has the desired effect of not causing roll oversteer. Does NOT use
+            sequential rotation angles.
+
+            Set desiredUpVector to Vector3D.Zero if you don't care about roll.
+
+            NOTE: 
+            This is designed for use with Keen's gyroscopes where:
+              + pitch = -X rotation
+              + yaw   = -Y rotation
+              + roll  = -Z rotation
+
+            As such, the resulting angles are negated since they are computed
+            using the opposite sign assumption.
+
+            Dependencies:
+            VectorMath.SafeNormalize
+            */
+            public void GetRotationAnglesSimultaneous(Vector3D desiredForwardVector, Vector3D desiredUpVector, MatrixD worldMatrix, out double pitch, out double yaw, out double roll)
             {
-                var rotationVec = new Vector3D(-pitch_speed, yaw_speed, roll_speed); //because keen does some weird stuff with signs
-                var shipMatrix = reference.WorldMatrix;
-                var relativeRotationVec = Vector3D.TransformNormal(rotationVec, shipMatrix);
-                foreach (var thisGyro in gyro_list)
+                desiredForwardVector = VectorMath.SafeNormalize(desiredForwardVector);
+
+                MatrixD transposedWm;
+                MatrixD.Transpose(ref worldMatrix, out transposedWm);
+                Vector3D.Rotate(ref desiredForwardVector, ref transposedWm, out desiredForwardVector);
+                Vector3D.Rotate(ref desiredUpVector, ref transposedWm, out desiredUpVector);
+
+                Vector3D leftVector = Vector3D.Cross(desiredUpVector, desiredForwardVector);
+                Vector3D axis;
+                double angle;
+                if (Vector3D.IsZero(desiredUpVector) || Vector3D.IsZero(leftVector))
                 {
-                    var gyroMatrix = thisGyro.WorldMatrix;
-                    var transformedRotationVec = Vector3D.TransformNormal(relativeRotationVec, Matrix.Transpose(gyroMatrix));
+                    axis = new Vector3D(desiredForwardVector.Y, -desiredForwardVector.X, 0);
+                    angle = Math.Acos(MathHelper.Clamp(-desiredForwardVector.Z, -1.0, 1.0));
+                }
+                else
+                {
+                    leftVector = VectorMath.SafeNormalize(leftVector);
+                    Vector3D upVector = Vector3D.Cross(desiredForwardVector, leftVector);
+
+                    // Create matrix
+                    MatrixD targetMatrix = MatrixD.Zero;
+                    targetMatrix.Forward = desiredForwardVector;
+                    targetMatrix.Left = leftVector;
+                    targetMatrix.Up = upVector;
+
+                    axis = new Vector3D(targetMatrix.M23 - targetMatrix.M32,
+                                        targetMatrix.M31 - targetMatrix.M13,
+                                        targetMatrix.M12 - targetMatrix.M21);
+
+                    double trace = targetMatrix.M11 + targetMatrix.M22 + targetMatrix.M33;
+                    angle = Math.Acos(MathHelper.Clamp((trace - 1) * 0.5, -1, 1));
+                }
+
+                if (Vector3D.IsZero(axis))
+                {
+                    angle = desiredForwardVector.Z < 0 ? 0 : Math.PI;
+                    yaw = angle;
+                    pitch = 0;
+                    roll = 0;
+                    return;
+                }
+
+                axis = VectorMath.SafeNormalize(axis);
+                // Because gyros rotate about -X -Y -Z, we need to negate our angles
+                yaw = -axis.Y * angle;
+                pitch = -axis.X * angle;
+                roll = -axis.Z * angle;
+            }
+            /*
+            Whip's ApplyGyroOverride - Last modified: 2020/08/27
+
+            Takes pitch, yaw, and roll speeds relative to the gyro's backwards
+            ass rotation axes. 
+            */
+            public void ApplyGyroOverride(double pitchSpeed, double yawSpeed, double rollSpeed, List<IMyGyro> gyroList, MatrixD worldMatrix)
+            {
+                var rotationVec = new Vector3D(pitchSpeed, yawSpeed, rollSpeed);
+                var relativeRotationVec = Vector3D.TransformNormal(rotationVec, worldMatrix);
+
+                if (gyroList == null) // added by wico
+                    gyroList = useGyros;
+
+                foreach (var thisGyro in gyroList)
+                {
+                    var transformedRotationVec = Vector3D.TransformNormal(relativeRotationVec, Matrix.Transpose(thisGyro.WorldMatrix));
+
                     thisGyro.Pitch = (float)transformedRotationVec.X;
                     thisGyro.Yaw = (float)transformedRotationVec.Y;
                     thisGyro.Roll = (float)transformedRotationVec.Z;
@@ -346,7 +427,7 @@ namespace IngameScript
             {
                 //                for (int i = 0; i < Gyros.Count; i++)
                 if (useGyros.Count < 1) GyroSetup();
-                ApplyGyroOverride(0, yaw, 0, useGyros, _wicoBlockMaster.GetMainController());
+                ApplyGyroOverride(0, yaw, 0, useGyros, _wicoBlockMaster.GetMainController().WorldMatrix);
             }
             public bool DoRotate(double rollAngle, string sPlane = "Roll", float maxYPR = -1, float facingFactor = 1f)
             {
@@ -368,7 +449,7 @@ namespace IngameScript
 
                 if (Math.Abs(rollAngle) > 1.0)
                 {
-                    _program.Echo("MAx gyro");
+                    _program.Echo("Max gyro");
                     targetNewSetting = maxRoll * (float)(rollAngle) * facingFactor;
                 }
                 else if (Math.Abs(rollAngle) > .7)
@@ -488,6 +569,110 @@ namespace IngameScript
             MatrixD GetBlock2WorldTransform(IMyCubeBlock blk)
             { Matrix blk2grid; blk.Orientation.GetMatrix(out blk2grid); return blk2grid * MatrixD.CreateTranslation(((Vector3D)new Vector3D(blk.Min + blk.Max)) / 2.0) * GetGrid2WorldTransform(blk.CubeGrid); }
             #endregion
+
+            // https://github.com/Whiplash141/SpaceEngineersScripts/blob/master/Unpolished/VectorMath.cs
+            public static class VectorMath
+            {
+                /// <summary>
+                ///  Normalizes a vector only if it is non-zero and non-unit
+                /// </summary>
+                public static Vector3D SafeNormalize(Vector3D a)
+                {
+                    if (Vector3D.IsZero(a))
+                        return Vector3D.Zero;
+
+                    if (Vector3D.IsUnit(ref a))
+                        return a;
+
+                    return Vector3D.Normalize(a);
+                }
+
+                /// <summary>
+                /// Reflects vector a over vector b with an optional rejection factor
+                /// </summary>
+                public static Vector3D Reflection(Vector3D a, Vector3D b, double rejectionFactor = 1) //reflect a over b
+                {
+                    Vector3D project_a = Projection(a, b);
+                    Vector3D reject_a = a - project_a;
+                    return project_a - reject_a * rejectionFactor;
+                }
+
+                /// <summary>
+                /// Rejects vector a on vector b
+                /// </summary>
+                public static Vector3D Rejection(Vector3D a, Vector3D b) //reject a on b
+                {
+                    if (Vector3D.IsZero(a) || Vector3D.IsZero(b))
+                        return Vector3D.Zero;
+
+                    return a - a.Dot(b) / b.LengthSquared() * b;
+                }
+
+                /// <summary>
+                /// Projects vector a onto vector b
+                /// </summary>
+                public static Vector3D Projection(Vector3D a, Vector3D b)
+                {
+                    if (Vector3D.IsZero(a) || Vector3D.IsZero(b))
+                        return Vector3D.Zero;
+
+                    if (Vector3D.IsUnit(ref b))
+                        return a.Dot(b) * b;
+
+                    return a.Dot(b) / b.LengthSquared() * b;
+                }
+
+                /// <summary>
+                /// Scalar projection of a onto b
+                /// </summary>
+                public static double ScalarProjection(Vector3D a, Vector3D b)
+                {
+                    if (Vector3D.IsZero(a) || Vector3D.IsZero(b))
+                        return 0;
+
+                    if (Vector3D.IsUnit(ref b))
+                        return a.Dot(b);
+
+                    return a.Dot(b) / b.Length();
+                }
+
+                /// <summary>
+                /// Computes angle between 2 vectors in radians.
+                /// </summary>
+                public static double AngleBetween(Vector3D a, Vector3D b)
+                {
+                    if (Vector3D.IsZero(a) || Vector3D.IsZero(b))
+                        return 0;
+                    else
+                        return Math.Acos(MathHelper.Clamp(a.Dot(b) / Math.Sqrt(a.LengthSquared() * b.LengthSquared()), -1, 1));
+                }
+
+                /// <summary>
+                /// Computes cosine of the angle between 2 vectors.
+                /// </summary>
+                public static double CosBetween(Vector3D a, Vector3D b)
+                {
+                    if (Vector3D.IsZero(a) || Vector3D.IsZero(b))
+                        return 0;
+                    else
+                        return MathHelper.Clamp(a.Dot(b) / Math.Sqrt(a.LengthSquared() * b.LengthSquared()), -1, 1);
+                }
+
+                /// <summary>
+                /// Returns if the normalized dot product between two vectors is greater than the tolerance.
+                /// This is helpful for determining if two vectors are "more parallel" than the tolerance.
+                /// </summary>
+                /// <param name="a">First vector</param>
+                /// <param name="b">Second vector</param>
+                /// <param name="tolerance">Cosine of maximum angle</param>
+                /// <returns></returns>
+                public static bool IsDotProductWithinTolerance(Vector3D a, Vector3D b, double tolerance)
+                {
+                    double dot = Vector3D.Dot(a, b);
+                    double num = a.LengthSquared() * b.LengthSquared() * tolerance * Math.Abs(tolerance);
+                    return Math.Abs(dot) * dot > num;
+                }
+            }
         }
 
     }
