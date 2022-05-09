@@ -601,3 +601,6 @@ __pycache__/
 
 # OpenCover UI analysis results
 OpenCover/
+
+# MDK SE scripting tools
+MDK/
