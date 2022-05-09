@@ -113,7 +113,6 @@ namespace IngameScript
 
             LoadDefaults();
 
-
             // initialise module specific classes
             ModuleProgramInit();
 
@@ -127,7 +126,7 @@ namespace IngameScript
             if (bAllowPBRename && !Me.CustomName.Contains(moduleName))
                 Me.CustomName = "PB" +moduleName;
 
-            // Yes! Program() is run even if PB is turned off.
+            // Yes... Program() is run even if PB is turned off.
             if (!Me.Enabled)
             {
                 OldEcho("I am turned OFF!");
@@ -290,6 +289,7 @@ namespace IngameScript
         /// <param name="bNoDrills"></param>
         void ResetMotion(bool bNoDrills=false)
         {
+//           ErrorLog("ResetMotion()");
             foreach (var handler in ResetMotionHandlers)
             {
                 handler(bNoDrills);
@@ -305,6 +305,7 @@ namespace IngameScript
             if (!PostInitHandlers.Contains(handler))
                 PostInitHandlers.Add(handler);
         }
+
         /// <summary>
         /// Add a handler that's called on every invocation of Main() after init is completed.
         /// </summary>
@@ -415,7 +416,8 @@ namespace IngameScript
             if (sMasterReporting!="") Echo("Reporting:\n"+sMasterReporting);
             if (sMasterReporting.Length > 1024*2)
             {
-                sMasterReporting = "";
+                sMasterReporting="---\n"+sMasterReporting.Remove(0,1024);
+//                sMasterReporting = "";
             }
 
             HandleMain(updateSource);
@@ -474,6 +476,8 @@ namespace IngameScript
             if (InitStage < 3)
             {
                 ModulePostInit();
+                if (_wicoControl != null)
+                    _wicoControl.ModeAfterInit(SaveIni);
                 InitStage++;
 //                EchoInstructions("WLI:After _wc:MAI:");
             }
