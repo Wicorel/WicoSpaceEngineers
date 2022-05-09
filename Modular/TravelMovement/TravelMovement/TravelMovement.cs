@@ -66,9 +66,9 @@ namespace IngameScript
             bool btmApproach = false;
             bool btmPrecision = false;
             bool btmClose = false;
-            double dtmFar = 100;
-            double dtmApproach = 50;
-            double dtmPrecision = 15;
+            double dtmDistanceFar = 100;
+            double dtmDistanceApproach = 50;
+            double dtmDistancePrecision = 15;
             double dtmFarSpeed = 100;
             double dtmApproachSpeed = 100 * 0.5;
             double dtmPrecisionSpeed = 100 * 0.25;
@@ -166,6 +166,8 @@ namespace IngameScript
 //                tmScanElapsedMs = 0;
 //                tmCameraElapsedMs = -1;
                 _wheels.WheelsPowerUp(0, 50);
+                thrustGravityUpList.Clear();
+                thrustGravityDownList.Clear();
                 CurrentStatus = "RESET";
 
         }
@@ -311,9 +313,9 @@ namespace IngameScript
 
                 if (!(btmWheels || btmRotor))
                 {
-                    dtmPrecision = _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustTmBackwardList, dtmPrecisionSpeed, 0);
-                    dtmApproach = dtmPrecision + _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustTmBackwardList, dtmApproachSpeed, 0);
-                    dtmFar = dtmApproach + _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustTmBackwardList, dtmFarSpeed, 0); 
+                    dtmDistancePrecision = _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustTmBackwardList, dtmPrecisionSpeed, 0);
+                    dtmDistanceApproach = dtmDistancePrecision + _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustTmBackwardList, dtmApproachSpeed, 0);
+                    dtmDistanceFar = dtmDistanceApproach + _thrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustTmBackwardList, dtmFarSpeed, 0); 
 //                  dtmApproach = _thrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmApproachSpeed + (dtmFarSpeed - dtmApproachSpeed) / 2, 0);
 //                  dtmPrecision = _thrusters.calculateStoppingDistance(tmShipController, thrustTmBackwardList, dtmPrecisionSpeed + (dtmApproachSpeed - dtmPrecisionSpeed) / 2, 0);
 
@@ -334,14 +336,14 @@ namespace IngameScript
                         _program.ErrorLog("BW/FW DV=" + (maxDeltaVBW / maxDeltaVFW).ToString("0.0"));
                     }
                 }
-                if (distance < dtmFar)
+                if (distance < dtmDistanceFar)
                     btmApproach = true;
-                if (distance < dtmApproach)
+                if (distance < dtmDistanceApproach)
                 {
                     btmApproach = true;
                     btmPrecision = true;
                 }
-                if (distance < dtmPrecision)
+                if (distance < dtmDistancePrecision)
                 {
                     btmApproach = true;
                     btmPrecision = true;
@@ -357,16 +359,10 @@ namespace IngameScript
 
                 Vector3D vNG = tmShipController.GetNaturalGravity();
 
-                if (!btmSled && vNG.Length() > 0) // we have gravity
+                if (!btmSled && vNG.LengthSquared() > 0) // we have gravity
                 {
-                    Vector3D vNGN = vNG;
-                    vNGN.Normalize();
-                    _thrusters.GetBestThrusters(vNGN,
-                        thrustTmForwardList, thrustTmBackwardList,
-                        thrustTmDownList, thrustTmUpList,
-                        thrustTmLeftList, thrustTmRightList,
-                        out thrustGravityUpList, out thrustGravityDownList
-                        );
+                    InitGravityAlignments();
+
                 }
                 else
                 {
@@ -375,10 +371,11 @@ namespace IngameScript
                     tmShipController.Orientation.GetMatrix(out or1);
                     vBestThrustOrientation = or1.Forward;
                 }
-                if(dTMDebug) _program.ErrorLog(" TM Init: max=" + tmMaxSpeed.ToString("0") + ":far=" + dtmFar.ToString("0"));
+                if(dTMDebug) _program.ErrorLog(" TM Init: max=" + tmMaxSpeed.ToString("0") + ":far=" + dtmDistanceFar.ToString("0"));
                 if (dTMDebug) _program.ErrorLog("FarSpeed=" + _program.niceDoubleMeters(dtmFarSpeed) + " ASpeed=" + _program.niceDoubleMeters(dtmApproachSpeed));
-                if (dTMDebug) _program.ErrorLog("Far =" + _program.niceDoubleMeters(dtmFar) + " A=" + _program.niceDoubleMeters(dtmApproach) + " P=" + _program.niceDoubleMeters(dtmPrecision));
+                if (dTMDebug) _program.ErrorLog("Far =" + _program.niceDoubleMeters(dtmDistanceFar) + " A=" + _program.niceDoubleMeters(dtmDistanceApproach) + " P=" + _program.niceDoubleMeters(dtmDistancePrecision));
                 if (dTMDebug) _program.ErrorLog("BtmA =" + btmApproach + " P=" + btmPrecision + " C=" + btmClose);
+                /*
                 if(dTMDebug)
                 {
                     _program.ErrorLog("FW Count=" + thrustTmForwardList.Count());
@@ -387,6 +384,7 @@ namespace IngameScript
                         _program.ErrorLog(" " + thrust.CustomName);
                     }
                 }
+                */
                 CurrentStatus = "Initialized";
             }
 
@@ -431,13 +429,17 @@ namespace IngameScript
                 {
                     _program.Echo("FW:" + thrustTmForwardList.Count());
                     _program.Echo("BW:" + thrustTmBackwardList.Count());
+
+                    _program.ErrorLog("distance=" + distance);
+                    _program.ErrorLog("arrivalDist=" + arrivalDistance);
+                    _program.ErrorLog("MinElevation=" + _wicoBlockMaster.DesiredMinTravelElevation.ToString());
                 }
 
                 // TODO: Adjust targetlocation for gravity and min altitude.
                 //                if (NAVGravityMinElevation > 0 && dGravity > 0)
                 if (_wicoBlockMaster.DesiredMinTravelElevation > 0 && dGravity > 0)
                 {
-                    // Need some trig here to calculate angle/distance to ground and target above ground
+                    // TODO: Need some trig here to calculate angle/distance to ground and target above ground
                     // Have: our altitude. Angle to target. Distance to target.
                     // iff target is 'below' us, then raise effective target to maintain min alt
                     // iff target is 'above' us..  then raise up to it..
@@ -445,6 +447,13 @@ namespace IngameScript
                     // cheat for now.
                     if (distance < (arrivalDistance + _wicoBlockMaster.DesiredMinTravelElevation))
                     {
+                        if (dTMDebug)
+                        {
+                            _program.ErrorLog("Air Cheat arrival");
+                            _program.ErrorLog("distance=" + distance);
+                            _program.ErrorLog("arrivalDist=" + arrivalDistance);
+                            _program.ErrorLog("MinElevation=" + _wicoBlockMaster.DesiredMinTravelElevation.ToString());
+                        }
                         CurrentStatus = "Air Arrived";
 
                         bArrived = true;
@@ -467,6 +476,11 @@ namespace IngameScript
                 if (bArrived)
                 {
                     CurrentStatus = "Arrived";
+                    if (dTMDebug)
+                    {
+                        _program.ErrorLog("DTM arrival");
+                    }
+
                     _program.ResetMotion(); // start the stopping
                     _wicoControl.SetState(arrivalState);// current_state = arrivalState; // we have arrived
                     ResetTravelMovement(wicoElapsedTime); // reset our brain so we re-calculate for the next time we're called
@@ -575,16 +589,31 @@ namespace IngameScript
                 {
                     if (grav.LengthSquared() > 0)
                     { // in gravity. try to stay aligned to gravity, but change yaw to aim at location.
+                        if(thrustGravityUpList.Count<1)
+                        {
+                            InitGravityAlignments();
+                        }
+                        double pitch, yaw, roll;
+                        _gyros.GetRotationAnglesSimultaneous(vVec, -grav, tmShipController.WorldMatrix, out pitch, out yaw, out roll);
+                        _gyros.ApplyGyroOverride(pitch, yaw, roll, null, tmShipController.WorldMatrix);
+
+                        bAimed = false;
+                        if(Math.Abs(pitch)+ Math.Abs(yaw) + Math.Abs(roll) <.05)
+                                bAimed = true;
+                        if (dTMDebug) _program.Echo("pitch=" + pitch.ToString("0.000")+" yaw="+yaw.ToString("0.000") + " roll="+roll.ToString("0.000"));
                         _program.Echo("In Gravity Alignment");
+                        /*
                         if (_gyros.AlignGyros(vBestThrustOrientation, grav))
 //                            bool bGravAligned = GyroMain("", grav, tmShipController);
                         //                    if (bGravAligned)
                         {
                             _program.Echo("AlignedG: Align target");
                             double yawangle = _gyros.CalculateYaw(vTargetLocation, tmShipController);
-                            _gyros.DoRotate(yawangle, "Yaw");
+                            _gyros.DoRotate(yawangle, "Yaw", -1, 3);
                             bAimed = Math.Abs(yawangle) < .05;
+                            if (dTMDebug) _program.Echo("G2 Aligned=" + bAimed + " Yawangle=" + yawangle.ToString("0.000"));
                         }
+                        */
                     }
                     else
                     {
@@ -601,14 +630,31 @@ namespace IngameScript
                                                             //                    StatusLog("\"Arriving at target.  Slowing", textPanelReport);
                     CurrentStatus = "Arrival Immenient\n  Waiting for stop";
                     _program.Echo("Waiting for stop");
-                    if (!bAimed) _wicoControl.WantFast();// bWantFast = true;
-                    else _wicoControl.WantMedium();
-                    _program.ResetMotion();
+//                    if (!bAimed) _wicoControl.WantFast();  else 
+                    _wicoControl.WantMedium();
+                    _thrusters.powerDownThrusters();
+                    if (grav.LengthSquared() > 0)
+                    {
+                        // get aligned to gravity while we're waiting for stop.
+                        bool bAligned = _gyros.AlignGyros(vBestThrustOrientation, grav);
+                        /*
+                        double pitch, yaw, roll;
+                        _gyros.GetRotationAnglesSimultaneous(vVec, -grav, tmShipController.WorldMatrix, out pitch, out yaw, out roll);
+                        _gyros.ApplyGyroOverride(pitch, yaw, roll, null, tmShipController.WorldMatrix);
+                        bAimed = false;
+                        if (Math.Abs(yaw) < .025)
+                            //                                    if (Math.Abs(pitch) + Math.Abs(yaw) + Math.Abs(roll) < .05)
+                            bAimed = true;
+                        */
+                    }
+                    //                    _program.ResetMotion();
+
                     return;
                 }
                 if (bAimed)
                 {
-                    _wicoControl.WantMedium(); // bWantMedium = true;
+                    _wicoControl.WantSlow();
+//                    _wicoControl.WantMedium(); // bWantMedium = true;
                     // we are aimed at location
                     _program.Echo("Aimed");
                     _gyros.gyrosOff();
@@ -775,6 +821,7 @@ namespace IngameScript
                                 if (_cameras.CameraForwardScan(vTarget))
                                 {
                                     bDidScan = true;
+                                    _InitialScanDone = true;
                                 }
                                 break;
                             case 5:
@@ -810,10 +857,11 @@ namespace IngameScript
                                 if (_cameras.CameraForwardScan(vTarget))
                                 {
                                     bDidScan = true;
-                                    _InitialScanDone = true;
                                 }
                                 break;
                         }
+                        if (!_InitialScanDone)
+                            _wicoControl.WantMedium(); // do our initial scans faster
 
                         if (bDidScan)
                         {
@@ -901,11 +949,11 @@ namespace IngameScript
                     }
 
                     if (dTMDebug)
-                        _program.Echo("dtmFar=" + _program.niceDoubleMeters(dtmFar));
+                        _program.Echo("dtmFar=" + _program.niceDoubleMeters(dtmDistanceFar));
                     if (dTMDebug)
-                        _program.Echo("dtmApproach=" + _program.niceDoubleMeters(dtmApproach));
+                        _program.Echo("dtmApproach=" + _program.niceDoubleMeters(dtmDistanceApproach));
                     if (dTMDebug)
-                        _program.Echo("dtmPrecision=" + _program.niceDoubleMeters(dtmPrecision));
+                        _program.Echo("dtmPrecision=" + _program.niceDoubleMeters(dtmDistancePrecision));
 
 //                    if (dTMDebug) _program.ErrorLog("D=" + _program.niceDoubleMeters(distance) + " AD=" + _program.niceDoubleMeters(arrivalDistance));
 
@@ -916,12 +964,15 @@ namespace IngameScript
                         || (dTMUseCameraCollision && !_cameras.HasForwardCameras())
                         )
                     {
-                        if ((distance + arrivalDistance + velocityShip * 2) > dtmFar && !btmApproach)
+                        if(distance + velocityShip*2 + arrivalDistance > stoppingDistance)
+                            _wicoControl.WantMedium();
+
+                        if ((distance + arrivalDistance + velocityShip * 2) > dtmDistanceFar && !btmApproach)
                         {
                             CurrentStatus = "Far Travel";
                             // we are 'far' from target location.  use fastest movement
                             //                    if(dTMDebug)
-                            _program.Echo("dtmFar.=" + _program.niceDoubleMeters(dtmFar) + " Target Vel=" + dtmFarSpeed.ToString("N0"));
+                            _program.Echo("dtmFar.=" + _program.niceDoubleMeters(dtmDistanceFar) + " Target Vel=" + dtmFarSpeed.ToString("N0"));
  //                           if (dTMDebug) _program.ErrorLog("dtmFar.=" + _program.niceDoubleMeters(dtmFar) + " Target Vel=" + dtmFarSpeed.ToString("N0"));
                             //                        StatusLog("\"Far\" from target\n Target Speed=" + dtmFarSpeed.ToString("N0") + "m/s", textPanelReport);
 
@@ -937,7 +988,7 @@ namespace IngameScript
                             _program.Echo("Far thrust%=" + fThrustPercent.ToString());
                             TmDoForward(dtmFarSpeed, fThrustPercent);
                         }
-                        else if ((distance + arrivalDistance + velocityShip * 2) > dtmApproach && !btmPrecision)
+                        else if ((distance + arrivalDistance + velocityShip * 2) > dtmDistanceApproach && !btmPrecision)
                         {
                             // we are on 'approach' to target location.  use a good speed
                             //                    if(dTMDebug)
@@ -948,8 +999,9 @@ namespace IngameScript
                             btmApproach = true;
                             TmDoForward(dtmApproachSpeed, 100f);
                         }
-                        else if ((distance + arrivalDistance + velocityShip * 2) > dtmPrecision && !btmClose)
+                        else if ((distance + arrivalDistance + velocityShip * 2) > dtmDistancePrecision && !btmClose)
                         {
+                            _wicoControl.WantMedium();
                             CurrentStatus = "Precision Travel";
                             //                    if(dTMDebug)
                             _program.Echo("Precision. Target Vel=" + dtmPrecisionSpeed.ToString("N0"));
@@ -975,6 +1027,7 @@ namespace IngameScript
                         {
                             // we are very close to our target. use a very small speed
                             //                    if(dTMDebug)
+                            _wicoControl.WantMedium();
                             CurrentStatus = "Close Travel";
                             _program.Echo("Close. Target Speed=" + dtmCloseSpeed.ToString("N0") + "m/s");
                             if (dTMDebug) _program.ErrorLog("Close. Target Speed=" + dtmCloseSpeed.ToString("N0") + "m/s");
@@ -1006,12 +1059,12 @@ namespace IngameScript
                     CurrentStatus = "Aiming";
                     //                    StatusLog("Aiming at target", textPanelReport);
                     if (dTMDebug) _program.Echo("Aiming");
-                    _wicoControl.WantMedium();
-//                    _wicoControl.WantFast();// bWantFast = true;
+//                    _wicoControl.WantMedium();
+                    _wicoControl.WantFast();// bWantFast = true;
                     tmShipController.DampenersOverride = true;
-                    if (velocityShip < 5)
+                    if (velocityShip < 4)
                     {
-                        // we are probably doing precision maneuvers.  Turn on all thrusters to avoid floating past target
+                        // we are probably doing (initial) precision maneuvers.  Turn on all thrusters to avoid floating past target
                         _thrusters.powerDownThrusters();
                     }
                     else
@@ -1542,7 +1595,7 @@ namespace IngameScript
                         _thrusters.powerDownThrusters(thrustTmBackwardList, WicoThrusters.thrustAll, true);
                     }
                     // if we need to go much faster or we are FAR and not near max speed
-                    else if (velocityShip < maxSpeed * .75 || (!btmApproach && velocityShip < maxSpeed * .98))
+                    else if (velocityShip < maxSpeed * .75 || (!btmApproach && velocityShip < maxSpeed * .97))
                     {
                         CurrentStatus += "\n Accelerating";
 
@@ -1554,25 +1607,56 @@ namespace IngameScript
                     {
                         CurrentStatus += "\n Small Accel";
                         _thrusters.powerUpThrusters(thrustTmForwardList, 15f);
+                        _thrusters.powerDownThrusters(thrustTmBackwardList, WicoThrusters.thrustAll, true);
                     }
-                    else if (velocityShip <= maxSpeed * .98)
+                    else if (velocityShip <= maxSpeed * .96)
                     {
                         CurrentStatus += "\n Tiny Accel";
                         _thrusters.powerUpThrusters(thrustTmForwardList, 1f);
+                        _thrusters.powerDownThrusters(thrustTmBackwardList, WicoThrusters.thrustAll, true);
                     }
-                    else if (velocityShip >= maxSpeed * 1.02)
+                    else if (velocityShip >= maxSpeed * 1.10)
                     {
                         CurrentStatus += "\n Too fast";
+//                        _thrusters.powerDownThrusters(thrustTmBackwardList, WicoThrusters.thrustAll, true);
                         _thrusters.powerDownThrusters();
                     }
                     else // sweet spot
                     {
                         CurrentStatus += "\n Coasting";
-                        _thrusters.powerDownThrusters(); // turns ON all thrusters
-                                                                     // turns off the 'backward' thrusters... so we don't slow down
+                        //                        _thrusters.powerDownThrusters(); // turns ON all thrusters
+                        _thrusters.powerDownThrusters(thrustTmForwardList, WicoThrusters.thrustAll, false);
+                        // turns off the 'backward' thrusters... so we don't slow down
                         _thrusters.powerDownThrusters(thrustTmBackwardList, WicoThrusters.thrustAll, true);
                         //                 tmShipController.DampenersOverride = false; // this would also work, but then we don't get ship moving towards aim point as we correct
                     }
+                }
+
+            }
+            void InitGravityAlignments()
+            {
+                Vector3D vNG = tmShipController.GetNaturalGravity();
+                Vector3D vNGN = vNG;
+                vNGN.Normalize();
+                _thrusters.GetBestThrusters(vNGN,
+                    thrustTmForwardList, thrustTmBackwardList,
+                    thrustTmDownList, thrustTmUpList,
+                    thrustTmLeftList, thrustTmRightList,
+                    out thrustGravityUpList, out thrustGravityDownList
+                    );
+                Matrix or1;
+                if (thrustGravityUpList.Count > 0)
+                {
+
+                    thrustGravityUpList[0].Orientation.GetMatrix(out or1);
+                    vBestThrustOrientation = or1.Forward; // start out aiming at whatever the up thrusters are aiming at..
+                                                          //                        vBestThrustOrientation = thrustOrbitalUpList[0].WorldMatrix.Forward;
+                }
+                else
+                {
+                    tmShipController.Orientation.GetMatrix(out or1);
+                    vBestThrustOrientation = or1.Down; // assumes forward facing cockpit
+                                                       //                        vBestThrustOrientation = shipController.WorldMatrix.Down;
                 }
 
             }
