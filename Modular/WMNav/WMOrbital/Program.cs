@@ -59,7 +59,6 @@ namespace IngameScript
             _wicoIGC = new WicoIGC(this); // Must be first as some use it in constructor
 
             _wicoBlockMaster = new WicoBlockMaster(this); // must be before any other block-oriented modules
-            _wicoBlockMaster.LoadLocalGrid();
 
             _wicoControl = new WicoControl(this, _wicoIGC);
 
@@ -124,9 +123,6 @@ namespace IngameScript
 
         public void ModulePostInit()
         {
-            if (_wicoControl != null)
-                _wicoControl.ModeAfterInit(SaveIni);
-
             wicoSensors.SensorInit(_wicoBlockMaster.GetMainController());
         }
 
