@@ -102,7 +102,7 @@ namespace IngameScript
                 _systemsMonitor = systemsMonitor;
 
                 _program.moduleName += " Docked";
-                _program.moduleList += "\nDocked V4.2i";
+                _program.moduleList += "\nDocked V4.2n";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -302,7 +302,7 @@ namespace IngameScript
                 sbModeInfo.AppendLine("Docked");
                 _program.Echo("Docked!");
                 if(bAutoRelaunch) sbNotices.AppendLine("Will Autorelaunch");
-                _program.Echo("Autorelaunch=" + bAutoRelaunch.ToString());
+//                _program.Echo("Autorelaunch=" + bAutoRelaunch.ToString());
 
                 _wicoControl.WantSlow();
                 //TODO: autounload
@@ -348,6 +348,7 @@ namespace IngameScript
                 {
                     // we magically got disconnected..
                     // assume user did it.
+                    _timers.TimerTriggers("[LAUNCH]");
                     _wicoControl.SetMode(WicoControl.MODE_IDLE);
 
                     _systemsMonitor.powerDownThrusters(); // turn thrusters ON
