@@ -130,7 +130,7 @@ namespace IngameScript
                 _systemsMonitor = systemsMonitor;
 
                 _program.moduleName += " Space Dock";
-                _program.moduleList += "\nSpaceDock V4.2k";
+                _program.moduleList += "\nSpaceDock V4.2n";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -217,7 +217,6 @@ namespace IngameScript
                 {
                     if (ActionType == Displays.DODRAW)
                     {
-
                         {
                             _systemsMonitor.AirWorthy(false,false, _systemsMonitor.cargohighwater);
                             sbFuelInfo.Clear();
@@ -260,7 +259,7 @@ namespace IngameScript
                                 sbFuelInfo.AppendLine("Engines = " + (_systemsMonitor.EnginesAreOff()?"Off": "ON"));
                             }
                             sbFuelNotices.AppendLine("Current Output = " + (_systemsMonitor.currentTotalOutput/ _systemsMonitor.maxTotalPower).ToString("0.00") +"%");
-
+                            sbFuelNotices.AppendLine("Refuel=" + (bAutoRefuel ? "ON" : "Off"));
                             tsurface.WriteText(sbFuelInfo);
                             if (tsurface.SurfaceSize.Y < 256)
                             { // small/corner LCD
@@ -459,7 +458,7 @@ namespace IngameScript
                     && bAutoRefuel
                   )
                 {
-                    if (_systemsMonitor.AnyConnectorIsConnected() && iMode != WicoControl.MODE_DOCKED)
+//                    if (_systemsMonitor.AnyConnectorIsConnected() && iMode != WicoControl.MODE_DOCKED)
                     {
                         if (!bAirWorthy)
                         {
@@ -1310,6 +1309,7 @@ namespace IngameScript
                         _timers.TimerTriggers("[DOCKING:APPROACH]");
                         _systemsMonitor.MoveForwardSlowReset();
                         _wicoControl.SetState(400);
+//                        _wicoControl.SetState(404);
                         _wicoControl.WantFast();
                     }
                 }
@@ -1319,7 +1319,7 @@ namespace IngameScript
                     _program.Echo("Moving to Launch1");
                     sbModeInfo.AppendLine("Moving To Connector Entry");
 
-                    _navCommon.NavGoTarget(vLaunch1, iMode, 410, 3, "DOCK Connector Entry");
+                    _navCommon.NavGoTarget(vLaunch1, iMode, 410, 3, "DOCK Connector Entry", 25);
                     _wicoElapsedTime.RestartTimer(DockingAction);
                     _wicoControl.SetState(401);
                 }
@@ -1332,6 +1332,15 @@ namespace IngameScript
                         _program.ErrorLog("401:Timeout waiting for NAV");
                         _wicoControl.SetMode(WicoControl.MODE_ATTENTION);
                     }
+                }
+                else if(iState==404)
+                {
+                    _program.Echo("Debug wait state");
+                    double distanceSQ = (vLaunch1 - _wicoBlockMaster.CenterOfMass()).LengthSquared() - _wicoBlockMaster.LengthInMeters();
+                    _program.Echo("COMDistanceSQ=" + distanceSQ.ToString("0.0"));
+                    double stoppingDistance = _systemsMonitor.calculateStoppingDistance(_wicoBlockMaster.GetPhysicalMass(), thrustBackwardList, _wicoBlockMaster.GetShipSpeed(), 0);
+                    _program.Echo("check Closesq=" + (_wicoBlockMaster.LengthInMeters() / 2
+                          + stoppingDistance * 2));
                 }
                 else if (iState == 410)
                 {
