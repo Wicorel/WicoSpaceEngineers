@@ -31,11 +31,12 @@ namespace IngameScript
 
             bool bMeGridOnly = false;
 
-            public WicoBlockMaster(Program program)
+            public WicoBlockMaster(Program program, bool MeGridOnly=false)
             {
                 _program = program;
 
                 GridTerminalSystem = _program.GridTerminalSystem;
+                bMeGridOnly = MeGridOnly;
 
                 AddLocalBlockHandler(BlockParseHandler);
                 AddLocalBlockChangedHandler(LocalGridChangedHandler);
@@ -49,6 +50,8 @@ namespace IngameScript
 
                 DesiredMinTravelElevation = (float)_program.CustomDataIni.Get(_program.OurName, "MinTravelElevation").ToDouble(DesiredMinTravelElevation);
                 _program.CustomDataIni.Set(_program.OurName, "MinTravelElevation", DesiredMinTravelElevation);
+
+                LoadLocalGrid();
             }
             void LoadHandler(MyIni theINI)
             {
@@ -358,12 +361,14 @@ namespace IngameScript
             {
                 bMeGridOnly = bMeOnly;
             }
+
             public void LoadLocalGrid()
             {
                 localCubeGrids.Clear();
                 gtsLocalBlocks.Clear();
                 GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, bLocalCheck);
             }
+
             bool bLocalCheck(IMyTerminalBlock tb)
             {
                 bool bValid = true;
@@ -691,7 +696,7 @@ namespace IngameScript
                     f.Enabled = bOn;
                 }
             }
-            public float DesiredMinTravelElevation = -1; // OLD: float NAVGravityMinElevation = -1;
+            public float DesiredMinTravelElevation = 0; // zero means none
 
         }
 
