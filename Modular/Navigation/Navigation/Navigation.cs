@@ -72,7 +72,7 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " Navigation";
-                _program.moduleList += "\nNavigation V4.2m";
+                _program.moduleList += "\nNavigation V4.2n";
 
                 NAVEmulateOld=_program.CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
                 _program.CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
@@ -174,8 +174,8 @@ namespace IngameScript
                 Ini.Set(sNavSection, "vAvoid", vAvoid.ToString());
 
                 Vector3D.TryParse(Ini.Get(sNavSection, "vBestThrustOrientation").ToString(), out v3D);
-                vBestThrustOrientation = v3D;
-                Ini.Set(sNavSection, "vBestThrustOrientation", vBestThrustOrientation.ToString());
+                vBestGravityThrustDirection = v3D;
+                Ini.Set(sNavSection, "vBestThrustOrientation", vBestGravityThrustDirection.ToString());
 
                 BValidNavTarget = Ini.Get(sNavSection, "ValidNavTarget").ToBoolean();
                 NAVTargetName= Ini.Get(sNavSection, "ValidNavTarget").ToString();
@@ -193,7 +193,7 @@ namespace IngameScript
             {
                 Ini.Set(sNavSection, "vTarget", VNavTarget.ToString());
                 Ini.Set(sNavSection, "vAvoid", vAvoid.ToString());
-                Ini.Set(sNavSection, "vBestThrustOrientation", vBestThrustOrientation.ToString());
+                Ini.Set(sNavSection, "vBestThrustOrientation", vBestGravityThrustDirection.ToString());
                 Ini.Set(sNavSection, "ValidNavTarget", BValidNavTarget);
                 Ini.Set(sNavSection, "TargetName", NAVTargetName);
 
@@ -608,7 +608,7 @@ namespace IngameScript
             /// <summary>
             ///  GRID orientation to aim ship
             /// </summary>
-            Vector3D vBestThrustOrientation;
+            Vector3D vBestGravityThrustDirection;
 
             bool bAutoPatrol = false;
             bool bControlAntennaRange = true;
@@ -633,6 +633,10 @@ namespace IngameScript
             List<IMyTerminalBlock> thrustUpList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> thrustLeftList = new List<IMyTerminalBlock>();
             List<IMyTerminalBlock> thrustRightList = new List<IMyTerminalBlock>();
+
+            List<IMyTerminalBlock> thrustGravityUpList = new List<IMyTerminalBlock>();
+            List<IMyTerminalBlock> thrustGravityDownList = new List<IMyTerminalBlock>();
+
             /*
             States:
             0 -- Master Init
@@ -743,18 +747,25 @@ namespace IngameScript
 
                 if(thrustForwardList.Count<1)
                 {
-                    _wicoThrusters.ThrustersCalculateOrientation(shipController,
-                        ref thrustForwardList, ref thrustBackwardList,
-                        ref thrustDownList, ref thrustUpList,
-                        ref thrustLeftList, ref thrustRightList
-                        );
+                    if (dGravity > 0)
+                    {
+                        InitializeGravityThrusters();
+                    }
+                    else
+                    {
+                        _wicoThrusters.ThrustersCalculateOrientation(shipController,
+                            ref thrustForwardList, ref thrustBackwardList,
+                            ref thrustDownList, ref thrustUpList,
+                            ref thrustLeftList, ref thrustRightList
+                            );
+                        Matrix or1;
+                        thrustForwardList[0].Orientation.GetMatrix(out or1);
+                        vBestGravityThrustDirection = or1.Forward; // start out aiming at whatever the FW thrusters are aiming at..
+                    }
                 }
 
                 if (iState == 0)
                 {
-                    Matrix or1;
-                    thrustForwardList[0].Orientation.GetMatrix(out or1);
-                    vBestThrustOrientation = or1.Forward; // start out aiming at whatever the FW thrusters are aiming at..
 
                     bControlAntennaRange = _program.CustomDataIni.Get(sNavSection, "ControlAntennaRange").ToBoolean(bControlAntennaRange);
 
@@ -796,6 +807,7 @@ namespace IngameScript
                     else
                     if (BValidNavTarget)
                     {
+                        // checks if we are in the air or on the ground.
                         if (elevation > _wicoBlockMaster.HeightInMeters())
                         {
                             _wicoControl.SetState(150);
@@ -809,9 +821,12 @@ namespace IngameScript
                 {
                     _wicoControl.WantFast();
                     Vector3D vTargetLocation = VNavTarget;
-                    if (dGravity > 0)
+                    if (dGravity > 0 )
                     {
-
+                        if(thrustGravityUpList.Count<1)
+                        {
+                            InitializeGravityThrusters();
+                        }
                         double elevation = 0;
 
                         shipController.TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
@@ -819,8 +834,10 @@ namespace IngameScript
 
                         float fSaveAngle = _gyros.GetMinAngle();
                         _gyros.SetMinAngle(0.1f);
+                        _program.Echo("FWthrust=" + thrustForwardList[0].CustomName);
+                        _program.Echo("VBest=" + vBestGravityThrustDirection.ToString());
 
-                        bool bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
+                        bool bAligned = _gyros.AlignGyros(vBestGravityThrustDirection, vNG);
                         sNavDebug += " Aligned=" + bAligned.ToString();
 
                         _program.Echo("bAligned=" + bAligned.ToString());
@@ -841,6 +858,10 @@ namespace IngameScript
                     _wicoControl.WantFast();
                     if (dGravity > 0 || bWheels)
                     {
+                        if (dGravity>0 && thrustGravityUpList.Count < 1)
+                        {
+                            InitializeGravityThrusters();
+                        }
                         double elevation = 0;
 
                         shipController.TryGetPlanetElevation(MyPlanetElevation.Surface, out elevation);
@@ -849,7 +870,7 @@ namespace IngameScript
                         float fSaveAngle = _gyros.GetMinAngle();
                         _gyros.SetMinAngle(0.1f);
 
-                        bool bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
+                        bool bAligned = _gyros.AlignGyros(vBestGravityThrustDirection, vNG);
                         sNavDebug += " Aligned=" + bAligned.ToString();
 
                         _program.Echo("bAligned=" + bAligned.ToString());
@@ -877,14 +898,23 @@ namespace IngameScript
 
                     if (dGravity > 0)
                     {
-                        bool bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
+                        if (thrustGravityUpList.Count < 1)
+                        {
+                            InitializeGravityThrusters();
+                        }
+                        bool bAligned = _gyros.AlignGyros(vBestGravityThrustDirection, vNG);
                         sNavDebug += " Aligned=" + bAligned.ToString();
+//                        _program.Echo("aligned=" + bAligned.ToString());
+
+//                        _program.Echo("FWthrust=" + thrustForwardList[0].CustomName);
 
                         double yawangle = -999;
                         yawangle = _program.CalculateYaw(VNavTarget, shipController);
                         bool bAimed = Math.Abs(yawangle) < 0.1; // NOTE: 2x allowance
-                        _program.Echo("yawangle=" + yawangle.ToString());
+//                        _program.Echo("yawangle=" + yawangle.ToString());
                         sNavDebug += " Yaw=" + yawangle.ToString("0.00");
+
+//                        bAimed = true; /// DEBUG
 
                         if (!bAimed)
                         {
@@ -895,7 +925,17 @@ namespace IngameScript
                             }
                             else // use for both sled and flight
                             {
-                                _gyros.DoRotate(yawangle, "Yaw");
+
+                                Vector3D vVec = VNavTarget - shipController.CenterOfMass;
+                                double pitch, yaw, roll;
+                                _gyros.GetRotationAnglesSimultaneous(vVec, -vNG, shipController.WorldMatrix, out pitch, out yaw, out roll);
+                                _gyros.ApplyGyroOverride(0, yaw, 0, null, shipController.WorldMatrix);
+                                bAimed = false;
+                                if (Math.Abs(yaw) < .025)
+//                                    if (Math.Abs(pitch) + Math.Abs(yaw) + Math.Abs(roll) < .05)
+                                        bAimed = true;
+                                
+                                //bAimed = _gyros.DoRotate(yawangle, "Yaw");
                             }
                         }
                         if (bAligned && bAimed)
@@ -928,7 +968,7 @@ namespace IngameScript
                 {
                     // realign gravity
                     _wicoControl.WantFast();
-                    bool bAimed = _gyros.AlignGyros(vBestThrustOrientation, vNG);
+                    bool bAimed = _gyros.AlignGyros(vBestGravityThrustDirection, vNG);
                     if (bAimed)
                     {
                         _gyros.gyrosOff();
@@ -967,6 +1007,13 @@ namespace IngameScript
                     {
                         _wicoControl.SetState(500);
 
+//                        if(_Debug)
+                        {
+                            _program.ErrorLog("NAV:We have arrived"
+                                +"\ndistance=" + _program.niceDoubleMeters(distance)
+                                +"\nadistmin="+_program.niceDoubleMeters(ArrivalDistanceMin)
+                                );
+                        }
                         sbModeInfo.AppendLine("We have arrived");
                         _program.Echo("we have arrived");
                         _wicoControl.WantFast();
@@ -1020,7 +1067,7 @@ namespace IngameScript
                               // Emergency thrust
                                 sNavDebug += " EM UP!";
 
-                                bool bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
+                                bool bAligned = _gyros.AlignGyros(vBestGravityThrustDirection, vNG);
 
                                 _wicoThrusters.powerUpThrusters(thrustUpList, 100);
                                 bDoTravel = false;
@@ -1047,7 +1094,7 @@ namespace IngameScript
                                 //                            bool bAligned = GyroMain("", grav, shipOrientationBlock);
 
                                 _wicoThrusters.powerDownThrusters(thrustUpList, WicoThrusters.thrustAll, true);
-                                bool bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
+                                bool bAligned = _gyros.AlignGyros(vBestGravityThrustDirection, vNG);
                                 if (!bAligned)
                                 {
                                     _wicoControl.WantFast();
@@ -1086,7 +1133,7 @@ namespace IngameScript
                                         ion += Math.Max(100f, Math.Min(5f, (float)velocityShip / 2));
                                         sNavDebug += " 2FAST! A" + atmo.ToString("0.00");// + " H" + hydro.ToString("0.00") + " I" + ion.ToString("0.00");
 
-                                        bool bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
+                                        bool bAligned = _gyros.AlignGyros(vBestGravityThrustDirection, vNG);
                                         if (!bAligned)
                                         {
                                             _wicoControl.WantFast();
@@ -1143,7 +1190,7 @@ namespace IngameScript
                 else if(iState==161)
                 {
                     // Holding
-                    _program.Echo("Hodling for DEBUG");
+                    _program.Echo("Holding for DEBUG");
                 }
                 else if (iState == 300)
                 { // collision detection
@@ -1219,7 +1266,7 @@ namespace IngameScript
                     {
                         thrustUpList[0].Orientation.GetMatrix(out or1);
                         vOrientation = or1.Forward;
-                        if (_gyros.AlignGyros(vBestThrustOrientation, vNG))
+                        if (_gyros.AlignGyros(vBestGravityThrustDirection, vNG))
                         {
                             _wicoControl.SetState(349);
                         }
@@ -1237,7 +1284,7 @@ namespace IngameScript
                     Vector3 vOrientation;
                     thrustRightList[0].Orientation.GetMatrix(out or1);
                     vOrientation = or1.Forward;
-                    if (_gyros.AlignGyros(vBestThrustOrientation, vNG))
+                    if (_gyros.AlignGyros(vBestGravityThrustDirection, vNG))
                     {
                         _wicoControl.SetState(350);
                     }
@@ -1330,7 +1377,7 @@ namespace IngameScript
                     }
                     _wicoControl.WantFast();
                 }
-                //                NavDebug(sNavDebug);
+             //                   NavDebug(sNavDebug);
             }
 
             public void SetNavigation(Vector3D vNavTarget, string NavTargetName, bool bGo = true, int NavArrivalMode= WicoControl.MODE_NAVNEXTTARGET, int NavArrivalState=0, double _ArrivalDistanceMin=50, double _ShipSpeedMax=9999 )
@@ -1572,6 +1619,39 @@ namespace IngameScript
                 }
                 if (_Debug) _program.ErrorLog("StartPatrol:():" + wicoNavCommands.Count + " Commands");
                 return bAddedTargets;
+
+            }
+            void InitializeGravityThrusters()
+            {
+                IMyShipController shipController = _wicoBlockMaster.GetMainController();
+                Vector3D vNG = shipController.GetNaturalGravity();
+                Vector3D vNGN = vNG;
+                vNGN.Normalize();
+                _wicoThrusters.ThrustersCalculateOrientation(shipController,
+                   ref thrustForwardList, ref thrustBackwardList,
+                   ref thrustDownList, ref thrustUpList,
+                   ref thrustLeftList, ref thrustRightList
+                   );
+                _wicoThrusters.GetBestThrusters(vNGN,
+                    thrustForwardList, thrustBackwardList,
+                    thrustDownList, thrustUpList,
+                    thrustLeftList, thrustRightList,
+                    out thrustGravityUpList, out thrustGravityDownList
+                    );
+                Matrix or1;
+                if (thrustGravityUpList.Count > 0)
+                {
+
+                    thrustGravityUpList[0].Orientation.GetMatrix(out or1);
+                    vBestGravityThrustDirection = or1.Forward; // start out aiming at whatever the up thrusters are aiming at..
+                                                          //                        vBestThrustOrientation = thrustOrbitalUpList[0].WorldMatrix.Forward;
+                }
+                else
+                {
+                    shipController.Orientation.GetMatrix(out or1);
+                    vBestGravityThrustDirection = or1.Down; // assumes forward facing cockpit
+                                                       //                        vBestThrustOrientation = shipController.WorldMatrix.Down;
+                }
 
             }
 
