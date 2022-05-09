@@ -101,6 +101,7 @@ namespace IngameScript
             public void SetMode(int theNewMode, int theNewState = 0)
             {
                 // do nothing if we are already in that mode
+                if (_bControlDebug) _program.ErrorLog("MSet I= " + _iMode + " S=" + theNewState);
                 if (_iMode == theNewMode)
                     return;
 //                if(_bControlDebug) _program.ErrorLog("Set M=" + theNewMode + " S=" + theNewState+" OM="+IMode+" OS="+_iState);
@@ -116,14 +117,15 @@ namespace IngameScript
                 HandleModeChange(_iMode, _iState, theNewMode, theNewState);
 
                 _iMode = theNewMode;
-                _iState = theNewState;
+                SetState(theNewState);
+//                _iState = theNewState;
                 WantOnce();
             }
 
             public void SetState(int theNewState)
             {
-                // not synced..
-//                if (_bControlDebug) _program.ErrorLog("Set S=" + theNewState);
+                // not synced by default..
+                if (_bControlDebug) _program.ErrorLog("SSet I= "+ _iMode + " S=" + theNewState);
 
                 _iState = theNewState;
             }
@@ -332,7 +334,8 @@ namespace IngameScript
                         HandleModeChange(_iMode, _iState, theNewMode, theNewState);
 
                     _iMode = theNewMode;
-                    _iState = theNewState;
+                    SetState(theNewState);
+//                    _iState = theNewState;
                 }
                 // TODO: add more messages as needed
             }
