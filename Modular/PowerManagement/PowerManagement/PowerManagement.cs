@@ -33,7 +33,7 @@ namespace IngameScript
             bool _ControlEngines = true;
 
             readonly Program _program;
-            readonly WicoControl _wicoControl;
+//            readonly WicoControl _wicoControl;
             readonly PowerProduction _power;
             readonly GasTanks _tanks;
             readonly WicoElapsedTime _elapsedTime;
@@ -53,10 +53,12 @@ namespace IngameScript
             const string PowerManagementeDebug = PowerManagementName + "Debug";
             const string PowerManagementeEnabled = PowerManagementName + "Enabled";
 
-            public PowerManagement(Program program, WicoControl wicoControl, PowerProduction powerProduction, GasTanks tanks, WicoElapsedTime wicoElapsedTime, WicoIGC wicoIGC, Displays displays)
+            public PowerManagement(Program program,
+                //WicoControl wicoControl, 
+                PowerProduction powerProduction, GasTanks tanks, WicoElapsedTime wicoElapsedTime, WicoIGC wicoIGC, Displays displays)
             {
                 _program = program;
-                _wicoControl = wicoControl;
+//                _wicoControl = wicoControl;
                 _power = powerProduction;
                 _tanks = tanks;
                 _elapsedTime = wicoElapsedTime;
@@ -64,7 +66,7 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " PowerMgmt";
-                _program.moduleList += "\nPower Management V4.2b";
+                _program.moduleList += "\nPower Management V4.2n";
 
                 _program.AddLoadHandler(LoadHandler);
                 _program.AddSaveHandler(SaveHandler);

@@ -85,7 +85,7 @@ namespace IngameScript
             navCommon = new NavCommon(this, _wicoControl, _wicoIGC);
             _cargoCheck = new CargoCheck(this, _wicoBlockMaster,_displays);
 
-            _powerManagement = new PowerManagement(this, _wicoControl
+            _powerManagement = new PowerManagement(this 
                 , wicoPower, wicoGasTanks, _wicoElapsedTime
                 ,  _wicoIGC, _displays
                 );
