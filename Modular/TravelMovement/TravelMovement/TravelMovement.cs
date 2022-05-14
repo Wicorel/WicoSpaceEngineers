@@ -183,8 +183,8 @@ namespace IngameScript
             {
                 _InitialScanDone = false;
                 tmMaxSpeed = maxSpeed;
-                if (tmMaxSpeed > _wicoControl.fMaxWorldMps)
-                    tmMaxSpeed = _wicoControl.fMaxWorldMps;
+                if (tmMaxSpeed > _wicoBlockMaster.fMaxWorldMps)
+                    tmMaxSpeed = _wicoBlockMaster.fMaxWorldMps;
                 if (dTMDebug) _program.ErrorLog("Initial tmMax=" + _program.niceDoubleMeters(tmMaxSpeed));
                 if (dTMDebug) _program.ErrorLog("Initial reqMax=" + _program.niceDoubleMeters(maxSpeed));
 
@@ -1088,7 +1088,7 @@ namespace IngameScript
                     _program.ErrorLog("COS: NULL list");
                     return 0;
                 }
-                if (thrustList.Count < 1) return _wicoControl.fMaxWorldMps;
+                if (thrustList.Count < 1) return _wicoBlockMaster.fMaxWorldMps;
                 distance = Math.Abs(distance);
 
                 IMyShipController myShip = tmShipController;
@@ -1565,7 +1565,7 @@ namespace IngameScript
                     // if we need to go much faster or we are FAR and not near max speed
                     else if (velocityShip < maxSpeed * .75 || (!btmApproach && velocityShip < maxSpeed * .98))
                     {
-                        float delta = (float)maxSpeed / _wicoControl.fMaxWorldMps * maxThrust;
+                        float delta = (float)maxSpeed / _wicoBlockMaster.fMaxWorldMps * maxThrust;
                         _wheels.WheelsPowerUp(maxThrust);
                     }
                     else if (velocityShip < maxSpeed * .85)
@@ -1599,7 +1599,7 @@ namespace IngameScript
                     {
                         CurrentStatus += "\n Accelerating";
 
-                        float delta = (float)maxSpeed / _wicoControl.fMaxWorldMps * maxThrust;
+                        float delta = (float)maxSpeed / _wicoBlockMaster.fMaxWorldMps * maxThrust;
                         _thrusters.powerUpThrusters(thrustTmForwardList, delta);
                         _thrusters.powerDownThrusters(thrustTmBackwardList, WicoThrusters.thrustAll, true);
                     }

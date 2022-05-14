@@ -72,7 +72,7 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " Navigation";
-                _program.moduleList += "\nNavigation V4.2n";
+                _program.moduleList += "\nNavigation V4.2n2";
 
                 NAVEmulateOld=_program.CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
                 _program.CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
@@ -181,7 +181,7 @@ namespace IngameScript
                 NAVTargetName= Ini.Get(sNavSection, "ValidNavTarget").ToString();
 
                 dtNavStartShip=DateTime.FromBinary(Ini.Get(sNavSection, "dStartShip").ToInt64());
-                ShipSpeedMax=Ini.Get(sNavSection, "shipSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
+                ShipSpeedMax=Ini.Get(sNavSection, "shipSpeedMax").ToDouble(_wicoBlockMaster.fMaxWorldMps);
                 ArrivalDistanceMin = Ini.Get(sNavSection, "arrivalDistanceMin").ToDouble(ArrivalDistanceMin);
                 NAVArrivalMode = Ini.Get(sNavSection, "NAVArrivalMode").ToInt32(NAVArrivalMode);
                 NAVArrivalState = Ini.Get(sNavSection, "NAVArrivalState").ToInt32(NAVArrivalState);
@@ -1049,7 +1049,7 @@ namespace IngameScript
                         {
                             stopD = _wicoThrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustUpList, Math.Abs(vertVel), dGravity);
                         }
-                        double maxStopD = _wicoThrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustUpList, _wicoControl.fMaxWorldMps, dGravity);
+                        double maxStopD = _wicoThrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustUpList, _wicoBlockMaster.fMaxWorldMps, dGravity);
 
                         float atmo;
                         float hydro;
@@ -1467,8 +1467,8 @@ namespace IngameScript
             {
                 //                _program.ErrorLog("_NavAddTarget()"+TargetName);
 
-                if (maxSpeed > _wicoControl.fMaxWorldMps)
-                    maxSpeed = _wicoControl.fMaxWorldMps;
+                if (maxSpeed > _wicoBlockMaster.fMaxWorldMps)
+                    maxSpeed = _wicoBlockMaster.fMaxWorldMps;
                 WicoNavCommand wicoNavCommand = new WicoNavCommand
                 {
                     pg = _program,
@@ -1495,8 +1495,8 @@ namespace IngameScript
             {
                 //                _program.ErrorLog("_NavAddTarget()"+TargetName);
 
-                if (maxSpeed > _wicoControl.fMaxWorldMps)
-                    maxSpeed = _wicoControl.fMaxWorldMps;
+                if (maxSpeed > _wicoBlockMaster.fMaxWorldMps)
+                    maxSpeed = _wicoBlockMaster.fMaxWorldMps;
                 WicoNavCommand wicoNavCommand = new WicoNavCommand
                 {
                     pg = _program,

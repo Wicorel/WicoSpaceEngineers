@@ -31,6 +31,8 @@ namespace IngameScript
 
             bool bMeGridOnly = false;
 
+            public float fMaxWorldMps = 100f;
+
             public WicoBlockMaster(Program program, bool MeGridOnly=false)
             {
                 _program = program;
@@ -50,6 +52,9 @@ namespace IngameScript
 
                 DesiredMinTravelElevation = (float)_program.CustomDataIni.Get(_program.OurName, "MinTravelElevation").ToDouble(DesiredMinTravelElevation);
                 _program.CustomDataIni.Set(_program.OurName, "MinTravelElevation", DesiredMinTravelElevation);
+
+                fMaxWorldMps = (float)_program.CustomDataIni.Get(_program.OurName, "MaxWorldMps").ToDouble(fMaxWorldMps);
+                _program.CustomDataIni.Set(_program.OurName, "MaxWorldMps", fMaxWorldMps);
 
                 LoadLocalGrid();
             }

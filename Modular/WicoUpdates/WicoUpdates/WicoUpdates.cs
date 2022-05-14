@@ -33,7 +33,7 @@ namespace IngameScript
                 _program.CustomDataIni.Set(_program.OurName, "UpdateDebug", _bUpdateDebug);
             }
 
-            public float fMaxWorldMps = 100f;
+//            public float fMaxWorldMps = 100f;
 
             bool bWantOnce = false;
             bool bWantFast = false;

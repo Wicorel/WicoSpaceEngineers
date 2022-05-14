@@ -76,7 +76,7 @@ namespace IngameScript
                 bAlignGravityHover = _program.CustomDataIni.Get(sOrbitalSection, "AlignGravityHover").ToBoolean(bAlignGravityHover);
                 _program.CustomDataIni.Set(sOrbitalSection, "AlignGravityHover", MaxLaunchMps);
 
-                MaxLaunchMps = _program.CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
+                MaxLaunchMps = _program.CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoBlockMaster.fMaxWorldMps);
                 _program.CustomDataIni.Set(sOrbitalSection, "LaunchSpeedMax", MaxLaunchMps);
 
                 MaxDescentMps = _program.CustomDataIni.Get(sOrbitalSection, "DescentSpeedMax").ToDouble(MaxDescentMps);
@@ -588,7 +588,7 @@ namespace IngameScript
                 if (iState == 0)
                 {
                     //		dtStartShip = DateTime.Now;
-                    MaxLaunchMps = _program.CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoControl.fMaxWorldMps);
+                    MaxLaunchMps = _program.CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoBlockMaster.fMaxWorldMps);
 
                     _wicoControl.WantOnce();
                     //                    dLastVelocityShip = 0;
@@ -792,7 +792,7 @@ namespace IngameScript
                             decreasePower(dGravity, alt); // take away from lowest provider
                             increasePower(dGravity, alt);// add it back
                         }
-                        if (expectedV < (_wicoControl.fMaxWorldMps / 5)) // add even more.
+                        if (expectedV < (_wicoBlockMaster.fMaxWorldMps / 5)) // add even more.
                             increasePower(dGravity, alt);
 
                         if (velocityShip > (MaxLaunchMps - 5))
@@ -1635,7 +1635,7 @@ namespace IngameScript
                 ////
                 if (dGravity > 0)
                 {
-                    float fMPS = _wicoControl.fMaxWorldMps;
+                    float fMPS = _wicoBlockMaster.fMaxWorldMps;
                     if (velocityShip > fMPS) fMPS = (float)velocityShip;
 
                     retroStartDistance = (int)_wicoThrusters.calculateStoppingDistance(_wicoBlockMaster.GetAllPhysicalMass(), thrustOrbitalUpList, fMPS, dGravity);
