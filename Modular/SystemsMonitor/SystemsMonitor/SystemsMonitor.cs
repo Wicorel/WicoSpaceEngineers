@@ -337,6 +337,16 @@ namespace IngameScript
             {
                 _gyros.gyrosOff();
             }
+
+            public void GetRotationAnglesSimultaneous(Vector3D desiredForwardVector, Vector3D desiredUpVector, MatrixD worldMatrix, out double pitch, out double yaw, out double roll)
+            {
+                _gyros.GetRotationAnglesSimultaneous(desiredForwardVector, desiredUpVector, worldMatrix, out pitch, out yaw, out roll);
+            }
+            public void ApplyGyroOverride(double pitchSpeed, double yawSpeed, double rollSpeed, List<IMyGyro> gyroList, MatrixD worldMatrix)
+            {
+                _gyros.ApplyGyroOverride(pitchSpeed, yawSpeed, rollSpeed, gyroList, worldMatrix);
+            }
+
             public bool AlignGyros(string argument, Vector3D vDirection, IMyTerminalBlock gyroControlPoint)
             {
                 return _gyros.AlignGyros(argument, vDirection, gyroControlPoint);
