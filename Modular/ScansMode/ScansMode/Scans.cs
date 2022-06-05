@@ -58,8 +58,8 @@ namespace IngameScript
                 _program.moduleName += " Scans";
                 _program.moduleList += "\nScans V4.2a";
 
-                _scanRange = _program._CustomDataIni.Get(_CameraSection, _NameScanRange).ToInt64(_scanRange);
-                _program._CustomDataIni.Set(_CameraSection, _NameScanRange, _scanRange);
+                _scanRange = _program.CustomDataIni.Get(_CameraSection, _NameScanRange).ToInt64(_scanRange);
+                _program.CustomDataIni.Set(_CameraSection, _NameScanRange, _scanRange);
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -73,6 +73,7 @@ namespace IngameScript
                 _wicoBlockMaster.AddLocalBlockChangedHandler(LocalGridChangedHandler);
 
                 _wicoIGC.AddPublicHandler(sScansTag, BroadcastHandler);
+                _wicoIGC.AddUnicastHandler(BroadcastHandler);
 
                 _displays.AddSurfaceHandler("MODE", SurfaceHandler);
 
@@ -136,6 +137,10 @@ namespace IngameScript
             /// <param name="updateSource"></param>
             public void ProcessTrigger(string sArgument, MyCommandLine myCommandLine, UpdateType updateSource)
             {
+                if (sArgument == "doscans")
+                {
+                    _wicoControl.SetMode(WicoControl.MODE_DOSCANS);
+                }
             }
 
             void UpdateHandler(UpdateType updateSource)
@@ -157,12 +162,14 @@ namespace IngameScript
                         string sCommand = msg.Data as string;
                         sCommand = sCommand.Trim();
                         string[] saArguments = sCommand.Split(':');
+
                         if (saArguments[0]== sStartCommand)
                         {
                             int iArgument = 1;
                             int doneMode = WicoControl.MODE_NAVNEXTTARGET;
                             int doneState = 0;
 
+                            // optional arguments for mode and state
                             if (int.TryParse(saArguments[iArgument++], out doneMode))
                                 ScansDoneMode = doneMode;
 
@@ -263,7 +270,7 @@ namespace IngameScript
                             // TODO: Use WicoET
                             scanElapsedMs = 0;
 
-                            _scanRange = _program._CustomDataIni.Get(_CameraSection, _NameScanRange).ToInt64(_scanRange);
+                            _scanRange = _program.CustomDataIni.Get(_CameraSection, _NameScanRange).ToInt64(_scanRange);
 
                             // initialize cameras
                             if (scanfrontScanner == null)
