@@ -138,17 +138,17 @@ namespace IngameScript
                 _program.AddPostInitHandler(PostInit());
 
 
-                MiningCargopcthighwater = _program._CustomDataIni.Get(_program.OurName, "MiningCargopcthighwater").ToInt32(MiningCargopcthighwater);
-                _program._CustomDataIni.Set(_program.OurName, "MiningCargopcthighwater", MiningCargopcthighwater);
+                MiningCargopcthighwater = _program.CustomDataIni.Get(_program.OurName, "MiningCargopcthighwater").ToInt32(MiningCargopcthighwater);
+                _program.CustomDataIni.Set(_program.OurName, "MiningCargopcthighwater", MiningCargopcthighwater);
 
-                MiningCargopctlowwater = _program._CustomDataIni.Get(_program.OurName, "MiningCargopctlowwater").ToInt32(MiningCargopctlowwater);
-                _program._CustomDataIni.Set(_program.OurName, "MiningCargopctlowwater", MiningCargopctlowwater);
+                MiningCargopctlowwater = _program.CustomDataIni.Get(_program.OurName, "MiningCargopctlowwater").ToInt32(MiningCargopctlowwater);
+                _program.CustomDataIni.Set(_program.OurName, "MiningCargopctlowwater", MiningCargopctlowwater);
 
-                EjectorWaitSeconds = _program._CustomDataIni.Get(_program.OurName, EjectorWait).ToDouble(EjectorWaitSeconds);
-                _program._CustomDataIni.Set(_program.OurName, EjectorWait, EjectorWaitSeconds);
+                EjectorWaitSeconds = _program.CustomDataIni.Get(_program.OurName, EjectorWait).ToDouble(EjectorWaitSeconds);
+                _program.CustomDataIni.Set(_program.OurName, EjectorWait, EjectorWaitSeconds);
 
-                MaxEjectorWaitSeconds = _program._CustomDataIni.Get(_program.OurName, MaxEjectorWait).ToDouble(MaxEjectorWaitSeconds);
-                _program._CustomDataIni.Set(_program.OurName, MaxEjectorWait, MaxEjectorWaitSeconds);
+                MaxEjectorWaitSeconds = _program.CustomDataIni.Get(_program.OurName, MaxEjectorWait).ToDouble(MaxEjectorWaitSeconds);
+                _program.CustomDataIni.Set(_program.OurName, MaxEjectorWait, MaxEjectorWaitSeconds);
 
                 _elapsedTime.AddTimer(miningChecksElapsed);
                 _elapsedTime.AddTimer(miningElapsed);
@@ -342,6 +342,7 @@ namespace IngameScript
                  * Add: remember the current asteroid ID.  Use it for "go mine" (even if single bore)
                  */
                 _program.Echo("Miner TriggerHandler:" + sArgument);
+                /*
                 string[] varArgs = sArgument.Trim().Split(';');
 
                 for (int iArg = 0; iArg < varArgs.Length; iArg++)
@@ -350,6 +351,7 @@ namespace IngameScript
                     // Commands here:
 
                 }
+                */
                 if (myCommandLine != null)
                 {
                     if (myCommandLine.Argument(0) == "mine")
@@ -2614,8 +2616,8 @@ namespace IngameScript
             }
             void MinerCalculateBoreSize()
             {
-                MiningBoreHeight = _program._CustomDataIni.Get(sMiningSection, "MiningBoreHeight").ToDouble(MiningBoreHeight);
-                MiningBoreWidth = _program._CustomDataIni.Get(sMiningSection, "MiningBoreWidth").ToDouble(MiningBoreWidth);
+                MiningBoreHeight = _program.CustomDataIni.Get(sMiningSection, "MiningBoreHeight").ToDouble(MiningBoreHeight);
+                MiningBoreWidth = _program.CustomDataIni.Get(sMiningSection, "MiningBoreWidth").ToDouble(MiningBoreWidth);
 
                 if (MiningBoreHeight <= 0)
                 {
@@ -2626,11 +2628,11 @@ namespace IngameScript
 
                     // save defaults back to customdata to allow player to change
 
-                    _program._CustomDataIni.Set(sMiningSection, "MiningBoreHeight", MiningBoreHeight.ToString("0.00"));
-                    _program._CustomDataIni.Set(sMiningSection, "MiningBoreWidth", MiningBoreWidth.ToString("0.00"));
+                    _program.CustomDataIni.Set(sMiningSection, "MiningBoreHeight", MiningBoreHeight.ToString("0.00"));
+                    _program.CustomDataIni.Set(sMiningSection, "MiningBoreWidth", MiningBoreWidth.ToString("0.00"));
                     // informational for the player
-                    _program._CustomDataIni.Set(sMiningSection, "ShipWidth", _wicoBlockMaster.WidthInMeters().ToString("0.00"));
-                    _program._CustomDataIni.Set(sMiningSection, "ShipHeight", _wicoBlockMaster.HeightInMeters().ToString("0.00"));
+                    _program.CustomDataIni.Set(sMiningSection, "ShipWidth", _wicoBlockMaster.WidthInMeters().ToString("0.00"));
+                    _program.CustomDataIni.Set(sMiningSection, "ShipHeight", _wicoBlockMaster.HeightInMeters().ToString("0.00"));
                     _program.CustomDataChanged();
                 }
             }
@@ -2639,7 +2641,7 @@ namespace IngameScript
             {
                 BoundingBoxD bbd = _asteroids.AsteroidGetBB(AsteroidID);
 
-                Vector3D[] corners = new Vector3D[BoundingBoxD.CornerCount];
+                Vector3D[] corners = new Vector3D[BoundingBox.CornerCount];
                 AsteroidPosition = bbd.Center;
                 AsteroidDiameter = (bbd.Max - bbd.Min).Length();
 
