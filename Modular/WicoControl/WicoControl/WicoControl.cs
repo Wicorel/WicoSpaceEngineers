@@ -216,6 +216,8 @@ namespace IngameScript
                 _bControlDebug = _program.CustomDataIni.Get(_program.OurName, "ControlDebug").ToBoolean(_bControlDebug);
                 _program.CustomDataIni.Set(_program.OurName, "ControlDebug", _bControlDebug);
 
+                _program.AddMainHandler(MainHandler);
+
                 // ModeAfterInit gets called by main
                 _program.AddSaveHandler(SaveHandler);
 
@@ -223,6 +225,12 @@ namespace IngameScript
             public bool IamMain()
             {
                 return bIAmMain;
+            }
+            public new void MainHandler(UpdateType updateSource)
+            {
+                //                if(_bControlDebug)
+                if (_bUpdateDebug)
+                    _program.Echo("update" + updateSource.ToString());
             }
 
             /// <summary>
@@ -245,7 +253,6 @@ namespace IngameScript
                         }
                     }
                 }
-
             }
 
             public void SendToAllSubscribers(string tag, string argument)

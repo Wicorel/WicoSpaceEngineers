@@ -29,11 +29,18 @@ namespace IngameScript
             {
                 _program = program;
 
+                _program.AddMainHandler(MainHandler);
+
                 _bUpdateDebug = _program.CustomDataIni.Get(_program.OurName, "UpdateDebug").ToBoolean(_bUpdateDebug);
                 _program.CustomDataIni.Set(_program.OurName, "UpdateDebug", _bUpdateDebug);
             }
+            public void MainHandler(UpdateType updateSource)
+            {
+                if (_bUpdateDebug)
+                    _program.Echo("update" + updateSource.ToString());
+            }
 
-//            public float fMaxWorldMps = 100f;
+            //            public float fMaxWorldMps = 100f;
 
             bool bWantOnce = false;
             bool bWantFast = false;
