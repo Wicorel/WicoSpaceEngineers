@@ -45,8 +45,8 @@ namespace IngameScript
 // have Ores        CargoCheck _cargoCheck;
         Sensors _sensors;
         Drills _drills;
-//        ScanBase _scanBase;
-        ScansMode _scanMode;
+        ScanBase _scanBase;
+//        ScansMode _scanMode;
         Asteroids _asteroids;
         OreInfoLocs _oreInfoLocs;
         OresLocal _ores;
@@ -91,9 +91,10 @@ namespace IngameScript
             _drills = new Drills(this, _wicoBlockMaster);
             _displays = new Displays(this, _wicoBlockMaster, _wicoElapsedTime);
             _dock = new DockBase(this);
-//            _scanBase = new ScanBase(this, _wicoControl);
+            _scanBase = new ScanBase(this, _wicoControl);
             _asteroids = new Asteroids(this, _wicoControl, _wicoIGC,_displays);
-            _scanMode = new ScansMode(this, _wicoControl, _wicoBlockMaster, _wicoIGC, wicoCameras, _asteroids, _displays);
+//            _scanMode = new ScansMode(this, _wicoControl, _wicoBlockMaster, _wicoIGC, wicoCameras, _asteroids, _displays);
+               
             _oreInfoLocs = new OreInfoLocs(this, _wicoBlockMaster, _wicoIGC, _asteroids, _displays);
             _ores = new OresLocal(this, _wicoBlockMaster, _wicoControl, _wicoIGC, _asteroids, _oreInfoLocs, _displays);
 
@@ -101,7 +102,7 @@ namespace IngameScript
             _systemsMonitor = new SystemsMonitor(this, _wicoElapsedTime, wicoThrusters, wicoConnectors, wicoAntennas, wicoGasTanks, wicoGyros, wicoPower, _ores);
 
             _miner = new Miner(this, _wicoControl, _wicoBlockMaster, _wicoElapsedTime, _wicoIGC
-                , _scanMode, _asteroids
+                , _scanBase, _asteroids
                 , _systemsMonitor
 //                , wicoThrusters, wicoConnectors
                 , wicoSensors
@@ -152,6 +153,7 @@ namespace IngameScript
                 _displays.EchoInfo();
             }
             _wicoControl.WantSlow();
+            Runtime.UpdateFrequency = _wicoControl.GenerateUpdate();
 
             Echo("LastRun=" + LastRunMs.ToString("0.00") + "ms Max=" + MaxRunMs.ToString("0.00") + "ms");
             EchoInstructions();
@@ -159,7 +161,7 @@ namespace IngameScript
         public void ModulePostInit()
         {
             if (_wicoControl != null)
-                _wicoControl.ModeAfterInit(_SaveIni);
+                _wicoControl.ModeAfterInit(SaveIni);
 
             //            _wicoSensors.SensorInit(_wicoBlockMaster.GetMainController());
         }

@@ -102,9 +102,7 @@ Global
 		..\Ores\Ores\Ores.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\PowerManagement\PowerManagement\PowerManagement.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Power\Power\Power.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
-		..\QuadrantScanner\QuadrantScanner\QuadrantScanner.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\ScanBase\ScanBase\ScanBase.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
-		..\ScansMode\ScansMode\ScansMode.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Sensors\Sensors\Sensors.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\SystemsMonitor\SystemsMonitor\SystemsMonitor.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Tanks\Tanks\Tanks.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
