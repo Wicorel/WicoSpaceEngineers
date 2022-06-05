@@ -404,7 +404,8 @@ namespace IngameScript
             {
                 var rotationVec = new Vector3D(pitchSpeed, yawSpeed, rollSpeed);
                 var relativeRotationVec = Vector3D.TransformNormal(rotationVec, worldMatrix);
-
+                
+                if (useGyros.Count < 1) GyroSetup();
                 if (gyroList == null) // added by wico
                     gyroList = useGyros;
 
