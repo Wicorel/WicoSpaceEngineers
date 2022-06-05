@@ -598,6 +598,10 @@ namespace IngameScript
                         _gyros.ApplyGyroOverride(pitch, yaw, roll, null, tmShipController.WorldMatrix);
 
                         bAimed = false;
+                        /*
+                        _program.Echo("PYR=" + pitch.ToString("0.000") + " " + yaw.ToString("0.000") + " " + roll.ToString("0.000"));
+                        _program.Echo("D=" + (Math.Abs(pitch) + Math.Abs(yaw) + Math.Abs(roll)).ToString("0.0000"));
+                        */
                         if(Math.Abs(pitch)+ Math.Abs(yaw) + Math.Abs(roll) <.05)
                                 bAimed = true;
                         if (dTMDebug) _program.Echo("pitch=" + pitch.ToString("0.000")+" yaw="+yaw.ToString("0.000") + " roll="+roll.ToString("0.000"));
@@ -617,9 +621,21 @@ namespace IngameScript
                     }
                     else
                     {
-                        Matrix or1;
-                        tmShipController.Orientation.GetMatrix(out or1);
-                        bAimed=_gyros.AlignGyros(or1.Forward, vVec);// bAimed = GyroMain("forward", vVec, tmShipController);
+                        double pitch, yaw, roll;
+                        _gyros.GetRotationAnglesSimultaneous(vVec, Vector3D.Zero, tmShipController.WorldMatrix, out pitch, out yaw, out roll);
+                        _gyros.ApplyGyroOverride(pitch, yaw, roll, null, tmShipController.WorldMatrix);
+                        /*
+                        _program.Echo("PYR=" + pitch.ToString("0.000") + " " + yaw.ToString("0.000") + " " + roll.ToString("0.000"));
+                        _program.Echo("D=" + (Math.Abs(pitch) + Math.Abs(yaw) + Math.Abs(roll)).ToString("0.0000"));
+                        */
+                        //                        bAimed = false;
+                        if (Math.Abs(pitch) + Math.Abs(yaw) + Math.Abs(roll) < .05)
+                            bAimed = true;
+                        /*
+                                                Matrix or1;
+                                                tmShipController.Orientation.GetMatrix(out or1);
+                                                bAimed=_gyros.AlignGyros(or1.Forward, vVec);// bAimed = GyroMain("forward", vVec, tmShipController);
+                        */
                     }
                 }
                 tmShipController.DampenersOverride = true;
