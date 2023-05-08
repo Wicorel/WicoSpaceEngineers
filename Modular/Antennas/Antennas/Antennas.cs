@@ -29,7 +29,7 @@ namespace IngameScript
             public string AntennaName;
 
             protected List<IMyRadioAntenna> antennaList = new List<IMyRadioAntenna>();
-            protected List<IMyLaserAntenna> antennaLList = new List<IMyLaserAntenna>();
+            protected List<IMyLaserAntenna> laserList = new List<IMyLaserAntenna>();
 
             protected List<IMyBeacon> beaconList = new List<IMyBeacon>();
 
@@ -64,7 +64,7 @@ namespace IngameScript
                 }
                 if (tb is IMyLaserAntenna)
                 {
-                    antennaLList.Add(tb as IMyLaserAntenna);
+                    laserList.Add(tb as IMyLaserAntenna);
                 }
                 if (tb is IMyBeacon)
                 {
@@ -74,7 +74,7 @@ namespace IngameScript
             void LocalGridChangedHandler()
             {
                 antennaList.Clear();
-                antennaLList.Clear();
+                laserList.Clear();
                 bGotAntennaName = false;
                 AntennaName = "";
             }
