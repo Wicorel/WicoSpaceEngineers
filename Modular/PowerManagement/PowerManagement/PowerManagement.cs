@@ -30,7 +30,7 @@ namespace IngameScript
             /// <summary>
             /// Turn Hydro Engines on/Off automatically to recharge batteries
             /// </summary>
-            bool _ControlEngines = true;
+            readonly bool _ControlEngines = true;
 
             readonly Program _program;
 //            readonly WicoControl _wicoControl;
@@ -44,8 +44,8 @@ namespace IngameScript
             const string ScreenTag = "POWERMANAGEMENT";
             readonly double PowerManagementCheckSeconds = 1;
 
-            bool _bDebug = false;
-            bool PowerManagementEnable = true;
+            readonly bool _bDebug = false;
+            readonly bool PowerManagementEnable = true;
 
             const string PowerManagementName = "PowerManagement";
             const string PowerManagementTimer = PowerManagementName+"Check";
@@ -100,8 +100,8 @@ namespace IngameScript
             void SaveHandler(MyIni Ini)
             {
             }
-            StringBuilder sbNotices = new StringBuilder(300);
-            StringBuilder sbModeInfo = new StringBuilder(100);
+            readonly StringBuilder sbNotices = new StringBuilder(300);
+            readonly StringBuilder sbModeInfo = new StringBuilder(100);
 
             public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
             {
