@@ -6,6 +6,8 @@
 
 // V2.7 Feb 23, 2022 SE 1.200 
 
+// SE 2.202.002 removed IMyTurretControlBlock ?
+
 //MyDefinitionId electricDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Electricity");
 //MyDefinitionId oxygenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Oxygen");
 //MyDefinitionId hydrogenDefId = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
@@ -538,12 +540,14 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\nIMyLargeGatlingTurret ");
         values.Append("\n");
     }
+    /* 1.202.002 prohibited
     if (unit is IMyTurretControlBlock)
     {
         IMyTurretControlBlock ihv = unit as IMyTurretControlBlock;
         values.Append("\nIMyTurretControlBlock ");
         values.Append("\n");
     }
+    */
 
     Echo("Accepted resources:");
     values.Append("\nAccepted resources:");
