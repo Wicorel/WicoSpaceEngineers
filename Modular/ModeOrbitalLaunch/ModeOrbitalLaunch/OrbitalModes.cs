@@ -65,16 +65,16 @@ namespace IngameScript
                 _wicoCameras = wicoCameras;
 
                 _program.moduleName += " Orbital";
-                _program.moduleList += "\nOrbital V4.2i";
+                _program.moduleList += "\nOrbital V4.2n";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
 
                 bOrbitalLaunchDebug = _program.CustomDataIni.Get(sOrbitalSection, "OrbitalLaunchDebug").ToBoolean(bOrbitalLaunchDebug);
-                _program.CustomDataIni.Set(sOrbitalSection, "OrbitalLaunchDebug", MaxLaunchMps);
+                _program.CustomDataIni.Set(sOrbitalSection, "OrbitalLaunchDebug", bOrbitalLaunchDebug);
 
                 bAlignGravityHover = _program.CustomDataIni.Get(sOrbitalSection, "AlignGravityHover").ToBoolean(bAlignGravityHover);
-                _program.CustomDataIni.Set(sOrbitalSection, "AlignGravityHover", MaxLaunchMps);
+                _program.CustomDataIni.Set(sOrbitalSection, "AlignGravityHover", bAlignGravityHover);
 
                 MaxLaunchMps = _program.CustomDataIni.Get(sOrbitalSection, "LaunchSpeedMax").ToDouble(_wicoBlockMaster.fMaxWorldMps);
                 _program.CustomDataIni.Set(sOrbitalSection, "LaunchSpeedMax", MaxLaunchMps);
@@ -688,6 +688,10 @@ namespace IngameScript
                 double deltaV = velocityShip - dLastVelocityShip;
                 double expectedV = deltaV * 5 + velocityShip;
 
+                if (bOrbitalLaunchDebug) _program.Echo("deltaV=" + deltaV.ToString("N2"));
+                if (bOrbitalLaunchDebug) _program.Echo("velocityShip=" + velocityShip.ToString("N2"));
+                if (bOrbitalLaunchDebug) _program.Echo("ExpectedV=" + expectedV.ToString("N2"));
+
                 double dLength = vNG.Length();
                 double dGravity = dLength / 9.81;
                 sbNotices.AppendLine("Gravity: "+ dGravity.ToString("0.00"));
@@ -751,8 +755,7 @@ namespace IngameScript
                     {
                         _gyros.SetMinAngle();
                         bAligned = _gyros.AlignGyros(vBestThrustOrientation, vNG);
-                        if (!bAligned)
-                            _wicoControl.WantFast();
+//                        if (!bAligned) _wicoControl.WantFast();
                     }
                 }
 
@@ -822,7 +825,8 @@ namespace IngameScript
                     sbModeInfo.AppendLine("Maintain max speed");
                     sbModeInfo.AppendLine(_program.niceDoubleMeters(expectedV) + " m/s");
                     sbModeInfo.AppendLine("Altitude=" + alt.ToString("N0"));
-//                    sbNotices.AppendLine("Maintain max speed");
+                    //                    sbNotices.AppendLine("Maintain max speed");
+                    if (bOrbitalLaunchDebug) _program.Echo(_program.niceDoubleMeters(expectedV) + " m/s");
                     _program.Echo("Maintain max speed");
                     //                    Log("Maintain max speed");
 
@@ -843,14 +847,13 @@ namespace IngameScript
                     // if(velocityShip>(fMaxMps-5))
                     {
                         bool bThrustOK = _wicoThrusters.CalculateHoverThrust(thrustOrbitalUpList, out fOrbitalAtmoPower, out fOrbitalHydroPower, out fOrbitalIonPower);
-                        //                        if (bOrbitalLaunchDebug) 
-                        //                        _program.Echo("hover thrust:" + fOrbitalAtmoPower.ToString("0.00") + ":" + fOrbitalHydroPower.ToString("0.00") + ":" + fOrbitalIonPower.ToString("0.00"));
+                        if (bOrbitalLaunchDebug) _program.Echo("hover thrust:" + fOrbitalAtmoPower.ToString("0.00") + ":" + fOrbitalHydroPower.ToString("0.00") + ":" + fOrbitalIonPower.ToString("0.00"));
                         //                        if (bOrbitalLaunchDebug) StatusLog("hover thrust:" + fOrbitalAtmoPower.ToString("0.00") + ":" + fOrbitalHydroPower.ToString("0.00") + ":" + fOrbitalIonPower.ToString("0.00"), textPanelReport);
 
                     }
                     else if (expectedV < (MaxLaunchMps - 10))
                     {
-                        //                      _program.Echo("Increase power");
+                        if (bOrbitalLaunchDebug) _program.Echo("Increase power");
                         decreasePower(dGravity, alt); // take away from lowest provider
                         increasePower(dGravity, alt);// add it back
                         increasePower(dGravity, alt);// and add some more
@@ -927,9 +930,10 @@ namespace IngameScript
 
                 int iPowered = 0;
 
-                //                _program.Echo("IonPower=" + fOrbitalIonPower.ToString("0.00"));
+//                _program.Echo("IonPower=" + fOrbitalIonPower.ToString("0.00"));
                 if (fOrbitalIonPower > 0.01)
                 {
+                    // TODO: And alt > some minimums...
                     _wicoThrusters.powerDownThrusters(WicoThrusters.thrustatmo, true);
                     _wicoThrusters.powerDownThrusters(WicoThrusters.thrustion);
                     iPowered = _wicoThrusters.powerUpThrusters(thrustOrbitalUpList, fOrbitalIonPower, WicoThrusters.thrustion);
@@ -941,10 +945,10 @@ namespace IngameScript
                     _wicoThrusters.powerDownThrusters(thrustOrbitalUpList, WicoThrusters.thrustion);
                 }
 
-                //                _program.Echo("HydroPower=" + fOrbitalHydroPower.ToString("0.00"));
+//                _program.Echo("HydroPower=" + fOrbitalHydroPower.ToString("0.00"));
                 if (fOrbitalHydroPower > 0.01)
                 {
-                    //                Echo("Powering Hydro to " + fHydroPower.ToString());
+//                    _program.Echo("Powering Hydro to " + fOrbitalHydroPower.ToString());
                     _wicoThrusters.powerUpThrusters(thrustOrbitalUpList, fOrbitalHydroPower, WicoThrusters.thrusthydro);
                 }
                 else
@@ -952,7 +956,7 @@ namespace IngameScript
                     _wicoThrusters.powerDownThrusters(thrustOrbitalDownList, WicoThrusters.thrusthydro, true);
                     _wicoThrusters.powerDownThrusters(thrustOrbitalUpList, WicoThrusters.thrusthydro, true);
                 }
-                //                _program.Echo("AtmoPower=" + fOrbitalAtmoPower.ToString("0.00"));
+//                _program.Echo("AtmoPower=" + fOrbitalAtmoPower.ToString("0.00"));
                 if (fOrbitalAtmoPower > 0.01)
                 {
                     _wicoThrusters.powerUpThrusters(thrustOrbitalUpList, fOrbitalAtmoPower, WicoThrusters.thrustatmo);
@@ -960,10 +964,8 @@ namespace IngameScript
                 else
                 {
                     //                    closeDoors(outterairlockDoorList);
-
-                    // iPowered=powerDownThrusters(thrustStage1UpList,thrustatmo,true);
                     iPowered = _wicoThrusters.powerDownThrusters(WicoThrusters.thrustatmo, true);
-                    //Echo("Powered DOWN "+ iPowered.ToString()+ " Atmo Thrusters");
+//                    _program.Echo("Powered DOWN "+ iPowered.ToString()+ " Atmo Thrusters");
                 }
 
                 {
