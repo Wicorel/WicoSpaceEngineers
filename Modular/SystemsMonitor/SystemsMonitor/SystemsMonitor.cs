@@ -21,21 +21,21 @@ namespace IngameScript
     {
         public class SystemsMonitor
         {
-            private Program _program;
-            private WicoElapsedTime _elapsedTime;
+            readonly private Program _program;
+            readonly private WicoElapsedTime _elapsedTime;
             //            private WicoControl _wicoControl;
             //            private WicoBlockMaster _wicoBlockMaster;
-            private Connectors _connectors;
-            private WicoThrusters _thrusters;
-            private Antennas _antennas;
-            private GasTanks _tanks;
-            public WicoGyros _gyros;
-            private PowerProduction _power;
+            readonly private Connectors _connectors;
+            readonly private WicoThrusters _thrusters;
+            readonly private Antennas _antennas;
+            readonly private GasTanks _tanks;
+            readonly public WicoGyros _gyros;
+            readonly private PowerProduction _power;
             //            private Timers _timers;
             //            private WicoIGC _wicoIGC;
             //            private WicoBases _wicoBases;
             //            private NavCommon _navCommon;
-            private CargoCheck _cargoCheck;
+            readonly private CargoCheck _cargoCheck;
             //            private Displays _displays;
 
             public bool bAutoRefuel = true;
