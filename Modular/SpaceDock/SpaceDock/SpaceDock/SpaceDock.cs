@@ -34,24 +34,24 @@ namespace IngameScript
          */
         public class SpaceDock
         {
-            private Program _program;
-            private WicoControl _wicoControl;
-            private WicoBlockMaster _wicoBlockMaster;
-            private WicoElapsedTime _wicoElapsedTime;
-//            private Connectors _connectors;
-//            private WicoThrusters _thrusters;
-            private Antennas _antennas;
-//            private GasTanks _tanks;
-//            private WicoGyros _gyros;
-//            private PowerProduction _power;
-            private Timers _timers;
-            private WicoIGC _wicoIGC;
-            private WicoBases _wicoBases;
-            private NavCommon _navCommon;
-//            private CargoCheck _cargoCheck;
-            private Displays _displays;
+            readonly private Program _program;
+            readonly private WicoControl _wicoControl;
+            readonly private WicoBlockMaster _wicoBlockMaster;
+            readonly private WicoElapsedTime _wicoElapsedTime;
+            //            private Connectors _connectors;
+            //            private WicoThrusters _thrusters;
+            readonly private Antennas _antennas;
+            //            private GasTanks _tanks;
+            //            private WicoGyros _gyros;
+            //            private PowerProduction _power;
+            readonly private Timers _timers;
+            readonly private WicoIGC _wicoIGC;
+            readonly private WicoBases _wicoBases;
+            readonly private NavCommon _navCommon;
+            //            private CargoCheck _cargoCheck;
+            readonly private Displays _displays;
 
-            private SystemsMonitor _systemsMonitor;
+            readonly private SystemsMonitor _systemsMonitor;
 
             Vector3D vDockAlign;
             bool bDoDockAlign = false;
@@ -71,10 +71,10 @@ namespace IngameScript
             //            DateTime dtDockingActionStart;
             const string DockingAction = "DockingAction"; // ET timer name
 
-            string sDockingSection = "DOCKING";
+            readonly string sDockingSection = "DOCKING";
 
-            double LaunchMaxVelocity = 20;
-            double LaunchDistance = 45;
+            readonly double LaunchMaxVelocity = 20;
+            readonly double LaunchDistance = 45;
 
             const string CONNECTORAPPROACHTAG = "CONA";
             const string CONNECTORDOCKTAG = "COND";
@@ -161,11 +161,11 @@ namespace IngameScript
             }
 
 
-            StringBuilder sbModeInfo = new StringBuilder(100);
-            StringBuilder sbNotices = new StringBuilder(300);
+            readonly StringBuilder sbModeInfo = new StringBuilder(100);
+            readonly StringBuilder sbNotices = new StringBuilder(300);
 
-            StringBuilder sbFuelInfo = new StringBuilder(25);
-            StringBuilder sbFuelNotices = new StringBuilder(200);
+            readonly StringBuilder sbFuelInfo = new StringBuilder(25);
+            readonly StringBuilder sbFuelNotices = new StringBuilder(200);
 
             public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
             {
@@ -1420,7 +1420,6 @@ namespace IngameScript
                         _wicoControl.WantFast();
                     }
 
-
                 }
                 else if (iState == 430)
                 {
@@ -1466,7 +1465,8 @@ namespace IngameScript
 //                        if (_wicoElapsedTime.IsExpired(DockingAction))
                         {
                             _wicoElapsedTime.RestartTimer(DockingAction);
-                            if (iState == 452) _wicoControl.SetState(500);
+                            if (iState == 452) 
+                                _wicoControl.SetState(500);
                             else
                                 _wicoControl.SetState(451); ; // 450->451 
                         }
@@ -1489,7 +1489,8 @@ namespace IngameScript
 
                     _program.Echo("Aligning to dock");
                     bool bAimed = false;
-//                    _systemsMonitor.SetMinAngle(0.03f);
+                    //                    _systemsMonitor.SetMinAngle(0.03f);
+                    _wicoControl.WantFast();
                     // TODO: Handle non-vanilla connectors and other blocks..
                     bAimed = _systemsMonitor.AlignGyros("forward", vVec, dockingConnector);
                     if (bAimed)
@@ -1509,7 +1510,7 @@ namespace IngameScript
                   //               _wicoControl.WantFast();
                     sbModeInfo.AppendLine("Reversing to Dock");
                     //StatusLog("Reversing to Docking Connector", textPanelReport);
-                    _program.Echo("bDoDockAlign=" + bDoDockAlign);
+//                    _program.Echo("bDoDockAlign=" + bDoDockAlign);
                     //                StatusLog(moduleName + ":Docking: Reversing to dock! Velocity=" + wicoBlockMaster.GetShipSpeed().ToString("0.00"), textPanelReport);
                     _program.Echo("Reversing to Dock");
 // CHECK HERE IF DOCKING SPAZZES                    CTRL_COEFF = 0.75;
@@ -1539,7 +1540,7 @@ namespace IngameScript
                     Vector3D vTargetCalc = vDock + vNTLine * distance;
                     Vector3D vOffset = dockingConnector.GetPosition() - vTargetCalc;
                     double offsetL = vOffset.Length();
-                    _program.Echo("OffsetL=" + offsetL.ToString("0.000") + " ("+ _wicoBlockMaster.gridsize.ToString("0.000")+")");
+//                    _program.Echo("OffsetL=" + offsetL.ToString("0.0") + " ("+ _wicoBlockMaster.gridsize.ToString("0.0")+")");
 
                     //                    _program.Echo("rot=" + rot.ToString());
                     //                    _program.Echo("dot2=" + (dot2).ToString("0.00"));
@@ -1557,42 +1558,51 @@ namespace IngameScript
 
                     bool bAimed = false;
 
-                    if (distance > 15)
+                    if (offsetL > _wicoBlockMaster.gridsize * 2)
+                    {
+
                         bAimed = _systemsMonitor.BeamRider(vTargetLocation, vDock, dockingConnector);
+//                        _program.Echo("Beam Rider");
+                    }
                     else
+                    {
                         // TODO: Handle non-vanilla connectors and other blocks..
                         bAimed = _systemsMonitor.AlignGyros("forward", vVec, dockingConnector);
-
+//                        _program.Echo("Align Gyros");
+                    }
                     if (bAimed)
                     { // only check if we are aimed at desired connector
-//                        _program.Echo("Angle Between=" + _systemsMonitor._gyros.VectorAngleBetween(dockingConnector.WorldMatrix.Forward, -vTargetLine));
+                      //                        _program.Echo("Angle Between=" + _systemsMonitor._gyros.VectorAngleBetween(dockingConnector.WorldMatrix.Forward, -vTargetLine));
+                        _wicoControl.WantMedium();
+                        /*
+                                                if (offsetL > _wicoBlockMaster.gridsize*2)
+                                                { // we are farther then desired point that we want to be.
+                                                    _program.Echo("Farther than desired");
 
-                        if (offsetL > _wicoBlockMaster.gridsize*2)
-                        { // we are farther then desired point that we want to be.
-                            _program.Echo("Farther than desired");
+                                                    _systemsMonitor.powerDownThrusters();
 
-                            _systemsMonitor.powerDownThrusters();
+                                                    if (thrustToward.Count == 0) // first time we should reset movement
+                                                        _systemsMonitor.MoveForwardSlowReset();
 
-                            if (thrustToward.Count == 0) // first time we should reset movement
-                                _systemsMonitor.MoveForwardSlowReset();
+                                                    if(thrustForwardList.Count<1)
+                                                    {
+                                                        _systemsMonitor.ThrustersCalculateOrientation(_wicoBlockMaster.GetMainController(),
+                                                            ref thrustForwardList, ref thrustBackwardList, ref thrustDownList, ref thrustUpList,
+                                                            ref thrustLeftList, ref thrustRightList);
+                                                    }
+                                                    _systemsMonitor.GetBestThrusters(vOffset,
+                                                        thrustForwardList, thrustBackwardList, thrustDownList, thrustUpList, thrustLeftList, thrustRightList,
+                                                        out thrustToward, out thrustAway);
+                                                    _program.Echo("FW #=" + thrustToward.Count);
+                                                    _wicoControl.WantFast();
 
-                            if(thrustForwardList.Count<1)
-                            {
-                                _systemsMonitor.ThrustersCalculateOrientation(_wicoBlockMaster.GetMainController(),
-                                    ref thrustForwardList, ref thrustBackwardList, ref thrustDownList, ref thrustUpList,
-                                    ref thrustLeftList, ref thrustRightList);
-                            }
-                            _systemsMonitor.GetBestThrusters(vOffset,
-                                thrustForwardList, thrustBackwardList, thrustDownList, thrustUpList, thrustLeftList, thrustRightList,
-                                out thrustToward, out thrustAway);
-                            _program.Echo("FW #=" + thrustToward.Count);
-                            _wicoControl.WantFast();
-
-                            _systemsMonitor.MoveForwardSlow(1, 3, thrustToward, thrustAway, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
-                        }
-                        else if (thrustToward.Count > 0)
+                                                    _systemsMonitor.MoveForwardSlow(1, 3, thrustToward, thrustAway, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
+                                                }
+                                                else 
+                        */
+                        if (thrustToward.Count > 0)
                         {
-                            _program.Echo("Reset movement");
+//                            _program.Echo("Reset movement");
                             // Once
                             _systemsMonitor.MoveForwardSlowReset();
                             _systemsMonitor.powerDownThrusters();
@@ -1600,6 +1610,7 @@ namespace IngameScript
                             thrustToward.Clear();
                             _wicoControl.WantFast();
                         }
+
                         else 
                         {
                             // we are aimed at location
@@ -1609,16 +1620,16 @@ namespace IngameScript
 
                             double distanceSlow = Math.Max(stoppingD*5, _wicoBlockMaster.gridsize * 5);
 
-                            _program.Echo("Aimed");
+//                            _program.Echo("Aimed");
                             if (distance > distanceSlow)
                             {
                                 _wicoControl.WantMedium();
-                                _program.Echo(">"+distanceSlow.ToString("0.0"));
+//                                _program.Echo(">"+distanceSlow.ToString("0.0"));
                                 _systemsMonitor.MoveForwardSlow(5, 10, thrustDockForwardList, thrustDockBackwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
                             }
                             else
                             {
-                                _program.Echo("<=" + distanceSlow.ToString("0.0"));
+//                                _program.Echo("<=" + distanceSlow.ToString("0.0"));
                                 _wicoControl.WantFast();
                                 _systemsMonitor.MoveForwardSlow(.5f, 1.5f, thrustDockForwardList, thrustDockBackwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
                             }
@@ -1626,13 +1637,16 @@ namespace IngameScript
                     }
                     else
                     {
-                        _program.Echo("Aiming");
+//                        _program.Echo("Aiming");
                         _systemsMonitor.powerDownThrusters();
                         _wicoControl.WantFast();
                     }
                 }
                 else if (iState == 590)
                 {
+                    // TODO: need abort count.
+                    // TODO: need fuel check and go to attention
+
                     sbModeInfo.AppendLine("Abort and try again");
                     // abort dock and try again
                     _program.ResetMotion();
@@ -1641,11 +1655,22 @@ namespace IngameScript
                     if (distance > _wicoBlockMaster.LengthInMeters() * 1.25)
                     {
                         // we are far enough away.  Try again
-                        _wicoControl.SetState(0);
-                        _wicoControl.WantFast();
+                        bool bAirWorthy = _systemsMonitor.AirWorthy(false, false);
+
+                        if (bAirWorthy)
+                        {
+                            _wicoControl.SetState(0);
+                            _wicoControl.WantFast();
+                        }
+                        else
+                        {
+                            // else not air worthy...
+                            _wicoControl.SetMode(WicoControl.MODE_ATTENTION);
+                        }
                         return;
+
                     }
-                    bool bAimed = _systemsMonitor.AlignGyros("forward", vVec, dockingConnector);
+                        bool bAimed = _systemsMonitor.AlignGyros("forward", vVec, dockingConnector);
                     if (!bAimed) _wicoControl.WantFast();
                     else _wicoControl.WantMedium();
                     _systemsMonitor.MoveForwardSlow(5, 10, thrustDockBackwardList, thrustDockForwardList, _wicoBlockMaster.GetPhysicalMass(), _wicoBlockMaster.GetShipSpeed());
