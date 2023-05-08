@@ -72,7 +72,7 @@ namespace IngameScript
                 _displays = displays;
 
                 _program.moduleName += " Navigation";
-                _program.moduleList += "\nNavigation V4.2n2";
+                _program.moduleList += "\nNavigation V4.2n3";
 
                 NAVEmulateOld=_program.CustomDataIni.Get(sNavSection, "NAVEmulateOld").ToBoolean(NAVEmulateOld);
                 _program.CustomDataIni.Set(sNavSection, "NAVEmulateOld", NAVEmulateOld);
@@ -1006,14 +1006,15 @@ namespace IngameScript
                         (distance < Math.Max(_wicoBlockMaster.gridsize * 2, ArrivalDistanceMin)))
                     {
                         _wicoControl.SetState(500);
-
-//                        if(_Debug)
+/*
+                        if(_Debug)
                         {
                             _program.ErrorLog("NAV:We have arrived"
                                 +"\ndistance=" + _program.niceDoubleMeters(distance)
                                 +"\nadistmin="+_program.niceDoubleMeters(ArrivalDistanceMin)
                                 );
                         }
+*/
                         sbModeInfo.AppendLine("We have arrived");
                         _program.Echo("we have arrived");
                         _wicoControl.WantFast();
@@ -1574,8 +1575,11 @@ namespace IngameScript
                     NAVArrivalState = 0;
                     return;
                 }
+//                _program.Echo(wicoNavCommands.Count + " Commands");
                 wicoNavCommands[0].ProcessCommand();
-                wicoNavCommands.RemoveAt(0);
+//                _program.Echo(wicoNavCommands.Count + " Commands a-process");
+//                if(wicoNavCommands.Count>0)
+                    wicoNavCommands.RemoveAt(0);
                 if (_Debug) _program.ErrorLog("EONavNext():" + wicoNavCommands.Count + " Commands");
                 // should serialize these so they can resume on reload
             }
