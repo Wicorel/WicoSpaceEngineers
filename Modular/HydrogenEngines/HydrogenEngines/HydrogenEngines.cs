@@ -86,10 +86,10 @@ namespace IngameScript
                     if (tb.BlockDefinition.TypeIdString == "MyObjectBuilder_HydrogenEngine")
                     {
 
+                        /*
                         var sourceComp = tb.Components.Get<MyResourceComponents>();
                         float tankFill = sourceComp.RemainingCapacity;
                         totalLevel += tankFill;
-                        /*
                          * 
                          * From discord: Digi https://discord.com/channels/125011928711036928/216219467959500800/917996330482302996
                          * var sourceComp = engine.Components.Get<MyResourceSourceComponent>();
@@ -97,7 +97,7 @@ float tankFill = sourceComp.RemainingCapacity;
 
                         */
 
-                        /*
+
                          double tankLevel = 0;
                        //Type: Hydrogen Engine
                         //Max Output: 500.00 kW
@@ -123,7 +123,8 @@ float tankFill = sourceComp.RemainingCapacity;
                         tankLevel /= 100.0; // convert from 0->100 to 0->1.0
 
                         totalLevel += tankLevel;
-                        */
+
+
                         iTanksCount++;
                     }
                 }
