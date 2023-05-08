@@ -1121,7 +1121,7 @@ namespace IngameScript
                                 bool bCargoOK = _ores.cargopcent < MiningCargopctlowwater; // how full is our cargo
                                 if(!bCargoOK)
                                 {
-                                    sbNotices.AppendLine("Cargo Full");
+                                    sbModeInfo.AppendLine("Cargo Full");
                                 }
                                 if (_ores.bHasDrills && _ores.bCargoFull && !_ores.bDrillFull)
                                 {
@@ -1989,7 +1989,7 @@ namespace IngameScript
                         break;
                     case 155:
                         {
-                            _program.ErrorLog("155:Move Next Bore");
+//                            _program.ErrorLog("155:Move Next Bore");
                             _program.ResetMotion();
                             //                        if (_wicoBlockMaster.GetShipSpeed() < 1)
                             AsteroidDoNextBore(iMode);
