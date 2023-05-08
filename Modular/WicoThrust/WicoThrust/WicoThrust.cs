@@ -172,7 +172,7 @@ namespace IngameScript
 
                 return thrust;
             }
-            double cos45 = MathHelper.Sqrt2 * 0.5;
+            const double cos45 = MathHelper.Sqrt2 * 0.5;
 
             public void GetBestThrusters(Vector3D v1,
                 List<IMyTerminalBlock> thrustForwardList, List<IMyTerminalBlock> thrustBackwardList,
@@ -280,7 +280,7 @@ namespace IngameScript
                     if (angle > cos45)
                     {
 //                        _program.Echo("GBT: Thrust LEFT");
-//                        _program.sMasterReporting += "GBT: Thrust LEFT\n";
+                        _program.sMasterReporting += "GBT: Thrust LEFT\n";
                         thrustTowards = thrustLeftList;
                         thrustAway = thrustRightList;
                         return;
