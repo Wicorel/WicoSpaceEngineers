@@ -137,12 +137,13 @@ namespace IngameScript
                 // ensure we run at least at slow speed for updates.
                 _wicoControl.WantSlow();
                 
-                _displays.EchoInfo();
+//                _displays.EchoInfo();
                 Echo(wicoBases.baseInfoString().Trim());
             }
             
             _wicoControl.AnnounceState();
             Runtime.UpdateFrequency = _wicoControl.GenerateUpdate();
+            Echo("velocity=" + _wicoBlockMaster.GetShipSpeed().ToString("0.00"));
 
             Echo("LastRun=" + LastRunMs.ToString("0.00") + "ms Max=" + MaxRunMs.ToString("0.00") + "ms");
             EchoInstructions();
