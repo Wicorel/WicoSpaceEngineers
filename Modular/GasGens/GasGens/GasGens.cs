@@ -23,13 +23,13 @@ namespace IngameScript
     {
         class GasGens
         {
-            List<IMyTerminalBlock> gasgenList = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> gasgenList = new List<IMyTerminalBlock>();
 
-            Program thisProgram;
-            WicoBlockMaster _wicoBlockMaster;
+            readonly Program _Program;
+            readonly WicoBlockMaster _wicoBlockMaster;
             public GasGens(Program program, WicoBlockMaster wicoBlockMaster)
             {
-                thisProgram = program;
+                _Program = program;
                 _wicoBlockMaster = wicoBlockMaster;
 
                 _wicoBlockMaster.AddLocalBlockHandler(BlockParseHandler);

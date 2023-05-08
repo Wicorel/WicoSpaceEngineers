@@ -45,15 +45,15 @@ namespace IngameScript
                 // TODO: time-out for docking selection.  So can choose 'next' if base says 'no room', etc.
 
             }
-            List<BaseInfo> baseList = new List<BaseInfo>();
+            readonly List<BaseInfo> baseList = new List<BaseInfo>();
 
             const string sBaseSavedListSection = "BASE1.0";
 
             const string sIGCBaseAnnounceTag = "BASE";
 
-            Program _program;
-            WicoIGC _wicoIGC;
-            Displays _displays;
+            readonly Program _program;
+            readonly WicoIGC _wicoIGC;
+            readonly Displays _displays;
 
             public WicoBases(Program program, WicoIGC iGC, Displays displays )
             {
@@ -70,8 +70,8 @@ namespace IngameScript
                 _wicoIGC.AddPublicHandler(sIGCBaseAnnounceTag, BaseBroadcastHandler);
             }
 
-            StringBuilder sbNotices = new StringBuilder(300);
-            StringBuilder sbModeInfo = new StringBuilder(100);
+            readonly StringBuilder sbNotices = new StringBuilder(300);
+            readonly StringBuilder sbModeInfo = new StringBuilder(100);
 
             public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
             {
@@ -241,7 +241,7 @@ namespace IngameScript
                 return s1;
             }
 
-            double dBaseRequestTransmitWait = 25; //seconds between active transmits
+            readonly double dBaseRequestTransmitWait = 25; //seconds between active transmits
 
             double dBaseRequestLastTransmit = -1;
 

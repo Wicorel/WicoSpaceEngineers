@@ -23,30 +23,30 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
 
-//        IFF igciff;
+        //        IFF igciff;
 
         // Handlers
-        private List<Action<string,MyCommandLine, UpdateType>> UpdateTriggerHandlers = new List<Action<string,MyCommandLine, UpdateType>>();
-        private List<Action<UpdateType>> UpdateUpdateHandlers = new List<Action<UpdateType>>();
+        readonly private List<Action<string,MyCommandLine, UpdateType>> UpdateTriggerHandlers = new List<Action<string,MyCommandLine, UpdateType>>();
+        readonly private List<Action<UpdateType>> UpdateUpdateHandlers = new List<Action<UpdateType>>();
 
         // https://github.com/malware-dev/MDK-SE/wiki/Handling-Script-Arguments
-        private MyCommandLine myCommandLine = new MyCommandLine();
+        readonly private MyCommandLine myCommandLine = new MyCommandLine();
 
-        private List<Action<MyIni>> SaveHandlers = new List<Action<MyIni>>();
-        private List<Action<MyIni>> LoadHandlers = new List<Action<MyIni>>();
+        readonly private List<Action<MyIni>> SaveHandlers = new List<Action<MyIni>>();
+        readonly private List<Action<MyIni>> LoadHandlers = new List<Action<MyIni>>();
 
         // reset motion handlers
-        private List<Action<bool>> ResetMotionHandlers = new List<Action<bool>>();
+        readonly private List<Action<bool>> ResetMotionHandlers = new List<Action<bool>>();
 
         // Post init handlers
-        private List<IEnumerator<bool>> PostInitHandlers = new List<IEnumerator<bool>>();
+        readonly private List<IEnumerator<bool>> PostInitHandlers = new List<IEnumerator<bool>>();
 
         // Main handlers
-        private List<Action<UpdateType>> MainHandlers = new List<Action<UpdateType>>();
+        readonly private List<Action<UpdateType>> MainHandlers = new List<Action<UpdateType>>();
 
         // https://github.com/malware-dev/MDK-SE/wiki/Handling-configuration-and-storage
-        private MyIni SaveIni = new MyIni();
-        private MyIni CustomDataIni = new MyIni();
+        readonly private MyIni SaveIni = new MyIni();
+        readonly private MyIni CustomDataIni = new MyIni();
 
         /// <summary>
         /// The combined set of UpdateTypes that count as a 'trigger'
@@ -65,7 +65,7 @@ namespace IngameScript
 
         bool bAllowPBRename = true;
 
-        string OurName = "Wico Modular";
+        readonly string OurName = "Wico Modular";
         /// <summary>
         /// The names of the modules attached to this script. Seperate names with space
         /// </summary>
@@ -75,7 +75,7 @@ namespace IngameScript
         /// The list of modules including version number. Seperate with \n at start.
         /// </summary>
         string moduleList = "";
-        string sVersion = " 4.2b";
+        readonly string sVersion = " 4.2b";
 
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace IngameScript
 
         bool bEchoOn = true;
 
-        Action<string> OldEcho;
+        readonly Action<string> OldEcho;
         void MyEcho(string output)
         {
             if (bEchoOn) OldEcho(output);

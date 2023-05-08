@@ -37,7 +37,7 @@ namespace IngameScript
                 _program.AddSaveHandler(SaveHandler);
                 _wicoIGC.AddPublicHandler(sAsteroidTag, BroadcastHandler);
 
-                _displays.AddSurfaceHandler("ASTEROIDS", SurfaceHandler);
+                if(_displays != null) _displays.AddSurfaceHandler("ASTEROIDS", SurfaceHandler);
             }
             StringBuilder sbNotices = new StringBuilder(300);
             StringBuilder sbModeInfo = new StringBuilder(100);
@@ -64,7 +64,6 @@ namespace IngameScript
                         {
                             tsurface.WriteText(sbNotices, true);
                         }
-
                     }
                     else if (ActionType == Displays.SETUPDRAW)
                     {
@@ -240,6 +239,11 @@ namespace IngameScript
                     bFoundAsteroid = true;
                 }
                 return bFoundAsteroid;
+            }
+
+            public int AsteroidCount()
+            {
+                return asteroidsInfo.Count;
             }
 
             public long AsteroidFindNearest(bool bInsideOnly = false)

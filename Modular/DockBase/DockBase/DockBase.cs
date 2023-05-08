@@ -21,7 +21,7 @@ namespace IngameScript
     {
         public class DockBase
         {
-            Program _program;
+            readonly Program _program;
 
             public DockBase(Program program) 
             {

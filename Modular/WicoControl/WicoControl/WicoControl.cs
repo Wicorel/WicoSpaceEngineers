@@ -31,7 +31,7 @@ namespace IngameScript
             int _iMode = -1;
             int _iState = -1;
 
-            string ControlSection = "WicoControl";
+            readonly string ControlSection = "WicoControl";
             public int IMode
             {
                 get
@@ -60,8 +60,8 @@ namespace IngameScript
                 }
             }
 
-            List<Action<int, int, int, int>> ControlChangeHandlers = new List<Action<int, int, int, int>>();
-            List<Action> ModeAfterInitHandlers = new List<Action>();
+            readonly List<Action<int, int, int, int>> ControlChangeHandlers = new List<Action<int, int, int, int>>();
+            readonly List<Action> ModeAfterInitHandlers = new List<Action>();
 
             public const int MODE_IDLE = 0;
 
@@ -97,7 +97,7 @@ namespace IngameScript
 
             public const int MODE_ATTENTION = 9999;
 
-            StringBuilder sbData = new StringBuilder(100);
+            readonly StringBuilder sbData = new StringBuilder(100);
             public void SetMode(int theNewMode, int theNewState = 0)
             {
                 // do nothing if we are already in that mode
@@ -174,8 +174,8 @@ namespace IngameScript
             #endregion
 
 
-//            Program _program;
-            WicoIGC _wicoIGC;
+            //            Program _program;
+            readonly WicoIGC _wicoIGC;
 
             readonly TransmissionDistance localConstructs = TransmissionDistance.CurrentConstruct;
             public WicoControl(Program program, WicoIGC wicoIGC): base(program)
@@ -189,7 +189,7 @@ namespace IngameScript
             /// <summary>
             /// List of Wico PB blocks on local construct
             /// </summary>
-            List<long> _WicoMainSubscribers = new List<long>();
+            readonly List<long> _WicoMainSubscribers = new List<long>();
             bool bIAmMain = true; // assume we are main
 
             // Wico Main/Config stuff

@@ -29,16 +29,16 @@ namespace IngameScript
             public const int DODRAW= 1;
             public const int SETUPDRAW = 99;
 
-            bool _Debug = false;
+            readonly bool _Debug = false;
 
-            List<IMyTerminalBlock> _SurfaceProviders = new List<IMyTerminalBlock>();
-            List<WicoDisplay> _wicoDisplays = new List<WicoDisplay>();
+            readonly List<IMyTerminalBlock> _SurfaceProviders = new List<IMyTerminalBlock>();
+            readonly List<WicoDisplay> _wicoDisplays = new List<WicoDisplay>();
 
             public class WicoDisplay
             {
                 public string tag;
-                List<IMyTextSurface> _surfaces;
-                List<Action<string,IMyTextSurface, int>> SurfaceDrawHandlers = new List<Action<string,IMyTextSurface, int>>();
+                readonly List<IMyTextSurface> _surfaces;
+                readonly List<Action<string,IMyTextSurface, int>> SurfaceDrawHandlers = new List<Action<string,IMyTextSurface, int>>();
 
                 public WicoDisplay(List<IMyTerminalBlock> lsp, string Tag)
                 {
@@ -83,9 +83,9 @@ namespace IngameScript
                 }
             }
 
-            Program _program;
-            WicoBlockMaster _wicoBlockMaster;
-            WicoElapsedTime _wicoElapsedTime;
+            readonly Program _program;
+            readonly WicoBlockMaster _wicoBlockMaster;
+            readonly WicoElapsedTime _wicoElapsedTime;
 
             readonly string WicoDisplaySection = "WicoDisplay";
 

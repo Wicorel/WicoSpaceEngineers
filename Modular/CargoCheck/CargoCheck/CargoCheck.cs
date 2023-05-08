@@ -32,14 +32,14 @@ namespace IngameScript
             public List<IMyTerminalBlock> lContainers = new List<IMyTerminalBlock>();
             public List<IMyTerminalBlock> localEjectors = new List<IMyTerminalBlock>();
 
-            Program _program;
-            WicoBlockMaster _wicoBlockMaster;
-            Displays _displays;
+            readonly Program _program;
+            readonly WicoBlockMaster _wicoBlockMaster;
+            readonly Displays _displays;
 
-            string sCargoSection = "CARGO";
-            string DisplayCargoCheck = "CARGOCHECK";
-            string KeyCargoPcent = "cargopctmin";
-            string KeyCargoHighwater = "cargohighwater";
+            readonly string sCargoSection = "CARGO";
+            readonly string DisplayCargoCheck = "CARGOCHECK";
+            readonly string KeyCargoPcent = "cargopctmin";
+            readonly string KeyCargoHighwater = "cargohighwater";
 
             public CargoCheck(Program program, WicoBlockMaster wbm, Displays displays)
             {
@@ -62,8 +62,8 @@ namespace IngameScript
                 if (_displays!=null) _displays.AddSurfaceHandler(DisplayCargoCheck, SurfaceHandler);
             }
 
-            StringBuilder sbNotices = new StringBuilder(300);
-            StringBuilder sbModeInfo = new StringBuilder(100);
+            readonly StringBuilder sbNotices = new StringBuilder(300);
+            readonly StringBuilder sbModeInfo = new StringBuilder(100);
 
             public void SurfaceHandler(string tag, IMyTextSurface tsurface, int ActionType)
             {
@@ -169,7 +169,7 @@ namespace IngameScript
                 }
                 totalCurrentVolume = 0.0;
                 double totalMax = 0.0;
-                double ratio = 0;
+                double ratio;
 
                 bCargoFull = true;
                 bDrillFull = false;

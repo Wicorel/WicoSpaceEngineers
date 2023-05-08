@@ -20,8 +20,8 @@ namespace IngameScript
         public class WicoGyros
         {
             // Originally from: http://forums.keenswh.com/threads/aligning-ship-to-planet-gravity.7373513/#post-1286885461 
-            List<IMyGyro> allLocalGyros = new List<IMyGyro>();
-            List<IMyGyro> useGyros = new List<IMyGyro>();
+            readonly List<IMyGyro> allLocalGyros = new List<IMyGyro>();
+            readonly List<IMyGyro> useGyros = new List<IMyGyro>();
 
 
             public IMyShipController gyroControl;
@@ -36,8 +36,8 @@ namespace IngameScript
             /// </summary>
             int LIMIT_GYROS = 1;
 
-            Program _program;
-            WicoBlockMaster _wicoBlockMaster;
+            readonly Program _program;
+            readonly WicoBlockMaster _wicoBlockMaster;
 
 
             public WicoGyros(Program program, WicoBlockMaster wbm)
@@ -48,7 +48,7 @@ namespace IngameScript
                 GyrosInit();
             }
 
-            string sGridSection = "GRIDS";
+            readonly string sGridSection = "GRIDS";
 
             public void GyrosInit()
             {

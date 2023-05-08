@@ -26,7 +26,7 @@ namespace IngameScript
 
             bool _bDebug = false;
 
-            string wicoETString = "WicoET";
+            readonly string wicoETString = "WicoET";
 
             public WicoElapsedTime(Program program, WicoUpdates wicoUpdates)
             {

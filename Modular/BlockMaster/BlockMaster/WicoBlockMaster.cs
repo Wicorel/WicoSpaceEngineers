@@ -26,8 +26,8 @@ namespace IngameScript
 
         public class WicoBlockMaster //really "ship" master
         {
-            Program _program;
-            IMyGridTerminalSystem GridTerminalSystem;
+            readonly Program _program;
+            readonly IMyGridTerminalSystem _gts;
 
             bool bMeGridOnly = false;
 
@@ -37,7 +37,7 @@ namespace IngameScript
             {
                 _program = program;
 
-                GridTerminalSystem = _program.GridTerminalSystem;
+                _gts = _program.GridTerminalSystem;
                 bMeGridOnly = MeGridOnly;
 
                 AddLocalBlockHandler(BlockParseHandler);
@@ -65,7 +65,7 @@ namespace IngameScript
             {
             }
             #region SHIPCONTROLLER
-            List<IMyShipController> shipControllers = new List<IMyShipController>();
+            readonly List<IMyShipController> shipControllers = new List<IMyShipController>();
             private IMyShipController MainShipController;
             /// <summary>
             /// gets called for every block on the local construct
@@ -100,7 +100,7 @@ namespace IngameScript
             public bool IsClosed(IMyTerminalBlock block)
             {
                 if (block == null || block.WorldMatrix == MatrixD.Identity) return true;
-                return !(GridTerminalSystem.GetBlockWithId(block.EntityId) == block);
+                return !(_gts.GetBlockWithId(block.EntityId) == block);
             }
 
             /// <summary>
@@ -314,18 +314,18 @@ namespace IngameScript
             List<IMyTerminalBlock> gtsRemoteBlocks = new List<IMyTerminalBlock>();
             long remoteBlocksCount = 0;
 
-            List<IMyCubeGrid> localCubeGrids = new List<IMyCubeGrid>();
+            readonly List<IMyCubeGrid> localCubeGrids = new List<IMyCubeGrid>();
 
-            List<IMyCubeGrid> remoteCubeGrids = new List<IMyCubeGrid>();
+            readonly List<IMyCubeGrid> remoteCubeGrids = new List<IMyCubeGrid>();
 
-            List<Action<IMyTerminalBlock>> WicoLocalBlockParseHandlers = new List<Action<IMyTerminalBlock>>();
-            List<Action<IMyTerminalBlock>> WicoRemoteBlockParseHandlers = new List<Action<IMyTerminalBlock>>();
+            readonly List<Action<IMyTerminalBlock>> WicoLocalBlockParseHandlers = new List<Action<IMyTerminalBlock>>();
+            readonly List<Action<IMyTerminalBlock>> WicoRemoteBlockParseHandlers = new List<Action<IMyTerminalBlock>>();
 
-            List<Action> WicoLocalBlockChangedHandlers = new List<Action>();
-            List<Action> WicoRemoteBlockChangedHandlers = new List<Action>();
+            readonly List<Action> WicoLocalBlockChangedHandlers = new List<Action>();
+            readonly List<Action> WicoRemoteBlockChangedHandlers = new List<Action>();
 
-            List<Action> WicoLocalBlockDoneParsedHandlers = new List<Action>();
-            List<Action> WicoRemoteBlockDoneParsedHandlers = new List<Action>();
+            readonly List<Action> WicoLocalBlockDoneParsedHandlers = new List<Action>();
+            readonly List<Action> WicoRemoteBlockDoneParsedHandlers = new List<Action>();
 
 
             public bool AddLocalBlockHandler(Action<IMyTerminalBlock> handler)
@@ -371,7 +371,7 @@ namespace IngameScript
             {
                 localCubeGrids.Clear();
                 gtsLocalBlocks.Clear();
-                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, bLocalCheck);
+                _gts.GetBlocksOfType<IMyTerminalBlock>(gtsLocalBlocks, bLocalCheck);
             }
 
             bool bLocalCheck(IMyTerminalBlock tb)
@@ -399,7 +399,7 @@ namespace IngameScript
             public IEnumerator<bool> LocalBlocksInit()
             {
                 yield return true;
-                float fper = 0;
+                float fper;
 
                 if (gtsLocalBlocks.Count < 1)
                 {
@@ -462,7 +462,7 @@ namespace IngameScript
 
                 if (CollectRemote)
                 {
-                    GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsRemoteBlocks, (x1 => !x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
+                    _gts.GetBlocksOfType<IMyTerminalBlock>(gtsRemoteBlocks, (x1 => !x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
                     fper = _program.Runtime.CurrentInstructionCount / (float)_program.Runtime.MaxInstructionCount;
                     if (fper > 0.75f) yield return true;
 
@@ -531,7 +531,7 @@ namespace IngameScript
                 return Output;
             }
 
-            List<IMyTerminalBlock> gtsTestBlocks = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> gtsTestBlocks = new List<IMyTerminalBlock>();
             /// <summary>
             /// Call to check if the local grid needs to be re-initialized.
             /// </summary>
@@ -540,7 +540,7 @@ namespace IngameScript
             public bool CalcLocalGridChange(bool bForceUpdate = false)
             {
                 gtsTestBlocks.Clear();
-                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
+                _gts.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => x1.IsSameConstructAs(_program.Me) && ValidBlock(x1)));
                 //                _program.Echo("test block count=" + gtsTestBlocks.Count.ToString());
                 if (localBlocksCount != gtsTestBlocks.Count || bForceUpdate)
                 {
@@ -582,7 +582,7 @@ namespace IngameScript
             public bool CalcRemoteGridChange()
             {
                 List<IMyTerminalBlock> gtsTestBlocks = new List<IMyTerminalBlock>();
-                GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => !x1.IsSameConstructAs(_program.Me)));
+                _gts.GetBlocksOfType<IMyTerminalBlock>(gtsTestBlocks, (x1 => !x1.IsSameConstructAs(_program.Me)));
                 if (remoteBlocksCount != gtsTestBlocks.Count)
                 {
                     RemoteBlocksChanged();
@@ -606,13 +606,13 @@ namespace IngameScript
             #endregion
 
             #region shipdim
-            const float SMALL_BLOCK_VOLUME = 0.5f;
-            const float LARGE_BLOCK_VOLUME = 2.5f;
+//            const float SMALL_BLOCK_VOLUME = 0.5f;
+//            const float LARGE_BLOCK_VOLUME = 2.5f;
             const float SMALL_BLOCK_LENGTH = 0.5f;
             const float LARGE_BLOCK_LENGTH = 2.5f;
 
             private float _length_blocks, _width_blocks, _height_blocks;
-            private double _length, _width, _height;
+            private double _length, _width, _height, _maxmeters;
             public float gridsize;
             private OrientedBoundingBoxFaces _obbf;
 
@@ -639,6 +639,18 @@ namespace IngameScript
                 _length_blocks = (float)(_length / gridsize);
                 _width_blocks = (float)(_width / gridsize);
                 _height_blocks = (float)(_height / gridsize);
+                _maxmeters = Math.Max(Math.Max(_length,_width),_height);
+                
+            }
+
+            /// <summary>
+            /// maxiumum dimension in meters.
+            /// </summary>
+            /// <returns>see the tin</returns>
+            public double MaxMeters()
+            {
+                if (shipdimController == null) ShipDimensions(GetMainController());
+                return _maxmeters;
             }
             public float LengthInBlocks()
             {
@@ -715,16 +727,16 @@ namespace IngameScript
 
             public Vector3D Position;
 
-            static int[] PointsLookupRight = { 1, 3, 5, 7 };
-            static int[] PointsLookupLeft = { 0, 2, 4, 6 };
+            readonly static int[] PointsLookupRight = { 1, 3, 5, 7 };
+            readonly static int[] PointsLookupLeft = { 0, 2, 4, 6 };
 
-            static int[] PointsLookupTop = { 2, 3, 6, 7 };
-            static int[] PointsLookupBottom = { 0, 1, 4, 5 };
+            readonly static int[] PointsLookupTop = { 2, 3, 6, 7 };
+            readonly static int[] PointsLookupBottom = { 0, 1, 4, 5 };
 
-            static int[] PointsLookupBack = { 4, 5, 6, 7 };
-            static int[] PointsLookupFront = { 0, 1, 2, 3 };
+            readonly static int[] PointsLookupBack = { 4, 5, 6, 7 };
+            readonly static int[] PointsLookupFront = { 0, 1, 2, 3 };
 
-            static int[][] PointsLookup = {
+            readonly static int[][] PointsLookup = {
         PointsLookupRight, PointsLookupLeft,
         PointsLookupTop, PointsLookupBottom,
         PointsLookupBack, PointsLookupFront
@@ -832,8 +844,8 @@ namespace IngameScript
 
         double CalculateYaw(Vector3D destination, IMyTerminalBlock Origin)
         {
-            double yawAngle = 0;
-            bool facingTarget = false;
+            double yawAngle;
+            bool facingTarget;
 
             MatrixD refOrientation = GetBlock2WorldTransform(Origin);
 
@@ -853,11 +865,11 @@ namespace IngameScript
             //          double upTargetDistance = calculateDistance(vUp, destination);
             //          double backTargetDistance = calculateDistance(vBack, destination);
             //          double rightLocalDistance = calculateDistance(vRight, vCenter);
-            double rightTargetDistance = calculateDistance(vRight, destination);
+            double rightTargetDistance = CalculateDistance(vRight, destination);
 
-            double leftTargetDistance = calculateDistance(vLeft, destination);
+            double leftTargetDistance = CalculateDistance(vLeft, destination);
 
-            double yawLocalDistance = calculateDistance(vRight, vLeft);
+            double yawLocalDistance = CalculateDistance(vRight, vLeft);
 
 
             double centerTargetDistance = Vector3D.DistanceSquared(vCenter, destination);
@@ -885,7 +897,7 @@ namespace IngameScript
             return yawAngle;
         }
 
-        double calculateDistance(Vector3D a, Vector3D b)
+        double CalculateDistance(Vector3D a, Vector3D b)
         {
             return Vector3D.Distance(a, b);
         }

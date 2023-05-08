@@ -38,33 +38,33 @@ namespace IngameScript
              *  handle some batteries emptied as 'cargo'
              *  
              */
-            private Program _program;
-            private WicoControl _wicoControl;
-            private WicoBlockMaster _wicoBlockMaster;
-//            private Connectors _connectors;
-//            private WicoThrusters _thrusters;
-            private Antennas _antennas;
-//            private GasTanks _tanks;
-//            private WicoGyros _gyros;
-//            private PowerProduction _power;
-            private Timers _timers;
-            private WicoIGC _wicoIGC;
-            private WicoBases _wicoBases;
-//            private NavCommon _navCommon;
-//            private CargoCheck _cargoCheck;
-            private Displays _displays;
-            private SystemsMonitor _systemsMonitor;
+            readonly private Program _program;
+            readonly private WicoControl _wicoControl;
+            readonly private WicoBlockMaster _wicoBlockMaster;
+            //            private Connectors _connectors;
+            //            private WicoThrusters _thrusters;
+            readonly private Antennas _antennas;
+            //            private GasTanks _tanks;
+            //            private WicoGyros _gyros;
+            //            private PowerProduction _power;
+            readonly private Timers _timers;
+            readonly private WicoIGC _wicoIGC;
+            readonly private WicoBases _wicoBases;
+            //            private NavCommon _navCommon;
+            //            private CargoCheck _cargoCheck;
+            readonly private Displays _displays;
+            readonly private SystemsMonitor _systemsMonitor;
 
-            string sDockingSection = "DOCKED";
-            public bool _Debug = false;
+            readonly string sDockingSection = "DOCKED";
+            readonly public bool _Debug = false;
 
             bool bAutoRelaunch = false;
             //            bool bAutoRefuel = true;
-            bool bFastRecharge = true;
-            
+            readonly bool bFastRecharge = true;
 
-            StringBuilder sbModeInfo = new StringBuilder(100);
-            StringBuilder sbNotices = new StringBuilder(300);
+
+            readonly StringBuilder sbModeInfo = new StringBuilder(100);
+            readonly StringBuilder sbNotices = new StringBuilder(300);
 
             public WhenDocked(Program program, WicoControl wc, WicoBlockMaster wbm
                 , WicoIGC iGC
@@ -102,7 +102,7 @@ namespace IngameScript
                 _systemsMonitor = systemsMonitor;
 
                 _program.moduleName += " Docked";
-                _program.moduleList += "\nDocked V4.2n";
+                _program.moduleList += "\nDocked V4.2o";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -310,7 +310,7 @@ namespace IngameScript
 
                 if (bAutoRelaunch)
                 {
-                    sbModeInfo.AppendLine(" Checking Relaunch");
+//                    sbModeInfo.AppendLine(" Checking Relaunch");
                     _program.Echo("Docked. Checking Relaunch");
                     if (bAirWorthy)
                     {

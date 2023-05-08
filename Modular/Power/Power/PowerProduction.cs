@@ -21,20 +21,20 @@ namespace IngameScript
     {
         public class PowerProduction
         {
-            List<IMyTerminalBlock> lHydrogenEngines = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> lHydrogenEngines = new List<IMyTerminalBlock>();
             public double maxHydrogenPower = -1;
             public float currentEngineOutput = -1;
 
-            List<IMyTerminalBlock> reactorList = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> reactorList = new List<IMyTerminalBlock>();
             public double maxReactorPower = -1;
             public float currentReactorOutput = -1;
 
-            List<IMyTerminalBlock> solarList = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> solarList = new List<IMyTerminalBlock>();
             public double maxSolarPower = -1;
             public float currentSolarOutput = 0;
 
 
-            List<IMyTerminalBlock> batteryList = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> batteryList = new List<IMyTerminalBlock>();
             public double maxBatteryPower = -1;
             /// <summary>
             /// current battery STORAGE power. -1 means no batteries. percentage is 0->100
@@ -46,7 +46,7 @@ namespace IngameScript
             public int batterypcthigh = 80;
             public int batterypctlow = 20;
 
-            List<IMyTerminalBlock> turbineList = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> turbineList = new List<IMyTerminalBlock>();
             public double maxTurbinePower = -1;
             public float currentTurbineOutput = 0;
 
@@ -55,12 +55,12 @@ namespace IngameScript
             public double currentTotalOutput = -1;
 
 
-            string sPowerSection = "POWER";
+            readonly string sPowerSection = "POWER";
 
-            Program _program;
-            WicoBlockMaster _wicoBlockMaster;
+            readonly Program _program;
+            readonly WicoBlockMaster _wicoBlockMaster;
 
-            bool MeGridOnly = false;
+            readonly bool MeGridOnly = false;
 
             public PowerProduction(Program program, WicoBlockMaster wbm, bool bMeGridOnly=false)
             {

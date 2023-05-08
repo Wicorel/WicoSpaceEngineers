@@ -25,7 +25,7 @@ namespace IngameScript
             protected Program _program;
             protected WicoBlockMaster _wicoBlockMaster;
 
-            bool MeGridOnly = false;
+            readonly bool MeGridOnly = false;
 
             protected string sThrusterSection = "THRUSTERS";
 

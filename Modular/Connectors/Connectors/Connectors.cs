@@ -23,14 +23,15 @@ namespace IngameScript
     {
         public class Connectors
         {
-            List<IMyTerminalBlock> localConnectors = new List<IMyTerminalBlock>();
-            List<IMyTerminalBlock> localDockConnectors = new List<IMyTerminalBlock>();
-            List<IMyTerminalBlock> localBaseConnectors = new List<IMyTerminalBlock>();
-            List<IMyTerminalBlock> localNondesignatedConnectors = new List<IMyTerminalBlock>();
-            List<IMyTerminalBlock> localEjectors = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> localConnectors = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> localSmallConnectors = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> localDockConnectors = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> localBaseConnectors = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> localNondesignatedConnectors = new List<IMyTerminalBlock>();
+            readonly List<IMyTerminalBlock> localEjectors = new List<IMyTerminalBlock>();
 
-            Program _program;
-            bool MeGridOnly = false;
+            readonly Program _program;
+            readonly bool MeGridOnly = false;
             public Connectors(Program program, WicoBlockMaster wicoBlockMaster, bool bMeGridOnly=false)
             {
                 _program = program;
@@ -51,13 +52,16 @@ namespace IngameScript
                     return;
                 if (tb is IMyShipConnector)
                 {
-                    if(tb.BlockDefinition.SubtypeName.Contains("ConnectorSmall"))
+                    if (tb.CustomName.Contains("Ejector"))
                     {
                         localEjectors.Add(tb);
                     }
                     else
                     {
-                        localConnectors.Add(tb);
+                        if (tb.BlockDefinition.SubtypeName.Contains("ConnectorSmall"))
+                            localSmallConnectors.Add(tb);
+                        else
+                            localConnectors.Add(tb);
                         bool bDesignated = false;
                         if (tb.CustomName.Contains("[DOCK]") || tb.CustomData.Contains("[DOCK]"))
                         {
@@ -78,8 +82,9 @@ namespace IngameScript
             {
                 localEjectors.Clear();
                 localConnectors.Clear();
+                localSmallConnectors.Clear();
                 localDockConnectors.Clear();
-                localBaseConnectors.Clear();
+                localNondesignatedConnectors.Clear();
             }
             public bool AnyConnectorIsLocked()
             {
@@ -233,6 +238,7 @@ namespace IngameScript
             public void DisplayInfo()
             {
                 _program.Echo("localConnectors#=" + localConnectors.Count);
+                _program.Echo("localSmallConnectors#=" + localSmallConnectors.Count);
                 _program.Echo("localDockConnectors#=" + localDockConnectors.Count);
                 _program.Echo("localBaseConnectors#=" + localBaseConnectors.Count);
                 _program.Echo("localNDConnectors#=" + localNondesignatedConnectors.Count);

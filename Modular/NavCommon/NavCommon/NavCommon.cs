@@ -21,9 +21,9 @@ namespace IngameScript
     {
         public class NavCommon
         {
-            Program _program;
-            WicoControl _wicoControl;
-            WicoIGC _wicoIGC;
+            readonly Program _program;
+            readonly WicoControl _wicoControl;
+            readonly WicoIGC _wicoIGC;
 
             protected bool _bLocalNavAvailable = false;
             long NavLocalID = 0;
@@ -68,7 +68,7 @@ namespace IngameScript
             public const string WICOB_NAVHEARTBEAT = "WICOB_NAVHEARTBEAT"; // is there a nav available?
             public const string WICOB_NAVPRESENT = "WICOB_NAVPRESENT"; // a nav is present
 
-            static StringBuilder sbNav = new StringBuilder(100);
+            readonly static StringBuilder sbNav = new StringBuilder(100);
             public static string NAVSerializeCommand(Vector3D vTarget, int modeArrival = WicoControl.MODE_NAVNEXTTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
                 sbNav.Clear();
@@ -137,7 +137,7 @@ namespace IngameScript
             public virtual void NavGoTarget(Vector3D vTarget, int modeArrival = WicoControl.MODE_ARRIVEDTARGET, int stateArrival = 0, double DistanceMin = 50, string TargetName = "", double maxSpeed = 9999, bool bGo = true)
             {
                 // TODO: support no local NAV and use remote control instead.
-                //                _program.ErrorLog("NavCommon NavGoTarget");
+ //               _program.ErrorLog("NavCommon NavGoTarget");
                 string data = NavCommon.NAVSerializeCommand(vTarget, modeArrival, stateArrival, DistanceMin, TargetName, maxSpeed, bGo);
                 _program.IGC.SendBroadcastMessage(NavCommon.WICOB_NAVIMMEDIATETARGET, data, TransmissionDistance.CurrentConstruct);
             }
