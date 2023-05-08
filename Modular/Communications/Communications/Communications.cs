@@ -105,7 +105,7 @@ namespace IngameScript
                 _EntityId = program.Me.CubeGrid.EntityId;
 
                 _program.moduleName += " Communications";
-                _program.moduleList += "\nCommunications V4.2n";
+                _program.moduleList += "\nCommunications V4.2o";
 
                 _program.AddUpdateHandler(UpdateHandler);
                 _program.AddTriggerHandler(ProcessTrigger);
@@ -175,8 +175,8 @@ namespace IngameScript
                 sbMessages.AppendLine(bAreaController.ToString());
                 sbMessages.AppendLine(bRelay.ToString());
 
-                sbMessages.AppendLine(antennaLList.Count.ToString());
-                foreach(var laser in antennaLList)
+                sbMessages.AppendLine(laserList.Count.ToString());
+                foreach(var laser in laserList)
                 {
                     sbMessages.AppendLine(laser.CustomName);
                     sbMessages.AppendLine(_program.Vector3DToString(laser.GetPosition()));
@@ -334,7 +334,7 @@ namespace IngameScript
                 if(numberLocalThrust>0)
                 {
                     // we have thrusters
-                    if(antennaLList.Count<1)
+                    if(laserList.Count<1)
                     {
                         // no lasers
                         if (antennaList.Count < 1)
@@ -352,12 +352,12 @@ namespace IngameScript
                     }
                     else
                     { // we have some laser
-                        if(antennaLList.Count >1)
+                        if(laserList.Count >1)
                         { // possibility of relay ship
                             if (antennaList.Count < 1) _gridRole = GridRole.MultipleLaserShip; // No radio; can't serve as local radio relay
                             else _gridRole = GridRole.MultipleLaserRadioShip;  
                         }
-                        else if(antennaLList.Count>0)
+                        else if(laserList.Count>0)
                         {
                             // we have one laser only
                             if (antennaList.Count < 1) _gridRole = GridRole.LaserOnlyShip;
@@ -369,7 +369,7 @@ namespace IngameScript
                 else
                 {
                     // No Thrusters
-                    if (antennaLList.Count < 1)
+                    if (laserList.Count < 1)
                     {
                         // no lasers
                         if (antennaList.Count < 1)
@@ -386,7 +386,7 @@ namespace IngameScript
                     }
                     else
                     { // we have some laser
-                        if (antennaLList.Count > 1)
+                        if (laserList.Count > 1)
                         { // possibility of laser relay ship; multiple lasers
                             if (antennaList.Count < 1)
                             {
@@ -399,7 +399,7 @@ namespace IngameScript
                             }
                             else _gridRole = GridRole.LaserRadioBase;
                         }
-                        else if (antennaLList.Count > 0)
+                        else if (laserList.Count > 0)
                         {
                             // we have one laser only
                             if (antennaList.Count < 1)
@@ -591,12 +591,14 @@ namespace IngameScript
                         sbRSNotices.AppendLine(" " + _program.niceDoubleMeters((_wicoBlockMaster.CenterOfMass() - remoteship.Position).Length()));
                     }
 
-                    foreach (var laser in antennaLList)
+                    foreach (var laser in laserList)
                     {
                         if (laser.Status == MyLaserAntennaStatus.Idle)
                         {
                             // check status and turn them off if not neeed
-                            laser.Enabled = false;
+//                            laser.Enabled = false;
+// allow user to hand-link laser. means it needs to be left on
+
                         }
 
                     }
@@ -652,12 +654,12 @@ namespace IngameScript
                     if (bRelay) sbComNotices.AppendLine("I am a relay");
 
                     sbComNotices.AppendLine(antennaList.Count + " Radio Antennas");
-                    sbComNotices.AppendLine(antennaLList.Count + " Laser Antennas");
+                    sbComNotices.AppendLine(laserList.Count + " Laser Antennas");
                     foreach (var radio in antennaList)
                     {
                         sbComInfo.AppendLine(radio.CustomName + " (" + radio.Radius.ToString("N0") + "M)");
                     }
-                    foreach (var laser in antennaLList)
+                    foreach (var laser in laserList)
                     {
                         sbComInfo.AppendLine(laser.CustomName + " (" + laser.Range.ToString("N0") + "M)");
                     }
@@ -791,6 +793,7 @@ namespace IngameScript
             {
                 public string Name;
                 public Vector3D Position;
+                // WIP
             }
 
             class RemoteShip
