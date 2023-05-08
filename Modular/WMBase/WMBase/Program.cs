@@ -49,7 +49,6 @@ namespace IngameScript
         WicoBlockMaster _wicoBlockMaster;
         WicoElapsedTime _wicoElapsedTime;
 
-        BaseConnectors baseConnectors;
         Asteroids _asteroids;
         OreInfoLocs _oreInfoLocs;
 //        OresRemote _ores;
@@ -63,7 +62,11 @@ namespace IngameScript
         Timers _timers;
         PowerProduction _power;
         GasTanks _tanks;
+
+
+        // functionality modules
         PowerManagement _powerManagement;
+        BaseConnectors _baseConnectors;
 
         void ModuleControlInit()
         {
@@ -82,10 +85,10 @@ namespace IngameScript
 
             _wicoElapsedTime = new WicoElapsedTime(this, _wicoControl);
 
-
             _timers = new Timers(this, _wicoBlockMaster);
 
-            baseConnectors = new BaseConnectors(this, _wicoBlockMaster, _wicoIGC, _wicoElapsedTime, _timers);
+            _baseConnectors = new BaseConnectors(this, _wicoBlockMaster, _wicoIGC, _wicoElapsedTime, _timers);
+
             _displays = new Displays(this, _wicoBlockMaster, _wicoElapsedTime);
             _asteroids = new Asteroids(this, _wicoControl, _wicoIGC, _displays);
             _oreInfoLocs = new OreInfoLocs(this, _wicoBlockMaster, _wicoIGC, _asteroids, _displays);
@@ -93,7 +96,7 @@ namespace IngameScript
             _power = new PowerProduction(this, _wicoBlockMaster);
             _tanks = new GasTanks(this, _wicoBlockMaster);
 
-            _powerManagement = new PowerManagement(this, _wicoControl, _power, _tanks, _wicoElapsedTime, _wicoIGC, _displays);
+            _powerManagement = new PowerManagement(this, _power, _tanks, _wicoElapsedTime, _wicoIGC, _displays);
         }
 
         public void ModulePreMain(string argument, UpdateType updateSource)
@@ -115,8 +118,6 @@ namespace IngameScript
 
         public void ModulePostInit()
         {
-            if (_wicoControl != null)
-                _wicoControl.ModeAfterInit(SaveIni);
 
             //            _wicoSensors.SensorInit(_wicoBlockMaster.GetMainController());
         }
