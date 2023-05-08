@@ -67,6 +67,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoBasicThrusters", "..\Wi
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "WicoUpdates", "..\WicoUpdates\WicoUpdates\WicoUpdates.shproj", "{C0CDA458-C1B4-45BA-94DE-ADC133813CB0}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "OreDector Reforged", "..\OreDector Reforged\OreDector Reforged\OreDector Reforged.shproj", "{BDC76E48-5367-4A8B-A389-62EDCFA660C5}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\SystemsMonitor\SystemsMonitor\SystemsMonitor.projitems*{0a413eef-1543-468e-a388-03e471a4e85f}*SharedItemsImports = 13
@@ -95,6 +97,7 @@ Global
 		..\IGC\IGC\IGC.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\ModularMain\ModularMain\ModularMain.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\NavCommon\NavCommon\NavCommon.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
+		..\OreDector Reforged\OreDector Reforged\OreDector_Reforged.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Ores\Ores\Ores.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\Power\Power\Power.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
 		..\QuadrantScanner\QuadrantScanner\QuadrantScanner.projitems*{44638090-faa7-4efe-bb54-c51c5ae1e654}*SharedItemsImports = 4
@@ -117,6 +120,7 @@ Global
 		..\ScansMode\ScansMode\ScansMode.projitems*{a1965c9f-3406-44fd-b829-56382885eea9}*SharedItemsImports = 13
 		..\NavCommon\NavCommon\NavCommon.projitems*{b28d34d0-bfa4-4db3-a4fc-7374d0148092}*SharedItemsImports = 13
 		..\Drills\Drills\Drills.projitems*{ba0127b0-06b7-4573-9d0a-5c1cbf9207e3}*SharedItemsImports = 13
+		..\OreDector Reforged\OreDector Reforged\OreDector_Reforged.projitems*{bdc76e48-5367-4a8b-a389-62edcfa660c5}*SharedItemsImports = 13
 		..\WicoUpdates\WicoUpdates\WicoUpdates.projitems*{c0cda458-c1b4-45ba-94de-adc133813cb0}*SharedItemsImports = 13
 		..\QuadrantScanner\QuadrantScanner\QuadrantScanner.projitems*{c15983b8-8c8a-48a8-9fb3-3048d9eeb488}*SharedItemsImports = 13
 		..\IGC\IGC\IGC.projitems*{d641aa70-4a98-4d1b-b594-f38f66938d65}*SharedItemsImports = 13
