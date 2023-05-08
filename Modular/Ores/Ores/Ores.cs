@@ -147,6 +147,7 @@ namespace IngameScript
                 // from ore detector (!)
                 // 69  from 'tasting' with drills
                 // player given GPS
+                // 42 OreDetector Reforged Detection
             }
             void LoadHandler(MyIni ini)
             {
