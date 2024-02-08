@@ -1248,13 +1248,13 @@ namespace IngameScript
                     // we hit a grid.  align to it
 
                     //                    Vector3D[] corners = new Vector3D[BoundingBoxD.CornerCount];
-                    Vector3D[] corners = new Vector3D[BoundingBox.CornerCount];
+//                    Vector3D[] corners = new Vector3D[BoundingBox.CornerCount];
 
                     BoundingBoxD bbd = _travelMovement.LastDetectedInfo.BoundingBox;
-                    bbd.GetCorners(corners);
+//                    bbd.GetCorners(corners);
                     
-                    GridUpVector = _program.wicoSensors.PlanarNormal(corners[3], corners[4], corners[7]);
-                    GridRightVector = _program.wicoSensors.PlanarNormal(corners[0], corners[1], corners[4]);
+                    GridUpVector = _program.wicoSensors.PlanarNormal(bbd.GetCorner(3), bbd.GetCorner(4), bbd.GetCorner(7));
+                    GridRightVector = _program.wicoSensors.PlanarNormal(bbd.GetCorner(0), bbd.GetCorner(1), bbd.GetCorner(4));
                     _wicoControl.WantFast();
                     _wicoControl.SetState(348);
                 }
