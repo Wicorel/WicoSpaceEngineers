@@ -16,7 +16,7 @@ void Main(string sArgument)
 {
     
     List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-    IMyTextPanel screen = (IMyTextPanel)GridTerminalSystem.GetBlockWithName("LCD Test IMyTerminalBlock");
+    IMyTextPanel screen = (IMyTextPanel)GridTerminalSystem.GetBlockWithName("LCD Test");
     if (screen == null)
     {
         List<IMyTerminalBlock> gtsTestBlocks = new List<IMyTerminalBlock>();
@@ -549,6 +549,8 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
     }
     */
 
+    /* 1.203 prohibited.
+     * 
     Echo("Accepted resources:");
     values.Append("\nAccepted resources:");
     MyResourceSinkComponent sink;
@@ -589,18 +591,11 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
 
     if (source != null)
     {
-        /*
-        float currentOutput = 0;
-        float maxOutput = 0;
-        currentOutput = source.CurrentOutput;
-        maxOutput = source.MaxOutput;
-
-        values.Append("\n Current=" + currentOutput.ToString() + " Max=" + maxOutput.ToString());
-        */
         var list = source.ResourceTypes;
         for (int j = 0; j < list.Count; ++j)
         {
-            values.Append("\n " + /*list[j].TypeId.ToString()+"/" +*/ list[j].SubtypeId.ToString());
+            
+            list[j].SubtypeId.ToString());
             Echo(list[j].SubtypeId.ToString());
             float maxoutput = source.DefinedOutputByType(list[j]);
             float currentoutput = source.CurrentOutputByType(list[j]);
@@ -612,7 +607,7 @@ void DisplayBlockInfo(ref StringBuilder values, IMyTerminalBlock unit)
         values.Append("\n No Resources");
         Echo("No resources");
     }
-
+    */
     values.Append("\n-------------\n");
 }
 
