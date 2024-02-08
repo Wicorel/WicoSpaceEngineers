@@ -23,8 +23,17 @@ namespace IngameScript
         IMyUnicastListener _uListener;// There is only ONE unicast listener.  This for THIS PB
         IMyBroadcastListener _bListener; // Can have multiple broadcast listeners.  Each will need to be registered.
 
-        const string BroadcastTag = "[WICO_BROADCAST]";
-        const string UnicastTag = "[WICO_UNICAST]";
+        const string BroadcastTag = "[WICO_TESTBROADCAST]";
+        const string UnicastTag = "[WICO_TESTUNICAST]";
+
+        /// <summary>
+        /// The combined set of UpdateTypes that count as a 'trigger'
+        /// </summary>
+        UpdateType utTriggers = UpdateType.Terminal | UpdateType.Trigger | UpdateType.Mod | UpdateType.Script;
+        /// <summary>
+        /// the combined set of UpdateTypes and count as an 'Update'
+        /// </summary>
+        UpdateType utUpdates = UpdateType.Update1 | UpdateType.Update10 | UpdateType.Update100 | UpdateType.Once;
 
         public Program()
         {
@@ -48,69 +57,79 @@ namespace IngameScript
 
 
         int runcount = 0; // used to show running multiple times
+        int incomingMessageCount = 0; // number of messages we have received
 
         public void Main(string argument, UpdateType updateSource)
         {
             // Echo some information aboue 'me' and why we were run
-            Echo(updateSource.ToString());
-            Echo("Me=" + Me.EntityId.ToString());
+            Echo("Source=" + updateSource.ToString());
+            Echo("Me=" + Me.EntityId.ToString("X"));
             Echo(Me.CubeGrid.CustomName);
+
+
             runcount++;
             Echo("Runs=" + runcount.ToString());
 
+            Echo("-_-_-");
             // if there is a message pending, process it
             if ( _bListener.HasPendingMessage || _uListener.HasPendingMessage)
             {
-                    if (!HandleMessages())
-                    return;
+                HandleMessages();
             }
-            else
+
+            if((updateSource & utTriggers) >0)
             {
-                // if we were run when there's not a pending message, send out a broadcast message
+                // if we were run by a trigger, then send out a broadcast message with the argument
                 Echo("Sending Broadcast Message");
                 IGC.SendBroadcastMessage<string>(BroadcastTag, "Me=" + Me.EntityId.ToString() +":"+Me.CubeGrid.CustomName + "\n" + argument, TransmissionDistance.AntennaRelay);
             }
+
+            Echo("Received " + incomingMessageCount + " total msgs");
         }
 
         // Handle the available messages
         bool  HandleMessages()
         {
+            // check for a pending message
+            if (!_bListener.HasPendingMessage && !_uListener.HasPendingMessage)
+                return true;
 
-            int incomingCount = 1; // keep a count of how many messages we've processed
+            int incomingCount = 0; // keep a count of how many messages we've processed
             do
             {
+                incomingCount++;
+                incomingMessageCount++;
+
                 Echo("Message "+incomingCount.ToString());
 
                 // check broadcast first, then unicast
                 bool bBroadcast = _bListener.HasPendingMessage;
                 if (bBroadcast) Echo("Broadcast"); else Echo("Unicast");
-                var msg = _bListener.HasPendingMessage ? _bListener.AcceptMessage() : _uListener.AcceptMessage();
 
+                var msg = _bListener.HasPendingMessage ? _bListener.AcceptMessage() : _uListener.AcceptMessage();
 
                 // information about the received message
                 Echo("Received Message");
-                Echo(msg.ToString());
+//                Echo(msg.ToString());
                 var src = msg.Source;
-                Echo("Source=" + src.ToString());
-                Echo("Data=" + msg.Data);
+                Echo("Source=" + src.ToString("X"));
+                Echo("Data=\"" + msg.Data+"\"");
                 Echo("Tag=" + msg.Tag);
 
 
-                // we could check to see if the source of the message is still reachable (destroyed, out of range, etc)
-                // if(IGC.IsEndpointReachable(msg.Source)) {}
 
                 // If we got a brodcast message, reply with a unicast message to the sender
                 if (bBroadcast)
                 {
-                    if (IGC.SendUnicastMessage<string>(msg.Source, UnicastTag, "Message received by:" + Me.EntityId.ToString()))
+                    // we could check to see if the source of the message is still reachable (destroyed, out of range, etc)
+                    // if(IGC.IsEndpointReachable(msg.Source)) {}
+                    if (IGC.SendUnicastMessage<string>(msg.Source, UnicastTag, "Message received by:" + Me.EntityId.ToString("X")))
                     {
                         Echo("Response Sent");
-
                     }
                     else Echo("Error sending response");
                 }
                 Echo("----");
-                incomingCount++;
             } while (_bListener.HasPendingMessage || _uListener.HasPendingMessage); // Process all pending messages
             return true;
         }
